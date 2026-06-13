@@ -762,6 +762,25 @@ namespace Neo.UI.Editor
                 trigger.type = FlowTrigger.TriggerType.Timer;
                 trigger.timerDuration = (float)seconds;
             }
+            else
+            {
+                // Extensibility seam: fall through to a project-registered custom trigger kind, keyed
+                // by its JSON key. Its payload mirrors the built-in "Category/Name" form.
+                bool matched = false;
+                foreach (INeoTriggerKind kind in NeoTriggerKinds.All)
+                {
+                    if (!on.TryGetValue(kind.JsonKey, out object custom)) continue;
+                    trigger.type = FlowTrigger.TriggerType.Custom;
+                    trigger.customKind = kind.Id;
+                    CategoryNameId.Parse(custom?.ToString(), out trigger.category, out trigger.name);
+                    matched = true;
+                    break;
+                }
+                // No silent failures: an "on" object whose only key matches neither a built-in nor a
+                // registered kind is almost certainly a typo or an unloaded project trigger.
+                if (!matched && on.Count > 0)
+                    Debug.LogWarning($"FlowEdge 'on' trigger has no recognized key ({string.Join(", ", on.Keys)}); edge will never fire. Built-in keys: button, signal, toggleOn, toggleOff, viewShown, viewHidden, back, timer — or register a custom kind in NeoTriggerKinds.");
+            }
             return trigger;
         }
 
@@ -798,6 +817,11 @@ namespace Neo.UI.Editor
                     return new Dictionary<string, object> { ["back"] = true };
                 case FlowTrigger.TriggerType.Timer:
                     return new Dictionary<string, object> { ["timer"] = (double)trigger.timerDuration };
+                case FlowTrigger.TriggerType.Custom:
+                    if (NeoTriggerKinds.TryGet(trigger.customKind, out INeoTriggerKind kind))
+                        return new Dictionary<string, object> { [kind.JsonKey] = $"{trigger.category}/{trigger.name}" };
+                    Debug.LogWarning($"FlowTrigger.TriggerToJson: custom trigger kind '{trigger.customKind}' is not registered; trigger dropped from export. Register it in NeoTriggerKinds.");
+                    return null;
                 default:
                     return null;
             }

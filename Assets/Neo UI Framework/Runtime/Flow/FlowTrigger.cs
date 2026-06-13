@@ -20,7 +20,12 @@ namespace Neo.UI
             ViewShown = 5,
             ViewHidden = 6,
             Back = 7,
-            Timer = 8
+            Timer = 8,
+            /// <summary>
+            /// A project-supplied trigger kind registered in <see cref="NeoTriggerKinds"/>. The actual
+            /// kind is named by <see cref="FlowTrigger.customKind"/> — see the extensibility seam.
+            /// </summary>
+            Custom = 9
         }
 
         public TriggerType type = TriggerType.None;
@@ -33,11 +38,14 @@ namespace Neo.UI
         [Tooltip("Seconds before a Timer trigger fires")]
         [Min(0f)] public float timerDuration = 1f;
 
+        [Tooltip("Id of the registered NeoTriggerKinds kind, when type == Custom")]
+        public string customKind;
+
         public bool usesSignalStream =>
             type == TriggerType.ButtonClick || type == TriggerType.Signal ||
             type == TriggerType.ToggleOn || type == TriggerType.ToggleOff ||
             type == TriggerType.ViewShown || type == TriggerType.ViewHidden ||
-            type == TriggerType.Back;
+            type == TriggerType.Back || type == TriggerType.Custom;
 
         public override string ToString()
         {
@@ -46,6 +54,7 @@ namespace Neo.UI
                 case TriggerType.Timer: return $"Timer {timerDuration:0.##}s";
                 case TriggerType.Back: return "Back";
                 case TriggerType.None: return "None";
+                case TriggerType.Custom: return $"Custom:{customKind} {category}/{name}";
                 default: return $"{type} {category}/{name}";
             }
         }
@@ -67,9 +76,33 @@ namespace Neo.UI
             _onFired = onFired;
         }
 
+        /// <summary> The trigger this listener watches — read by custom <see cref="INeoTriggerKind"/>s. </summary>
+        public FlowTrigger Trigger => _trigger;
+
+        /// <summary>
+        /// Subscribes this listener to <paramref name="stream"/> (so its signals route to
+        /// <see cref="OnSignal"/> → the kind's <c>Matches</c>). Used by a custom
+        /// <see cref="INeoTriggerKind.Connect"/> implementation; <see cref="Disconnect"/> tears it down.
+        /// No-op if already bound.
+        /// </summary>
+        public void BindStream(SignalStream stream)
+        {
+            if (_stream != null || stream == null) return;
+            _stream = stream;
+            _stream.ConnectReceiver(this);
+        }
+
         public void Connect()
         {
             if (_stream != null || _trigger == null || !_trigger.usesSignalStream) return;
+            if (_trigger.type == FlowTrigger.TriggerType.Custom)
+            {
+                if (NeoTriggerKinds.TryGet(_trigger.customKind, out INeoTriggerKind kind))
+                    kind.Connect(this, () => _onFired?.Invoke());
+                else
+                    Debug.LogWarning($"FlowTrigger: no registered trigger kind '{_trigger.customKind}' — edge will never fire. Register it in NeoTriggerKinds from a [RuntimeInitializeOnLoadMethod].");
+                return;
+            }
             switch (_trigger.type)
             {
                 case FlowTrigger.TriggerType.ButtonClick:
@@ -106,6 +139,9 @@ namespace Neo.UI
 
         private bool Matches(Signal signal)
         {
+            if (_trigger.type == FlowTrigger.TriggerType.Custom)
+                return NeoTriggerKinds.TryGet(_trigger.customKind, out INeoTriggerKind kind)
+                       && kind.Matches(this, signal);
             switch (_trigger.type)
             {
                 case FlowTrigger.TriggerType.ButtonClick:
