@@ -83,3 +83,6 @@ crashlytics-build.properties
 ehthumbs.db
 Thumbs.db
 desktop.ini
+
+# Plan 2 compile-check scratch output
+/build/

@@ -39,6 +39,13 @@ namespace Neo.UI.Editor
         private string _nameBuffer;
         private bool _nameFieldFocused;
 
+        /// <summary> Raised after any edit that mutates the graph (connect/disconnect/move/delete,
+        /// rename, arrange, reroute). The Composer sets this to mirror flow edits made on a transient
+        /// graph back into its in-memory spec — null in normal asset-editing use. </summary>
+        internal System.Action externalGraphChanged;
+
+        internal void RaiseExternalChanged() => externalGraphChanged?.Invoke();
+
         [MenuItem("Tools/Neo UI/Flow Graph Editor", priority = 10)]
         public static void Open() => GetWindow<FlowGraphWindow>("Flow Graph");
 
@@ -46,6 +53,20 @@ namespace Neo.UI.Editor
         {
             var window = GetWindow<FlowGraphWindow>("Flow Graph");
             window.SetGraph(graph);
+        }
+
+        /// <summary>
+        /// Opens the window on an externally-owned (often transient) graph and routes edits back to
+        /// <paramref name="onChanged"/>. The Neo Composer uses this so its "Flow" leaf edits the
+        /// document's flow without that flow ever becoming a committed asset.
+        /// </summary>
+        public static FlowGraphWindow OpenForSpec(FlowGraph graph, System.Action onChanged)
+        {
+            var window = GetWindow<FlowGraphWindow>("Flow Graph");
+            window.externalGraphChanged = onChanged;
+            window.SetGraph(graph);
+            window.Focus();
+            return window;
         }
 
         [OnOpenAsset]
@@ -167,6 +188,7 @@ namespace Neo.UI.Editor
             EditorUtility.SetDirty(_graph);
             _graphView.PopulatePreservingSelection();
             _graphView.FrameAll();
+            RaiseExternalChanged();
         }
 
         /// <summary> Selects and frames the first node whose name contains <paramref name="query"/>. </summary>
@@ -350,6 +372,7 @@ namespace Neo.UI.Editor
             EditorUtility.SetDirty(_graph);
             _serializedGraph.Update();
             _nameBuffer = candidate;
+            RaiseExternalChanged();
         }
 
         /// <summary> Refreshes title, port labels and edges of the inspected node without rebuilding the view. </summary>
@@ -644,6 +667,7 @@ namespace Neo.UI.Editor
             sourceEdge.toNode = reroute.name;
             EditorUtility.SetDirty(_graph);
             PopulatePreservingSelection();
+            _window.RaiseExternalChanged();
         }
 
         private GraphViewChange OnGraphViewChanged(GraphViewChange change)
@@ -707,7 +731,11 @@ namespace Neo.UI.Editor
                 }
             }
 
-            if (dirty) EditorUtility.SetDirty(_graph);
+            if (dirty)
+            {
+                EditorUtility.SetDirty(_graph);
+                _window.RaiseExternalChanged();
+            }
             return change;
         }
     }
