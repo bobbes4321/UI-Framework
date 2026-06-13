@@ -1,0 +1,110 @@
+using System.Linq;
+using Neo.UI.Editor;
+using NUnit.Framework;
+
+namespace Neo.UI.Tests
+{
+    /// <summary>
+    /// Structural spec diff (Plan 1, A): round-trip identity, per-section single-field changes,
+    /// element add/remove/modify and flow edge changes. Pure model — no Unity assets.
+    /// </summary>
+    public class SpecDiffTests
+    {
+        private const string BaseJson = @"{
+          ""theme"": { ""tokens"": { ""Primary"": ""#FFFFFF"", ""Background"": ""#000000"" } },
+          ""views"": [ { ""id"": ""Spec/Main"", ""elements"": [
+            { ""button"": { ""id"": ""Spec/A"", ""label"": ""Play"", ""background"": ""Primary"" } },
+            { ""text"": { ""label"": ""Hello"" } }
+          ] } ],
+          ""flow"": { ""name"": ""UI"", ""start"": ""MainMenu"", ""nodes"": [
+            { ""name"": ""MainMenu"", ""view"": ""Spec/Main"",
+              ""next"": [ { ""on"": { ""button"": ""Spec/A"" }, ""to"": ""Settings"" } ] },
+            { ""name"": ""Settings"", ""view"": ""Spec/Main"" }
+          ] }
+        }";
+
+        private static UISpec Parse(string json) => UISpec.FromJson(json);
+
+        [Test]
+        public void Compare_Identity_IsEmpty()
+        {
+            var changes = SpecDiff.Compare(Parse(BaseJson), Parse(BaseJson));
+            Assert.IsEmpty(changes, "Compare(spec, spec) must report no changes");
+        }
+
+        [Test]
+        public void ThemeToken_SingleFieldChange()
+        {
+            UISpec candidate = Parse(BaseJson.Replace("#FFFFFF", "#FF0000"));
+            var changes = SpecDiff.Compare(Parse(BaseJson), candidate);
+
+            Assert.AreEqual(1, changes.Count, "exactly one token changed");
+            SpecChange change = changes[0];
+            Assert.AreEqual(SpecChangeKind.Modified, change.kind);
+            Assert.AreEqual("theme/tokens/Primary", change.path);
+            Assert.AreEqual(SpecPath.ThemeSection, change.section);
+            Assert.AreEqual("#FFFFFF", change.before);
+            Assert.AreEqual("#FF0000", change.after);
+            Assert.IsTrue(change.roundTrips, "a token recolor is fully representable in the spec");
+        }
+
+        [Test]
+        public void ElementField_Modified()
+        {
+            UISpec candidate = Parse(BaseJson.Replace(@"""label"": ""Play""", @"""label"": ""Start"""));
+            var changes = SpecDiff.Compare(Parse(BaseJson), candidate);
+
+            SpecChange labelChange = changes.SingleOrDefault(c => c.path.EndsWith("/label") && c.before == "Play");
+            Assert.IsNotNull(labelChange, "the button label change must be reported");
+            Assert.AreEqual(SpecChangeKind.Modified, labelChange.kind);
+            Assert.AreEqual("Start", labelChange.after);
+            Assert.AreEqual(SpecPath.ViewSection, labelChange.section);
+            StringAssert.StartsWith("views/Spec/Main/elements[0]", labelChange.path);
+        }
+
+        [Test]
+        public void Element_Added_IsStructural()
+        {
+            UISpec baseline = Parse(BaseJson);
+            UISpec candidate = Parse(BaseJson);
+            candidate.views[0].elements.Add(ElementOf("{ \"toggle\": { \"id\": \"Spec/New\", \"label\": \"Extra\" } }"));
+
+            var changes = SpecDiff.Compare(baseline, candidate);
+            SpecChange added = changes.SingleOrDefault(c => c.kind == SpecChangeKind.Added);
+            Assert.IsNotNull(added, "the added element must surface as one structural Added");
+            Assert.AreEqual("(node)", added.after);
+            Assert.AreEqual(SpecPath.ViewSection, added.section);
+            StringAssert.Contains("elements[2]", added.path);
+        }
+
+        [Test]
+        public void Element_Removed_IsStructural()
+        {
+            UISpec baseline = Parse(BaseJson);
+            UISpec candidate = Parse(BaseJson);
+            candidate.views[0].elements.RemoveAt(1); // drop the text element
+
+            var changes = SpecDiff.Compare(baseline, candidate);
+            SpecChange removed = changes.SingleOrDefault(c => c.kind == SpecChangeKind.Removed);
+            Assert.IsNotNull(removed, "the removed element must surface as one structural Removed");
+            Assert.AreEqual("(node)", removed.before);
+            StringAssert.Contains("elements[1]", removed.path);
+        }
+
+        [Test]
+        public void FlowEdge_Change_IsReported()
+        {
+            UISpec candidate = Parse(BaseJson.Replace(@"""to"": ""Settings""", @"""to"": ""Options"""));
+            var changes = SpecDiff.Compare(Parse(BaseJson), candidate);
+
+            Assert.IsTrue(changes.Any(c => c.section == SpecPath.FlowSection),
+                "a re-pointed flow edge must show up in the flow section");
+            Assert.IsTrue(changes.Any(c => c.kind == SpecChangeKind.Added)
+                          && changes.Any(c => c.kind == SpecChangeKind.Removed),
+                "re-pointing an edge reads as remove(old)+add(new) under edge identity");
+        }
+
+        private static ElementSpec ElementOf(string json) =>
+            ElementSpec.Parse(JsonReader.AsObject(MiniJson.Parse(json), "element"));
+    }
+}
