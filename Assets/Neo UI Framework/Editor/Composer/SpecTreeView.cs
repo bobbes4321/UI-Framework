@@ -9,7 +9,7 @@ namespace Neo.UI.Editor.Composer
     public enum SpecNodeKind
     {
         Theme, ViewsHeader, View, Element,
-        PopupsHeader, Popup, SettingsHeader, CheatsHeader, Catalog, MenuItem, Flow
+        PopupsHeader, Popup, MenusHeader, Catalog, MenuItem, Flow
     }
 
     /// <summary> One visible row in the spec tree. Carries everything the inspector and the
@@ -49,7 +49,7 @@ namespace Neo.UI.Editor.Composer
         private readonly SpecDocument _document;
         private readonly HashSet<string> _expanded = new HashSet<string>
         {
-            "theme", "views", "popups", "settings", "cheats"
+            "theme", "views", "popups", "menus"
         };
         private readonly List<SpecNode> _rows = new List<SpecNode>();
         private bool _dirty = true;
@@ -128,8 +128,7 @@ namespace Neo.UI.Editor.Composer
                         AddElements(popup.elements, popupPath, true, 2, null, popup);
                 }
 
-            AddCatalogSection(spec.settings, "settings", SpecNodeKind.SettingsHeader, "Settings");
-            AddCatalogSection(spec.cheats, "cheats", SpecNodeKind.CheatsHeader, "Cheats");
+            AddMenusSection(spec);
 
             AddRow(new SpecNode { kind = SpecNodeKind.Flow, label = spec.flow != null ? $"Flow: {spec.flow.name}" : "Flow (none)", path = "flow", depth = 0, accent = NeoColors.Flow });
 
@@ -165,30 +164,52 @@ namespace Neo.UI.Editor.Composer
             _rows.AddRange(filtered);
         }
 
-        private void AddCatalogSection(List<MenuCatalogSpec> catalogs, string section, SpecNodeKind headerKind, string title)
+        /// <summary> One neutral <c>Menus (N)</c> section over every registered catalog kind
+        /// (<see cref="ComposerCatalogKinds.All"/>). The header is cosmetic — each catalog row keeps
+        /// its real <see cref="SpecPath.Catalog"/> path (section = the kind id) so selection, the
+        /// inspector and baseline addressing are unchanged — and carries a kind tag so one section
+        /// stays legible. An empty <c>Menus (0)</c> asserts nothing about any particular kind. </summary>
+        private void AddMenusSection(UISpec spec)
         {
-            AddRow(new SpecNode { kind = headerKind, label = $"{title} ({catalogs.Count})", path = section, depth = 0, expandable = true, accent = NeoColors.Data });
-            if (!IsExpanded(section)) return;
-            foreach (MenuCatalogSpec catalog in catalogs)
+            int total = 0;
+            foreach (CatalogKind kind in ComposerCatalogKinds.All)
+                total += kind.list(spec).Count;
+
+            AddRow(new SpecNode { kind = SpecNodeKind.MenusHeader, label = $"Menus ({total})", path = "menus", depth = 0, expandable = true, accent = NeoColors.Data });
+            if (!IsExpanded("menus")) return;
+
+            foreach (CatalogKind kind in ComposerCatalogKinds.All)
             {
-                string catalogPath = SpecPath.Catalog(section, catalog.id);
-                AddRow(new SpecNode { kind = SpecNodeKind.Catalog, label = catalog.id, path = catalogPath, depth = 1, expandable = catalog.items.Count > 0, accent = NeoColors.Data, catalog = catalog });
-                if (!IsExpanded(catalogPath)) continue;
-                for (int i = 0; i < catalog.items.Count; i++)
+                foreach (MenuCatalogSpec catalog in kind.list(spec))
                 {
-                    MenuItemSpec item = catalog.items[i];
-                    AddRow(new SpecNode
+                    string catalogPath = SpecPath.Catalog(kind.id, catalog.id);
+                    AddRow(new SpecNode { kind = SpecNodeKind.Catalog, label = $"{kind.label} · {catalog.id}", path = catalogPath, depth = 1, expandable = catalog.items.Count > 0, accent = NeoColors.Data, catalog = catalog });
+                    if (!IsExpanded(catalogPath)) continue;
+                    for (int i = 0; i < catalog.items.Count; i++)
                     {
-                        kind = SpecNodeKind.MenuItem,
-                        label = $"{item.kind}: {item.id}",
-                        path = $"{catalogPath}/items[{i}]",
-                        depth = 2,
-                        accent = NeoColors.Data,
-                        catalog = catalog,
-                        menuItem = item
-                    });
+                        MenuItemSpec item = catalog.items[i];
+                        AddRow(new SpecNode
+                        {
+                            kind = SpecNodeKind.MenuItem,
+                            label = $"{item.kind}: {item.id}",
+                            path = $"{catalogPath}/items[{i}]",
+                            depth = 2,
+                            accent = NeoColors.Data,
+                            catalog = catalog,
+                            menuItem = item
+                        });
+                    }
                 }
             }
+        }
+
+        /// <summary> Test seam: forces a rebuild and returns the resulting flat row list (the Composer
+        /// keeps it private + rebuilt-on-demand per the IMGUI caching rules). </summary>
+        internal IReadOnlyList<SpecNode> RebuildForTest()
+        {
+            _dirty = true;
+            RebuildIfNeeded();
+            return _rows;
         }
 
         private void AddElements(List<ElementSpec> elements, string ownerPath, bool topLevel, int depth,
@@ -337,11 +358,12 @@ namespace Neo.UI.Editor.Composer
                 case SpecNodeKind.PopupsHeader:
                     menu.AddItem(new GUIContent("Add Popup"), false, AddPopup);
                     break;
-                case SpecNodeKind.SettingsHeader:
-                    menu.AddItem(new GUIContent("Add Settings Catalog"), false, () => AddCatalog(MenuCatalogSpec.SettingsKind));
-                    break;
-                case SpecNodeKind.CheatsHeader:
-                    menu.AddItem(new GUIContent("Add Cheats Catalog"), false, () => AddCatalog(MenuCatalogSpec.CheatKind));
+                case SpecNodeKind.MenusHeader:
+                    foreach (CatalogKind kind in ComposerCatalogKinds.All)
+                    {
+                        string kindId = kind.id;
+                        menu.AddItem(new GUIContent($"Add Menu/{kind.label}"), false, () => AddCatalog(kindId));
+                    }
                     break;
                 case SpecNodeKind.View:
                     AddElementCreateItems(menu, "Add Element/", k => AddElementTo(node.view.elements, node, k));
@@ -453,37 +475,45 @@ namespace Neo.UI.Editor.Composer
 
         private void DuplicateCatalog(MenuCatalogSpec catalog)
         {
+            if (!ComposerCatalogKinds.TryGet(catalog.kind, out CatalogKind kind))
+            {
+                Debug.LogWarning($"[Composer] No catalog kind registered for '{catalog.kind}'; cannot duplicate.");
+                return;
+            }
             MenuCatalogSpec clone = ComposerFactory.Clone(catalog);
-            bool cheat = catalog.kind == MenuCatalogSpec.CheatKind;
-            List<MenuCatalogSpec> list = cheat ? _document.Spec.cheats : _document.Spec.settings;
-            string section = cheat ? "cheats" : "settings";
+            List<MenuCatalogSpec> list = kind.list(_document.Spec);
             int n = 2;
             string baseName = catalog.menuName;
             clone.menuName = $"{baseName}Copy";
             while (list.Exists(c => c.menuName == clone.menuName && c.category == clone.category))
                 clone.menuName = $"{baseName}Copy{n++}";
             _document.ApplyEdit(() => list.Add(clone), "Duplicate Catalog");
-            _expanded.Add(section);
-            SelectAfter(SpecPath.Catalog(section, clone.id));
+            _expanded.Add("menus");
+            SelectAfter(SpecPath.Catalog(kind.id, clone.id));
         }
 
-        private void AddCatalog(string kind)
+        private void AddCatalog(string kindId)
         {
-            List<MenuCatalogSpec> list = kind == MenuCatalogSpec.CheatKind ? _document.Spec.cheats : _document.Spec.settings;
-            string section = kind == MenuCatalogSpec.CheatKind ? "cheats" : "settings";
+            if (!ComposerCatalogKinds.TryGet(kindId, out CatalogKind kind))
+            {
+                Debug.LogWarning($"[Composer] No catalog kind registered for '{kindId}'; cannot add.");
+                return;
+            }
+            List<MenuCatalogSpec> list = kind.list(_document.Spec);
             int n = list.Count + 1;
             string menuName = $"Catalog{n}";
-            string category = kind == MenuCatalogSpec.CheatKind ? "Cheats" : "Settings";
-            _document.ApplyEdit(() => list.Add(ComposerFactory.NewCatalog(kind, category, menuName)), "Add Catalog");
-            _expanded.Add(section);
-            SelectAfter(SpecPath.Catalog(section, $"{category}/{menuName}"));
+            string category = kind.defaultCategory;
+            _document.ApplyEdit(() => list.Add(ComposerFactory.NewCatalog(kind.id, category, menuName)), "Add Catalog");
+            _expanded.Add("menus");
+            SelectAfter(SpecPath.Catalog(kind.id, $"{category}/{menuName}"));
         }
 
         private void DeleteCatalog(MenuCatalogSpec catalog)
         {
             _document.ApplyEdit(() =>
             {
-                if (!_document.Spec.settings.Remove(catalog)) _document.Spec.cheats.Remove(catalog);
+                foreach (CatalogKind kind in ComposerCatalogKinds.All)
+                    if (kind.list(_document.Spec).Remove(catalog)) return;
             }, "Delete Catalog");
             SelectAfter(null);
         }
@@ -557,7 +587,7 @@ namespace Neo.UI.Editor.Composer
         }
 
         private static string CatalogPath(MenuCatalogSpec catalog) =>
-            SpecPath.Catalog(catalog.kind == MenuCatalogSpec.CheatKind ? "cheats" : "settings", catalog.id);
+            SpecPath.Catalog(catalog.kind, catalog.id);
 
         private void SelectAfter(string path)
         {
@@ -569,7 +599,26 @@ namespace Neo.UI.Editor.Composer
         // toolbar entry points (used by the window's tree-pane toolbar)
         public void AddViewFromToolbar() => AddView();
         public void AddPopupFromToolbar() => AddPopup();
-        public void AddSettingsFromToolbar() => AddCatalog(MenuCatalogSpec.SettingsKind);
-        public void AddCheatsFromToolbar() => AddCatalog(MenuCatalogSpec.CheatKind);
+
+        /// <summary> Adds a catalog of the given registered kind id — the single <c>+ Menu ▾</c>
+        /// picker routes here, one entry per <see cref="ComposerCatalogKinds.All"/>. </summary>
+        public void AddCatalogFromToolbar(string kindId) => AddCatalog(kindId);
+
+        /// <summary> The catalog-kind option labels shown in the <c>+ Menu ▾</c> picker (= every
+        /// registered kind), and a parallel id lookup. Built fresh on demand (dropdown-open only). </summary>
+        public static List<string> CatalogKindLabels()
+        {
+            var labels = new List<string>(ComposerCatalogKinds.All.Count);
+            foreach (CatalogKind kind in ComposerCatalogKinds.All) labels.Add(kind.label);
+            return labels;
+        }
+
+        /// <summary> Maps a picker label back to its kind id (label is unique per registered kind). </summary>
+        public static string CatalogKindIdForLabel(string label)
+        {
+            foreach (CatalogKind kind in ComposerCatalogKinds.All)
+                if (kind.label == label) return kind.id;
+            return null;
+        }
     }
 }

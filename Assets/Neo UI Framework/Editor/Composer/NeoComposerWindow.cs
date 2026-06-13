@@ -117,8 +117,18 @@ namespace Neo.UI.Editor.Composer
             var bar = new Toolbar();
             bar.Add(new ToolbarButton(() => _tree.AddViewFromToolbar()) { text = "+ View" });
             bar.Add(new ToolbarButton(() => _tree.AddPopupFromToolbar()) { text = "+ Popup" });
-            bar.Add(new ToolbarButton(() => _tree.AddSettingsFromToolbar()) { text = "+ Settings" });
-            bar.Add(new ToolbarButton(() => _tree.AddCheatsFromToolbar()) { text = "+ Cheats" });
+            // one neutral "+ Menu ▾" picker over every registered catalog kind (settings, cheats, …)
+            // — no product opinion baked into the chrome, and a project's registered kind shows up here.
+            ToolbarButton menuButton = null;
+            menuButton = new ToolbarButton(() =>
+                NeoSearchablePopup.Show(menuButton.worldBound, null, SpecTreeView.CatalogKindLabels(),
+                    label =>
+                    {
+                        string id = SpecTreeView.CatalogKindIdForLabel(label);
+                        if (id != null) _tree.AddCatalogFromToolbar(id);
+                    }))
+            { text = "+ Menu ▾" };
+            bar.Add(menuButton);
             return bar;
         }
 
