@@ -1,10 +1,68 @@
 using System.Collections.Generic;
 using System.Linq;
+using Neo.EditorUI;
 using UnityEditor;
 using UnityEngine;
 
 namespace Neo.UI.Editor
 {
+    /// <summary>
+    /// Pattern R registry of theme <see cref="ThemeBundles.Bundle"/>s — the extensibility seam for the
+    /// curated bundle set. Seeded with the three package built-ins (CleanSlate / NeonArcade /
+    /// SoftFantasy); a consuming project ships its own coherent look by calling
+    /// <see cref="Register"/> once from an <c>[InitializeOnLoad]</c> type, and it appears everywhere a
+    /// bundle can be picked (the Apply-Theme-Bundle menu, the inspector dropdown) and resolves through
+    /// the spec <c>"theme":{"bundle":"…"}</c> path. Editor-only (the editor is a single domain), so the
+    /// static seed is sufficient — no domain-reload survival needed.
+    /// </summary>
+    public static class ThemeBundleRegistry
+    {
+        private static readonly List<ThemeBundles.Bundle> _bundles = new List<ThemeBundles.Bundle>
+        {
+            ThemeBundles.CleanSlate, ThemeBundles.NeonArcade, ThemeBundles.SoftFantasy
+        };
+
+        /// <summary> All registered bundles, built-ins first, in registration order. </summary>
+        public static IReadOnlyList<ThemeBundles.Bundle> All => _bundles;
+
+        /// <summary> The names of every registered bundle — what the menu and inspector dropdown list. </summary>
+        public static IEnumerable<string> Names => _bundles.Select(b => b.name);
+
+        /// <summary> Case-insensitive lookup by name. Returns false (and a null bundle) when nothing matches. </summary>
+        public static bool TryGet(string name, out ThemeBundles.Bundle bundle)
+        {
+            bundle = _bundles.FirstOrDefault(b =>
+                string.Equals(b.name, name, System.StringComparison.OrdinalIgnoreCase));
+            return bundle != null;
+        }
+
+        /// <summary>
+        /// Registers a bundle. If one with the same name already exists (case-insensitive) it is
+        /// replaced in place (so a project can override a built-in); otherwise the bundle is appended.
+        /// </summary>
+        public static void Register(ThemeBundles.Bundle bundle)
+        {
+            if (bundle == null || string.IsNullOrEmpty(bundle.name))
+            {
+                Debug.LogWarning("[Neo.UI] ThemeBundleRegistry.Register ignored a null/unnamed bundle");
+                return;
+            }
+            int existing = _bundles.FindIndex(b =>
+                string.Equals(b.name, bundle.name, System.StringComparison.OrdinalIgnoreCase));
+            if (existing >= 0) _bundles[existing] = bundle;
+            else _bundles.Add(bundle);
+        }
+
+        /// <summary>
+        /// Test-only: removes a registered bundle by name (case-insensitive). Not part of the public
+        /// extensibility seam — exists so tests that register a probe can leave the static registry
+        /// clean for sibling suites in the same domain. Returns true if a bundle was removed.
+        /// </summary>
+        internal static bool Remove(string name) =>
+            _bundles.RemoveAll(b =>
+                string.Equals(b.name, name, System.StringComparison.OrdinalIgnoreCase)) > 0;
+    }
+
     /// <summary>
     /// Curated, designer-made theme bundles — the "shadcn move": one bundle defines the COMPLETE
     /// system (token palette with derived hover/pressed states, type scale, shape-style radius
@@ -80,7 +138,7 @@ namespace Neo.UI.Editor
 
         // ------------------------------------------------------------------ the bundles
 
-        private static readonly Bundle CleanSlate = new Bundle
+        internal static readonly Bundle CleanSlate = new Bundle
         {
             name = "CleanSlate",
             description = "SaaS-neutral, light + dark, radius 12, fast subtle motion",
@@ -97,7 +155,7 @@ namespace Neo.UI.Editor
             headlineSpacing = -1f
         };
 
-        private static readonly Bundle NeonArcade = new Bundle
+        internal static readonly Bundle NeonArcade = new Bundle
         {
             name = "NeonArcade",
             description = "Dark, saturated gradients, glow accents, radius 8, snappy springs",
@@ -114,7 +172,7 @@ namespace Neo.UI.Editor
             headlineSpacing = 2f
         };
 
-        private static readonly Bundle SoftFantasy = new Bundle
+        internal static readonly Bundle SoftFantasy = new Bundle
         {
             name = "SoftFantasy",
             description = "Warm parchment / deep forest, radius 20, slower eased motion",
@@ -133,16 +191,11 @@ namespace Neo.UI.Editor
             headlineSpacing = 0f
         };
 
-        private static readonly Bundle[] All = { CleanSlate, NeonArcade, SoftFantasy };
+        // Bundles live in ThemeBundleRegistry (the extensibility seam). These stay as thin forwarders
+        // so the spec "theme":{"bundle":"…"} path and every existing caller keep working unchanged.
+        public static IEnumerable<string> Names => ThemeBundleRegistry.Names;
 
-        public static IEnumerable<string> Names => All.Select(b => b.name);
-
-        public static bool TryGet(string name, out Bundle bundle)
-        {
-            bundle = All.FirstOrDefault(b =>
-                string.Equals(b.name, name, System.StringComparison.OrdinalIgnoreCase));
-            return bundle != null;
-        }
+        public static bool TryGet(string name, out Bundle bundle) => ThemeBundleRegistry.TryGet(name, out bundle);
 
         // ------------------------------------------------------------------ application
 
@@ -305,14 +358,28 @@ namespace Neo.UI.Editor
 
         // ------------------------------------------------------------------ menu
 
-        [MenuItem("Tools/Neo UI/Apply Theme Bundle/Clean Slate", priority = 110)]
-        public static void ApplyCleanSlateMenu() => ApplyFromMenu(CleanSlate);
-
-        [MenuItem("Tools/Neo UI/Apply Theme Bundle/Neon Arcade", priority = 111)]
-        public static void ApplyNeonArcadeMenu() => ApplyFromMenu(NeonArcade);
-
-        [MenuItem("Tools/Neo UI/Apply Theme Bundle/Soft Fantasy", priority = 112)]
-        public static void ApplyFantasyMenu() => ApplyFromMenu(SoftFantasy);
+        // One picker over the registry instead of one [MenuItem] per built-in — a project's registered
+        // bundle shows up here automatically (no per-bundle fork point). [MenuItem] is attribute-driven
+        // and can't enumerate at compile time, so we open a NeoSearchablePopup (EditorUI kit, non-modal)
+        // over ThemeBundleRegistry.Names.
+        [MenuItem("Tools/Neo UI/Apply Theme Bundle…", priority = 110)]
+        public static void ApplyThemeBundleMenu()
+        {
+            var names = ThemeBundleRegistry.Names.ToList();
+            if (names.Count == 0)
+            {
+                Debug.LogWarning("[Neo.UI] No theme bundles registered");
+                return;
+            }
+            // anchor the popup at the mouse so it appears under the menu click
+            Vector2 mouse = GUIUtility.GUIToScreenPoint(Event.current?.mousePosition ?? Vector2.zero);
+            Rect activator = new Rect(mouse.x, mouse.y, 220f, 0f);
+            NeoSearchablePopup.Show(activator, null, names, name =>
+            {
+                if (ThemeBundleRegistry.TryGet(name, out Bundle bundle)) ApplyFromMenu(bundle);
+                else Debug.LogWarning($"[Neo.UI] No theme bundle named '{name}'");
+            });
+        }
 
         private static void ApplyFromMenu(Bundle bundle)
         {

@@ -15,8 +15,6 @@ namespace Neo.UI.Editor.Composer
     /// </summary>
     public static class ThemePaletteEditor
     {
-        private static readonly string[] Bundles = { "CleanSlate", "NeonArcade", "SoftFantasy" };
-
         public static void Draw(SpecDocument document)
         {
             NeoGUI.ComponentHeader("Theme", "Tokens & Variants", NeoColors.Theming);
@@ -25,7 +23,7 @@ namespace Neo.UI.Editor.Composer
 
             Rect bundleRect = EditorGUILayout.GetControlRect();
             bundleRect = EditorGUI.PrefixLabel(bundleRect, new GUIContent("Bundle"));
-            NeoDropdown.ValuePopup(bundleRect, theme?.bundle, () => new List<string>(Bundles),
+            NeoDropdown.ValuePopup(bundleRect, theme?.bundle, () => new List<string>(ThemeBundleRegistry.Names),
                 v => document.ApplyEdit(() => Ensure(document).bundle = string.IsNullOrEmpty(v) ? null : v, "Edit Bundle"),
                 "None");
             EditorGUILayout.HelpBox("A bundle seeds a full token set on Save; tokens below override it.", MessageType.None);
