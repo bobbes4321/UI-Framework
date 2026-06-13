@@ -32,6 +32,11 @@ namespace Neo.UI
 
         public SliderId id = new SliderId();
 
+        [Tooltip("Optional domain stream this slider publishes its committed float value to, in addition " +
+                 "to the standard \"UISlider/Behaviour\" stream — lets game code do " +
+                 "Signals.On<float>(category, name, …) directly. Default (None/None) = no extra stream.")]
+        public StreamId domainSignal = new StreamId();
+
         public FloatEvent OnValueIncremented = new FloatEvent();
         public FloatEvent OnValueDecremented = new FloatEvent();
         public UnityEvent OnValueReachedMin = new UnityEvent();
@@ -110,6 +115,10 @@ namespace Neo.UI
             OnValueCommitted?.Invoke(value);
             Signals.Send(StreamCategory, StreamName,
                 new SliderSignalData { category = id.Category, sliderName = id.Name, value = value }, this);
+
+            // additive first-class domain signal: Signals.On<float>("Audio","MusicVolume", …) works directly
+            if (!domainSignal.isDefault)
+                Signals.Send(domainSignal.Category, domainSignal.Name, value, this);
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]

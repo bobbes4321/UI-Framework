@@ -86,3 +86,6 @@ desktop.ini
 
 # Plan 2 compile-check scratch output
 /build/
+
+# Worktree-only compile-check helper (rebuilds Neo.UI + Neo.UI.Editor via Roslyn)
+/compile-check.sh

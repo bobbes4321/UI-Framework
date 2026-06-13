@@ -520,11 +520,13 @@ namespace Neo.UI.Editor
                     if (!string.IsNullOrEmpty(element.group))
                         go.GetComponent<UIToggle>().toggleGroup =
                             build.GetOrCreateToggleGroup(element.group, category);
+                    WireDomainSignal(go.GetComponent<UIToggle>().domainSignal, element.signal, settings);
                     RegisterId(settings.toggleIds, category, name);
                     break;
                 case "switch":
                     go = UIWidgetFactory.CreateSwitch(parent, category, name);
                     if ((element.value ?? 0f) >= 0.5f) UIWidgetFactory.BakeToggleOn(go);
+                    WireDomainSignal(go.GetComponent<UIToggle>().domainSignal, element.signal, settings);
                     RegisterId(settings.toggleIds, category, name);
                     break;
                 case "tab":
@@ -547,6 +549,7 @@ namespace Neo.UI.Editor
                 case "slider":
                     go = UIWidgetFactory.CreateSlider(parent, category, name,
                         element.min ?? 0f, element.max ?? 1f, element.value ?? 0.5f);
+                    WireDomainSignal(go.GetComponent<UISlider>().domainSignal, element.signal, settings);
                     RegisterId(settings.sliderIds, category, name);
                     break;
                 case "progress":
@@ -686,6 +689,7 @@ namespace Neo.UI.Editor
                 case "dropdown":
                     go = UIWidgetFactory.CreateDropdown(parent, category, name, element.options,
                         (int)(element.value ?? 0f));
+                    WireDomainSignal(go.GetComponent<UIDropdown>().domainSignal, element.signal, settings);
                     RegisterId(settings.dropdownIds, category, name);
                     break;
                 case "settings":
@@ -978,6 +982,21 @@ namespace Neo.UI.Editor
             if (database == null || string.IsNullOrEmpty(category) || string.IsNullOrEmpty(name)) return;
             database.Add(category, name);
             EditorUtility.SetDirty(database);
+        }
+
+        /// <summary>
+        /// Wires a widget's optional first-class domain signal (Plan 3, deliverable B): the widget
+        /// publishes its typed value to this stream IN ADDITION to its standard "…/Behaviour" stream,
+        /// so game code can <c>Signals.On&lt;T&gt;(category, name, …)</c> without branching the firehose.
+        /// Registers the stream id so validation/manifest see it.
+        /// </summary>
+        private static void WireDomainSignal(CategoryNameId target, SignalRefSpec signal, NeoUISettings settings)
+        {
+            if (target == null || signal == null
+                || string.IsNullOrEmpty(signal.category) || string.IsNullOrEmpty(signal.name)) return;
+            target.Category = signal.category;
+            target.Name = signal.name;
+            RegisterId(settings.streamIds, signal.category, signal.name);
         }
 
         // ------------------------------------------------------------------ menus (settings / cheats)

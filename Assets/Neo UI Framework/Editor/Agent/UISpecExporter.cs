@@ -348,7 +348,8 @@ namespace Neo.UI.Editor
                     kind = "dropdown",
                     id = dropdown.id.ToString(),
                     options = options,
-                    value = dropdown.value
+                    value = dropdown.value,
+                    signal = ExportDomainSignal(dropdown.domainSignal)
                 };
             }
 
@@ -361,7 +362,8 @@ namespace Neo.UI.Editor
                     id = slider.id.ToString(),
                     min = slider.minValue,
                     max = slider.maxValue,
-                    value = slider.value
+                    value = slider.value,
+                    signal = ExportDomainSignal(slider.domainSignal)
                 };
             }
 
@@ -408,7 +410,8 @@ namespace Neo.UI.Editor
                     textStyle = toggleLabel?.GetComponent<ThemeTextStyleTarget>()?.style,
                     background = go.GetComponent<ThemeColorTarget>()?.token,
                     group = toggle.toggleGroup != null ? toggle.toggleGroup.id.Name : null,
-                    value = startsOn ? (float?)1f : null
+                    value = startsOn ? (float?)1f : null,
+                    signal = ExportDomainSignal(toggle.domainSignal)
                 };
             }
 
@@ -773,6 +776,12 @@ namespace Neo.UI.Editor
             UIBadge component = badge != null ? badge.GetComponent<UIBadge>() : null;
             return component != null ? (float?)component.count : null;
         }
+
+        /// <summary> A widget's optional first-class domain signal (Plan 3 B); default = unset = null. </summary>
+        private static SignalRefSpec ExportDomainSignal(CategoryNameId domainSignal) =>
+            domainSignal == null || domainSignal.isDefault
+                ? null
+                : new SignalRefSpec { category = domainSignal.Category, name = domainSignal.Name };
 
         /// <summary> Anchor preset, size and position — only the parts the generator re-applies. </summary>
         private static void ExportGeometry(ElementSpec element, RectTransform rect, bool inLayout)

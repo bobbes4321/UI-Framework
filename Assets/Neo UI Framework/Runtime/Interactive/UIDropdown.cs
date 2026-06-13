@@ -29,6 +29,11 @@ namespace Neo.UI
 
         public DropdownId id = new DropdownId();
 
+        [Tooltip("Optional domain stream this dropdown publishes its selected index to, in addition to " +
+                 "the standard \"UIDropdown/Behaviour\" stream — lets game code do " +
+                 "Signals.On<int>(category, name, …) directly. Default (None/None) = no extra stream.")]
+        public StreamId domainSignal = new StreamId();
+
         private static readonly HashSet<UIDropdown> Registry = new HashSet<UIDropdown>();
 
         public static IEnumerable<UIDropdown> allDropdowns => Registry;
@@ -66,6 +71,10 @@ namespace Neo.UI
             string option = index >= 0 && index < options.Count ? options[index].text : null;
             Signals.Send(StreamCategory, StreamName,
                 new DropdownSignalData { category = id.Category, dropdownName = id.Name, index = index, option = option }, this);
+
+            // additive first-class domain signal: Signals.On<int>("Graphics","Quality", …) works directly
+            if (!domainSignal.isDefault)
+                Signals.Send(domainSignal.Category, domainSignal.Name, index, this);
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]

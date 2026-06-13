@@ -57,6 +57,55 @@ namespace Neo.UI
             }
         }
 
+        /// <summary>
+        /// Replaces a single spawned row with a fresh clone bound to <paramref name="data"/> — re-tokens
+        /// only that row, leaving every other spawned row untouched (no full <see cref="Rebuild"/>).
+        /// </summary>
+        public void UpdateRow(int index, IDictionary<string, string> data)
+        {
+            if (index < 0 || index >= _spawned.Count)
+            {
+                Debug.LogWarning($"[Neo.UI] UIBoundList.UpdateRow({index}) on '{source}' — index out of range " +
+                                 $"(spawned {_spawned.Count}); ignoring.");
+                return;
+            }
+            if (itemTemplate == null) return;
+            GameObject old = _spawned[index];
+            int sibling = old != null ? old.transform.GetSiblingIndex() : transform.childCount;
+            if (old != null) Destroy(old);
+            GameObject instance = Instantiate(itemTemplate, transform);
+            instance.transform.SetSiblingIndex(sibling);
+            instance.SetActive(true);
+            Bind(instance, data);
+            _spawned[index] = instance;
+        }
+
+        /// <summary> Spawns and binds a single new row at <paramref name="index"/> (no full rebuild). </summary>
+        public void InsertRow(int index, IDictionary<string, string> data)
+        {
+            if (itemTemplate == null) return;
+            index = Mathf.Clamp(index, 0, _spawned.Count);
+            GameObject instance = Instantiate(itemTemplate, transform);
+            // rows live as siblings after the inactive template; place this one at its logical slot
+            instance.transform.SetSiblingIndex(itemTemplate.transform.GetSiblingIndex() + 1 + index);
+            instance.SetActive(true);
+            Bind(instance, data);
+            _spawned.Insert(index, instance);
+        }
+
+        /// <summary> Destroys a single spawned row (no full rebuild). </summary>
+        public void RemoveRow(int index)
+        {
+            if (index < 0 || index >= _spawned.Count)
+            {
+                Debug.LogWarning($"[Neo.UI] UIBoundList.RemoveRow({index}) on '{source}' — index out of range " +
+                                 $"(spawned {_spawned.Count}); ignoring.");
+                return;
+            }
+            if (_spawned[index] != null) Destroy(_spawned[index]);
+            _spawned.RemoveAt(index);
+        }
+
         private static void Bind(GameObject row, IDictionary<string, string> data)
         {
             foreach (TMP_Text text in row.GetComponentsInChildren<TMP_Text>(true))

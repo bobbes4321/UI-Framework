@@ -389,6 +389,10 @@ namespace Neo.UI.Editor
         public string bind;          // list/grid: UIData source id ("Category/Name") feeding rows at runtime
         public ElementSpec item;     // list/grid: row template, cloned per data row ({key} tokens in text)
         public SignalRefSpec onClickSignal;
+        public SignalRefSpec signal;   // toggle/slider/dropdown: domain stream the widget publishes its
+                                       // typed value to (bool/float/int), IN ADDITION to the standard
+                                       // "UIToggle/UISlider/UIDropdown Behaviour" stream — so game code can
+                                       // Signals.On<T>(category, name, …) without branching the firehose
         public string onClickShowView; // "Category/Name"
         public string onClickHideView;
         public string onClickPopup;    // popup name from the popups section
@@ -461,6 +465,10 @@ namespace Neo.UI.Editor
                         if (scalar.HasValue) spec.size = new[] { scalar.Value, scalar.Value };
                     }
                 }
+
+                // first-class domain signal on toggle/slider/dropdown (button uses onClick.signal)
+                if (body.TryGetValue("signal", out object domainSignal))
+                    spec.signal = SignalRefSpec.Parse(domainSignal, "signal");
 
                 Dictionary<string, object> onClick = JsonReader.GetObject(body, "onClick");
                 if (onClick != null)
@@ -545,6 +553,7 @@ namespace Neo.UI.Editor
             }
             if (cascade) body["cascade"] = true;
             if (badge.HasValue) body["badge"] = (double)badge.Value;
+            if (signal != null) body["signal"] = signal.ToJsonObject();
             if (onClickSignal != null || !string.IsNullOrEmpty(onClickShowView)
                 || !string.IsNullOrEmpty(onClickHideView) || !string.IsNullOrEmpty(onClickPopup)
                 || onClickClose)
