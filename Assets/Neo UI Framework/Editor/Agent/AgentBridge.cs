@@ -19,7 +19,14 @@ namespace Neo.UI.Editor
     ///   returns the created/updated/collision/issue lists
     /// - <c>{"action":"export","out":"path/out.json"}</c> — exports the project spec; "out" optional,
     ///   the spec JSON is always inlined in the result
-    /// - <c>{"action":"validate"}</c> — runs AgentValidation, returns issues
+    /// - <c>{"action":"validate"}</c> — runs AgentValidation, returns issues + designWarnings +
+    ///   offSpecWarnings (the last names editor edits that won't survive a round trip)
+    /// - <c>{"action":"diff","baseline":"path.json"}</c> — exports the project and diffs it against
+    ///   the given baseline (or the stored <c>.neo-baseline.json</c>); returns changes +
+    ///   offSpecWarnings. Degrades to "no baseline" when none exists.
+    /// - <c>{"action":"merge","incoming":"new.json","out":"merged.json","conflictPolicy":"preferTheirs"}</c>
+    ///   — three-way merge of stored baseline + live project + incoming spec; writes the merged spec
+    ///   and returns applied / conflicts / dropped (off-spec edits that cannot be folded in)
     /// - <c>{"action":"buildScene"}</c> — builds the playable scene from generated assets
     ///   (refuses while the open scene has unsaved changes)
     /// - <c>{"action":"specReference","out":"path.md"}</c> — writes the code-generated spec
@@ -88,8 +95,11 @@ namespace Neo.UI.Editor
                 // generating/screenshotting in play mode corrupts bakes: AddComponent fires
                 // Awake/OnEnable on the factory's temp objects mid-construction (and pollutes
                 // the running game's registries)
+                // diff/merge build reference widget subtrees in memory (like preview), so the same
+                // play-mode hazard applies (AddComponent fires Awake/OnEnable mid-construction)
                 bool mutatesAssets = action == "generate" || action == "buildScene"
-                                     || action == "screenshot" || action == "preview";
+                                     || action == "screenshot" || action == "preview"
+                                     || action == "diff" || action == "merge";
                 if (mutatesAssets && UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode)
                 {
                     result["ok"] = false;
@@ -103,13 +113,15 @@ namespace Neo.UI.Editor
                     case "generate": HandleGenerate(request, result); break;
                     case "export": HandleExport(request, result); break;
                     case "validate": HandleValidate(result); break;
+                    case "diff": HandleDiff(request, result); break;
+                    case "merge": HandleMerge(request, result); break;
                     case "buildScene": HandleBuildScene(request, result); break;
                     case "specReference": HandleSpecReference(request, result); break;
                     case "preview": HandlePreview(request, result); break;
                     case "importSprites": HandleImportSprites(request, result); break;
                     default:
                         result["ok"] = false;
-                        result["error"] = $"Unknown action '{action}' (screenshot | generate | export | validate | buildScene | specReference | preview | importSprites)";
+                        result["error"] = $"Unknown action '{action}' (screenshot | generate | export | validate | diff | merge | buildScene | specReference | preview | importSprites)";
                         break;
                 }
             }
@@ -195,6 +207,92 @@ namespace Neo.UI.Editor
             result["issues"] = new List<object>(issues);
             // soft design lint (contrast / raw font sizes / off-scale spacing) — never fails "ok"
             result["designWarnings"] = new List<object>(AgentValidation.ValidateDesign());
+            // round-trip safety lint: editor edits that won't survive a regenerate (advisory, never
+            // fails "ok"). Needs a baseline and an in-memory rebuild, so skip it in Play mode.
+            var offSpec = new List<object>();
+            if (!EditorApplication.isPlayingOrWillChangePlaymode)
+                foreach (OffSpecFinding finding in OffSpecLint.ScanProject(NeoBaseline.Load()))
+                    offSpec.Add(finding.ToJsonObject());
+            result["offSpecWarnings"] = offSpec;
+        }
+
+        private static void HandleDiff(Dictionary<string, object> request, Dictionary<string, object> result)
+        {
+            string baselinePath = JsonReader.GetString(request, "baseline");
+            UISpec baseline = !string.IsNullOrEmpty(baselinePath)
+                ? UISpec.FromJson(File.ReadAllText(baselinePath))
+                : NeoBaseline.Load();
+            if (baseline == null)
+            {
+                result["ok"] = true;
+                result["changes"] = new List<object>();
+                result["offSpecWarnings"] = new List<object>();
+                result["note"] = "no baseline — establish one (Tools/Neo UI/Check For Drift, or export) before diffing";
+                return;
+            }
+
+            UISpec current = UISpecExporter.ExportProject();
+            var changes = new List<object>();
+            foreach (SpecChange change in SpecDiff.Compare(baseline, current)) changes.Add(change.ToJsonObject());
+            var offSpec = new List<object>();
+            foreach (OffSpecFinding finding in OffSpecLint.ScanProject(baseline)) offSpec.Add(finding.ToJsonObject());
+
+            result["ok"] = true;
+            result["changes"] = changes;
+            result["offSpecWarnings"] = offSpec;
+        }
+
+        private static void HandleMerge(Dictionary<string, object> request, Dictionary<string, object> result)
+        {
+            string incomingPath = JsonReader.GetString(request, "incoming");
+            if (string.IsNullOrEmpty(incomingPath) || !File.Exists(incomingPath))
+                throw new ArgumentException($"merge needs \"incoming\": an existing spec JSON file (got '{incomingPath}')");
+
+            UISpec theirs = UISpec.FromJson(File.ReadAllText(incomingPath));
+            UISpec ours = UISpecExporter.ExportProject();
+            UISpec baseline = NeoBaseline.Load();
+            bool hadBaseline = baseline != null;
+            if (baseline == null) baseline = new UISpec(); // 2-way union when no common ancestor exists
+
+            ConflictPolicy policy = ParsePolicy(JsonReader.GetString(request, "conflictPolicy"));
+            MergeResult merge = SpecMerge.Merge(baseline, ours, theirs, policy);
+            // off-spec edits can never be folded into a spec — report them so the caller can refuse
+            merge.dropped.AddRange(OffSpecLint.ScanProject(hadBaseline ? baseline : ours));
+
+            string mergedJson = merge.merged.ToJson();
+            string outPath = JsonReader.GetString(request, "out");
+            if (!string.IsNullOrEmpty(outPath))
+            {
+                string directory = Path.GetDirectoryName(outPath);
+                if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
+                File.WriteAllText(outPath, mergedJson);
+                result["path"] = Path.GetFullPath(outPath);
+            }
+
+            var applied = new List<object>();
+            foreach (SpecChange change in merge.applied) applied.Add(change.ToJsonObject());
+            var conflicts = new List<object>();
+            foreach (SpecChange change in merge.conflicts) conflicts.Add(change.ToJsonObject());
+            var dropped = new List<object>();
+            foreach (OffSpecFinding finding in merge.dropped) dropped.Add(finding.ToJsonObject());
+
+            result["ok"] = !merge.failed;
+            result["merged"] = mergedJson;
+            result["applied"] = applied;
+            result["conflicts"] = conflicts;
+            result["dropped"] = dropped;
+            if (!hadBaseline)
+                result["note"] = "no baseline — performed a 2-way union (establish a baseline for true three-way merges)";
+        }
+
+        private static ConflictPolicy ParsePolicy(string value)
+        {
+            switch (value)
+            {
+                case "preferOurs": return ConflictPolicy.PreferOurs;
+                case "fail": return ConflictPolicy.Fail;
+                default: return ConflictPolicy.PreferTheirs;
+            }
         }
 
         private static void HandleImportSprites(Dictionary<string, object> request, Dictionary<string, object> result)

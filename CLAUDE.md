@@ -115,7 +115,13 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   one request or an array, processed in order; omit `-nographics` when screenshots/previews are in
   it; exit code 1 when any request fails). Actions:
   `{"action":"generate","spec":"path.json"}` · `{"action":"export","out":"path.json"}` ·
-  `{"action":"validate"}` · `{"action":"screenshot","prefab":"Assets/...","out":"shot.png"}` ·
+  `{"action":"validate"}` (issues + soft `designWarnings` + `offSpecWarnings` — editor edits that
+  won't survive a regenerate) · `{"action":"diff","baseline":"path.json"}` (exports the project and
+  diffs it against `baseline` or the stored `.neo-baseline.json`; returns `changes` + `offSpecWarnings`)
+  · `{"action":"merge","incoming":"new.json","out":"merged.json","conflictPolicy":"preferTheirs"}`
+  (three-way merge of stored baseline + live project + incoming spec; preserves human prefab edits
+  against a stale incoming spec — returns `applied`/`conflicts`/`dropped`) ·
+  `{"action":"screenshot","prefab":"Assets/...","out":"shot.png"}` ·
   `{"action":"preview","spec":"path.json","out":"dir"}` (renders a spec's views to PNGs across the
   resolution matrix IN-MEMORY — commits no prefabs/assets; the agent render-and-critique loop;
   `UISpecPreview`/`UIScreenshotter.CaptureLive`) · `{"action":"specReference"}` (writes
@@ -133,6 +139,18 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   alone leaves `spriteImportMode` None and no Sprite sub-asset exists)
   (screenshot output paths must live OUTSIDE Temp/ if they need to survive an editor exit; the
   screenshotter needs a graphics device — batch runs must omit -nographics).
+- Round-trip safety (the spec is the source of truth; the prefab is its materialization): before
+  letting an agent regenerate over human prefab edits, check what would be lost. `SpecDiff.Compare`
+  structurally diffs two specs (stable `SpecPath` addresses); `SpecMerge.Merge` is the three-way
+  merge (base = stored baseline, ours = exported project, theirs = incoming spec) that folds human
+  drift in so `generate` won't wipe it — collisions surface in `conflicts`, never swallowed.
+  `OffSpecLint` flags edits BELOW a composite widget root (raw colors/materials, internal geometry,
+  added/removed internals) that the exporter can't see — these can't be merged (they land in
+  `dropped`/`offSpecWarnings`) so the fix is to bind a theme token or move the change into the spec.
+  The baseline is a hidden `{GeneratedRoot}/.neo-baseline.json` (`NeoBaseline`). Human entry point:
+  `Tools → Neo UI → Check For Drift` (`DriftWindow`) — green = round-trips, red = will be lost; "Fold
+  Edits Into Spec" re-captures the baseline. Tests: `SpecDiffTests`, `SpecMergeTests`,
+  `OffSpecLintTests`, `RoundTripSafetyTests`.
 - Spec element kinds: button, toggle, switch, tab, slider, progress, tabbar, list/scroll, vstack,
   hstack, grid, panel (a `UIPanel : UIContainer` content surface a tab shows/hides — see tab
   `controls` below), overlay (z-stack: children keep anchors/positions inside layout cells —
