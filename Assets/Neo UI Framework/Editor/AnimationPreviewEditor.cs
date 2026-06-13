@@ -118,14 +118,61 @@ namespace Neo.UI.Editor
         }
     }
 
+    /// <summary>
+    /// Shared L1 tab bar for the multi-animation animators (states, show/hide, on/off). Each tab is
+    /// tinted with the Animation accent and suffixed with a dot when that animation drives any
+    /// channel, so the whole state machine's coverage reads at a glance — and the SAME selection
+    /// drives both editing and the preview controls (no more separate edit-vs-preview navigation).
+    /// </summary>
+    internal static class AnimatorEditorGUI
+    {
+        public static int AnimationTabBar(string sessionKey, string[] labels, bool[] hasChannels)
+        {
+            int current = Mathf.Clamp(SessionState.GetInt(sessionKey, 0), 0, labels.Length - 1);
+            int result = current;
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                for (int i = 0; i < labels.Length; i++)
+                {
+                    bool isSelected = i == current;
+                    GUIStyle style = labels.Length == 1 ? EditorStyles.miniButton
+                        : i == 0 ? EditorStyles.miniButtonLeft
+                        : i == labels.Length - 1 ? EditorStyles.miniButtonRight
+                        : EditorStyles.miniButtonMid;
+
+                    var content = new GUIContent(hasChannels[i] ? labels[i] + "  •" : labels[i],
+                        hasChannels[i] ? "Drives one or more channels" : "No channels enabled");
+
+                    Color previous = GUI.backgroundColor;
+                    if (hasChannels[i] && !isSelected) GUI.backgroundColor = NeoColors.Animation;
+                    bool pressed = GUILayout.Toggle(isSelected, content, style, GUILayout.Height(22f));
+                    GUI.backgroundColor = previous;
+                    // Only react to a tab flipping OFF→ON. These toggles are independent: clicking a
+                    // new tab leaves the old one reporting `true` too, so a plain `if (pressed)` would
+                    // let the last still-on tab (Disabled) overwrite the click and trap selection.
+                    if (pressed && !isSelected) result = i;
+                }
+            }
+
+            if (result != current) SessionState.SetInt(sessionKey, result);
+            GUILayout.Space(NeoGUI.Spacing);
+            return result;
+        }
+    }
+
     [CustomEditor(typeof(UIAnimator))]
     [CanEditMultipleObjects]
     public class UIAnimatorEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {
-            NeoGUI.ComponentHeader("UIAnimator", null, NeoColors.Animation);
-            DrawDefaultInspector();
+            NeoGUI.ComponentHeader("UI Animator", null, NeoColors.Animation);
+            serializedObject.Update();
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("onStartBehaviour"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("animation"));
+            serializedObject.ApplyModifiedProperties();
+
             var animator = (UIAnimator)target;
             if (targets.Length == 1)
                 AnimationPreview.DrawControls(animator.animation, animator.GetComponent<RectTransform>());
@@ -136,15 +183,24 @@ namespace Neo.UI.Editor
     [CanEditMultipleObjects]
     public class UIContainerUIAnimatorEditor : UnityEditor.Editor
     {
+        private static readonly string[] Labels = { "Show", "Hide" };
+        private static readonly string[] Props = { "showAnimation", "hideAnimation" };
+
         public override void OnInspectorGUI()
         {
             NeoGUI.ComponentHeader("Container UI Animator", null, NeoColors.Animation);
-            DrawDefaultInspector();
+            serializedObject.Update();
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("controller"));
+
             var animator = (UIContainerUIAnimator)target;
+            var hasChannels = new[] { animator.showAnimation.hasEnabledChannels, animator.hideAnimation.hasEnabledChannels };
+            int index = AnimatorEditorGUI.AnimationTabBar("Neo.ContainerAnim.tab", Labels, hasChannels);
+            EditorGUILayout.PropertyField(serializedObject.FindProperty(Props[index]), GUIContent.none);
+            serializedObject.ApplyModifiedProperties();
+
             if (targets.Length != 1) return;
-            var rectTransform = animator.GetComponent<RectTransform>();
-            AnimationPreview.DrawControls(animator.showAnimation, rectTransform, "Show");
-            AnimationPreview.DrawControls(animator.hideAnimation, rectTransform, "Hide");
+            UIAnimation selected = index == 0 ? animator.showAnimation : animator.hideAnimation;
+            AnimationPreview.DrawControls(selected, animator.GetComponent<RectTransform>(), Labels[index]);
         }
     }
 
@@ -153,19 +209,29 @@ namespace Neo.UI.Editor
     public class UISelectableUIAnimatorEditor : UnityEditor.Editor
     {
         private static readonly string[] StateNames = { "Normal", "Highlighted", "Pressed", "Selected", "Disabled" };
-        private int _stateIndex;
+        private static readonly string[] Props =
+            { "normalAnimation", "highlightedAnimation", "pressedAnimation", "selectedAnimation", "disabledAnimation" };
 
         public override void OnInspectorGUI()
         {
             NeoGUI.ComponentHeader("Selectable UI Animator", null, NeoColors.Animation);
-            DrawDefaultInspector();
+            serializedObject.Update();
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("controller"));
+
             var animator = (UISelectableUIAnimator)target;
+            var hasChannels = new bool[StateNames.Length];
+            for (int i = 0; i < StateNames.Length; i++)
+                hasChannels[i] = animator.GetAnimation((UISelectionState)i).hasEnabledChannels;
+
+            int index = AnimatorEditorGUI.AnimationTabBar("Neo.SelectableAnim.tab", StateNames, hasChannels);
+            EditorGUILayout.PropertyField(serializedObject.FindProperty(Props[index]), GUIContent.none);
+            serializedObject.ApplyModifiedProperties();
+
             if (targets.Length != 1) return;
-            _stateIndex = GUILayout.Toolbar(_stateIndex, StateNames);
             AnimationPreview.DrawControls(
-                animator.GetAnimation((UISelectionState)_stateIndex),
+                animator.GetAnimation((UISelectionState)index),
                 animator.GetComponent<RectTransform>(),
-                StateNames[_stateIndex]);
+                StateNames[index]);
         }
     }
 
@@ -173,15 +239,24 @@ namespace Neo.UI.Editor
     [CanEditMultipleObjects]
     public class UIToggleUIAnimatorEditor : UnityEditor.Editor
     {
+        private static readonly string[] Labels = { "On", "Off" };
+        private static readonly string[] Props = { "onAnimation", "offAnimation" };
+
         public override void OnInspectorGUI()
         {
             NeoGUI.ComponentHeader("Toggle UI Animator", null, NeoColors.Animation);
-            DrawDefaultInspector();
+            serializedObject.Update();
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("controller"));
+
             var animator = (UIToggleUIAnimator)target;
+            var hasChannels = new[] { animator.onAnimation.hasEnabledChannels, animator.offAnimation.hasEnabledChannels };
+            int index = AnimatorEditorGUI.AnimationTabBar("Neo.ToggleAnim.tab", Labels, hasChannels);
+            EditorGUILayout.PropertyField(serializedObject.FindProperty(Props[index]), GUIContent.none);
+            serializedObject.ApplyModifiedProperties();
+
             if (targets.Length != 1) return;
-            var rectTransform = animator.GetComponent<RectTransform>();
-            AnimationPreview.DrawControls(animator.onAnimation, rectTransform, "On");
-            AnimationPreview.DrawControls(animator.offAnimation, rectTransform, "Off");
+            UIAnimation selected = index == 0 ? animator.onAnimation : animator.offAnimation;
+            AnimationPreview.DrawControls(selected, animator.GetComponent<RectTransform>(), Labels[index]);
         }
     }
 }

@@ -63,6 +63,21 @@ namespace Neo.UI
             hideAnimation.SetTarget(rectTransform, group);
         }
 
+        /// <summary>
+        /// Re-snapshots the rest pose. Awake binds the target and captures start values, but when the
+        /// container uses a custom start position that capture can race the container's Awake snap
+        /// (component Awake order is undefined) and bake the editor layout offset into the StartValue
+        /// endpoints — sending shown views off-screen. The container calls this once, AFTER it has
+        /// placed the rect at customStartPosition, so move/scale/fade StartValue endpoints resolve to
+        /// the real runtime pose instead of the offset.
+        /// </summary>
+        public void RecaptureStartValues()
+        {
+            BindTarget();
+            showAnimation.CaptureStartValues();
+            hideAnimation.CaptureStartValues();
+        }
+
         private static bool HasChannels(UIAnimation animation) =>
             animation.move.enabled || animation.rotate.enabled
             || animation.scale.enabled || animation.fade.enabled;

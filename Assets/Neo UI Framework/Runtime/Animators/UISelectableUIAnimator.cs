@@ -81,11 +81,25 @@ namespace Neo.UI
             UIAnimation animation = GetAnimation(state);
             if (!animation.hasEnabledChannels)
             {
-                // no animation for this state: settle back to rest so a previous state doesn't stick
-                if (_current != null && !_current.isActive)
+                // No animation for this state (e.g. Normal / un-hover): return the previous state's
+                // animation to its rest (from) value so it doesn't stick. This MUST run even while
+                // that animation is still playing — un-hovering mid scale-up is the common case, and
+                // the old "!isActive" guard skipped it, leaving the button stuck at the hover scale.
+                if (_current != null)
                 {
-                    _current.RestoreStartValues();
-                    _current = null;
+                    if (instant)
+                    {
+                        _current.Stop(silent: true);
+                        _current.RestoreStartValues();
+                    }
+                    else
+                    {
+                        // Reverse smoothly back to rest: flips the in-flight playhead when the
+                        // forward play is still running, or replays in reverse from the end when it
+                        // already finished. A no-channel state is always preceded by a channel state
+                        // (which replays _current forward), so _current is never double-reversed.
+                        _current.Reverse();
+                    }
                 }
                 return;
             }

@@ -102,6 +102,7 @@ namespace Neo.UI
         private GraphicRaycaster _graphicRaycaster;
         private float _autoHideCountdown = -1f;
         private bool _startBehaviourExecuted;
+        private bool _customRestPoseEstablished;
 
         public VisibilityState visibilityState { get; private set; } = VisibilityState.Visible;
 
@@ -195,6 +196,25 @@ namespace Neo.UI
 
         public void UnregisterProgressor(Progressor progressor) => _progressors.Remove(progressor);
 
+        /// <summary>
+        /// Establishes the runtime rest pose for containers laid out at an editor-only offset (a scene
+        /// builder spreads views side-by-side, then relies on customStartPosition to snap them back at
+        /// runtime). Awake already snapped the rect to customStartPosition, but a position animator's
+        /// own Awake may have captured its StartValue endpoints from the pre-snap offset (component
+        /// Awake order is undefined), which would animate shown views off-screen. Re-assert the pose
+        /// and have position animators recapture — once, synchronously before the first transition runs
+        /// them, so this also covers views the flow activates lazily. Scoped to useCustomStartPosition:
+        /// containers without it are completely untouched.
+        /// </summary>
+        private void EnsureCustomRestPose()
+        {
+            if (!useCustomStartPosition || _customRestPoseEstablished || !Application.isPlaying) return;
+            _customRestPoseEstablished = true;
+            rectTransform.anchoredPosition3D = customStartPosition;
+            foreach (IContainerAnimator animator in _animators)
+                (animator as UIContainerUIAnimator)?.RecaptureStartValues();
+        }
+
         private bool anyAnimatorActive
         {
             get
@@ -254,6 +274,7 @@ namespace Neo.UI
             OnShowCallback?.Invoke();
             OnShow?.Invoke();
 
+            EnsureCustomRestPose();
             foreach (IContainerAnimator animator in _animators) animator.OnShow(instant);
             foreach (Progressor progressor in _progressors)
             {
@@ -287,6 +308,7 @@ namespace Neo.UI
             OnHideCallback?.Invoke();
             OnHide?.Invoke();
 
+            EnsureCustomRestPose();
             foreach (IContainerAnimator animator in _animators) animator.OnHide(instant);
             foreach (Progressor progressor in _progressors)
             {

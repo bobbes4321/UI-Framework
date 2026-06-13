@@ -19,11 +19,14 @@ namespace Neo.UI.Editor
     {
         public const string ScenePath = "Assets/Scenes/NeoUIGeneratedDemo.unity";
 
+        /// <summary> The spec pipeline's portrait reference width — the floor for view spacing. </summary>
+        private const float PortraitReferenceWidth = 1080f;
+
         /// <summary>
-        /// Horizontal gap (in canvas units) between consecutive views when they are laid out
-        /// side-by-side in the editor — the portrait reference width (1080) plus breathing room.
+        /// Breathing room (in canvas units) added to the canvas width when laying views out
+        /// side-by-side in the editor, so adjacent full-screen views have a clear gap between them.
         /// </summary>
-        private const float ViewLayoutSpacing = 1200f;
+        private const float ViewLayoutGap = 200f;
 
         [MenuItem("Tools/Neo UI/Build Scene From Generated UI", priority = 51)]
         public static void BuildAndOpen()
@@ -60,6 +63,10 @@ namespace Neo.UI.Editor
             List<FlowGraph> flows = LoadGeneratedFlowGraphs();
             FlowGraph graph = SelectFlowGraph(flows, flowName);
             HashSet<string> wantedViews = graph != null ? CollectReferencedViewKeys(graph) : null;
+            // Capture the path NOW: NewScene unloads the unused graph asset and fake-nulls `graph`, and
+            // AssetDatabase.GetAssetPath on a fake-null object returns "" — so reading the path AFTER
+            // NewScene (as it used to) silently dropped the flow and shipped a controller-less scene.
+            string graphPath = graph != null ? AssetDatabase.GetAssetPath(graph) : null;
 
             List<GameObject> viewPrefabs = LoadGeneratedViewPrefabs(wantedViews);
 
@@ -79,38 +86,48 @@ namespace Neo.UI.Editor
             RectTransform canvasRect = CreateCanvas("Canvas", sortingOrder: 0);
 
             var instances = new List<GameObject>();
-            int layoutIndex = 0;
+            var laidOut = new List<RectTransform>();
             foreach (GameObject prefab in viewPrefabs)
             {
                 var instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, scene);
                 instance.transform.SetParent(canvasRect, worldPositionStays: false);
+                instances.Add(instance);
 
-                // Spread the views out side-by-side in the editor so each one is visible at a
-                // glance instead of every view stacking on top of each other at the origin
-                // (impossible to inspect or tweak). useCustomStartPosition snaps each container
-                // back to customStartPosition (0,0,0 — centred, full-screen) the instant Play
-                // begins (UIContainer.Awake), so this is purely an authoring-time layout that
-                // costs nothing at runtime. The override lives on the scene instance only — the
-                // generated prefabs stay untouched so the export round-trip stays byte-identical.
+                // Spread the views out side-by-side in the editor so each one is visible at a glance
+                // instead of every view stacking on top of each other at the origin (impossible to
+                // inspect or tweak). useCustomStartPosition snaps each container back to
+                // customStartPosition (0,0,0 — centred, full-screen) the instant Play begins
+                // (UIContainer.Awake), so this is purely an authoring-time layout that costs nothing at
+                // runtime. The override lives on the scene instance only — the generated prefabs stay
+                // untouched so the export round-trip stays byte-identical. Positions are applied below,
+                // once the canvas width is known.
                 if (instance.GetComponent<UIContainer>() is { } container)
                 {
                     container.useCustomStartPosition = true;
                     container.customStartPosition = Vector3.zero;
-                    ((RectTransform)instance.transform).anchoredPosition3D =
-                        new Vector3(layoutIndex * ViewLayoutSpacing, 0f, 0f);
-                    layoutIndex++;
+                    laidOut.Add((RectTransform)instance.transform);
                 }
-
-                instances.Add(instance);
             }
+
+            // Space the views by the ACTUAL canvas width so full-screen views never overlap, whatever
+            // the game-view resolution. A fixed offset smaller than the rendered view width (the canvas
+            // resolves much wider than the 1080 portrait reference on a non-portrait game view) leaves
+            // them stacked. Force a layout pass so the canvas rect resolves; clamp to the reference
+            // width so a not-yet-sized canvas (headless builds, no screen) still gets a sane spread.
+            Canvas.ForceUpdateCanvases();
+            float spacing = Mathf.Max(canvasRect.rect.width, PortraitReferenceWidth) + ViewLayoutGap;
+            for (int i = 0; i < laidOut.Count; i++)
+                laidOut[i].anchoredPosition3D = new Vector3(i * spacing, 0f, 0f);
+            Debug.Log($"[Neo.UI] Laid out {laidOut.Count} views at {spacing:0} spacing " +
+                      $"(canvas width {canvasRect.rect.width:0}).");
 
             // popups parent themselves to this canvas by name (settings.popupsCanvasName)
             CreateCanvas(settings.popupsCanvasName, sortingOrder: 100);
 
-            // re-load the graph AFTER NewScene: scene creation unloads unused assets, which fake-nulls a
-            // ScriptableObject loaded earlier (cold batch sessions hit this reliably — the
-            // controller would silently ship with an empty graph)
-            if (graph != null) graph = AssetDatabase.LoadAssetAtPath<FlowGraph>(AssetDatabase.GetAssetPath(graph));
+            // re-load the graph AFTER NewScene: scene creation unloads unused assets, which fake-nulls
+            // the reference loaded earlier (cold batch sessions hit this reliably — the controller would
+            // silently ship with an empty graph). Re-load from the path captured BEFORE NewScene.
+            if (graphPath != null) graph = AssetDatabase.LoadAssetAtPath<FlowGraph>(graphPath);
 
             string summary;
             if (graph != null)

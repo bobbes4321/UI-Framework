@@ -18,6 +18,7 @@ MonoBehaviour:
   - Player
   - Economy
   - World
+  - Test
   startGroup: 
   inputActionAssetPath: 
   items:
@@ -180,6 +181,23 @@ MonoBehaviour:
     bindingIndex: 0
   - category: World
     name: FinishRace
+    kind: 1
+    label: Finish Race Instantly
+    tooltip: 
+    group: World
+    persisted: 1
+    min: 0
+    max: 1
+    step: 1
+    wholeNumbers: 0
+    defaultValue: 
+    options: []
+    emitOnDrag: 1
+    emitOnRelease: 1
+    inputAction: 
+    bindingIndex: 0
+  - category: Test
+    name: Penis
     kind: 1
     label: Finish Race Instantly
     tooltip: 

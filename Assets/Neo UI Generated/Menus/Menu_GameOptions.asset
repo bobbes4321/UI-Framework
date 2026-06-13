@@ -118,7 +118,7 @@ MonoBehaviour:
   - category: Graphics
     name: VSync
     kind: 3
-    label: V-Sync
+    label: 222
     tooltip: 
     group: Graphics
     persisted: 1
