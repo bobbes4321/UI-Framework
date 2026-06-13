@@ -1,0 +1,24 @@
+{
+  "_recipe": "Confirmation dialog — a centered card over a dimmed backdrop, with a title, message and a cancel/confirm pair (danger variant for destructive confirms). For a real modal you'd usually use the `popups` section + onClick popup; this view form is handy when the dialog is part of a flow.",
+  "theme": { "bundle": "SoftFantasy" },
+  "presets": [
+    { "name": "FadeIn", "type": "Show", "duration": 0.2, "ease": "OutQuad", "fade": { "from": 0, "to": 1 } },
+    { "name": "FadeOut", "type": "Hide", "duration": 0.2, "ease": "InQuad", "fade": { "from": 1, "to": 0 } }
+  ],
+  "views": [
+    { "id": "Dialog/Confirm", "showAnimation": "FadeIn", "hideAnimation": "FadeOut", "background": "Shadow",
+      "elements": [
+        { "shape": { "anchor": "Center", "size": [560, 360], "shape": "RoundedRect", "radius": 24, "style": "Card", "background": "Surface" } },
+        { "vstack": { "anchor": "Center", "size": [520, 320], "padding": 16, "spacing": 16, "children": [
+          { "icon": { "name": "triangle-alert", "color": "Danger", "size": 56 } },
+          { "text": { "label": "Delete save?", "color": "TextStrong", "textStyle": "Title" } },
+          { "text": { "label": "This cannot be undone. Your progress since the last checkpoint will be lost.", "color": "TextMuted", "textStyle": "Body" } },
+          { "spacer": {} },
+          { "hstack": { "spacing": 12, "children": [
+            { "button": { "id": "Dialog/Cancel", "label": "Cancel", "variant": "secondary", "onClick": { "signal": "Dialog/Cancel" } } },
+            { "button": { "id": "Dialog/Confirm", "label": "Delete", "icon": "trash-2", "variant": "danger", "onClick": { "signal": "Dialog/Confirm" } } }
+          ] } }
+        ] } }
+      ] }
+  ]
+}

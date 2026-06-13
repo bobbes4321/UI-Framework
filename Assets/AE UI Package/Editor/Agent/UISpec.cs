@@ -1,0 +1,1117 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace AlterEyes.UI.Editor
+{
+    /// <summary>
+    /// The declarative UI spec model — the text format agents author. JSON schema (all sections optional):
+    /// <code>
+    /// {
+    ///   "theme":   { "tokens": { "Primary": "#3A86FF" }, "variants": { "Dark": { "Primary": "#123456" } } },
+    ///   "presets": [ { "name": "SlideInLeft", "type": "Show", "move": { "from": "Left" },
+    ///                  "fade": { "from": 0 }, "duration": 0.3, "ease": "OutCubic" } ],
+    ///   "views":   [ { "id": "Menu/Main", "showAnimation": "SlideInLeft", "hideAnimation": "SlideOutLeft",
+    ///                  "background": "Background",
+    ///                  "elements": [ { "button": { "id": "Action/Play", "label": "Play",
+    ///                                  "labelColor": "TextDefault", "background": "Primary",
+    ///                                  "onClick": { "signal": { "category": "Gameplay", "name": "StartPainting" } } } },
+    ///                                { "text":   { "label": "Title", "color": "TextDefault" } },
+    ///                                { "toggle": { "id": "Mute/Music", "label": "Music" } } ] } ],
+    ///   "flow":    { "name": "UI", "start": "MainMenu",
+    ///                "nodes": [ { "name": "MainMenu", "view": "Menu/Main",
+    ///                             "next": [ { "on": { "button": "Action/Settings" }, "to": "Settings" } ] },
+    ///                           { "name": "Settings", "view": "Menu/Settings",
+    ///                             "next": [ { "on": { "back": true }, "to": "MainMenu" } ] } ] }
+    /// }
+    /// </code>
+    /// Triggers ("on"): { "button": "Cat/Name" } | { "signal": "Cat/Name" } | { "toggleOn"/"toggleOff": "Cat/Name" }
+    /// | { "viewShown"/"viewHidden": "Cat/Name" } | { "back": true } | { "timer": seconds }.
+    /// </summary>
+    [Serializable]
+    public class UISpec
+    {
+        public ThemeSpec theme;
+        public List<PresetSpec> presets = new List<PresetSpec>();
+        public List<ViewSpec> views = new List<ViewSpec>();
+        public List<PopupSpec> popups = new List<PopupSpec>();
+        /// <summary> Settings catalogs (generated as SettingsCatalog assets). </summary>
+        public List<MenuCatalogSpec> settings = new List<MenuCatalogSpec>();
+        /// <summary> Cheat catalogs (generated as CheatCatalog assets). </summary>
+        public List<MenuCatalogSpec> cheats = new List<MenuCatalogSpec>();
+        public FlowSpec flow;
+
+        public static UISpec FromJson(string json)
+        {
+            var root = JsonReader.AsObject(MiniJson.Parse(json), "spec root");
+            var spec = new UISpec();
+
+            Dictionary<string, object> themeObj = JsonReader.GetObject(root, "theme");
+            if (themeObj != null) spec.theme = ThemeSpec.Parse(themeObj);
+
+            List<object> presetArray = JsonReader.GetArray(root, "presets");
+            if (presetArray != null)
+                foreach (object item in presetArray)
+                    spec.presets.Add(PresetSpec.Parse(JsonReader.AsObject(item, "preset")));
+
+            List<object> settingsArray = JsonReader.GetArray(root, "settings");
+            if (settingsArray != null)
+                foreach (object item in settingsArray)
+                    spec.settings.Add(MenuCatalogSpec.Parse(JsonReader.AsObject(item, "settings catalog"), MenuCatalogSpec.SettingsKind));
+
+            List<object> cheatsArray = JsonReader.GetArray(root, "cheats");
+            if (cheatsArray != null)
+                foreach (object item in cheatsArray)
+                    spec.cheats.Add(MenuCatalogSpec.Parse(JsonReader.AsObject(item, "cheat catalog"), MenuCatalogSpec.CheatKind));
+
+            List<object> viewArray = JsonReader.GetArray(root, "views");
+            if (viewArray != null)
+                foreach (object item in viewArray)
+                    spec.views.Add(ViewSpec.Parse(JsonReader.AsObject(item, "view")));
+
+            List<object> popupArray = JsonReader.GetArray(root, "popups");
+            if (popupArray != null)
+                foreach (object item in popupArray)
+                    spec.popups.Add(PopupSpec.Parse(JsonReader.AsObject(item, "popup")));
+
+            Dictionary<string, object> flowObj = JsonReader.GetObject(root, "flow");
+            if (flowObj != null) spec.flow = FlowSpec.Parse(flowObj);
+
+            return spec;
+        }
+
+        public string ToJson()
+        {
+            var root = new Dictionary<string, object>();
+            if (theme != null) root["theme"] = theme.ToJsonObject();
+            if (presets.Count > 0)
+            {
+                var array = new List<object>();
+                foreach (PresetSpec preset in presets) array.Add(preset.ToJsonObject());
+                root["presets"] = array;
+            }
+            if (views.Count > 0)
+            {
+                var array = new List<object>();
+                foreach (ViewSpec view in views) array.Add(view.ToJsonObject());
+                root["views"] = array;
+            }
+            if (settings.Count > 0)
+            {
+                var array = new List<object>();
+                foreach (MenuCatalogSpec catalog in settings) array.Add(catalog.ToJsonObject());
+                root["settings"] = array;
+            }
+            if (cheats.Count > 0)
+            {
+                var array = new List<object>();
+                foreach (MenuCatalogSpec catalog in cheats) array.Add(catalog.ToJsonObject());
+                root["cheats"] = array;
+            }
+            if (popups.Count > 0)
+            {
+                var array = new List<object>();
+                foreach (PopupSpec popup in popups) array.Add(popup.ToJsonObject());
+                root["popups"] = array;
+            }
+            if (flow != null) root["flow"] = flow.ToJsonObject();
+            return MiniJson.Serialize(root);
+        }
+    }
+
+    [Serializable]
+    public class ThemeSpec
+    {
+        /// <summary>
+        /// Curated bundle name (CleanSlate / NeonArcade / SoftFantasy) applied FIRST;
+        /// explicit tokens/variants override afterwards. Never exported — the bundle expands
+        /// into plain tokens on generate.
+        /// </summary>
+        public string bundle;
+        /// <summary> Token → hex color of the default variant. </summary>
+        public Dictionary<string, string> tokens = new Dictionary<string, string>();
+        /// <summary> Variant name → (token → hex color) overrides. </summary>
+        public Dictionary<string, Dictionary<string, string>> variants = new Dictionary<string, Dictionary<string, string>>();
+
+        public static ThemeSpec Parse(Dictionary<string, object> obj)
+        {
+            var spec = new ThemeSpec();
+            spec.bundle = JsonReader.GetString(obj, "bundle");
+            Dictionary<string, object> tokenObj = JsonReader.GetObject(obj, "tokens");
+            if (tokenObj != null)
+                foreach (KeyValuePair<string, object> entry in tokenObj)
+                    spec.tokens[entry.Key] = entry.Value?.ToString();
+
+            Dictionary<string, object> variantObj = JsonReader.GetObject(obj, "variants");
+            if (variantObj != null)
+            {
+                foreach (KeyValuePair<string, object> variant in variantObj)
+                {
+                    var colors = new Dictionary<string, string>();
+                    foreach (KeyValuePair<string, object> entry in JsonReader.AsObject(variant.Value, $"variant '{variant.Key}'"))
+                        colors[entry.Key] = entry.Value?.ToString();
+                    spec.variants[variant.Key] = colors;
+                }
+            }
+            return spec;
+        }
+
+        public Dictionary<string, object> ToJsonObject()
+        {
+            var result = new Dictionary<string, object>();
+            var tokenObj = new Dictionary<string, object>();
+            foreach (KeyValuePair<string, string> entry in tokens) tokenObj[entry.Key] = entry.Value;
+            result["tokens"] = tokenObj;
+            if (variants.Count > 0)
+            {
+                var variantObj = new Dictionary<string, object>();
+                foreach (KeyValuePair<string, Dictionary<string, string>> variant in variants)
+                {
+                    var colors = new Dictionary<string, object>();
+                    foreach (KeyValuePair<string, string> entry in variant.Value) colors[entry.Key] = entry.Value;
+                    variantObj[variant.Key] = colors;
+                }
+                result["variants"] = variantObj;
+            }
+            return result;
+        }
+    }
+
+    [Serializable]
+    public class PresetChannelSpec
+    {
+        public bool enabled;
+        public string from; // direction name, number or "x,y,z" depending on channel
+        public string to;
+        public float? duration;
+        public string ease;
+
+        public static PresetChannelSpec Parse(Dictionary<string, object> obj)
+        {
+            if (obj == null) return null;
+            var channel = new PresetChannelSpec { enabled = true };
+            if (obj.TryGetValue("from", out object fromValue) && fromValue != null) channel.from = ValueToString(fromValue);
+            if (obj.TryGetValue("to", out object toValue) && toValue != null) channel.to = ValueToString(toValue);
+            if (obj.TryGetValue("duration", out object d) && d is double dd) channel.duration = (float)dd;
+            channel.ease = JsonReader.GetString(obj, "ease");
+            return channel;
+        }
+
+        private static string ValueToString(object value)
+        {
+            if (value is List<object> list) return string.Join(",", list);
+            if (value is double d) return d.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            return value.ToString();
+        }
+
+        public Dictionary<string, object> ToJsonObject()
+        {
+            var result = new Dictionary<string, object>();
+            if (!string.IsNullOrEmpty(from)) result["from"] = NumberOrString(from);
+            if (!string.IsNullOrEmpty(to)) result["to"] = NumberOrString(to);
+            if (duration.HasValue) result["duration"] = (double)duration.Value;
+            if (!string.IsNullOrEmpty(ease)) result["ease"] = ease;
+            return result;
+        }
+
+        private static object NumberOrString(string value) =>
+            double.TryParse(value, System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture, out double d) ? (object)d : value;
+    }
+
+    [Serializable]
+    public class PresetSpec
+    {
+        public string name;
+        public string type = "Custom"; // Show / Hide / Loop / Button / State / Custom
+        public float duration = 0.3f;
+        public string ease = "OutCubic";
+        public PresetChannelSpec move;
+        public PresetChannelSpec rotate;
+        public PresetChannelSpec scale;
+        public PresetChannelSpec fade;
+
+        public static PresetSpec Parse(Dictionary<string, object> obj)
+        {
+            var spec = new PresetSpec
+            {
+                name = JsonReader.GetString(obj, "name"),
+                type = JsonReader.GetString(obj, "type", "Custom"),
+                duration = JsonReader.GetFloat(obj, "duration", 0.3f),
+                ease = JsonReader.GetString(obj, "ease", "OutCubic"),
+                move = PresetChannelSpec.Parse(JsonReader.GetObject(obj, "move")),
+                rotate = PresetChannelSpec.Parse(JsonReader.GetObject(obj, "rotate")),
+                scale = PresetChannelSpec.Parse(JsonReader.GetObject(obj, "scale")),
+                fade = PresetChannelSpec.Parse(JsonReader.GetObject(obj, "fade"))
+            };
+            if (string.IsNullOrWhiteSpace(spec.name))
+                throw new FormatException("Preset is missing required field 'name'");
+            return spec;
+        }
+
+        public Dictionary<string, object> ToJsonObject()
+        {
+            var result = new Dictionary<string, object>
+            {
+                ["name"] = name,
+                ["type"] = type,
+                ["duration"] = (double)duration,
+                ["ease"] = ease
+            };
+            if (move != null && move.enabled) result["move"] = move.ToJsonObject();
+            if (rotate != null && rotate.enabled) result["rotate"] = rotate.ToJsonObject();
+            if (scale != null && scale.enabled) result["scale"] = scale.ToJsonObject();
+            if (fade != null && fade.enabled) result["fade"] = fade.ToJsonObject();
+            return result;
+        }
+    }
+
+    [Serializable]
+    public class SignalRefSpec
+    {
+        public string category;
+        public string name;
+
+        public static SignalRefSpec Parse(object value, string context)
+        {
+            var spec = new SignalRefSpec();
+            if (value is string s)
+            {
+                CategoryNameId.Parse(s, out spec.category, out spec.name);
+                return spec;
+            }
+            var obj = JsonReader.AsObject(value, context);
+            spec.category = JsonReader.GetString(obj, "category");
+            spec.name = JsonReader.GetString(obj, "name");
+            return spec;
+        }
+
+        public Dictionary<string, object> ToJsonObject() =>
+            new Dictionary<string, object> { ["category"] = category, ["name"] = name };
+    }
+
+    /// <summary>
+    /// A two-stop gradient: "from"/"to" are theme tokens or "#hex" colors, angle in degrees
+    /// (0 = left to right, 90 = bottom to top). Rides AEGradient so theming stays live.
+    /// </summary>
+    [Serializable]
+    public class GradientSpec
+    {
+        public string from;
+        public string to;
+        public float angle = 90f;
+
+        public static GradientSpec Parse(Dictionary<string, object> obj)
+        {
+            if (obj == null) return null;
+            return new GradientSpec
+            {
+                from = JsonReader.GetString(obj, "from"),
+                to = JsonReader.GetString(obj, "to"),
+                angle = JsonReader.GetFloat(obj, "angle", 90f)
+            };
+        }
+
+        public Dictionary<string, object> ToJsonObject()
+        {
+            var result = new Dictionary<string, object>();
+            if (!string.IsNullOrEmpty(from)) result["from"] = from;
+            if (!string.IsNullOrEmpty(to)) result["to"] = to;
+            result["angle"] = (double)angle;
+            return result;
+        }
+    }
+
+    /// <summary>
+    /// One element in a view. Widgets: button, toggle, switch, tab, slider, progress, tabbar,
+    /// list, text, image, shape. Layout containers: vstack, hstack, grid, scroll, spacer —
+    /// containers carry padding/spacing(/columns/cellSize) and nest anything via "children".
+    /// Common optional fields: anchor (preset name: TopLeft…BottomRight, Stretch, StretchTop, …),
+    /// size [w,h], position [x,y], style (theme shape style), background (color token).
+    /// </summary>
+    [Serializable]
+    public class ElementSpec
+    {
+        public static readonly string[] Kinds =
+        {
+            "button", "toggle", "switch", "tab", "slider", "progress", "tabbar", "list", "scroll",
+            "vstack", "hstack", "grid", "panel", "overlay", "spacer", "text", "image", "shape", "icon",
+            "input", "stepper", "safearea", "counter", "dropdown", "settings", "cheats"
+        };
+
+        public string kind;
+        public string id;   // "Category/Name" for interactive elements
+        public string label;
+        public string labelColor;  // theme token
+        public string background;  // theme token
+        public string style;       // theme shape style name (AEShape surfaces)
+        public string shape;       // for kind "shape": roundedRect / circle / pill / checkmark / chevron / cross / ring / arc
+        public GradientSpec gradient; // shape/image: theme-riding two-stop gradient
+        public float? thickness;   // ring/arc band width px
+        public float? arcStart;    // arc start angle, degrees cw from 12 o'clock
+        public float? arcSweep;    // arc sweep, degrees
+        public string icon;        // Lucide icon name — kind "icon" ("name" key) or button/tab slot ("icon" key)
+        public string src;         // image: sprite asset path ("Assets/...") — rendered as an AEShape
+                                   // texture fill so "radius" rounds the corners; full-rect sprites only
+        public string fit;         // image: "cover" crops a centered sub-rect to fill the rect
+                                   // (preserves art aspect); absent = stretch
+        public string variant;     // button: primary / secondary / ghost / danger
+        public string sizeVariant; // button: sm / md / lg (JSON key "size" — string form)
+        public bool cascade;       // vstack/hstack/grid: staggered child entrance on show
+        public float? badge;       // button/tab: notification badge count (0 = hidden)
+        public float? radius;      // corner radius override (px)
+        public string anchor;      // anchor preset name
+        public float[] size;       // [w,h] (JSON key "size" — array form)
+        public float? flex;        // in stacks: share of leftover space on the parent's main axis
+                                   // (size becomes the minimum); 0/absent = rigid authored size
+        public float? rotation;    // z rotation in degrees (corner ribbons, slanted banners)
+        public string outlineColor; // text: SDF outline color (hex or theme token, baked to a
+                                    // cached material — outlined card names over art)
+        public float? outlineWidth; // text: SDF outline width 0..1 (default 0.25 when only the
+                                    // color is given)
+        public float[] position;   // [x,y] anchored position
+        public float? padding;     // containers
+        public float? spacing;     // containers
+        public int? columns;       // grid
+        public float[] cellSize;   // grid [w,h]
+        public float? min;         // slider / progress / stepper
+        public float? max;
+        public float? value;       // slider / stepper
+        public float? step;        // stepper increment
+        public float? fontSize;    // text (styleless fallback — a textStyle owns the size)
+        public string textStyle;   // theme text style name (text + button/toggle/tab labels)
+        public string align;       // text: left | center | right (center default); stacks: childAlignment (left default)
+        public string controls;    // tab: id of the sibling "panel" this tab shows/hides
+        public string group;       // tab: standalone tabs sharing a group name in one view get
+                                   // one-on exclusivity (a shared UIToggleGroup on the view root)
+        public string catalog;     // settings/cheats: id of the catalog this menu element presents
+        public List<string> options; // dropdown: option labels in order (value is the selected index)
+        public string bind;          // list/grid: UIData source id ("Category/Name") feeding rows at runtime
+        public ElementSpec item;     // list/grid: row template, cloned per data row ({key} tokens in text)
+        public SignalRefSpec onClickSignal;
+        public string onClickShowView; // "Category/Name"
+        public string onClickHideView;
+        public string onClickPopup;    // popup name from the popups section
+        public bool onClickClose;      // button: hides the enclosing container (popup CTA / dismiss)
+        public List<ElementSpec> children = new List<ElementSpec>();
+
+        public static ElementSpec Parse(Dictionary<string, object> obj)
+        {
+            foreach (string kind in Kinds)
+            {
+                Dictionary<string, object> body = JsonReader.GetObject(obj, kind);
+                if (body == null) continue;
+                var spec = new ElementSpec
+                {
+                    kind = kind,
+                    id = JsonReader.GetString(body, "id"),
+                    label = JsonReader.GetString(body, "label"),
+                    labelColor = JsonReader.GetString(body, "labelColor") ?? JsonReader.GetString(body, "color"),
+                    background = JsonReader.GetString(body, "background"),
+                    style = JsonReader.GetString(body, "style"),
+                    shape = JsonReader.GetString(body, "shape"),
+                    variant = JsonReader.GetString(body, "variant"),
+                    anchor = JsonReader.GetString(body, "anchor"),
+                    radius = GetNullableFloat(body, "radius"),
+                    size = GetFloatArray(body, "size"),
+                    position = GetFloatArray(body, "position"),
+                    padding = GetNullableFloat(body, "padding"),
+                    spacing = GetNullableFloat(body, "spacing"),
+                    cellSize = GetFloatArray(body, "cellSize"),
+                    min = GetNullableFloat(body, "min"),
+                    max = GetNullableFloat(body, "max"),
+                    value = GetNullableFloat(body, "value"),
+                    step = GetNullableFloat(body, "step"),
+                    flex = GetNullableFloat(body, "flex"),
+                    rotation = GetNullableFloat(body, "rotation"),
+                    outlineColor = JsonReader.GetString(body, "outlineColor"),
+                    outlineWidth = GetNullableFloat(body, "outlineWidth"),
+                    fontSize = GetNullableFloat(body, "fontSize"),
+                    textStyle = JsonReader.GetString(body, "textStyle"),
+                    align = JsonReader.GetString(body, "align"),
+                    controls = JsonReader.GetString(body, "controls"),
+                    group = JsonReader.GetString(body, "group"),
+                    src = JsonReader.GetString(body, "src"),
+                    fit = JsonReader.GetString(body, "fit"),
+                    bind = JsonReader.GetString(body, "bind"),
+                    catalog = JsonReader.GetString(body, "catalog"),
+                    gradient = GradientSpec.Parse(JsonReader.GetObject(body, "gradient")),
+                    thickness = GetNullableFloat(body, "thickness"),
+                    arcStart = GetNullableFloat(body, "arcStart"),
+                    arcSweep = GetNullableFloat(body, "arcSweep")
+                };
+                float? columnsValue = GetNullableFloat(body, "columns");
+                if (columnsValue.HasValue) spec.columns = (int)columnsValue.Value;
+
+                // "size" is polymorphic: a string is the button size variant, an array is [w,h]
+                if (body.TryGetValue("size", out object sizeValue) && sizeValue is string sizeName)
+                    spec.sizeVariant = sizeName;
+
+                spec.cascade = JsonReader.GetBool(body, "cascade");
+                spec.badge = GetNullableFloat(body, "badge");
+
+                // icon elements take "name"; widget slots take "icon" — also accept a scalar size
+                spec.icon = JsonReader.GetString(body, "icon");
+                if (kind == "icon")
+                {
+                    if (string.IsNullOrEmpty(spec.icon)) spec.icon = JsonReader.GetString(body, "name");
+                    if (spec.size == null)
+                    {
+                        float? scalar = GetNullableFloat(body, "size");
+                        if (scalar.HasValue) spec.size = new[] { scalar.Value, scalar.Value };
+                    }
+                }
+
+                Dictionary<string, object> onClick = JsonReader.GetObject(body, "onClick");
+                if (onClick != null)
+                {
+                    if (onClick.TryGetValue("signal", out object signal))
+                        spec.onClickSignal = SignalRefSpec.Parse(signal, "onClick.signal");
+                    spec.onClickShowView = JsonReader.GetString(onClick, "showView");
+                    spec.onClickHideView = JsonReader.GetString(onClick, "hideView");
+                    spec.onClickPopup = JsonReader.GetString(onClick, "popup");
+                    spec.onClickClose = JsonReader.GetBool(onClick, "close");
+                }
+
+                List<object> optionArray = JsonReader.GetArray(body, "options");
+                if (optionArray != null)
+                {
+                    spec.options = new List<string>();
+                    foreach (object option in optionArray)
+                        if (option != null) spec.options.Add(option.ToString());
+                }
+
+                Dictionary<string, object> itemObj = JsonReader.GetObject(body, "item");
+                if (itemObj != null) spec.item = Parse(itemObj);
+
+                List<object> childArray = JsonReader.GetArray(body, "children");
+                if (childArray != null)
+                    foreach (object item in childArray)
+                        spec.children.Add(Parse(JsonReader.AsObject(item, "child element")));
+                return spec;
+            }
+            throw new FormatException($"Element must contain one of: {string.Join(", ", Kinds)}");
+        }
+
+        public Dictionary<string, object> ToJsonObject()
+        {
+            var body = new Dictionary<string, object>();
+            if (!string.IsNullOrEmpty(id)) body["id"] = id;
+            if (!string.IsNullOrEmpty(label)) body["label"] = label;
+            if (!string.IsNullOrEmpty(icon)) body[kind == "icon" ? "name" : "icon"] = icon;
+            if (!string.IsNullOrEmpty(labelColor))
+                body[kind == "text" || kind == "icon" ? "color" : "labelColor"] = labelColor;
+            if (!string.IsNullOrEmpty(background)) body["background"] = background;
+            if (!string.IsNullOrEmpty(style)) body["style"] = style;
+            if (!string.IsNullOrEmpty(shape)) body["shape"] = shape;
+            if (gradient != null) body["gradient"] = gradient.ToJsonObject();
+            if (thickness.HasValue) body["thickness"] = (double)thickness.Value;
+            if (arcStart.HasValue) body["arcStart"] = (double)arcStart.Value;
+            if (arcSweep.HasValue) body["arcSweep"] = (double)arcSweep.Value;
+            if (!string.IsNullOrEmpty(variant)) body["variant"] = variant;
+            if (radius.HasValue) body["radius"] = (double)radius.Value;
+            if (!string.IsNullOrEmpty(anchor)) body["anchor"] = anchor;
+            // string size variant and [w,h] share the "size" key — the variant owns it when set
+            if (!string.IsNullOrEmpty(sizeVariant)) body["size"] = sizeVariant;
+            else if (size != null) body["size"] = ToJsonArray(size);
+            if (position != null) body["position"] = ToJsonArray(position);
+            if (padding.HasValue) body["padding"] = (double)padding.Value;
+            if (spacing.HasValue) body["spacing"] = (double)spacing.Value;
+            if (columns.HasValue) body["columns"] = (double)columns.Value;
+            if (cellSize != null) body["cellSize"] = ToJsonArray(cellSize);
+            if (min.HasValue) body["min"] = (double)min.Value;
+            if (max.HasValue) body["max"] = (double)max.Value;
+            if (value.HasValue) body["value"] = (double)value.Value;
+            if (step.HasValue) body["step"] = (double)step.Value;
+            if (flex.HasValue) body["flex"] = (double)flex.Value;
+            if (rotation.HasValue) body["rotation"] = (double)rotation.Value;
+            if (!string.IsNullOrEmpty(outlineColor)) body["outlineColor"] = outlineColor;
+            if (outlineWidth.HasValue) body["outlineWidth"] = (double)outlineWidth.Value;
+            if (fontSize.HasValue) body["fontSize"] = (double)fontSize.Value;
+            if (!string.IsNullOrEmpty(textStyle)) body["textStyle"] = textStyle;
+            if (!string.IsNullOrEmpty(align)) body["align"] = align;
+            if (!string.IsNullOrEmpty(controls)) body["controls"] = controls;
+            if (!string.IsNullOrEmpty(group)) body["group"] = group;
+            if (!string.IsNullOrEmpty(catalog)) body["catalog"] = catalog;
+            if (!string.IsNullOrEmpty(src)) body["src"] = src;
+            if (!string.IsNullOrEmpty(fit)) body["fit"] = fit;
+            if (!string.IsNullOrEmpty(bind)) body["bind"] = bind;
+            if (item != null) body["item"] = item.ToJsonObject();
+            if (options != null && options.Count > 0)
+            {
+                var array = new List<object>();
+                foreach (string option in options) array.Add(option);
+                body["options"] = array;
+            }
+            if (cascade) body["cascade"] = true;
+            if (badge.HasValue) body["badge"] = (double)badge.Value;
+            if (onClickSignal != null || !string.IsNullOrEmpty(onClickShowView)
+                || !string.IsNullOrEmpty(onClickHideView) || !string.IsNullOrEmpty(onClickPopup)
+                || onClickClose)
+            {
+                var onClick = new Dictionary<string, object>();
+                if (onClickSignal != null) onClick["signal"] = onClickSignal.ToJsonObject();
+                if (!string.IsNullOrEmpty(onClickShowView)) onClick["showView"] = onClickShowView;
+                if (!string.IsNullOrEmpty(onClickHideView)) onClick["hideView"] = onClickHideView;
+                if (!string.IsNullOrEmpty(onClickPopup)) onClick["popup"] = onClickPopup;
+                if (onClickClose) onClick["close"] = true;
+                body["onClick"] = onClick;
+            }
+            if (children.Count > 0)
+            {
+                var array = new List<object>();
+                foreach (ElementSpec child in children) array.Add(child.ToJsonObject());
+                body["children"] = array;
+            }
+            return new Dictionary<string, object> { [kind] = body };
+        }
+
+        private static float? GetNullableFloat(Dictionary<string, object> obj, string key) =>
+            obj.TryGetValue(key, out object value) && value is double d ? (float?)(float)d : null;
+
+        private static float[] GetFloatArray(Dictionary<string, object> obj, string key)
+        {
+            if (!obj.TryGetValue(key, out object value) || !(value is List<object> list)) return null;
+            var result = new float[list.Count];
+            for (int i = 0; i < list.Count; i++)
+                result[i] = list[i] is double d ? (float)d : 0f;
+            return result;
+        }
+
+        private static List<object> ToJsonArray(float[] values)
+        {
+            var array = new List<object>(values.Length);
+            foreach (float value in values) array.Add((double)value);
+            return array;
+        }
+    }
+
+    /// <summary>
+    /// A modal popup template: generated as a UIPopup prefab and database entry. Plain form
+    /// (title/message only) gets the canonical OK button; the rich form adds "elements" (the same
+    /// element vocabulary as views, stacked in the card), an optional "size" [w,h] card override
+    /// and "close": true for an X dismiss button pinned to the card's top-right corner.
+    /// </summary>
+    [Serializable]
+    public class PopupSpec
+    {
+        public string name;
+        public string title;
+        public string message;
+        public float[] size;       // card [w,h]; omitted = factory default
+        public bool close;         // X button on the card corner
+        public List<ElementSpec> elements = new List<ElementSpec>();
+
+        public static PopupSpec Parse(Dictionary<string, object> obj)
+        {
+            var spec = new PopupSpec
+            {
+                name = JsonReader.GetString(obj, "name"),
+                title = JsonReader.GetString(obj, "title"),
+                message = JsonReader.GetString(obj, "message"),
+                close = JsonReader.GetBool(obj, "close")
+            };
+            if (string.IsNullOrWhiteSpace(spec.name))
+                throw new FormatException("Popup is missing required field 'name'");
+
+            if (obj.TryGetValue("size", out object sizeValue) && sizeValue is List<object> sizeList)
+            {
+                spec.size = new float[sizeList.Count];
+                for (int i = 0; i < sizeList.Count; i++)
+                    spec.size[i] = sizeList[i] is double d ? (float)d : 0f;
+            }
+
+            List<object> elementArray = JsonReader.GetArray(obj, "elements");
+            if (elementArray != null)
+                foreach (object item in elementArray)
+                    spec.elements.Add(ElementSpec.Parse(JsonReader.AsObject(item, "popup element")));
+            return spec;
+        }
+
+        public Dictionary<string, object> ToJsonObject()
+        {
+            var result = new Dictionary<string, object> { ["name"] = name };
+            if (!string.IsNullOrEmpty(title)) result["title"] = title;
+            if (!string.IsNullOrEmpty(message)) result["message"] = message;
+            if (size != null && size.Length >= 2)
+            {
+                var array = new List<object>();
+                foreach (float value in size) array.Add((double)value);
+                result["size"] = array;
+            }
+            if (close) result["close"] = true;
+            if (elements.Count > 0)
+            {
+                var array = new List<object>();
+                foreach (ElementSpec element in elements) array.Add(element.ToJsonObject());
+                result["elements"] = array;
+            }
+            return result;
+        }
+    }
+
+    [Serializable]
+    public class ViewSpec
+    {
+        public string category;
+        public string viewName;
+        public string showAnimation; // preset name
+        public string hideAnimation;
+        public string background;    // theme token for a full-bleed background image
+        public List<ElementSpec> elements = new List<ElementSpec>();
+
+        public string id => $"{category}/{viewName}";
+
+        public static ViewSpec Parse(Dictionary<string, object> obj)
+        {
+            var spec = new ViewSpec();
+            string idValue = JsonReader.GetString(obj, "id");
+            if (string.IsNullOrWhiteSpace(idValue))
+                throw new FormatException("View is missing required field 'id' (\"Category/Name\")");
+            CategoryNameId.Parse(idValue, out spec.category, out spec.viewName);
+            spec.showAnimation = JsonReader.GetString(obj, "showAnimation");
+            spec.hideAnimation = JsonReader.GetString(obj, "hideAnimation");
+            spec.background = JsonReader.GetString(obj, "background");
+
+            List<object> elementArray = JsonReader.GetArray(obj, "elements");
+            if (elementArray != null)
+                foreach (object item in elementArray)
+                    spec.elements.Add(ElementSpec.Parse(JsonReader.AsObject(item, "element")));
+            return spec;
+        }
+
+        public Dictionary<string, object> ToJsonObject()
+        {
+            var result = new Dictionary<string, object> { ["id"] = id };
+            if (!string.IsNullOrEmpty(showAnimation)) result["showAnimation"] = showAnimation;
+            if (!string.IsNullOrEmpty(hideAnimation)) result["hideAnimation"] = hideAnimation;
+            if (!string.IsNullOrEmpty(background)) result["background"] = background;
+            if (elements.Count > 0)
+            {
+                var array = new List<object>();
+                foreach (ElementSpec element in elements) array.Add(element.ToJsonObject());
+                result["elements"] = array;
+            }
+            return result;
+        }
+    }
+
+    [Serializable]
+    public class FlowEdgeSpec
+    {
+        public string to;
+        public bool allowsBack = true;
+        public FlowTrigger trigger = new FlowTrigger();
+
+        public static FlowEdgeSpec Parse(Dictionary<string, object> obj)
+        {
+            var spec = new FlowEdgeSpec
+            {
+                to = JsonReader.GetString(obj, "to"),
+                allowsBack = JsonReader.GetBool(obj, "allowsBack", true)
+            };
+            if (string.IsNullOrWhiteSpace(spec.to))
+                throw new FormatException("Flow edge is missing required field 'to'");
+
+            Dictionary<string, object> on = JsonReader.GetObject(obj, "on");
+            if (on != null) spec.trigger = ParseTrigger(on);
+            return spec;
+        }
+
+        public static FlowTrigger ParseTrigger(Dictionary<string, object> on)
+        {
+            var trigger = new FlowTrigger();
+            if (on.TryGetValue("button", out object button))
+            {
+                trigger.type = FlowTrigger.TriggerType.ButtonClick;
+                CategoryNameId.Parse(button.ToString(), out trigger.category, out trigger.name);
+            }
+            else if (on.TryGetValue("signal", out object signal))
+            {
+                trigger.type = FlowTrigger.TriggerType.Signal;
+                SignalRefSpec reference = SignalRefSpec.Parse(signal, "on.signal");
+                trigger.category = reference.category;
+                trigger.name = reference.name;
+            }
+            else if (on.TryGetValue("toggleOn", out object toggleOn))
+            {
+                trigger.type = FlowTrigger.TriggerType.ToggleOn;
+                CategoryNameId.Parse(toggleOn.ToString(), out trigger.category, out trigger.name);
+            }
+            else if (on.TryGetValue("toggleOff", out object toggleOff))
+            {
+                trigger.type = FlowTrigger.TriggerType.ToggleOff;
+                CategoryNameId.Parse(toggleOff.ToString(), out trigger.category, out trigger.name);
+            }
+            else if (on.TryGetValue("viewShown", out object viewShown))
+            {
+                trigger.type = FlowTrigger.TriggerType.ViewShown;
+                CategoryNameId.Parse(viewShown.ToString(), out trigger.category, out trigger.name);
+            }
+            else if (on.TryGetValue("viewHidden", out object viewHidden))
+            {
+                trigger.type = FlowTrigger.TriggerType.ViewHidden;
+                CategoryNameId.Parse(viewHidden.ToString(), out trigger.category, out trigger.name);
+            }
+            else if (on.ContainsKey("back"))
+            {
+                trigger.type = FlowTrigger.TriggerType.Back;
+            }
+            else if (on.TryGetValue("timer", out object timer) && timer is double seconds)
+            {
+                trigger.type = FlowTrigger.TriggerType.Timer;
+                trigger.timerDuration = (float)seconds;
+            }
+            return trigger;
+        }
+
+        public Dictionary<string, object> ToJsonObject()
+        {
+            var result = new Dictionary<string, object> { ["to"] = to };
+            if (!allowsBack) result["allowsBack"] = false;
+            Dictionary<string, object> on = TriggerToJson(trigger);
+            if (on != null) result["on"] = on;
+            return result;
+        }
+
+        public static Dictionary<string, object> TriggerToJson(FlowTrigger trigger)
+        {
+            if (trigger == null) return null;
+            switch (trigger.type)
+            {
+                case FlowTrigger.TriggerType.ButtonClick:
+                    return new Dictionary<string, object> { ["button"] = $"{trigger.category}/{trigger.name}" };
+                case FlowTrigger.TriggerType.Signal:
+                    return new Dictionary<string, object>
+                    {
+                        ["signal"] = new Dictionary<string, object> { ["category"] = trigger.category, ["name"] = trigger.name }
+                    };
+                case FlowTrigger.TriggerType.ToggleOn:
+                    return new Dictionary<string, object> { ["toggleOn"] = $"{trigger.category}/{trigger.name}" };
+                case FlowTrigger.TriggerType.ToggleOff:
+                    return new Dictionary<string, object> { ["toggleOff"] = $"{trigger.category}/{trigger.name}" };
+                case FlowTrigger.TriggerType.ViewShown:
+                    return new Dictionary<string, object> { ["viewShown"] = $"{trigger.category}/{trigger.name}" };
+                case FlowTrigger.TriggerType.ViewHidden:
+                    return new Dictionary<string, object> { ["viewHidden"] = $"{trigger.category}/{trigger.name}" };
+                case FlowTrigger.TriggerType.Back:
+                    return new Dictionary<string, object> { ["back"] = true };
+                case FlowTrigger.TriggerType.Timer:
+                    return new Dictionary<string, object> { ["timer"] = (double)trigger.timerDuration };
+                default:
+                    return null;
+            }
+        }
+    }
+
+    [Serializable]
+    public class FlowNodeSpec
+    {
+        public string name;
+        /// <summary> Views shown by this node ("Category/Name"). Spec accepts a single "view" or a
+        /// "views" array; canonical export writes "view" for one, "views" for several. </summary>
+        public List<string> views = new List<string>();
+        /// <summary> Views hidden when this node activates ("hide" array). </summary>
+        public List<string> hide = new List<string>();
+        public List<FlowEdgeSpec> next = new List<FlowEdgeSpec>();
+
+        /// <summary> Back-compat accessor: the single/first shown view. </summary>
+        public string view
+        {
+            get => views.Count > 0 ? views[0] : null;
+            set
+            {
+                views.Clear();
+                if (!string.IsNullOrEmpty(value)) views.Add(value);
+            }
+        }
+
+        public static FlowNodeSpec Parse(Dictionary<string, object> obj)
+        {
+            var spec = new FlowNodeSpec
+            {
+                name = JsonReader.GetString(obj, "name")
+            };
+            if (string.IsNullOrWhiteSpace(spec.name))
+                throw new FormatException("Flow node is missing required field 'name'");
+
+            string singleView = JsonReader.GetString(obj, "view");
+            if (!string.IsNullOrEmpty(singleView)) spec.views.Add(singleView);
+            List<object> viewArray = JsonReader.GetArray(obj, "views");
+            if (viewArray != null)
+                foreach (object item in viewArray)
+                    if (item != null) spec.views.Add(item.ToString());
+
+            List<object> hideArray = JsonReader.GetArray(obj, "hide");
+            if (hideArray != null)
+                foreach (object item in hideArray)
+                    if (item != null) spec.hide.Add(item.ToString());
+
+            List<object> nextArray = JsonReader.GetArray(obj, "next");
+            if (nextArray != null)
+                foreach (object item in nextArray)
+                    spec.next.Add(FlowEdgeSpec.Parse(JsonReader.AsObject(item, "flow edge")));
+            return spec;
+        }
+
+        public Dictionary<string, object> ToJsonObject()
+        {
+            var result = new Dictionary<string, object> { ["name"] = name };
+            if (views.Count == 1) result["view"] = views[0];
+            else if (views.Count > 1)
+            {
+                var array = new List<object>();
+                foreach (string entry in views) array.Add(entry);
+                result["views"] = array;
+            }
+            if (hide.Count > 0)
+            {
+                var array = new List<object>();
+                foreach (string entry in hide) array.Add(entry);
+                result["hide"] = array;
+            }
+            if (next.Count > 0)
+            {
+                var array = new List<object>();
+                foreach (FlowEdgeSpec edge in next) array.Add(edge.ToJsonObject());
+                result["next"] = array;
+            }
+            return result;
+        }
+    }
+
+    [Serializable]
+    public class FlowSpec
+    {
+        public string name = "UI";
+        public string start;
+        public List<FlowNodeSpec> nodes = new List<FlowNodeSpec>();
+
+        public static FlowSpec Parse(Dictionary<string, object> obj)
+        {
+            var spec = new FlowSpec
+            {
+                name = JsonReader.GetString(obj, "name", "UI"),
+                start = JsonReader.GetString(obj, "start")
+            };
+            List<object> nodeArray = JsonReader.GetArray(obj, "nodes");
+            if (nodeArray != null)
+                foreach (object item in nodeArray)
+                    spec.nodes.Add(FlowNodeSpec.Parse(JsonReader.AsObject(item, "flow node")));
+            return spec;
+        }
+
+        public Dictionary<string, object> ToJsonObject()
+        {
+            var result = new Dictionary<string, object> { ["name"] = name };
+            if (!string.IsNullOrEmpty(start)) result["start"] = start;
+            if (nodes.Count > 0)
+            {
+                var array = new List<object>();
+                foreach (FlowNodeSpec node in nodes) array.Add(node.ToJsonObject());
+                result["nodes"] = array;
+            }
+            return result;
+        }
+    }
+
+    /// <summary>
+    /// One control in a settings/cheats catalog. Keyed by kind (toggle/switch/slider/stepper/dropdown/
+    /// button/label/rebind) like <see cref="ElementSpec"/>; maps 1:1 to a runtime MenuItemDefinition.
+    /// </summary>
+    [Serializable]
+    public class MenuItemSpec
+    {
+        public static readonly string[] Kinds =
+        {
+            "label", "button", "toggle", "switch", "slider", "stepper", "dropdown", "rebind"
+        };
+
+        public string kind;
+        public string category;
+        public string name;
+        public string group;
+        public string label;
+        public string tooltip;
+        public bool persisted = true;
+        public float? min;
+        public float? max;
+        public float? step;
+        public bool wholeNumbers;
+        public string value;          // stringified default (canonical type emitted per kind)
+        public List<string> options;  // dropdown
+        public bool emitOnDrag = true;    // slider
+        public bool emitOnRelease = true; // slider
+        public string inputAction;    // rebind: "ActionMap/Action"
+        public int bindingIndex;      // rebind
+
+        public string id => $"{category}/{name}";
+
+        public static MenuItemSpec Parse(Dictionary<string, object> obj)
+        {
+            foreach (string kind in Kinds)
+            {
+                Dictionary<string, object> body = JsonReader.GetObject(obj, kind);
+                if (body == null) continue;
+                var spec = new MenuItemSpec
+                {
+                    kind = kind,
+                    group = JsonReader.GetString(body, "group"),
+                    label = JsonReader.GetString(body, "label"),
+                    tooltip = JsonReader.GetString(body, "tooltip"),
+                    persisted = JsonReader.GetBool(body, "persisted", true),
+                    wholeNumbers = JsonReader.GetBool(body, "wholeNumbers"),
+                    inputAction = JsonReader.GetString(body, "action"),
+                    emitOnDrag = JsonReader.GetBool(body, "emitOnDrag", true),
+                    emitOnRelease = JsonReader.GetBool(body, "emitOnRelease", true)
+                };
+                string idValue = JsonReader.GetString(body, "id");
+                if (string.IsNullOrWhiteSpace(idValue))
+                    throw new FormatException($"Menu item ('{kind}') is missing required field 'id' (\"Category/Name\")");
+                CategoryNameId.Parse(idValue, out spec.category, out spec.name);
+
+                if (body.TryGetValue("min", out object min) && min is double dmin) spec.min = (float)dmin;
+                if (body.TryGetValue("max", out object max) && max is double dmax) spec.max = (float)dmax;
+                if (body.TryGetValue("step", out object step) && step is double dstep) spec.step = (float)dstep;
+                if (body.TryGetValue("bindingIndex", out object bi) && bi is double dbi) spec.bindingIndex = (int)dbi;
+                spec.value = ValueToString(body.TryGetValue("value", out object v) ? v : null);
+
+                List<object> optionArray = JsonReader.GetArray(body, "options");
+                if (optionArray != null)
+                {
+                    spec.options = new List<string>();
+                    foreach (object option in optionArray)
+                        if (option != null) spec.options.Add(option.ToString());
+                }
+                return spec;
+            }
+            throw new FormatException($"Menu item must contain one of: {string.Join(", ", Kinds)}");
+        }
+
+        public Dictionary<string, object> ToJsonObject()
+        {
+            var body = new Dictionary<string, object> { ["id"] = id };
+            if (!string.IsNullOrEmpty(group)) body["group"] = group;
+            if (!string.IsNullOrEmpty(label)) body["label"] = label;
+            if (!string.IsNullOrEmpty(tooltip)) body["tooltip"] = tooltip;
+            if (!persisted) body["persisted"] = false;
+            if (min.HasValue) body["min"] = (double)min.Value;
+            if (max.HasValue) body["max"] = (double)max.Value;
+            if (step.HasValue) body["step"] = (double)step.Value;
+            if (wholeNumbers) body["wholeNumbers"] = true;
+            object typed = ValueToTyped(kind, value);
+            if (typed != null) body["value"] = typed;
+            if (options != null && options.Count > 0)
+            {
+                var array = new List<object>();
+                foreach (string option in options) array.Add(option);
+                body["options"] = array;
+            }
+            if (kind == "slider")
+            {
+                if (!emitOnDrag) body["emitOnDrag"] = false;
+                if (!emitOnRelease) body["emitOnRelease"] = false;
+            }
+            if (kind == "rebind")
+            {
+                if (!string.IsNullOrEmpty(inputAction)) body["action"] = inputAction;
+                if (bindingIndex != 0) body["bindingIndex"] = (double)bindingIndex;
+            }
+            return new Dictionary<string, object> { [kind] = body };
+        }
+
+        private static string ValueToString(object value)
+        {
+            if (value == null) return null;
+            if (value is bool b) return b ? "True" : "False";
+            if (value is double d) return d.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            return value.ToString();
+        }
+
+        /// <summary> The canonical JSON value for a stored string, per kind (so export round-trips). </summary>
+        private static object ValueToTyped(string kind, string value)
+        {
+            if (string.IsNullOrEmpty(value)) return null;
+            switch (kind)
+            {
+                case "toggle":
+                case "switch":
+                    return string.Equals(value, "True", StringComparison.OrdinalIgnoreCase) || value == "1";
+                case "slider":
+                case "stepper":
+                    return double.TryParse(value, System.Globalization.NumberStyles.Float,
+                        System.Globalization.CultureInfo.InvariantCulture, out double d) ? (object)d : null;
+                case "dropdown":
+                    return int.TryParse(value, out int i) ? (object)(double)i : null;
+                default:
+                    return null;
+            }
+        }
+    }
+
+    /// <summary>
+    /// A settings or cheats catalog: id, optional groups/tabs and a flat list of controls. Generated
+    /// into a SettingsCatalog / CheatCatalog asset; the "settings"/"cheats" view element references it.
+    /// </summary>
+    [Serializable]
+    public class MenuCatalogSpec
+    {
+        public const string SettingsKind = "settings";
+        public const string CheatKind = "cheats";
+
+        public string kind = SettingsKind;
+        public string category;
+        public string menuName;
+        public List<string> groups = new List<string>();
+        public string start;
+        public bool favourites = true;       // cheats only
+        public string inputActionAsset;      // optional asset path for rebind rows
+        public List<MenuItemSpec> items = new List<MenuItemSpec>();
+
+        public string id => $"{category}/{menuName}";
+
+        public static MenuCatalogSpec Parse(Dictionary<string, object> obj, string kind)
+        {
+            var spec = new MenuCatalogSpec { kind = kind };
+            string idValue = JsonReader.GetString(obj, "id");
+            if (string.IsNullOrWhiteSpace(idValue))
+                throw new FormatException("Menu catalog is missing required field 'id' (\"Category/Name\")");
+            CategoryNameId.Parse(idValue, out spec.category, out spec.menuName);
+            spec.start = JsonReader.GetString(obj, "start");
+            spec.favourites = JsonReader.GetBool(obj, "favourites", true);
+            spec.inputActionAsset = JsonReader.GetString(obj, "inputActionAsset");
+
+            List<object> groupArray = JsonReader.GetArray(obj, "groups");
+            if (groupArray != null)
+                foreach (object g in groupArray)
+                    if (g != null) spec.groups.Add(g.ToString());
+
+            List<object> itemArray = JsonReader.GetArray(obj, "items");
+            if (itemArray != null)
+                foreach (object item in itemArray)
+                    spec.items.Add(MenuItemSpec.Parse(JsonReader.AsObject(item, "menu item")));
+            return spec;
+        }
+
+        public Dictionary<string, object> ToJsonObject()
+        {
+            var result = new Dictionary<string, object> { ["id"] = id };
+            if (groups.Count > 0)
+            {
+                var array = new List<object>();
+                foreach (string g in groups) array.Add(g);
+                result["groups"] = array;
+            }
+            if (!string.IsNullOrEmpty(start)) result["start"] = start;
+            if (kind == CheatKind && !favourites) result["favourites"] = false;
+            if (!string.IsNullOrEmpty(inputActionAsset)) result["inputActionAsset"] = inputActionAsset;
+            if (items.Count > 0)
+            {
+                var array = new List<object>();
+                foreach (MenuItemSpec item in items) array.Add(item.ToJsonObject());
+                result["items"] = array;
+            }
+            return result;
+        }
+    }
+}

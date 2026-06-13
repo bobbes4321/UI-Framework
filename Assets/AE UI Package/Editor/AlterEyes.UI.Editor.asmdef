@@ -1,0 +1,23 @@
+{
+    "name": "AlterEyes.UI.Editor",
+    "rootNamespace": "AlterEyes.UI.Editor",
+    "references": [
+        "AlterEyes.UI",
+        "AlterEyes.EditorUI",
+        "UnityEngine.UI",
+        "UnityEditor.UI",
+        "Unity.TextMeshPro",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

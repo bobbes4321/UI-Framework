@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c3e95462891bb2458f2ac1e2b92628a, type: 3}
+  m_Name: StreamIdDatabase
+  m_EditorClassIdentifier: AlterEyes.UI::AlterEyes.UI.StreamIdDatabase
+  categories:
+  - category: App
+    names:
+    - OpenDiscord
+    - Quit
+  - category: Dialog
+    names:
+    - Cancel
+    - Confirm
+  - category: Game
+    names:
+    - Attack
+    - Block
+    - Dash
+    - Hint
+    - Pause
+  - category: Gameplay
+    names:
+    - StartPainting
+  - category: Inv
+    names:
+    - Items
+    - Pick
+  - category: Palette
+    names:
+    - Next
+    - Prev
+  - category: Shop
+    names:
+    - Buy
+    - Deals
+  - category: UI
+    names:
+    - CloseSettings
+    - CloseShop
+  - category: X
+    names:
+    - Y

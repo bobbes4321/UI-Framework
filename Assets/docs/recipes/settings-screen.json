@@ -1,0 +1,43 @@
+{
+  "_recipe": "Settings screen — a tabbed panel layout (the bread-and-butter use case). Each tab controls a sibling panel; the selected tab's panel shows, the rest hide. Copy, rename the ids, swap the controls.",
+  "theme": { "bundle": "CleanSlate" },
+  "presets": [
+    { "name": "FadeIn", "type": "Show", "duration": 0.2, "ease": "OutQuad", "fade": { "from": 0, "to": 1 } },
+    { "name": "FadeOut", "type": "Hide", "duration": 0.2, "ease": "InQuad", "fade": { "from": 1, "to": 0 } }
+  ],
+  "views": [
+    { "id": "Settings/Root", "showAnimation": "FadeIn", "hideAnimation": "FadeOut", "background": "Background",
+      "elements": [
+        { "safearea": { "children": [
+          { "vstack": { "anchor": "Stretch", "padding": 48, "spacing": 16, "children": [
+            { "text": { "label": "Settings", "color": "TextStrong", "textStyle": "Title" } },
+            { "tabbar": { "id": "SettingsTabs/Bar", "children": [
+              { "tab": { "id": "SettingsTabs/Audio", "label": "Audio", "icon": "volume-2", "controls": "SettingsPanels/Audio" } },
+              { "tab": { "id": "SettingsTabs/Display", "label": "Display", "icon": "maximize", "controls": "SettingsPanels/Display" } },
+              { "tab": { "id": "SettingsTabs/Controls", "label": "Controls", "icon": "gamepad-2", "controls": "SettingsPanels/Controls" } }
+            ] } },
+            { "panel": { "id": "SettingsPanels/Audio", "spacing": 16, "children": [
+              { "text": { "label": "Master Volume", "color": "TextDefault", "textStyle": "Heading" } },
+              { "slider": { "id": "Settings/MasterVolume", "min": 0, "max": 100, "value": 80 } },
+              { "toggle": { "id": "Settings/Music", "label": "Music" } },
+              { "toggle": { "id": "Settings/Sfx", "label": "Sound Effects" } }
+            ] } },
+            { "panel": { "id": "SettingsPanels/Display", "spacing": 16, "children": [
+              { "toggle": { "id": "Settings/Fullscreen", "label": "Fullscreen" } },
+              { "toggle": { "id": "Settings/Vsync", "label": "V-Sync" } },
+              { "text": { "label": "Quality", "color": "TextDefault", "textStyle": "Heading" } },
+              { "stepper": { "id": "Settings/Quality", "min": 1, "max": 3, "value": 2, "step": 1 } }
+            ] } },
+            { "panel": { "id": "SettingsPanels/Controls", "spacing": 16, "children": [
+              { "toggle": { "id": "Settings/InvertY", "label": "Invert Look" } },
+              { "text": { "label": "Sensitivity", "color": "TextDefault", "textStyle": "Heading" } },
+              { "slider": { "id": "Settings/Sensitivity", "min": 1, "max": 10, "value": 5 } }
+            ] } },
+            { "spacer": {} },
+            { "button": { "id": "Settings/Back", "label": "BACK", "icon": "arrow-left", "variant": "secondary",
+              "onClick": { "signal": "UI/CloseSettings" } } }
+          ] } }
+        ] } }
+      ] }
+  ]
+}

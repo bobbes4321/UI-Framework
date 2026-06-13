@@ -1,0 +1,105 @@
+{
+  "theme": { "bundle": "CleanSlate" },
+
+  "presets": [
+    { "name": "MenuIn",  "type": "Show", "duration": 0.25, "ease": "OutCubic",
+      "fade": { "from": 0, "to": 1 }, "move": { "from": "Bottom" } },
+    { "name": "MenuOut", "type": "Hide", "duration": 0.2, "ease": "InCubic",
+      "fade": { "from": 1, "to": 0 } }
+  ],
+
+  "settings": [
+    {
+      "id": "Settings/Game",
+      "groups": ["Audio", "Video", "Controls"],
+      "start": "Audio",
+      "items": [
+        { "slider":   { "id": "Audio/Master", "group": "Audio", "label": "Master Volume", "min": 0, "max": 1, "value": 0.8 } },
+        { "slider":   { "id": "Audio/Music",  "group": "Audio", "label": "Music Volume",  "min": 0, "max": 1, "value": 0.6 } },
+        { "switch":   { "id": "Audio/Mute",   "group": "Audio", "label": "Mute All", "value": false } },
+
+        { "dropdown": { "id": "Video/Quality", "group": "Video", "label": "Quality", "options": ["Low", "Medium", "High", "Ultra"], "value": 2 } },
+        { "toggle":   { "id": "Video/VSync",   "group": "Video", "label": "VSync", "value": true } },
+        { "toggle":   { "id": "Video/Fullscreen", "group": "Video", "label": "Fullscreen", "value": true } },
+
+        { "rebind":   { "id": "Controls/Jump", "group": "Controls", "label": "Jump", "action": "Gameplay/Jump", "bindingIndex": 0 } },
+        { "rebind":   { "id": "Controls/Fire", "group": "Controls", "label": "Fire", "action": "Gameplay/Fire", "bindingIndex": 0 } },
+        { "button":   { "id": "Controls/ResetDefaults", "group": "Controls", "label": "Reset to Defaults" } }
+      ]
+    }
+  ],
+
+  "cheats": [
+    {
+      "id": "Cheats/Main",
+      "groups": ["Player", "World"],
+      "start": "Player",
+      "favourites": true,
+      "items": [
+        { "button":  { "id": "Player/GiveGold", "group": "Player", "label": "Give 100 Gold" } },
+        { "switch":  { "id": "Player/God", "group": "Player", "label": "God Mode", "value": false } },
+        { "stepper": { "id": "Player/Lives", "group": "Player", "label": "Lives", "min": 1, "max": 9, "step": 1, "wholeNumbers": true, "value": 3 } },
+
+        { "slider":  { "id": "World/TimeScale", "group": "World", "label": "Time Scale", "min": 0, "max": 4, "value": 1 } },
+        { "button":  { "id": "World/SpawnEnemy", "group": "World", "label": "Spawn Enemy" } }
+      ]
+    }
+  ],
+
+  "views": [
+    {
+      "id": "Menu/Main",
+      "showAnimation": "MenuIn",
+      "hideAnimation": "MenuOut",
+      "background": "Background",
+      "elements": [
+        { "text":   { "label": "AlterEyes UI Demo", "color": "TextStrong", "textStyle": "Title", "anchor": "Top", "position": [0, -80] } },
+        { "vstack": { "anchor": "Center", "size": [360, 220], "spacing": 16, "padding": 16, "children": [
+          { "button": { "id": "Menu/OpenSettings", "label": "Settings", "icon": "settings", "onClick": { "showView": "Menu/Settings", "hideView": "Menu/Main" } } },
+          { "button": { "id": "Menu/OpenCheats",   "label": "Cheats", "icon": "wand-sparkles", "variant": "secondary", "onClick": { "showView": "Menu/Cheats", "hideView": "Menu/Main" } } }
+        ] } }
+      ]
+    },
+    {
+      "id": "Menu/Settings",
+      "showAnimation": "MenuIn",
+      "hideAnimation": "MenuOut",
+      "background": "Background",
+      "elements": [
+        { "text":     { "label": "Settings", "color": "TextStrong", "textStyle": "Heading", "anchor": "Top", "position": [0, -48] } },
+        { "settings": { "catalog": "Settings/Game", "anchor": "Center", "size": [560, 520] } },
+        { "button":   { "id": "Menu/SettingsBack", "label": "Back", "variant": "ghost", "anchor": "BottomLeft", "position": [120, 60],
+                        "onClick": { "showView": "Menu/Main", "hideView": "Menu/Settings" } } }
+      ]
+    },
+    {
+      "id": "Menu/Cheats",
+      "showAnimation": "MenuIn",
+      "hideAnimation": "MenuOut",
+      "background": "Background",
+      "elements": [
+        { "text":   { "label": "Cheats", "color": "TextStrong", "textStyle": "Heading", "anchor": "Top", "position": [0, -48] } },
+        { "cheats": { "catalog": "Cheats/Main", "anchor": "Center", "size": [560, 520] } },
+        { "button": { "id": "Menu/CheatsBack", "label": "Back", "variant": "ghost", "anchor": "BottomLeft", "position": [120, 60],
+                      "onClick": { "showView": "Menu/Main", "hideView": "Menu/Cheats" } } }
+      ]
+    }
+  ],
+
+  "flow": {
+    "name": "UI",
+    "start": "MainMenu",
+    "nodes": [
+      { "name": "MainMenu", "view": "Menu/Main", "next": [
+        { "on": { "button": "Menu/OpenSettings" }, "to": "Settings" },
+        { "on": { "button": "Menu/OpenCheats" }, "to": "Cheats" }
+      ] },
+      { "name": "Settings", "views": ["Menu/Settings"], "hide": ["Menu/Main"], "next": [
+        { "on": { "button": "Menu/SettingsBack" }, "to": "MainMenu" }
+      ] },
+      { "name": "Cheats", "views": ["Menu/Cheats"], "hide": ["Menu/Main"], "next": [
+        { "on": { "button": "Menu/CheatsBack" }, "to": "MainMenu" }
+      ] }
+    ]
+  }
+}

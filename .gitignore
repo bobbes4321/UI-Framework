@@ -1,0 +1,81 @@
+# ==============================================================================
+# Unity .gitignore
+# ==============================================================================
+
+# Generated folders ----------------------------------------------------------
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# Asset meta data should only be ignored when the corresponding asset is also ignored
+!/[Aa]ssets/**/*.meta
+
+# Unity3D generated meta files
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# Unity3D generated file on crash reports
+sysinfo.txt
+
+# Profiler / test output ------------------------------------------------------
+/[Pp]rofilerCaptures/
+/[Tt]estResults/
+/aeui-screenshots/
+
+# Reference-only material -----------------------------------------------------
+# Doozy 4 source kept on disk for porting (Unity-ignored `~` folder); not part
+# of the shipped package, so it stays out of the repo.
+/Assets/References/
+/Assets/References.meta
+
+# IDE / OS / Build solution files --------------------------------------------
+# Visual Studio / Rider auto-generate these from the asmdefs.
+ExportedObj/
+.consulo/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Unity3D generated debug bundle / app packages
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# Crashlytics generated file
+crashlytics-build.properties
+
+# JetBrains Rider --------------------------------------------------------------
+.idea/
+*.DotSettings.user
+
+# Visual Studio Code -----------------------------------------------------------
+.vscode/
+
+# OS files ---------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini

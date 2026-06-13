@@ -1,0 +1,33 @@
+{
+  "_recipe": "Shop / store grid — a currency header plus a grid of item cards. Each whole card is a button wired to a buy signal carrying nothing here (real games send a payload from code). Swap the grid children for your catalog, or bind them once data-bound lists land.",
+  "theme": { "bundle": "NeonArcade" },
+  "presets": [
+    { "name": "FadeIn", "type": "Show", "duration": 0.2, "ease": "OutQuad", "fade": { "from": 0, "to": 1 } },
+    { "name": "FadeOut", "type": "Hide", "duration": 0.2, "ease": "InQuad", "fade": { "from": 1, "to": 0 } }
+  ],
+  "views": [
+    { "id": "Shop/Root", "showAnimation": "FadeIn", "hideAnimation": "FadeOut", "background": "Background",
+      "elements": [
+        { "safearea": { "children": [
+          { "vstack": { "anchor": "Stretch", "padding": 48, "spacing": 24, "children": [
+            { "hstack": { "spacing": 12, "children": [
+              { "text": { "label": "STORE", "color": "TextStrong", "textStyle": "Display" } },
+              { "spacer": {} },
+              { "icon": { "name": "coins", "color": "Primary", "size": 36 } },
+              { "counter": { "value": 2500, "label": "0", "textStyle": "Title", "color": "TextStrong" } }
+            ] } },
+            { "grid": { "columns": 3, "cellSize": [220, 260], "spacing": 16, "cascade": true, "children": [
+              { "button": { "id": "Shop/Sword", "label": "Blade", "icon": "sword", "onClick": { "signal": "Shop/Buy" } } },
+              { "button": { "id": "Shop/Shield", "label": "Aegis", "icon": "shield", "onClick": { "signal": "Shop/Buy" } } },
+              { "button": { "id": "Shop/Potion", "label": "Elixir", "icon": "flame", "onClick": { "signal": "Shop/Buy" } } },
+              { "button": { "id": "Shop/Gem", "label": "Shard", "icon": "gem", "variant": "secondary", "onClick": { "signal": "Shop/Buy" } } },
+              { "button": { "id": "Shop/Crown", "label": "Crown", "icon": "crown", "variant": "secondary", "onClick": { "signal": "Shop/Buy" } } },
+              { "button": { "id": "Shop/Key", "label": "Key", "icon": "key", "variant": "secondary", "onClick": { "signal": "Shop/Buy" } } }
+            ] } },
+            { "spacer": {} },
+            { "button": { "id": "Shop/Close", "label": "CLOSE", "icon": "x", "variant": "ghost", "onClick": { "signal": "UI/CloseShop" } } }
+          ] } }
+        ] } }
+      ] }
+  ]
+}

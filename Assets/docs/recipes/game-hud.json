@@ -1,0 +1,25 @@
+{
+  "_recipe": "Game HUD — free-anchored overlay elements inside a safearea: health bar (top-left), score (top-right), an ability row (bottom), and a radial cooldown. No background so it overlays gameplay. Drive the progress/counter values from code at runtime.",
+  "theme": { "bundle": "NeonArcade" },
+  "presets": [
+    { "name": "FadeIn", "type": "Show", "duration": 0.2, "ease": "OutQuad", "fade": { "from": 0, "to": 1 } },
+    { "name": "FadeOut", "type": "Hide", "duration": 0.2, "ease": "InQuad", "fade": { "from": 1, "to": 0 } }
+  ],
+  "views": [
+    { "id": "HUD/Root", "showAnimation": "FadeIn", "hideAnimation": "FadeOut",
+      "elements": [
+        { "safearea": { "children": [
+          { "progress": { "anchor": "TopLeft", "size": [360, 18], "position": [40, -48], "min": 0, "max": 100, "value": 72 } },
+          { "text": { "anchor": "TopLeft", "size": [200, 36], "position": [40, -70], "label": "HEALTH", "color": "TextMuted", "textStyle": "Caption", "align": "left" } },
+          { "counter": { "anchor": "TopRight", "size": [320, 64], "position": [-40, -40], "value": 13400, "label": "000000", "textStyle": "Title", "color": "TextStrong" } },
+          { "progress": { "style": "radial", "anchor": "BottomRight", "size": [104, 104], "position": [-40, 160], "min": 0, "max": 100, "value": 65 } },
+          { "hstack": { "anchor": "Bottom", "size": [420, 80], "position": [0, 56], "spacing": 16, "children": [
+            { "button": { "id": "HUD/Attack", "icon": "sword", "size": "lg", "onClick": { "signal": "Game/Attack" } } },
+            { "button": { "id": "HUD/Block", "icon": "shield", "size": "lg", "variant": "secondary", "onClick": { "signal": "Game/Block" } } },
+            { "button": { "id": "HUD/Dash", "icon": "zap", "size": "lg", "variant": "secondary", "onClick": { "signal": "Game/Dash" } } }
+          ] } },
+          { "button": { "id": "HUD/Pause", "icon": "pause", "anchor": "TopRight", "position": [-40, -120], "onClick": { "signal": "Game/Pause" } } }
+        ] } }
+      ] }
+  ]
+}

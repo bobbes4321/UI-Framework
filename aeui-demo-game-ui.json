@@ -1,0 +1,429 @@
+{
+  "presets": [
+    { "name": "SlideInLeft", "type": "Show", "duration": 0.35, "ease": "OutCubic",
+      "move": { "from": "Left" }, "fade": { "from": 0, "to": 1 } },
+    { "name": "SlideOutLeft", "type": "Hide", "duration": 0.25, "ease": "InCubic",
+      "move": { "to": "Left" }, "fade": { "from": 1, "to": 0 } },
+    { "name": "SlideUpIn", "type": "Show", "duration": 0.4, "ease": "OutCubic",
+      "move": { "from": "Bottom" }, "fade": { "from": 0, "to": 1 } },
+    { "name": "SlideDownOut", "type": "Hide", "duration": 0.3, "ease": "InCubic",
+      "move": { "to": "Bottom" }, "fade": { "from": 1, "to": 0 } },
+    { "name": "FadeIn", "type": "Show", "duration": 0.2, "ease": "OutQuad", "fade": { "from": 0, "to": 1 } },
+    { "name": "FadeOut", "type": "Hide", "duration": 0.2, "ease": "InQuad", "fade": { "from": 1, "to": 0 } },
+    { "name": "PopIn", "type": "Show", "duration": 0.35, "ease": "OutBack",
+      "scale": { "from": 0.85, "to": 1 }, "fade": { "from": 0, "to": 1 } },
+    { "name": "PopOut", "type": "Hide", "duration": 0.2, "ease": "InQuad",
+      "scale": { "from": 1, "to": 0.9 }, "fade": { "from": 1, "to": 0 } }
+  ],
+  "settings": [
+    { "id": "Menu/GameOptions",
+      "groups": ["Gameplay", "Graphics", "Audio", "Controls"],
+      "inputActionAsset": "Assets/InputSystem_Actions.inputactions",
+      "items": [
+        { "dropdown": { "id": "Gameplay/Difficulty", "group": "Gameplay", "label": "Difficulty",
+          "options": ["Casual", "Normal", "Hard", "Nightmare"], "value": 1 } },
+        { "toggle": { "id": "Gameplay/ScreenShake", "group": "Gameplay", "label": "Screen Shake",
+          "tooltip": "Camera impulse on impacts", "value": true } },
+        { "toggle": { "id": "Gameplay/Subtitles", "group": "Gameplay", "label": "Subtitles", "value": true } },
+        { "slider": { "id": "Gameplay/FieldOfView", "group": "Gameplay", "label": "Field of View",
+          "min": 60, "max": 120, "value": 90, "wholeNumbers": true } },
+        { "dropdown": { "id": "Graphics/Quality", "group": "Graphics", "label": "Quality Preset",
+          "options": ["Low", "Medium", "High", "Ultra"], "value": 2 } },
+        { "switch": { "id": "Graphics/VSync", "group": "Graphics", "label": "V-Sync", "value": true } },
+        { "slider": { "id": "Graphics/RenderScale", "group": "Graphics", "label": "Render Scale",
+          "min": 0.5, "max": 2, "value": 1 } },
+        { "toggle": { "id": "Graphics/MotionBlur", "group": "Graphics", "label": "Motion Blur", "value": false } },
+        { "slider": { "id": "Audio/Master", "group": "Audio", "label": "Master Volume",
+          "min": 0, "max": 1, "value": 0.8 } },
+        { "slider": { "id": "Audio/Music", "group": "Audio", "label": "Music",
+          "min": 0, "max": 1, "value": 0.6 } },
+        { "slider": { "id": "Audio/Effects", "group": "Audio", "label": "Effects",
+          "min": 0, "max": 1, "value": 1 } },
+        { "toggle": { "id": "Audio/MuteInBackground", "group": "Audio", "label": "Mute in Background", "value": true } },
+        { "slider": { "id": "Controls/Sensitivity", "group": "Controls", "label": "Look Sensitivity",
+          "min": 1, "max": 10, "value": 5, "wholeNumbers": true } },
+        { "toggle": { "id": "Controls/InvertY", "group": "Controls", "label": "Invert Y Axis", "value": false } },
+        { "rebind": { "id": "Controls/Jump", "group": "Controls", "label": "Jump", "action": "Player/Jump" } },
+        { "rebind": { "id": "Controls/Attack", "group": "Controls", "label": "Attack", "action": "Player/Attack" } },
+        { "rebind": { "id": "Controls/Sprint", "group": "Controls", "label": "Sprint", "action": "Player/Sprint" } },
+        { "button": { "id": "Controls/Reset", "group": "Controls", "label": "Reset to Defaults" } }
+      ] }
+  ],
+  "cheats": [
+    { "id": "Debug/Cheats",
+      "groups": ["Player", "Economy", "World"],
+      "items": [
+        { "toggle": { "id": "Player/GodMode", "group": "Player", "label": "God Mode",
+          "tooltip": "Invulnerable to damage", "value": false, "persisted": false } },
+        { "toggle": { "id": "Player/InfiniteBoost", "group": "Player", "label": "Infinite Boost",
+          "value": false, "persisted": false } },
+        { "button": { "id": "Player/HealFull", "group": "Player", "label": "Heal to Full" } },
+        { "stepper": { "id": "Player/XpMultiplier", "group": "Player", "label": "XP Multiplier",
+          "min": 1, "max": 10, "step": 1, "value": 1, "persisted": false } },
+        { "button": { "id": "Economy/Give1k", "group": "Economy", "label": "+1,000 Coins" } },
+        { "button": { "id": "Economy/Give10k", "group": "Economy", "label": "+10,000 Coins" } },
+        { "button": { "id": "Economy/UnlockAll", "group": "Economy", "label": "Unlock All Cars" } },
+        { "slider": { "id": "World/TimeScale", "group": "World", "label": "Time Scale",
+          "min": 0, "max": 3, "value": 1, "persisted": false } },
+        { "dropdown": { "id": "World/Weather", "group": "World", "label": "Weather",
+          "options": ["Clear", "Rain", "Fog", "Storm"], "value": 0, "persisted": false } },
+        { "button": { "id": "World/FinishRace", "group": "World", "label": "Finish Race Instantly" } }
+      ] }
+  ],
+  "views": [
+    { "id": "Menu/Main", "showAnimation": "SlideInLeft", "hideAnimation": "SlideOutLeft", "background": "Background",
+      "elements": [
+        { "safearea": { "children": [
+          { "shape": { "shape": "Ring", "anchor": "TopRight", "size": [360, 360], "position": [-40, -80],
+            "thickness": 3, "background": "Outline" } },
+          { "shape": { "shape": "Ring", "anchor": "TopRight", "size": [200, 200], "position": [-160, -260],
+            "thickness": 12, "gradient": { "from": "Primary", "to": "PrimaryHover", "angle": 45 } } },
+          { "shape": { "shape": "Arc", "anchor": "BottomLeft", "size": [420, 420], "position": [40, 60],
+            "thickness": 6, "arcStart": 300, "arcSweep": 200, "background": "Outline" } },
+          { "shape": { "shape": "Circle", "anchor": "BottomLeft", "size": [16, 16], "position": [140, 320],
+            "background": "Primary" } },
+          { "shape": { "shape": "Circle", "anchor": "TopLeft", "size": [10, 10], "position": [140, -340],
+            "background": "Outline" } },
+          { "vstack": { "anchor": "Stretch", "padding": 64, "spacing": 16, "cascade": true, "children": [
+            { "spacer": {} },
+            { "icon": { "name": "zap", "size": [96, 96], "color": "Primary" } },
+            { "text": { "label": "NEON DRIFT", "color": "TextStrong", "textStyle": "Display" } },
+            { "text": { "label": "arcade racing — every screen built from one JSON spec", "color": "TextMuted", "textStyle": "Body" } },
+            { "spacer": {} },
+            { "button": { "id": "Menu/Play", "label": "PLAY", "icon": "play", "size": "lg" } },
+            { "button": { "id": "Menu/Garage", "label": "GARAGE", "icon": "shopping-bag", "variant": "secondary", "badge": 2 } },
+            { "button": { "id": "Menu/Settings", "label": "SETTINGS", "icon": "settings", "variant": "secondary" } },
+            { "button": { "id": "Menu/Options", "label": "OPTIONS", "icon": "sliders-horizontal", "variant": "secondary" } },
+            { "button": { "id": "Menu/Cheats", "label": "CHEATS", "icon": "wand-sparkles", "variant": "ghost" } },
+            { "button": { "id": "Menu/Quit", "label": "QUIT", "variant": "ghost", "onClick": { "popup": "QuitConfirm" } } },
+            { "spacer": {} },
+            { "text": { "label": "AlterEyes UI · theming · flow graphs · signals · live data", "color": "TextMuted", "textStyle": "Caption" } }
+          ] } }
+        ] } }
+      ] },
+    { "id": "Menu/Settings", "showAnimation": "SlideUpIn", "hideAnimation": "SlideDownOut", "background": "Background",
+      "elements": [
+        { "safearea": { "children": [
+          { "vstack": { "anchor": "Stretch", "padding": 48, "spacing": 16, "children": [
+            { "hstack": { "spacing": 12, "children": [
+              { "icon": { "name": "settings", "size": [40, 40], "color": "TextStrong" } },
+              { "text": { "label": "Settings", "color": "TextStrong", "textStyle": "Title", "size": [300, 56], "align": "left" } }
+            ] } },
+            { "text": { "label": "Hand-laid layout — each tab controls a sibling panel.", "color": "TextMuted", "textStyle": "Caption", "align": "left" } },
+            { "tabbar": { "id": "SettingsTabs/TabBar", "children": [
+              { "tab": { "id": "SettingsTabs/Audio", "label": "Audio", "icon": "volume-2", "controls": "SettingsPanels/Audio" } },
+              { "tab": { "id": "SettingsTabs/Video", "label": "Video", "icon": "video", "controls": "SettingsPanels/Video" } },
+              { "tab": { "id": "SettingsTabs/Game", "label": "Game", "icon": "gamepad-2", "controls": "SettingsPanels/Game" } }
+            ] } },
+            { "panel": { "id": "SettingsPanels/Audio", "spacing": 12, "children": [
+              { "text": { "label": "Master Volume", "color": "TextDefault", "textStyle": "Heading", "align": "left" } },
+              { "slider": { "id": "Settings/Volume", "min": 0, "max": 100, "value": 80 } },
+              { "toggle": { "id": "Settings/Music", "label": "Music", "value": 1 } },
+              { "toggle": { "id": "Settings/Sfx", "label": "Sound Effects", "value": 1 } },
+              { "hstack": { "spacing": 16, "children": [
+                { "text": { "label": "Mute in background", "color": "TextDefault", "textStyle": "Body", "size": [870, 48], "align": "left" } },
+                { "switch": { "id": "Settings/MuteBg", "value": 1 } }
+              ] } }
+            ] } },
+            { "panel": { "id": "SettingsPanels/Video", "spacing": 12, "children": [
+              { "toggle": { "id": "Settings/Fullscreen", "label": "Fullscreen", "value": 1 } },
+              { "hstack": { "spacing": 16, "children": [
+                { "text": { "label": "V-Sync", "color": "TextDefault", "textStyle": "Body", "size": [870, 48], "align": "left" } },
+                { "switch": { "id": "Settings/VSync", "value": 1 } }
+              ] } },
+              { "text": { "label": "Quality", "color": "TextDefault", "textStyle": "Heading", "align": "left" } },
+              { "dropdown": { "id": "Settings/Quality", "options": ["Low", "Medium", "High", "Ultra"], "value": 2 } },
+              { "hstack": { "spacing": 16, "children": [
+                { "text": { "label": "FPS Cap", "color": "TextDefault", "textStyle": "Body", "size": [690, 48], "align": "left" } },
+                { "stepper": { "id": "Settings/FpsCap", "min": 30, "max": 240, "value": 120, "step": 30 } }
+              ] } }
+            ] } },
+            { "panel": { "id": "SettingsPanels/Game", "spacing": 12, "children": [
+              { "hstack": { "spacing": 16, "children": [
+                { "text": { "label": "Difficulty", "color": "TextDefault", "textStyle": "Body", "size": [690, 48], "align": "left" } },
+                { "stepper": { "id": "Settings/Difficulty", "min": 1, "max": 5, "value": 2, "step": 1 } }
+              ] } },
+              { "text": { "label": "Language", "color": "TextDefault", "textStyle": "Heading", "align": "left" } },
+              { "dropdown": { "id": "Settings/Language", "options": ["English", "Nederlands", "Deutsch", "Français", "Español"], "value": 0 } },
+              { "text": { "label": "Player Name", "color": "TextDefault", "textStyle": "Heading", "align": "left" } },
+              { "input": { "label": "Enter player name..." } }
+            ] } },
+            { "spacer": {} },
+            { "button": { "id": "Settings/Back", "label": "BACK", "icon": "arrow-left", "variant": "secondary" } }
+          ] } }
+        ] } }
+      ] },
+    { "id": "Menu/Options", "showAnimation": "SlideUpIn", "hideAnimation": "SlideDownOut", "background": "Background",
+      "elements": [
+        { "safearea": { "children": [
+          { "vstack": { "anchor": "Stretch", "padding": 48, "spacing": 16, "children": [
+            { "hstack": { "spacing": 12, "children": [
+              { "icon": { "name": "sliders-horizontal", "size": [40, 40], "color": "TextStrong" } },
+              { "text": { "label": "Options", "color": "TextStrong", "textStyle": "Title", "size": [300, 56], "align": "left" } }
+            ] } },
+            { "text": { "label": "This whole menu is ONE spec element bound to a settings catalog — groups, defaults, persistence, change signals and input rebinding included.", "color": "TextMuted", "textStyle": "Caption", "align": "left" } },
+            { "settings": { "catalog": "Menu/GameOptions" } },
+            { "spacer": {} },
+            { "button": { "id": "Options/Back", "label": "BACK", "icon": "arrow-left", "variant": "secondary" } }
+          ] } }
+        ] } }
+      ] },
+    { "id": "Menu/Cheats", "showAnimation": "PopIn", "hideAnimation": "PopOut", "background": "Shadow",
+      "elements": [
+        { "safearea": { "children": [
+          { "vstack": { "anchor": "Stretch", "padding": 48, "spacing": 16, "children": [
+            { "spacer": {} },
+            { "vstack": { "style": "Card", "background": "SurfaceElevated", "padding": 32, "spacing": 16, "children": [
+              { "hstack": { "spacing": 12, "children": [
+                { "icon": { "name": "wand-sparkles", "size": [40, 40], "color": "Danger" } },
+                { "text": { "label": "Cheats", "color": "TextStrong", "textStyle": "Title", "size": [300, 56], "align": "left" } }
+              ] } },
+              { "text": { "label": "Data-driven cheat menu — every row emits a signal your game code hooks with one line.", "color": "TextMuted", "textStyle": "Caption", "align": "left" } },
+              { "cheats": { "catalog": "Debug/Cheats" } },
+              { "button": { "id": "Cheats/Close", "label": "CLOSE", "icon": "x", "variant": "secondary" } }
+            ] } },
+            { "spacer": {} }
+          ] } }
+        ] } }
+      ] },
+    { "id": "Game/HUD", "showAnimation": "FadeIn", "hideAnimation": "FadeOut",
+      "elements": [
+        { "safearea": { "children": [
+          { "text": { "anchor": "TopLeft", "size": [200, 32], "position": [48, -48], "label": "HEALTH", "color": "TextMuted", "textStyle": "Caption", "align": "left" } },
+          { "progress": { "anchor": "TopLeft", "size": [340, 16], "position": [48, -88], "min": 0, "max": 100, "value": 72 } },
+          { "text": { "anchor": "TopLeft", "size": [200, 32], "position": [48, -120], "label": "BOOST", "color": "TextMuted", "textStyle": "Caption", "align": "left" } },
+          { "progress": { "anchor": "TopLeft", "size": [340, 16], "position": [48, -160], "min": 0, "max": 100, "value": 45 } },
+          { "counter": { "anchor": "TopRight", "size": [320, 64], "position": [-48, -48], "value": 124500, "label": "#,0", "textStyle": "Title" } },
+          { "text": { "anchor": "TopRight", "size": [320, 28], "position": [-48, -108], "label": "SCORE", "color": "TextMuted", "textStyle": "Caption" } },
+          { "hstack": { "anchor": "TopRight", "size": [320, 48], "position": [-48, -156], "spacing": 8, "align": "right", "children": [
+            { "icon": { "name": "coins", "size": [32, 32], "color": "Primary" } },
+            { "counter": { "value": 2450, "label": "#,0", "textStyle": "Heading", "size": [120, 40] } }
+          ] } },
+          { "button": { "id": "HUD/Pause", "icon": "pause", "anchor": "TopRight", "size": [64, 64], "position": [-48, -232] } },
+          { "progress": { "style": "radial", "anchor": "BottomRight", "size": [96, 96], "position": [-48, 560], "min": 0, "max": 100, "value": 100 } },
+          { "icon": { "name": "zap", "size": [40, 40], "color": "TextStrong", "anchor": "BottomRight", "position": [-76, 588] } },
+          { "progress": { "style": "radial", "anchor": "BottomRight", "size": [96, 96], "position": [-48, 440], "min": 0, "max": 100, "value": 62 } },
+          { "icon": { "name": "shield", "size": [40, 40], "color": "TextStrong", "anchor": "BottomRight", "position": [-76, 468] } },
+          { "progress": { "style": "radial", "anchor": "BottomRight", "size": [96, 96], "position": [-48, 320], "min": 0, "max": 100, "value": 25 } },
+          { "icon": { "name": "rocket", "size": [40, 40], "color": "TextStrong", "anchor": "BottomRight", "position": [-76, 348] } },
+          { "progress": { "style": "radial", "anchor": "Bottom", "size": [220, 220], "position": [0, 330], "min": 0, "max": 100, "value": 78 } },
+          { "counter": { "anchor": "Bottom", "size": [220, 72], "position": [0, 330], "value": 247, "label": "0", "textStyle": "Title" } },
+          { "text": { "anchor": "Bottom", "size": [220, 28], "position": [0, 282], "label": "KM/H", "color": "TextMuted", "textStyle": "Caption" } },
+          { "vstack": { "anchor": "BottomLeft", "size": [380, 220], "position": [48, 200], "style": "Card", "background": "Surface", "padding": 24, "spacing": 8, "children": [
+            { "text": { "label": "OBJECTIVES", "color": "TextMuted", "textStyle": "Caption", "align": "left" } },
+            { "hstack": { "spacing": 8, "children": [
+              { "icon": { "name": "circle-check", "size": [28, 28], "color": "Success" } },
+              { "text": { "label": "Win 3 races", "color": "TextDefault", "textStyle": "Body", "size": [260, 32], "align": "left" } }
+            ] } },
+            { "hstack": { "spacing": 8, "children": [
+              { "icon": { "name": "circle-check", "size": [28, 28], "color": "Success" } },
+              { "text": { "label": "Drift 500 m", "color": "TextDefault", "textStyle": "Body", "size": [260, 32], "align": "left" } }
+            ] } },
+            { "hstack": { "spacing": 8, "children": [
+              { "icon": { "name": "target", "size": [28, 28], "color": "TextMuted" } },
+              { "text": { "label": "Beat 1:40.00", "color": "TextMuted", "textStyle": "Body", "size": [260, 32], "align": "left" } }
+            ] } }
+          ] } },
+          { "button": { "id": "HUD/Finish", "label": "FINISH", "icon": "flag", "variant": "secondary", "anchor": "BottomRight", "size": [220, 64], "position": [-48, 80] } },
+          { "button": { "id": "HUD/Inventory", "label": "INVENTORY", "icon": "backpack", "badge": 3, "anchor": "Bottom", "size": [300, 64], "position": [0, 56] } }
+        ] } }
+      ] },
+    { "id": "Game/Inventory", "showAnimation": "PopIn", "hideAnimation": "PopOut", "background": "Shadow",
+      "elements": [
+        { "safearea": { "children": [
+          { "vstack": { "anchor": "Stretch", "padding": 64, "spacing": 24, "children": [
+            { "hstack": { "spacing": 12, "children": [
+              { "icon": { "name": "backpack", "size": [44, 44], "color": "TextStrong" } },
+              { "text": { "label": "Inventory", "color": "TextStrong", "textStyle": "Title", "size": [400, 56], "align": "left" } }
+            ] } },
+            { "text": { "label": "Pure spec: cards from shapes, icons and rarity gradients.", "color": "TextMuted", "textStyle": "Caption", "align": "left" } },
+            { "grid": { "columns": 4, "cellSize": [210, 200], "spacing": 16, "cascade": true, "align": "center", "children": [
+              { "vstack": { "style": "Card", "background": "Surface", "padding": 16, "spacing": 8, "children": [
+                { "icon": { "name": "sword", "size": [56, 56], "color": "TextDefault" } },
+                { "text": { "label": "Blade", "color": "TextDefault", "textStyle": "Body" } },
+                { "text": { "label": "Common", "color": "TextMuted", "textStyle": "Caption" } },
+                { "shape": { "shape": "Pill", "size": [120, 8], "background": "Outline" } }
+              ] } },
+              { "vstack": { "style": "Card", "background": "Surface", "padding": 16, "spacing": 8, "children": [
+                { "icon": { "name": "shield", "size": [56, 56], "color": "Primary" } },
+                { "text": { "label": "Aegis", "color": "TextDefault", "textStyle": "Body" } },
+                { "text": { "label": "Rare", "color": "TextMuted", "textStyle": "Caption" } },
+                { "shape": { "shape": "Pill", "size": [120, 8], "gradient": { "from": "Primary", "to": "PrimaryHover", "angle": 0 } } }
+              ] } },
+              { "vstack": { "style": "Card", "background": "Surface", "padding": 16, "spacing": 8, "children": [
+                { "icon": { "name": "gem", "size": [56, 56], "color": "Primary" } },
+                { "text": { "label": "Prism", "color": "TextDefault", "textStyle": "Body" } },
+                { "text": { "label": "Epic", "color": "TextMuted", "textStyle": "Caption" } },
+                { "shape": { "shape": "Pill", "size": [120, 8], "gradient": { "from": "PrimaryPressed", "to": "Primary", "angle": 0 } } }
+              ] } },
+              { "vstack": { "style": "Card", "background": "Surface", "padding": 16, "spacing": 8, "children": [
+                { "icon": { "name": "crown", "size": [56, 56], "color": "Success" } },
+                { "text": { "label": "Regalia", "color": "TextDefault", "textStyle": "Body" } },
+                { "text": { "label": "Legendary", "color": "TextMuted", "textStyle": "Caption" } },
+                { "shape": { "shape": "Pill", "size": [120, 8], "gradient": { "from": "Success", "to": "SuccessHover", "angle": 0 } } }
+              ] } },
+              { "vstack": { "style": "Card", "background": "Surface", "padding": 16, "spacing": 8, "children": [
+                { "icon": { "name": "flame", "size": [56, 56], "color": "Danger" } },
+                { "text": { "label": "Ember", "color": "TextDefault", "textStyle": "Body" } },
+                { "text": { "label": "Epic", "color": "TextMuted", "textStyle": "Caption" } },
+                { "shape": { "shape": "Pill", "size": [120, 8], "gradient": { "from": "Danger", "to": "DangerHover", "angle": 0 } } }
+              ] } },
+              { "vstack": { "style": "Card", "background": "Surface", "padding": 16, "spacing": 8, "children": [
+                { "icon": { "name": "snowflake", "size": [56, 56], "color": "Primary" } },
+                { "text": { "label": "Frost", "color": "TextDefault", "textStyle": "Body" } },
+                { "text": { "label": "Rare", "color": "TextMuted", "textStyle": "Caption" } },
+                { "shape": { "shape": "Pill", "size": [120, 8], "gradient": { "from": "Primary", "to": "PrimaryHover", "angle": 0 } } }
+              ] } },
+              { "vstack": { "style": "Card", "background": "Surface", "padding": 16, "spacing": 8, "children": [
+                { "icon": { "name": "key", "size": [56, 56], "color": "TextDefault" } },
+                { "text": { "label": "Skeleton Key", "color": "TextDefault", "textStyle": "Body" } },
+                { "text": { "label": "Common", "color": "TextMuted", "textStyle": "Caption" } },
+                { "shape": { "shape": "Pill", "size": [120, 8], "background": "Outline" } }
+              ] } },
+              { "vstack": { "style": "Card", "background": "Surface", "padding": 16, "spacing": 8, "children": [
+                { "icon": { "name": "heart", "size": [56, 56], "color": "Danger" } },
+                { "text": { "label": "Vitality", "color": "TextDefault", "textStyle": "Body" } },
+                { "text": { "label": "Rare", "color": "TextMuted", "textStyle": "Caption" } },
+                { "shape": { "shape": "Pill", "size": [120, 8], "gradient": { "from": "Primary", "to": "PrimaryHover", "angle": 0 } } }
+              ] } }
+            ] } },
+            { "spacer": {} },
+            { "button": { "id": "Inventory/Close", "label": "CLOSE", "icon": "x", "variant": "secondary" } }
+          ] } }
+        ] } }
+      ] },
+    { "id": "Shop/Store", "showAnimation": "SlideUpIn", "hideAnimation": "SlideDownOut", "background": "Background",
+      "elements": [
+        { "safearea": { "children": [
+          { "vstack": { "anchor": "Stretch", "padding": 48, "spacing": 16, "children": [
+            { "hstack": { "spacing": 12, "children": [
+              { "icon": { "name": "shopping-bag", "size": [44, 44], "color": "TextStrong" } },
+              { "text": { "label": "Garage", "color": "TextStrong", "textStyle": "Title", "size": [690, 56], "align": "left" } },
+              { "icon": { "name": "coins", "size": [36, 36], "color": "Primary" } },
+              { "counter": { "value": 2450, "label": "#,0", "textStyle": "Heading", "size": [140, 44] } }
+            ] } },
+            { "text": { "label": "FEATURED", "color": "TextMuted", "textStyle": "Caption", "align": "left" } },
+            { "vstack": { "style": "Card", "background": "SurfaceElevated", "padding": 24, "spacing": 8, "children": [
+              { "hstack": { "spacing": 16, "children": [
+                { "icon": { "name": "rocket", "size": [72, 72], "color": "Primary" } },
+                { "text": { "label": "Hyperion GT", "color": "TextStrong", "textStyle": "Heading", "size": [400, 48], "align": "left" } }
+              ] } },
+              { "text": { "label": "412 km/h top speed · AWD · Legendary class", "color": "TextMuted", "textStyle": "Caption", "align": "left" } },
+              { "shape": { "shape": "Pill", "size": [320, 8], "gradient": { "from": "Primary", "to": "PrimaryHover", "angle": 0 } } },
+              { "hstack": { "spacing": 16, "children": [
+                { "button": { "id": "Shop/BuyFeatured", "label": "BUY · 9,800", "icon": "coins", "size": [320, 56],
+                  "onClick": { "popup": "PurchaseConfirm", "signal": "Shop/Buy" } } },
+                { "text": { "label": "limited offer", "color": "Danger", "textStyle": "Caption", "size": [240, 32], "align": "left" } }
+              ] } }
+            ] } },
+            { "text": { "label": "DAILY DEALS — rows stream in from UIData at runtime", "color": "TextMuted", "textStyle": "Caption", "align": "left" } },
+            { "list": { "bind": "Shop/Deals", "item":
+              { "hstack": { "style": "Control", "padding": 12, "spacing": 16, "size": [0, 96], "children": [
+                { "icon": { "name": "gem", "size": [48, 48], "color": "Primary" } },
+                { "vstack": { "size": [420, 72], "spacing": 4, "children": [
+                  { "text": { "label": "{name}", "color": "TextDefault", "textStyle": "Body", "align": "left" } },
+                  { "text": { "label": "{tag}", "color": "TextMuted", "textStyle": "Caption", "align": "left" } }
+                ] } },
+                { "spacer": {} },
+                { "text": { "label": "{price}", "color": "TextStrong", "textStyle": "Heading", "size": [150, 40], "align": "right" } },
+                { "button": { "id": "Shop/BuyRow", "label": "BUY", "variant": "secondary", "size": [120, 48],
+                  "onClick": { "signal": "Shop/Buy" } } }
+              ] } } } },
+            { "spacer": {} },
+            { "button": { "id": "Shop/Back", "label": "BACK", "icon": "arrow-left", "variant": "secondary" } }
+          ] } }
+        ] } }
+      ] },
+    { "id": "Race/Victory", "showAnimation": "PopIn", "hideAnimation": "FadeOut", "background": "Background",
+      "elements": [
+        { "safearea": { "children": [
+          { "shape": { "shape": "Ring", "anchor": "TopLeft", "size": [220, 220], "position": [-60, 70],
+            "thickness": 3, "background": "Outline" } },
+          { "shape": { "shape": "Arc", "anchor": "TopRight", "size": [320, 320], "position": [40, 60],
+            "thickness": 8, "arcStart": 140, "arcSweep": 160,
+            "gradient": { "from": "Primary", "to": "PrimaryHover", "angle": 90 } } },
+          { "shape": { "shape": "Circle", "anchor": "BottomRight", "size": [12, 12], "position": [-160, 260],
+            "background": "Primary" } },
+          { "vstack": { "anchor": "Stretch", "padding": 64, "spacing": 16, "cascade": true, "children": [
+            { "spacer": {} },
+            { "icon": { "name": "trophy", "size": [96, 96], "color": "Success" } },
+            { "text": { "label": "RACE COMPLETE", "color": "TextStrong", "textStyle": "Display" } },
+            { "hstack": { "spacing": 8, "align": "center", "children": [
+              { "icon": { "name": "star", "size": [56, 56], "color": "Primary" } },
+              { "icon": { "name": "star", "size": [56, 56], "color": "Primary" } },
+              { "icon": { "name": "star", "size": [56, 56], "color": "Primary" } }
+            ] } },
+            { "hstack": { "spacing": 16, "align": "center", "children": [
+              { "vstack": { "size": [280, 110], "spacing": 4, "children": [
+                { "text": { "label": "TIME", "color": "TextMuted", "textStyle": "Caption" } },
+                { "text": { "label": "1:42.07", "color": "TextStrong", "textStyle": "Heading" } }
+              ] } },
+              { "vstack": { "size": [280, 110], "spacing": 4, "children": [
+                { "text": { "label": "TOP SPEED", "color": "TextMuted", "textStyle": "Caption" } },
+                { "text": { "label": "312 km/h", "color": "TextStrong", "textStyle": "Heading" } }
+              ] } },
+              { "vstack": { "size": [280, 110], "spacing": 4, "children": [
+                { "text": { "label": "DRIFT SCORE", "color": "TextMuted", "textStyle": "Caption" } },
+                { "counter": { "value": 18750, "label": "#,0", "textStyle": "Heading" } }
+              ] } }
+            ] } },
+            { "text": { "label": "LEVEL 12", "color": "TextMuted", "textStyle": "Caption" } },
+            { "progress": { "min": 0, "max": 100, "value": 78 } },
+            { "spacer": {} },
+            { "button": { "id": "Victory/Rematch", "label": "REMATCH", "icon": "rotate-ccw", "size": "lg" } },
+            { "button": { "id": "Victory/Continue", "label": "CONTINUE", "variant": "secondary" } },
+            { "text": { "label": "auto-continues in 10 s — a flow timer trigger", "color": "TextMuted", "textStyle": "Caption" } },
+            { "spacer": {} }
+          ] } }
+        ] } }
+      ] }
+  ],
+  "popups": [
+    { "name": "QuitConfirm", "title": "Quit?", "message": "Progress since the last checkpoint will be lost." },
+    { "name": "PurchaseConfirm", "title": "Purchase", "message": "Buy the Hyperion GT for 9,800 coins?" }
+  ],
+  "flow": {
+    "name": "GameUI", "start": "MainMenu",
+    "nodes": [
+      { "name": "MainMenu", "view": "Menu/Main", "next": [
+        { "on": { "button": "Menu/Play" }, "to": "Playing" },
+        { "on": { "button": "Menu/Settings" }, "to": "Settings" },
+        { "on": { "button": "Menu/Garage" }, "to": "Shop" },
+        { "on": { "button": "Menu/Options" }, "to": "Options" },
+        { "on": { "button": "Menu/Cheats" }, "to": "Cheats" }
+      ] },
+      { "name": "Settings", "view": "Menu/Settings", "next": [
+        { "on": { "button": "Settings/Back" }, "to": "MainMenu" },
+        { "on": { "back": true }, "to": "MainMenu" }
+      ] },
+      { "name": "Options", "view": "Menu/Options", "next": [
+        { "on": { "button": "Options/Back" }, "to": "MainMenu" },
+        { "on": { "back": true }, "to": "MainMenu" }
+      ] },
+      { "name": "Cheats", "views": ["Menu/Main", "Menu/Cheats"], "next": [
+        { "on": { "button": "Cheats/Close" }, "to": "MainMenu" },
+        { "on": { "back": true }, "to": "MainMenu" }
+      ] },
+      { "name": "Playing", "view": "Game/HUD", "next": [
+        { "on": { "button": "HUD/Inventory" }, "to": "Inventory" },
+        { "on": { "button": "HUD/Pause" }, "to": "MainMenu" },
+        { "on": { "button": "HUD/Finish" }, "to": "Victory" },
+        { "on": { "back": true }, "to": "MainMenu" }
+      ] },
+      { "name": "Inventory", "views": ["Game/HUD", "Game/Inventory"], "next": [
+        { "on": { "button": "Inventory/Close" }, "to": "Playing" },
+        { "on": { "back": true }, "to": "Playing" }
+      ] },
+      { "name": "Shop", "view": "Shop/Store", "next": [
+        { "on": { "button": "Shop/Back" }, "to": "MainMenu" },
+        { "on": { "back": true }, "to": "MainMenu" }
+      ] },
+      { "name": "Victory", "view": "Race/Victory", "next": [
+        { "on": { "button": "Victory/Rematch" }, "to": "Playing" },
+        { "on": { "button": "Victory/Continue" }, "to": "MainMenu" },
+        { "on": { "timer": 10 }, "to": "MainMenu" },
+        { "on": { "back": true }, "to": "MainMenu" }
+      ] }
+    ]
+  }
+}

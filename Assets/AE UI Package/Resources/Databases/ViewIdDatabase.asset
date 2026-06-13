@@ -1,0 +1,81 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57c1b0217159d73429448233e767832a, type: 3}
+  m_Name: ViewIdDatabase
+  m_EditorClassIdentifier: AlterEyes.UI::AlterEyes.UI.ViewIdDatabase
+  categories:
+  - category: Bundle
+    names:
+    - Screen
+  - category: Deco
+    names:
+    - Screen
+  - category: Depth
+    names:
+    - Screen
+  - category: Dialog
+    names:
+    - Confirm
+  - category: Game
+    names:
+    - HUD
+    - Inventory
+    - Painting
+    - Paused
+  - category: Gap
+    names:
+    - Form
+  - category: HUD
+    names:
+    - Root
+  - category: Juice
+    names:
+    - Screen
+  - category: Lint
+    names:
+    - Screen
+    - View
+  - category: Menu
+    names:
+    - Cheats
+    - Collection
+    - Detail
+    - Main
+    - News
+    - Options
+    - Settings
+    - Shop
+  - category: Mock
+    names:
+    - Broken
+    - Card
+  - category: Race
+    names:
+    - Victory
+  - category: Settings
+    names:
+    - Root
+  - category: Shop
+    names:
+    - Root
+    - Store
+  - category: Spec
+    names:
+    - Bound
+    - Layout
+    - Settings
+  - category: Starter
+    names:
+    - Showcase
+  - category: Typo
+    names:
+    - Screen

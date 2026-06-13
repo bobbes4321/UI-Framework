@@ -1,0 +1,160 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 71e45fd0d365d82409e04f2a77e8c016, type: 3}
+  m_Name: ButtonIdDatabase
+  m_EditorClassIdentifier: AlterEyes.UI::AlterEyes.UI.ButtonIdDatabase
+  categories:
+  - category: Action
+    names:
+    - Play
+    - Settings
+  - category: Bundle
+    names:
+    - Go
+  - category: Cheats
+    names:
+    - Close
+  - category: Controls
+    names:
+    - Attack_Rebind
+    - Fire_Rebind
+    - Jump_Rebind
+    - Reset
+    - ResetDefaults
+    - Sprint_Rebind
+  - category: Deco
+    names:
+    - Play
+    - Quit
+    - Settings
+    - Skip
+  - category: Dialog
+    names:
+    - Cancel
+    - Confirm
+  - category: Economy
+    names:
+    - Give10k
+    - Give1k
+    - UnlockAll
+  - category: Game
+    names:
+    - Hint
+    - OpenSettings
+    - Pause
+    - Resume
+    - SaveLeave
+  - category: Gap
+    names:
+    - Count_Minus
+    - Count_Plus
+  - category: HUD
+    names:
+    - Attack
+    - Block
+    - Dash
+    - Finish
+    - Inventory
+    - Pause
+  - category: Inventory
+    names:
+    - Close
+  - category: Juice
+    names:
+    - Inbox
+  - category: Lint
+    names:
+    - Empty
+    - IconOnly
+    - Labeled
+  - category: Menu
+    names:
+    - Cheats
+    - CheatsBack
+    - Garage
+    - OpenCheats
+    - OpenSettings
+    - Options
+    - Play
+    - Quit
+    - Settings
+    - SettingsBack
+  - category: Nav
+    names:
+    - Back
+    - BuyBench
+    - CupidPack
+    - Discord
+    - OpenPack
+    - PaintModel
+    - PlayFree
+    - Quit
+  - category: Options
+    names:
+    - Back
+  - category: Palette
+    names:
+    - Next
+    - Prev
+  - category: Player
+    names:
+    - GiveGold
+    - HealFull
+    - Lives_Minus
+    - Lives_Plus
+    - XpMultiplier_Minus
+    - XpMultiplier_Plus
+  - category: Popup
+    names:
+    - ConfirmBench
+    - GetPack
+  - category: Prev
+    names:
+    - Go
+  - category: Row
+    names:
+    - Pick
+  - category: Settings
+    names:
+    - Back
+    - Difficulty_Minus
+    - Difficulty_Plus
+    - FpsCap_Minus
+    - FpsCap_Plus
+    - Quality_Minus
+    - Quality_Plus
+  - category: Shop
+    names:
+    - Back
+    - BuyFeatured
+    - BuyRow
+    - Close
+    - Crown
+    - Gem
+    - Key
+    - Potion
+    - Shield
+    - Sword
+  - category: Spec
+    names:
+    - Go
+  - category: Typo
+    names:
+    - Apply
+  - category: Victory
+    names:
+    - Continue
+    - Rematch
+  - category: World
+    names:
+    - FinishRace
+    - SpawnEnemy
