@@ -7,8 +7,14 @@
 
 ## The problem
 
+> **Base-commit note:** a separate track (binding manifest / domain signals) landed on `main` as
+> `b83ca3b`, adding `Editor/Agent/BindingManifest.cs` and the `WireDomainSignal` calls referenced
+> below. **This plan's worktree must branch from that commit (current `main`), not the older
+> `cc16f98`** — `BindingManifest.cs` does not exist on the older base. (The Wave-1 plans don't touch
+> these files, so they're unaffected.)
+
 A custom widget (`carousel`, `data-table`, a game-specific HUD piece) cannot be added without editing
-**six** package sites:
+**seven** package sites:
 
 - `ElementSpec.Kinds` — the authoritative `string[]` of 25 kinds (`UISpec.cs:335`).
 - `UISpecGenerator.BuildElementTree` — a ~290-line `static switch (element.kind)`
@@ -44,6 +50,14 @@ path while a novel kind round-trips through its provider.
 - `UISpecExporter.cs:262-280` — `ExportElement` → `ExportElementBody`, a chain of early-returning
   `GetComponent` checks. The pre-check hook goes at the **top** of `ExportElementBody`.
 - `SpecFieldCatalog.cs` — `static` field table, private `Add`, `For(kind)` filter, `ElementKinds`.
+- **`BindingManifest.cs` (new on `b83ca3b` — the 7th site).** `BindingManifest.WalkElement` is another
+  `switch (element.kind)` (button → `onClickSignal`; toggle/switch → `element.signal` payload `bool`;
+  slider → `float`; dropdown → `int`; list/scroll/grid → `element.bind` data source). `TypeForKind`
+  maps a **menu-item** kind → C# value type (`bool/float/int/none`). A registered novel kind that
+  publishes a signal or binds data is **invisible** to the manifest + the generated stub today.
+- `UISpecGenerator.cs:533/539/562/702` — the per-kind `WireDomainSignal(...)` calls. These live
+  *inside* the generator switch cases, so the Phase-1 generator pre-check already covers them; the
+  per-kind payload type (bool/float/int) becomes the kind's own concern via `SignalPayload` below.
 
 ## Design
 
@@ -57,6 +71,8 @@ public interface INeoElementKind {
     bool TryExport(GameObject go, out ElementSpec spec);   // reverse; false if this go isn't ours
     IEnumerable<SpecField> Fields { get; }                 // inspector fields for this kind (Composer)
     UnityEngine.Color Accent { get; }                      // Composer tree/inspector accent (folds the NeoColors gap)
+    string SignalPayload { get; }                          // domain-signal value type: none|bool|float|int|string
+                                                           // — what BindingManifest.WalkElement records
 }
 public static class NeoElementKinds {                       // Pattern R — mirror ComposerCatalogKinds exactly
     public static IReadOnlyList<INeoElementKind> All { get; }
@@ -99,14 +115,28 @@ Define it by reading the locals the `switch` block touches — do not guess.
 - **Accent color**: replace the Composer's `switch (element.kind)` accent lookup with
   `NeoElementKinds.TryGet(kind, out var k) ? k.Accent : <built-in default by category>`. Built-ins
   keep their current `NeoColors` accents via the default branch; only project kinds read `Accent`.
+- **Binding manifest** (`BindingManifest.WalkElement`): add a pre-check mirroring the generator/
+  exporter — for a registered kind, record a domain signal from `element.signal`/`element.onClickSignal`
+  with payload `= k.SignalPayload`, and a data source from `element.bind`. Note (per the coordination
+  note) that **most of `WalkElement` is already field-driven** (it reads `element.signal`/`element.bind`
+  directly); the `switch` only chooses the *payload type* and the *standard stream*. So the cleanest
+  Phase-1 shape is: read the signal/bind fields generically, and ask the registry (or the built-in
+  map) only for the payload type. Built-ins keep their current standard-stream entries. **Invariant
+  (from `developer-binding-guide.md`):** a registered novel kind that publishes a signal or binds
+  data MUST appear in the binding manifest and the emitted stub — a registered kind that's invisible
+  to game code is the same 90%-then-stuck failure the tenet exists to prevent.
 
 ### Phase 2 (optional, later)
 
-Migrate the 25 built-ins into `INeoElementKind` descriptors so the generator `switch` and the
-exporter chain collapse into `NeoElementKinds.All` iteration. **This is itself parallelizable** —
-one agent per kind-group (Containers / Interactive / Ranged / Shape&Image / Data). No behavior
-change; the round-trip tests are the guardrail. Do the same for `MenuItemSpec.Kinds` →
-`NeoMenuItemKinds`.
+Migrate the 25 built-ins into `INeoElementKind` descriptors so the generator `switch`, the exporter
+chain and `WalkElement` collapse into `NeoElementKinds.All` iteration. **This is itself
+parallelizable** — one agent per kind-group (Containers / Interactive / Ranged / Shape&Image / Data).
+No behavior change; the round-trip tests are the guardrail.
+
+Do the same for `MenuItemSpec.Kinds` → `NeoMenuItemKinds`. The menu-item descriptor must carry a
+**`ValueType`** member (`bool/float/int/none`) so `BindingManifest.TypeForKind` rides the registry
+instead of switching on `MenuItemSpec.kind` — same invariant: a registered menu-item kind must surface
+its C# value type in the settings/cheats manifest and stub.
 
 ## New & modified files (Phase 1)
 
@@ -118,6 +148,7 @@ change; the round-trip tests are the guardrail. Do the same for `MenuItemSpec.Ki
 | `Editor/Composer/SpecFieldCatalog.cs` | EDIT — `RegisterField`; `For` unions registry fields; `ElementKinds` unions registry |
 | `Editor/Agent/UISpec.cs` | EDIT (minimal) — `ElementSpec.KnownKinds` accessor unioning the registry; validators/pickers read it |
 | Composer accent lookup | EDIT — read `INeoElementKind.Accent`, built-in default branch unchanged |
+| `Editor/Agent/BindingManifest.cs` | EDIT — `WalkElement` pre-check uses `k.SignalPayload` + `element.signal`/`bind`; `TypeForKind` rides `NeoMenuItemKinds.ValueType` (Phase-2 sibling) |
 
 ## Testing
 
@@ -127,6 +158,9 @@ change; the round-trip tests are the guardrail. Do the same for `MenuItemSpec.Ki
   ins never entered the new path).
 - New: register a throwaway `INeoElementKind` ("probe") in a test, generate a spec using it, export,
   assert the spec round-trips through its provider and the picker/field-catalog include it.
+- Binding manifest: a "probe" kind with `SignalPayload = "bool"` that sets `element.signal` appears
+  in `BindingManifest.Derive(spec).signals` as a domain signal with that payload; one that sets
+  `element.bind` appears in `dataSources`. (Guards the `developer-binding-guide.md` invariant.)
 - Unknown-kind path still produces a `report.issues` warning (no silent failure).
 
 ## Acceptance criteria

@@ -36,6 +36,11 @@ namespace Neo.UI
 
         public ToggleId id = new ToggleId();
 
+        [Tooltip("Optional domain stream this toggle publishes its bool value to, in addition to the " +
+                 "standard \"UIToggle/Behaviour\" stream — lets game code do Signals.On<bool>(category, name, …) " +
+                 "without branching the firehose. Default (None/None) = no extra stream.")]
+        public StreamId domainSignal = new StreamId();
+
         [SerializeField] private bool isOnValue;
 
         [Tooltip("Group enforcing exclusivity; optional")]
@@ -137,6 +142,10 @@ namespace Neo.UI
 
             Signals.Send(StreamCategory, StreamName,
                 new ToggleSignalData { category = id.Category, toggleName = id.Name, isOn = value }, this);
+
+            // additive first-class domain signal: Signals.On<bool>("Audio","Muted", …) works directly
+            if (!domainSignal.isDefault)
+                Signals.Send(domainSignal.Category, domainSignal.Name, value, this);
 
             if (notifyGroup && toggleGroup != null)
                 toggleGroup.NotifyToggleChanged(this, value);

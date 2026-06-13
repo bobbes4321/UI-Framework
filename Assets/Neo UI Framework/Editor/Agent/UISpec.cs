@@ -339,6 +339,21 @@ namespace Neo.UI.Editor
             "input", "stepper", "safearea", "counter", "dropdown", "settings", "cheats"
         };
 
+        /// <summary> The built-in <see cref="Kinds"/> unioned with any project-registered
+        /// <see cref="NeoElementKinds"/>. Validators, parsers and pickers read THIS so a registered novel
+        /// kind isn't flagged invalid; <see cref="Kinds"/> stays the pure built-in list. </summary>
+        public static IReadOnlyList<string> KnownKinds
+        {
+            get
+            {
+                var list = new List<string>(Kinds);
+                foreach (INeoElementKind k in NeoElementKinds.All)
+                    if (k != null && !string.IsNullOrEmpty(k.Kind) && !list.Contains(k.Kind))
+                        list.Add(k.Kind);
+                return list;
+            }
+        }
+
         public string kind;
         public string id;   // "Category/Name" for interactive elements
         public string label;
@@ -389,6 +404,10 @@ namespace Neo.UI.Editor
         public string bind;          // list/grid: UIData source id ("Category/Name") feeding rows at runtime
         public ElementSpec item;     // list/grid: row template, cloned per data row ({key} tokens in text)
         public SignalRefSpec onClickSignal;
+        public SignalRefSpec signal;   // toggle/slider/dropdown: domain stream the widget publishes its
+                                       // typed value to (bool/float/int), IN ADDITION to the standard
+                                       // "UIToggle/UISlider/UIDropdown Behaviour" stream — so game code can
+                                       // Signals.On<T>(category, name, …) without branching the firehose
         public string onClickShowView; // "Category/Name"
         public string onClickHideView;
         public string onClickPopup;    // popup name from the popups section
@@ -397,7 +416,7 @@ namespace Neo.UI.Editor
 
         public static ElementSpec Parse(Dictionary<string, object> obj)
         {
-            foreach (string kind in Kinds)
+            foreach (string kind in KnownKinds)
             {
                 Dictionary<string, object> body = JsonReader.GetObject(obj, kind);
                 if (body == null) continue;
@@ -462,6 +481,10 @@ namespace Neo.UI.Editor
                     }
                 }
 
+                // first-class domain signal on toggle/slider/dropdown (button uses onClick.signal)
+                if (body.TryGetValue("signal", out object domainSignal))
+                    spec.signal = SignalRefSpec.Parse(domainSignal, "signal");
+
                 Dictionary<string, object> onClick = JsonReader.GetObject(body, "onClick");
                 if (onClick != null)
                 {
@@ -490,7 +513,7 @@ namespace Neo.UI.Editor
                         spec.children.Add(Parse(JsonReader.AsObject(item, "child element")));
                 return spec;
             }
-            throw new FormatException($"Element must contain one of: {string.Join(", ", Kinds)}");
+            throw new FormatException($"Element must contain one of: {string.Join(", ", KnownKinds)}");
         }
 
         public Dictionary<string, object> ToJsonObject()
@@ -545,6 +568,7 @@ namespace Neo.UI.Editor
             }
             if (cascade) body["cascade"] = true;
             if (badge.HasValue) body["badge"] = (double)badge.Value;
+            if (signal != null) body["signal"] = signal.ToJsonObject();
             if (onClickSignal != null || !string.IsNullOrEmpty(onClickShowView)
                 || !string.IsNullOrEmpty(onClickHideView) || !string.IsNullOrEmpty(onClickPopup)
                 || onClickClose)

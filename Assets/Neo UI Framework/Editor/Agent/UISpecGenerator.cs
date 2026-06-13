@@ -490,6 +490,32 @@ namespace Neo.UI.Editor
             RectTransform childHost = null;     // where container children land
             bool childrenInLayout = true;       // safe areas host free-anchored children, not stacked ones
 
+            // Extensibility seam (keystone): a project-registered kind builds through its own provider,
+            // then falls into the SHARED geometry/anchor/child pass below exactly like a built-in. Built-ins
+            // are NOT registered, so this pre-check is a no-op until a project calls NeoElementKinds.Register.
+            if (NeoElementKinds.TryGet(element.kind, out INeoElementKind ext))
+            {
+                var ctx = new ElementBuildContext
+                {
+                    parent = parent,
+                    element = element,
+                    index = index,
+                    inLayout = inLayout,
+                    settings = settings,
+                    report = report,
+                    category = category,
+                    name = name,
+                    registerId = RegisterId,
+                    addViewCommand = AddViewCommand
+                };
+                go = ext.Build(ctx);
+                if (go == null)
+                {
+                    report.issues.Add($"Element kind '{element.kind}' provider returned no GameObject");
+                    return null;
+                }
+            }
+            else
             switch (element.kind)
             {
                 case "button":
@@ -530,11 +556,13 @@ namespace Neo.UI.Editor
                     if (!string.IsNullOrEmpty(element.group))
                         go.GetComponent<UIToggle>().toggleGroup =
                             build.GetOrCreateToggleGroup(element.group, category);
+                    WireDomainSignal(go.GetComponent<UIToggle>().domainSignal, element.signal, settings);
                     RegisterId(settings.toggleIds, category, name);
                     break;
                 case "switch":
                     go = UIWidgetFactory.CreateSwitch(parent, category, name);
                     if ((element.value ?? 0f) >= 0.5f) UIWidgetFactory.BakeToggleOn(go);
+                    WireDomainSignal(go.GetComponent<UIToggle>().domainSignal, element.signal, settings);
                     RegisterId(settings.toggleIds, category, name);
                     break;
                 case "tab":
@@ -557,6 +585,7 @@ namespace Neo.UI.Editor
                 case "slider":
                     go = UIWidgetFactory.CreateSlider(parent, category, name,
                         element.min ?? 0f, element.max ?? 1f, element.value ?? 0.5f);
+                    WireDomainSignal(go.GetComponent<UISlider>().domainSignal, element.signal, settings);
                     RegisterId(settings.sliderIds, category, name);
                     break;
                 case "progress":
@@ -696,6 +725,7 @@ namespace Neo.UI.Editor
                 case "dropdown":
                     go = UIWidgetFactory.CreateDropdown(parent, category, name, element.options,
                         (int)(element.value ?? 0f));
+                    WireDomainSignal(go.GetComponent<UIDropdown>().domainSignal, element.signal, settings);
                     RegisterId(settings.dropdownIds, category, name);
                     break;
                 case "settings":
@@ -989,6 +1019,21 @@ namespace Neo.UI.Editor
             if (database == null || string.IsNullOrEmpty(category) || string.IsNullOrEmpty(name)) return;
             database.Add(category, name);
             EditorUtility.SetDirty(database);
+        }
+
+        /// <summary>
+        /// Wires a widget's optional first-class domain signal (Plan 3, deliverable B): the widget
+        /// publishes its typed value to this stream IN ADDITION to its standard "…/Behaviour" stream,
+        /// so game code can <c>Signals.On&lt;T&gt;(category, name, …)</c> without branching the firehose.
+        /// Registers the stream id so validation/manifest see it.
+        /// </summary>
+        private static void WireDomainSignal(CategoryNameId target, SignalRefSpec signal, NeoUISettings settings)
+        {
+            if (target == null || signal == null
+                || string.IsNullOrEmpty(signal.category) || string.IsNullOrEmpty(signal.name)) return;
+            target.Category = signal.category;
+            target.Name = signal.name;
+            RegisterId(settings.streamIds, signal.category, signal.name);
         }
 
         // ------------------------------------------------------------------ menus (settings / cheats)

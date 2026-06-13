@@ -1,0 +1,135 @@
+using System.IO;
+using Neo.UI.Editor;
+using NUnit.Framework;
+
+namespace Neo.UI.Tests
+{
+    /// <summary>
+    /// Plan 3 A: the emitted partial-class stub is well-formed, deterministic (idempotent regen),
+    /// and never clobbers the developer's own sibling partial. The generator itself compiling against
+    /// the runtime is the worktree compile-check's job; here we pin structure + idempotency + safety.
+    /// </summary>
+    public class BindingStubTests
+    {
+        private const string SpecJson = @"{
+          ""views"": [ { ""id"": ""Shop/Store"", ""elements"": [
+            { ""vstack"": { ""children"": [
+              { ""button"":   { ""id"": ""Shop/Buy"", ""label"": ""Buy"", ""onClick"": { ""signal"": { ""category"": ""Shop"", ""name"": ""Buy"" } } } },
+              { ""toggle"":   { ""id"": ""Audio/Mute"", ""label"": ""Mute"", ""signal"": { ""category"": ""Audio"", ""name"": ""Muted"" } } },
+              { ""slider"":   { ""id"": ""Audio/Volume"", ""min"": 0, ""max"": 1, ""value"": 0.8, ""signal"": { ""category"": ""Audio"", ""name"": ""Volume"" } } },
+              { ""list"": { ""bind"": ""Shop/Deals"", ""item"": { ""text"": { ""label"": ""{name} {price}"" } } } }
+            ] } }
+          ] } ],
+          ""settings"": [ { ""id"": ""Audio/Settings"", ""items"": [
+            { ""slider"": { ""id"": ""Audio/MusicVolume"", ""min"": 0, ""max"": 1, ""value"": 0.8 } },
+            { ""button"": { ""id"": ""Audio/Reset"" } }
+          ] } ],
+          ""flow"": { ""name"": ""Shop"", ""nodes"": [ { ""name"": ""Store"", ""view"": ""Shop/Store"" } ] }
+        }";
+
+        private static string Generate() =>
+            BindingStubGenerator.Generate(BindingManifest.Derive(UISpec.FromJson(SpecJson)));
+
+        [Test]
+        public void Stub_ClassName_DerivesFromFlow()
+        {
+            BindingManifest manifest = BindingManifest.Derive(UISpec.FromJson(SpecJson));
+            Assert.AreEqual("ShopUIBindings", BindingStubGenerator.ClassName(manifest));
+            StringAssert.Contains("public partial class ShopUIBindings", Generate());
+        }
+
+        [Test]
+        public void Stub_EmitsGreppableConsts()
+        {
+            string source = Generate();
+            StringAssert.Contains("public const string ViewShopStore = \"Shop/Store\";", source);
+            StringAssert.Contains("public const string SigShopBuyCategory = \"Shop\";", source);
+            StringAssert.Contains("public const string SigShopBuyName = \"Buy\";", source);
+            StringAssert.Contains("public const string DataShopDealsCategory = \"Shop\";", source);
+            StringAssert.Contains("public const string SetAudioMusicVolumeName = \"MusicVolume\";", source);
+        }
+
+        [Test]
+        public void Stub_WiresDomainSignals_TypedAndParameterless()
+        {
+            string source = Generate();
+            // parameterless for a button onClick.signal (payload none)
+            StringAssert.Contains("Signals.On(SigShopBuyCategory, SigShopBuyName, () => OnShopBuy());", source);
+            // typed for a toggle (bool) / slider (float)
+            StringAssert.Contains("Signals.On<bool>(SigAudioMutedCategory, SigAudioMutedName, v => OnAudioMuted(v));", source);
+            StringAssert.Contains("Signals.On<float>(SigAudioVolumeCategory, SigAudioVolumeName, v => OnAudioVolume(v));", source);
+        }
+
+        [Test]
+        public void Stub_BindsSettings_AndWarnsOnMissingControl()
+        {
+            string source = Generate();
+            StringAssert.Contains("BindSetting<float>(SetAudioMusicVolumeCategory, SetAudioMusicVolumeName, v => OnAudioMusicVolumeChanged(v));", source);
+            // no-silent-failure mirror: BindSetting warns when the id resolves to no registered control
+            StringAssert.Contains("UserSettingsService.GetDefinition(category, name) == null", source);
+            StringAssert.Contains("Debug.LogWarning", source);
+            // a none-typed setting (button) is NOT bound
+            StringAssert.DoesNotContain("OnAudioResetChanged", source);
+        }
+
+        [Test]
+        public void Stub_EmitsPopulateHelpers_StringAndTyped()
+        {
+            string source = Generate();
+            StringAssert.Contains("public void PopulateShopDeals(IEnumerable<IDictionary<string, string>> rows)", source);
+            StringAssert.Contains("public void PopulateShopDeals<T>(IEnumerable<T> rows, Func<T, IReadOnlyDictionary<string, string>> project)", source);
+            StringAssert.Contains("Row tokens: name, price", source);
+        }
+
+        [Test]
+        public void Stub_DeclaresPartialHooks()
+        {
+            string source = Generate();
+            StringAssert.Contains("partial void OnShopBuy();", source);
+            StringAssert.Contains("partial void OnAudioMuted(bool value);", source);
+            StringAssert.Contains("partial void OnAudioMusicVolumeChanged(float value);", source);
+        }
+
+        [Test]
+        public void Stub_IsAutoGeneratedAndBalanced()
+        {
+            string source = Generate();
+            StringAssert.StartsWith("// <auto-generated>", source);
+            Assert.AreEqual(CountChar(source, '{'), CountChar(source, '}'), "braces must balance");
+        }
+
+        [Test]
+        public void Regen_IsIdempotent()
+        {
+            Assert.AreEqual(Generate(), Generate(), "same manifest must produce byte-identical source");
+        }
+
+        [Test]
+        public void Write_TouchesOnlyTheGeneratedFile_NotTheDevPartial()
+        {
+            string dir = Path.Combine(Path.GetTempPath(), "NeoStubTest");
+            Directory.CreateDirectory(dir);
+            string genPath = Path.Combine(dir, "ShopUIBindings.g.cs");
+            string devPath = Path.Combine(dir, "ShopUIBindings.Handlers.cs");
+            const string devContent = "// my handlers — must never be overwritten\n";
+            File.WriteAllText(devPath, devContent);
+
+            BindingManifest manifest = BindingManifest.Derive(UISpec.FromJson(SpecJson));
+            string written = BindingStubGenerator.Write(manifest, genPath);
+            BindingStubGenerator.Write(manifest, genPath); // regen
+
+            Assert.AreEqual(genPath, written);
+            Assert.IsTrue(File.Exists(genPath), "generated stub written");
+            Assert.AreEqual(devContent, File.ReadAllText(devPath), "the developer's partial is never touched");
+
+            Directory.Delete(dir, recursive: true);
+        }
+
+        private static int CountChar(string s, char c)
+        {
+            int n = 0;
+            foreach (char ch in s) if (ch == c) n++;
+            return n;
+        }
+    }
+}

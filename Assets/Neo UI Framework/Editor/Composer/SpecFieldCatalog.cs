@@ -155,14 +155,35 @@ namespace Neo.UI.Editor.Composer
             All.Add(new SpecField(key, label, kind, get, set, kinds));
         }
 
+        // Extensibility seam: project-registered fields not tied to a built-in kind table entry.
+        // (A project kind's own fields ride INeoElementKind.Fields; this is the explicit global hook the
+        // plan calls for, for fields a project wants to splice onto kinds generically.)
+        private static readonly List<SpecField> Registered = new List<SpecField>();
+
+        /// <summary> Registers an extra inspector field (e.g. for a project-defined element kind). </summary>
+        public static void RegisterField(SpecField field)
+        {
+            if (field != null) Registered.Add(field);
+        }
+
+        /// <summary> Test/seam hook: clears project-registered fields (built-ins are unaffected). </summary>
+        public static void ClearRegisteredForTests() => Registered.Clear();
+
         /// <summary> The fields the inspector should draw for an element of <paramref name="elementKind"/>,
-        /// in declaration order. </summary>
+        /// in declaration order. Unions the built-in table, any globally-registered fields, and (for a
+        /// project-registered kind) that kind's own <see cref="INeoElementKind.Fields"/>. </summary>
         public static List<SpecField> For(string elementKind)
         {
             var result = new List<SpecField>();
             foreach (SpecField field in All)
                 if (field.AppliesTo(elementKind))
                     result.Add(field);
+            foreach (SpecField field in Registered)
+                if (field.AppliesTo(elementKind))
+                    result.Add(field);
+            if (NeoElementKinds.TryGet(elementKind, out INeoElementKind ext) && ext.Fields != null)
+                foreach (SpecField field in ext.Fields)
+                    if (field != null) result.Add(field);
             return result;
         }
 
@@ -174,8 +195,8 @@ namespace Neo.UI.Editor.Composer
             return keys;
         }
 
-        /// <summary> The element kinds the "+ Add" pickers offer — straight from the spec model so the
-        /// picker and parser never drift. </summary>
-        public static IReadOnlyList<string> ElementKinds => ElementSpec.Kinds;
+        /// <summary> The element kinds the "+ Add" pickers offer — the built-in spec kinds unioned with
+        /// any project-registered kinds, so the picker and parser never drift. </summary>
+        public static IReadOnlyList<string> ElementKinds => ElementSpec.KnownKinds;
     }
 }

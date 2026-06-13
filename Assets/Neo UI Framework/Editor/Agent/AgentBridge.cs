@@ -40,6 +40,11 @@ namespace Neo.UI.Editor
     ///   authoring reference ("out" optional, defaults to Assets/docs/spec-reference.md)
     /// - <c>{"action":"importSprites","folder":"Assets/..."}</c> — imports every texture under the
     ///   folder as a Single sprite (spec image "src" needs Sprite sub-assets, not raw textures)
+    /// - <c>{"action":"bindings","spec":"path.json","out":"GameUI.bindings.json","stub":"Assets/Scripts/Generated/GameUIBindings.g.cs","namespace":"Game.UI"}</c>
+    ///   — derives the developer binding contract (signals / data sources / settings / cheats / views)
+    ///   from the spec ("spec" optional — falls back to the exported project) and emits a partial-class
+    ///   C# stub OUTSIDE GeneratedRoot (so spec regen never wipes it). All of out/stub/namespace optional;
+    ///   "manifestOnly":true skips the stub. Always inlines the manifest JSON in the result.
     ///
     /// With the editor CLOSED, run the same requests headlessly:
     /// <c>Unity.exe -batchmode -projectPath . -executeMethod Neo.UI.Editor.AgentBridge.RunBatch
@@ -106,7 +111,8 @@ namespace Neo.UI.Editor
                 // play-mode hazard applies (AddComponent fires Awake/OnEnable mid-construction)
                 bool mutatesAssets = action == "generate" || action == "buildScene"
                                      || action == "screenshot" || action == "preview"
-                                     || action == "diff" || action == "merge" || action == "sync";
+                                     || action == "diff" || action == "merge" || action == "sync"
+                                     || action == "bindings";
                 if (mutatesAssets && UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode)
                 {
                     result["ok"] = false;
@@ -127,9 +133,10 @@ namespace Neo.UI.Editor
                     case "specReference": HandleSpecReference(request, result); break;
                     case "preview": HandlePreview(request, result); break;
                     case "importSprites": HandleImportSprites(request, result); break;
+                    case "bindings": HandleBindings(request, result); break;
                     default:
                         result["ok"] = false;
-                        result["error"] = $"Unknown action '{action}' (screenshot | generate | export | validate | diff | merge | sync | buildScene | specReference | preview | importSprites)";
+                        result["error"] = $"Unknown action '{action}' (screenshot | generate | export | validate | diff | merge | sync | buildScene | specReference | preview | importSprites | bindings)";
                         break;
                 }
             }
@@ -373,6 +380,41 @@ namespace Neo.UI.Editor
             var list = new List<object>(findings.Count);
             foreach (OffSpecFinding finding in findings) list.Add(finding.ToJsonObject());
             return list;
+        }
+
+        private static void HandleBindings(Dictionary<string, object> request, Dictionary<string, object> result)
+        {
+            // the spec is the source of truth; "spec" optional — fall back to the exported project
+            string specPath = JsonReader.GetString(request, "spec");
+            UISpec spec = !string.IsNullOrEmpty(specPath)
+                ? UISpec.FromJson(File.ReadAllText(specPath))
+                : UISpecExporter.ExportProject();
+
+            BindingManifest manifest = BindingManifest.Derive(spec);
+            string manifestJson = manifest.ToJson();
+
+            string outPath = JsonReader.GetString(request, "out");
+            if (!string.IsNullOrEmpty(outPath))
+            {
+                string directory = Path.GetDirectoryName(outPath);
+                if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
+                File.WriteAllText(outPath, manifestJson);
+                result["path"] = Path.GetFullPath(outPath);
+            }
+
+            // emit the C# stub OUTSIDE GeneratedRoot (default Assets/Scripts/Generated) so a spec regen
+            // of UI assets never wipes the developer's wiring file; idempotent (same manifest → same bytes)
+            if (!JsonReader.GetBool(request, "manifestOnly"))
+            {
+                string stubPath = JsonReader.GetString(request, "stub");
+                string ns = JsonReader.GetString(request, "namespace");
+                string written = BindingStubGenerator.Write(manifest, stubPath, ns);
+                result["stub"] = Path.GetFullPath(written);
+                AssetDatabase.Refresh();
+            }
+
+            result["ok"] = true;
+            result["manifest"] = manifestJson;
         }
 
         private static void HandleImportSprites(Dictionary<string, object> request, Dictionary<string, object> result)
