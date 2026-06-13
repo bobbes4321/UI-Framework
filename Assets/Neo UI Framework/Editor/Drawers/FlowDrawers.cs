@@ -46,10 +46,13 @@ namespace Neo.UI.Editor
 
                 default:
                     Rect pair = EditorGUI.IndentedRect(NeoGUI.NextLine(ref line));
+                    string customKind = type == FlowTrigger.TriggerType.Custom
+                        ? property.FindPropertyRelative("customKind").stringValue
+                        : null;
                     IdDatabaseOptions.DrawCategoryNamePair(pair,
                         property.FindPropertyRelative("category"),
                         property.FindPropertyRelative("name"),
-                        IdDatabaseOptions.ForTrigger(type));
+                        IdDatabaseOptions.ForTrigger(type, customKind));
                     break;
             }
             EditorGUI.EndProperty();

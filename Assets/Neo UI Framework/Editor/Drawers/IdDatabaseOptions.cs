@@ -19,7 +19,14 @@ namespace Neo.UI.Editor
             return settings != null ? settings.GetDatabaseFor(idType) : null;
         }
 
-        public static IdDatabase ForTrigger(FlowTrigger.TriggerType type)
+        public static IdDatabase ForTrigger(FlowTrigger.TriggerType type) => ForTrigger(type, null);
+
+        /// <summary>
+        /// The id database a trigger's category/name dropdown should offer. Built-ins map by enum;
+        /// a <see cref="FlowTrigger.TriggerType.Custom"/> trigger consults its registered kind's
+        /// <see cref="ITriggerKindIdDatabase.PreferredIdType"/> (when it implements that seam).
+        /// </summary>
+        public static IdDatabase ForTrigger(FlowTrigger.TriggerType type, string customKind)
         {
             NeoUISettings settings = NeoUISettings.instance;
             if (settings == null) return null;
@@ -31,6 +38,12 @@ namespace Neo.UI.Editor
                 case FlowTrigger.TriggerType.ViewShown:
                 case FlowTrigger.TriggerType.ViewHidden: return settings.viewIds;
                 case FlowTrigger.TriggerType.Signal: return settings.streamIds;
+                case FlowTrigger.TriggerType.Custom:
+                    if (NeoTriggerKinds.TryGet(customKind, out INeoTriggerKind kind)
+                        && kind is ITriggerKindIdDatabase withDb
+                        && withDb.PreferredIdType != null)
+                        return settings.GetDatabaseFor(withDb.PreferredIdType);
+                    return null;
                 default: return null;
             }
         }
