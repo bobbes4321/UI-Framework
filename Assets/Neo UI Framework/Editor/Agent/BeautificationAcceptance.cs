@@ -44,7 +44,9 @@ namespace Neo.UI.Editor
                 Debug.Log($"[Neo.UI] Demo generation:\n{report}");
                 if (!report.hasProblems)
                 {
-                    string scenePath = GeneratedSceneBuilder.Build();
+                    // name the flow — a second spec sharing GeneratedRoot would otherwise make the
+                    // build ambiguous (SpecFile is the GameUI demo)
+                    string scenePath = GeneratedSceneBuilder.Build(ShowcaseSceneBuilder.ShowcaseFlow);
                     Debug.Log($"[Neo.UI] Scene ready: {scenePath}");
                     ok = true;
                 }

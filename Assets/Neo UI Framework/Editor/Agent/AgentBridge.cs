@@ -103,7 +103,7 @@ namespace Neo.UI.Editor
                     case "generate": HandleGenerate(request, result); break;
                     case "export": HandleExport(request, result); break;
                     case "validate": HandleValidate(result); break;
-                    case "buildScene": HandleBuildScene(result); break;
+                    case "buildScene": HandleBuildScene(request, result); break;
                     case "specReference": HandleSpecReference(request, result); break;
                     case "preview": HandlePreview(request, result); break;
                     case "importSprites": HandleImportSprites(request, result); break;
@@ -264,13 +264,16 @@ namespace Neo.UI.Editor
             return null;
         }
 
-        private static void HandleBuildScene(Dictionary<string, object> result)
+        private static void HandleBuildScene(Dictionary<string, object> request, Dictionary<string, object> result)
         {
             // building replaces the open scene — never discard a human's unsaved work silently
             if (UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene().isDirty)
                 throw new InvalidOperationException(
                     "The open scene has unsaved changes — save it in the editor first, then retry");
-            string path = GeneratedSceneBuilder.Build();
+            // optional "flow": which generated app to build when the generated folder holds several
+            // flows. Omit it when only one exists; the builder throws (listing them) if it's ambiguous.
+            string flowName = JsonReader.GetString(request, "flow");
+            string path = GeneratedSceneBuilder.Build(flowName);
             result["ok"] = true;
             result["path"] = path;
         }

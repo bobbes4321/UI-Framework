@@ -26,7 +26,10 @@ namespace Neo.UI.Tests
     /// </summary>
     public class SettingsCheatsDemoPlayTest : PlayModeTestBase
     {
-        private const string GeneratedRoot = "Assets/Neo UI Generated"; // UISpecGenerator.GeneratedRoot
+        // Throwaway root we generate into, mirroring NeoTestScratchRoot on the EditMode side: the
+        // generator is redirected here (via reflection — this assembly can't reference Neo.UI.Editor)
+        // so DeleteGenerated never touches the committed demo under "Assets/Neo UI Generated".
+        private const string GeneratedRoot = "Assets/NeoUITestScratch";
 
         private FlowController _controller;
 
@@ -39,9 +42,29 @@ namespace Neo.UI.Tests
             return method.Invoke(null, args);
         }
 
+        private static void SetGeneratorRoot(string value)
+        {
+            System.Type type = System.Type.GetType("Neo.UI.Editor.UISpecGenerator, Neo.UI.Editor");
+            Assert.IsNotNull(type, "Neo.UI.Editor.UISpecGenerator not found via reflection");
+            PropertyInfo prop = type.GetProperty("GeneratedRoot", BindingFlags.Public | BindingFlags.Static);
+            Assert.IsNotNull(prop, "UISpecGenerator.GeneratedRoot property not found");
+            prop.SetValue(null, value);
+        }
+
+        private static void RestoreGeneratorRoot()
+        {
+            System.Type type = System.Type.GetType("Neo.UI.Editor.UISpecGenerator, Neo.UI.Editor");
+            if (type == null) return;
+            var defaultRoot = (string)type.GetField("DefaultGeneratedRoot", BindingFlags.Public | BindingFlags.Static)
+                ?.GetValue(null);
+            SetGeneratorRoot(defaultRoot ?? "Assets/Neo UI Generated");
+        }
+
         [OneTimeSetUp]
         public void GenerateDemo()
         {
+            SetGeneratorRoot(GeneratedRoot); // redirect to scratch BEFORE generating
+
             string specPath = Path.Combine(
                 Path.GetDirectoryName(Application.dataPath) ?? ".", "settings-cheats-demo.json");
             Assert.IsTrue(File.Exists(specPath), $"demo spec missing at {specPath}");
@@ -57,6 +80,7 @@ namespace Neo.UI.Tests
         public void DeleteGenerated()
         {
             AssetDatabase.DeleteAsset(GeneratedRoot);
+            RestoreGeneratorRoot();
             NeoUISettings settings = NeoUISettings.instance;
             if (settings != null && settings.animationPresets != null)
             {

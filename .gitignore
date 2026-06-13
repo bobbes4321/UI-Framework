@@ -28,6 +28,10 @@ sysinfo.txt
 /[Pp]rofilerCaptures/
 /[Tt]estResults/
 /neo-screenshots/
+# Throwaway root the test suites generate into (NeoTestScratchRoot) — deleted in
+# teardown; ignored as a backstop so an interrupted run never commits scratch assets.
+/Assets/NeoUITestScratch/
+/Assets/NeoUITestScratch.meta
 
 # Reference-only material -----------------------------------------------------
 # Doozy 4 source kept on disk for porting (Unity-ignored `~` folder); not part

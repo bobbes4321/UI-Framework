@@ -19,6 +19,12 @@ namespace Neo.UI.Editor
     {
         public const string ScenePath = "Assets/Scenes/NeoUIGeneratedDemo.unity";
 
+        /// <summary>
+        /// Horizontal gap (in canvas units) between consecutive views when they are laid out
+        /// side-by-side in the editor — the portrait reference width (1080) plus breathing room.
+        /// </summary>
+        private const float ViewLayoutSpacing = 1200f;
+
         [MenuItem("Tools/Neo UI/Build Scene From Generated UI", priority = 51)]
         public static void BuildAndOpen()
         {
@@ -28,15 +34,35 @@ namespace Neo.UI.Editor
             Debug.Log($"[Neo.UI] Generated-UI scene ready at {path} — press Play.");
         }
 
-        /// <summary> Builds and saves the scene; returns its path. Throws when nothing was generated yet. </summary>
-        public static string Build()
+        /// <summary>
+        /// Builds and saves the scene; returns its path. Throws when nothing was generated yet.
+        /// <para>
+        /// <paramref name="flowName"/> selects which generated flow (= which app) to build when the
+        /// shared <see cref="UISpecGenerator.GeneratedRoot"/> holds more than one. The scene then
+        /// instances ONLY the views that flow references — never the whole folder — so a second spec's
+        /// assets sitting alongside it can't leak in. When null and exactly one flow exists, that flow
+        /// is used; when null and several exist, the build throws rather than silently picking one
+        /// (matching the "no silent failures" / no-blind-glob invariant in CLAUDE.md).
+        /// </para>
+        /// </summary>
+        public static string Build(string flowName = null)
         {
-            List<GameObject> viewPrefabs = LoadGeneratedViewPrefabs();
-            if (viewPrefabs.Count == 0)
+            string viewsFolder = $"{UISpecGenerator.GeneratedRoot}/Views";
+            if (!AssetDatabase.IsValidFolder(viewsFolder)
+                || AssetDatabase.FindAssets("t:Prefab", new[] { viewsFolder }).Length == 0)
                 throw new System.InvalidOperationException(
-                    $"No generated views under {UISpecGenerator.GeneratedRoot}/Views — run a spec through the generator first");
+                    $"No generated views under {viewsFolder} — run a spec through the generator first");
 
             NeoUISettings settings = NeoUISettingsBootstrap.GetOrCreateSettings();
+
+            // resolve the flow BEFORE NewScene unloads assets (see LoadGeneratedFlowGraphs note); the
+            // chosen flow defines the app, so it also drives which views we instance
+            List<FlowGraph> flows = LoadGeneratedFlowGraphs();
+            FlowGraph graph = SelectFlowGraph(flows, flowName);
+            HashSet<string> wantedViews = graph != null ? CollectReferencedViewKeys(graph) : null;
+
+            List<GameObject> viewPrefabs = LoadGeneratedViewPrefabs(wantedViews);
+
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
             var cameraGo = new GameObject("Main Camera", typeof(Camera), typeof(AudioListener));
@@ -53,27 +79,46 @@ namespace Neo.UI.Editor
             RectTransform canvasRect = CreateCanvas("Canvas", sortingOrder: 0);
 
             var instances = new List<GameObject>();
+            int layoutIndex = 0;
             foreach (GameObject prefab in viewPrefabs)
             {
                 var instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, scene);
                 instance.transform.SetParent(canvasRect, worldPositionStays: false);
+
+                // Spread the views out side-by-side in the editor so each one is visible at a
+                // glance instead of every view stacking on top of each other at the origin
+                // (impossible to inspect or tweak). useCustomStartPosition snaps each container
+                // back to customStartPosition (0,0,0 — centred, full-screen) the instant Play
+                // begins (UIContainer.Awake), so this is purely an authoring-time layout that
+                // costs nothing at runtime. The override lives on the scene instance only — the
+                // generated prefabs stay untouched so the export round-trip stays byte-identical.
+                if (instance.GetComponent<UIContainer>() is { } container)
+                {
+                    container.useCustomStartPosition = true;
+                    container.customStartPosition = Vector3.zero;
+                    ((RectTransform)instance.transform).anchoredPosition3D =
+                        new Vector3(layoutIndex * ViewLayoutSpacing, 0f, 0f);
+                    layoutIndex++;
+                }
+
                 instances.Add(instance);
             }
 
             // popups parent themselves to this canvas by name (settings.popupsCanvasName)
             CreateCanvas(settings.popupsCanvasName, sortingOrder: 100);
 
-            // load AFTER NewScene: scene creation unloads unused assets, which fake-nulls a
+            // re-load the graph AFTER NewScene: scene creation unloads unused assets, which fake-nulls a
             // ScriptableObject loaded earlier (cold batch sessions hit this reliably — the
             // controller would silently ship with an empty graph)
-            FlowGraph graph = LoadGeneratedFlowGraph();
+            if (graph != null) graph = AssetDatabase.LoadAssetAtPath<FlowGraph>(AssetDatabase.GetAssetPath(graph));
 
             string summary;
             if (graph != null)
             {
                 var controllerGo = new GameObject("Flow Controller", typeof(FlowController));
                 controllerGo.GetComponent<FlowController>().flow = graph;
-                summary = $"flow '{graph.name}'";
+                WarnAboutMissingViews(graph, wantedViews, instances);
+                summary = $"flow '{graph.graphName}' ({instances.Count} views)";
             }
             else
             {
@@ -90,8 +135,83 @@ namespace Neo.UI.Editor
             if (!AssetDatabase.IsValidFolder("Assets/Scenes"))
                 AssetDatabase.CreateFolder("Assets", "Scenes");
             EditorSceneManager.SaveScene(scene, ScenePath);
-            Debug.Log($"[Neo.UI] Built {ScenePath}: {viewPrefabs.Count} views, {summary}.");
+            Debug.Log($"[Neo.UI] Built {ScenePath}: {summary}.");
             return ScenePath;
+        }
+
+        /// <summary>
+        /// Picks the one flow graph to build. Null/empty <paramref name="flowName"/> with a single flow
+        /// uses it; with several flows it throws (listing them) rather than picking blindly. A named
+        /// flow that doesn't exist also throws with the available names.
+        /// </summary>
+        internal static FlowGraph SelectFlowGraph(List<FlowGraph> flows, string flowName)
+        {
+            if (flows.Count == 0) return null;
+
+            if (!string.IsNullOrEmpty(flowName))
+            {
+                FlowGraph match = flows.Find(g => MatchesFlowName(g, flowName));
+                if (match == null)
+                    throw new System.InvalidOperationException(
+                        $"No generated flow named '{flowName}' under {UISpecGenerator.GeneratedRoot}/Flow " +
+                        $"(found: {string.Join(", ", flows.ConvertAll(FlowLabel))})");
+                return match;
+            }
+
+            if (flows.Count == 1) return flows[0];
+
+            throw new System.InvalidOperationException(
+                $"{flows.Count} generated flows share {UISpecGenerator.GeneratedRoot}/Flow " +
+                $"({string.Join(", ", flows.ConvertAll(FlowLabel))}) — pass a flow name " +
+                "(scene builder: Build(name); agent: {\"action\":\"buildScene\",\"flow\":\"…\"}) " +
+                "so the scene isn't built from an arbitrary one.");
+        }
+
+        private static bool MatchesFlowName(FlowGraph graph, string flowName) =>
+            string.Equals(graph.graphName, flowName, System.StringComparison.OrdinalIgnoreCase)
+            || string.Equals(graph.name, flowName, System.StringComparison.OrdinalIgnoreCase);
+
+        private static string FlowLabel(FlowGraph g) =>
+            string.IsNullOrEmpty(g.graphName) || g.graphName == g.name ? $"'{g.name}'" : $"'{g.graphName}'";
+
+        /// <summary>
+        /// The set of "Category/Name" view keys a flow actually drives — every <see cref="UINode"/>'s
+        /// shown and hidden views. This is what makes the build flow-scoped: views belonging to other
+        /// specs in the shared folder are simply never instanced.
+        /// </summary>
+        internal static HashSet<string> CollectReferencedViewKeys(FlowGraph graph)
+        {
+            var keys = new HashSet<string>(System.StringComparer.Ordinal);
+            foreach (FlowNode node in graph.nodes)
+            {
+                if (!(node is UINode ui)) continue;
+                foreach (UINode.ViewRef v in ui.showViews) keys.Add(ViewKey(v.category, v.viewName));
+                foreach (UINode.ViewRef v in ui.hideViews) keys.Add(ViewKey(v.category, v.viewName));
+            }
+            return keys;
+        }
+
+        private static string ViewKey(string category, string name) =>
+            $"{(string.IsNullOrWhiteSpace(category) ? CategoryNameId.DefaultCategory : category.Trim())}/" +
+            $"{(string.IsNullOrWhiteSpace(name) ? CategoryNameId.DefaultName : name.Trim())}";
+
+        /// <summary>
+        /// Views the flow references but no generated prefab provided — a real authoring gap, surfaced
+        /// loudly instead of producing a scene where some navigation targets silently do nothing.
+        /// </summary>
+        private static void WarnAboutMissingViews(FlowGraph graph, HashSet<string> wanted, List<GameObject> instances)
+        {
+            var present = new HashSet<string>(System.StringComparer.Ordinal);
+            foreach (GameObject go in instances)
+            {
+                UIView view = go.GetComponent<UIView>();
+                if (view != null) present.Add(ViewKey(view.id.Category, view.id.Name));
+            }
+            foreach (string key in wanted)
+                if (!present.Contains(key))
+                    Debug.LogWarning(
+                        $"[Neo.UI] Flow '{graph.graphName}' references view '{key}' but no generated prefab " +
+                        $"exists under {UISpecGenerator.GeneratedRoot}/Views — that navigation target will do nothing.");
         }
 
         private static RectTransform CreateCanvas(string name, int sortingOrder)
@@ -124,7 +244,12 @@ namespace Neo.UI.Editor
             return first;
         }
 
-        private static List<GameObject> LoadGeneratedViewPrefabs()
+        /// <summary>
+        /// Generated view prefabs to instance. When <paramref name="wanted"/> is non-null only the
+        /// views whose <see cref="UIView.id"/> is in that set are loaded (flow-scoped); when null every
+        /// generated view is loaded (the no-flow single-screen fallback).
+        /// </summary>
+        private static List<GameObject> LoadGeneratedViewPrefabs(HashSet<string> wanted)
         {
             var prefabs = new List<GameObject>();
             string folder = $"{UISpecGenerator.GeneratedRoot}/Views";
@@ -132,15 +257,18 @@ namespace Neo.UI.Editor
             foreach (string guid in AssetDatabase.FindAssets("t:Prefab", new[] { folder }))
             {
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guid));
-                if (prefab != null && prefab.GetComponent<UIView>() != null
-                    && prefab.GetComponent<GeneratedMarker>() != null)
-                    prefabs.Add(prefab);
+                if (prefab == null || prefab.GetComponent<GeneratedMarker>() == null) continue;
+                UIView view = prefab.GetComponent<UIView>();
+                if (view == null) continue;
+                if (wanted != null && !wanted.Contains(ViewKey(view.id.Category, view.id.Name))) continue;
+                prefabs.Add(prefab);
             }
             return prefabs;
         }
 
-        private static FlowGraph LoadGeneratedFlowGraph()
+        private static List<FlowGraph> LoadGeneratedFlowGraphs()
         {
+            var graphs = new List<FlowGraph>();
             string folder = $"{UISpecGenerator.GeneratedRoot}/Flow";
             // "t:FlowGraph" rides the scripted-type search index, which can lag freshly created
             // assets in cold batch sessions — enumerate the folder on disk instead (anchored on
@@ -150,18 +278,18 @@ namespace Neo.UI.Editor
                 System.IO.Path.GetDirectoryName(Application.dataPath) ?? ".", folder);
             if (!System.IO.Directory.Exists(absoluteFolder))
             {
-                Debug.Log($"[Neo.UI] LoadGeneratedFlowGraph: no '{absoluteFolder}' on disk");
-                return null;
+                Debug.Log($"[Neo.UI] LoadGeneratedFlowGraphs: no '{absoluteFolder}' on disk");
+                return graphs;
             }
             foreach (string file in System.IO.Directory.GetFiles(absoluteFolder, "*.asset"))
             {
                 string assetPath = $"{folder}/{System.IO.Path.GetFileName(file)}";
                 var graph = AssetDatabase.LoadAssetAtPath<FlowGraph>(assetPath);
-                Debug.Log($"[Neo.UI] LoadGeneratedFlowGraph: '{assetPath}' → " +
+                Debug.Log($"[Neo.UI] LoadGeneratedFlowGraphs: '{assetPath}' → " +
                           $"{(graph != null ? "FlowGraph" : $"null ({AssetDatabase.GetMainAssetTypeAtPath(assetPath)})")}");
-                if (graph != null) return graph;
+                if (graph != null) graphs.Add(graph);
             }
-            return null;
+            return graphs;
         }
     }
 }

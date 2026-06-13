@@ -85,13 +85,18 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   verify the kit stays dependency-free.
 - **When no editor holds the lock**: batch tests via
   `Unity.exe -batchmode -nographics -runTests -testPlatform EditMode|PlayMode -projectPath .`.
-- **Running the EditMode suite DELETES `Assets/Neo UI Generated/`** — many EditMode tests call
-  `AssetDatabase.DeleteAsset(UISpecGenerator.GeneratedRoot)` in setup/teardown, wiping the committed
-  demo assets there. So always (re)generate the demo AFTER testing, never before. To rebuild it:
-  headless `AgentBridge.RunBatch` with `[{"action":"generate","spec":
-  "Assets/Mockups/ColorACube/color-a-cube.json"},{"action":"buildScene"}]` (the generated views/
-  popups/flow + the `NeoUIGeneratedDemo` scene). Other generated/bootstrapped assets (Starter kit,
-  settings, fonts) live OUTSIDE `GeneratedRoot` and survive test runs.
+- **Tests no longer touch the committed demo** — `UISpecGenerator.GeneratedRoot` is a redirectable
+  property (default `DefaultGeneratedRoot` = `Assets/Neo UI Generated`). The global `[SetUpFixture]`
+  `NeoTestScratchRoot` (EditMode) and `SettingsCheatsDemoPlayTest` (PlayMode, via reflection) point it
+  at a throwaway `Assets/NeoUITestScratch` for the duration of a run, so every
+  `AssetDatabase.DeleteAsset(GeneratedRoot)` in test teardown only ever hits scratch — the committed,
+  GUID-referenced demo under `Assets/Neo UI Generated` survives. Production code must never reassign
+  `GeneratedRoot`.
+- **To (re)generate the committed demo itself**: headless `AgentBridge.RunBatch` with
+  `[{"action":"generate","spec":"Assets/Mockups/ColorACube/color-a-cube.json"},{"action":"buildScene","flow":"ColorACube"}]`
+  (the generated views/popups/flow + the `NeoUIGeneratedDemo` scene; name the `flow` since the
+  showcase's `GameUI` flow may share `GeneratedRoot`). Other generated/bootstrapped
+  assets (Starter kit, settings, fonts) live OUTSIDE `GeneratedRoot` and survive test runs.
 - Settings/databases are created via `Tools → Neo UI → Create or Repair Settings`; the themed
   widget prefab library + Dark/Light palette + type scale via `Tools → Neo UI → Create or
   Repair Starter Kit`. TMP SDF font assets (Inter + the Lucide icon font, committed under
@@ -115,8 +120,14 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   resolution matrix IN-MEMORY — commits no prefabs/assets; the agent render-and-critique loop;
   `UISpecPreview`/`UIScreenshotter.CaptureLive`) · `{"action":"specReference"}` (writes
   `Assets/docs/spec-reference.md` + `neo-spec.schema.json`) ·
-  `{"action":"buildScene"}` (playable scene from generated assets; also
-  `Tools → Neo UI → Build Scene From Generated UI`) ·
+  `{"action":"buildScene","flow":"<name>"}` (playable scene from generated assets; also
+  `Tools → Neo UI → Build Scene From Generated UI`. `GeneratedRoot` is a SHARED bucket — every spec
+  generated since the last wipe accumulates there. The build is therefore flow-scoped: it builds ONE
+  flow (= one app) and instances ONLY the views that flow references. `"flow"` is optional when a
+  single flow exists; with several it is REQUIRED — `GeneratedSceneBuilder.SelectFlowGraph` throws
+  rather than silently picking one, so a second spec's screens can't leak into the scene. Showcase →
+  `GameUI` (`ShowcaseSceneBuilder.ShowcaseFlow`); the committed ColorACube demo → `ColorACube`.
+  Regression: `Tests/EditMode/SceneBuilderFlowScopingTests.cs`) ·
   `{"action":"importSprites","folder":"Assets/..."}` (imports every texture under the folder as a
   Single sprite — run it BEFORE generating a spec whose image `src` points there; `textureType`
   alone leaves `spriteImportMode` None and no Sprite sub-asset exists)

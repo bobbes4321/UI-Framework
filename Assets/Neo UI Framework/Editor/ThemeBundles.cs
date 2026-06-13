@@ -281,7 +281,7 @@ namespace Neo.UI.Editor
 
         private static void ApplyMotionPreset(NeoUISettings settings, GenerateReport report, PresetSpec presetSpec)
         {
-            const string folder = UISpecGenerator.GeneratedRoot + "/Presets";
+            string folder = UISpecGenerator.GeneratedRoot + "/Presets";
             if (!AssetDatabase.IsValidFolder(UISpecGenerator.GeneratedRoot))
                 AssetDatabase.CreateFolder("Assets", UISpecGenerator.GeneratedRoot.Substring("Assets/".Length));
             if (!AssetDatabase.IsValidFolder(folder))

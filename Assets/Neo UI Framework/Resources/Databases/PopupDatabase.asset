@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: PopupDatabase
   m_EditorClassIdentifier: Neo.UI::Neo.UI.PopupDatabase
   popups:
-  - popupName: BuyBench
-    prefab: {fileID: 4797077279363220885, guid: e3846f2f4cf64994686d258ec5e39d99, type: 3}
-  - popupName: PackDetails
-    prefab: {fileID: 1554591506574971473, guid: c91ffae7920b2e849a307d4a0ec6ef84, type: 3}
   - popupName: Popup_Demo
     prefab: {fileID: 3628143666470071130, guid: 42f3b96dda5a4da4da49c42907dd7dd7, type: 3}
+  - popupName: PurchaseConfirm
+    prefab: {fileID: 3618012485022562501, guid: 0419809bb99c21d4d9af8af9e9ba2142, type: 3}
+  - popupName: QuitConfirm
+    prefab: {fileID: 5648667192972076062, guid: b0e432418fba6bd4a8562a48368b6e70, type: 3}
   - popupName: Starter
     prefab: {fileID: 6325289436706755297, guid: fd9a1381e0f444247becb7b791432703, type: 3}

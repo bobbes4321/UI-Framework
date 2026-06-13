@@ -21,10 +21,14 @@ namespace Neo.UI.Editor
             Debug.Log($"[Neo.UI] Showcase scene ready at {path} — press Play.");
         }
 
+        /// <summary> The flow the showcase demonstrates — pins the build to the GameUI app so a second
+        /// generated spec (e.g. ColorACube) sharing the generated folder can't leak its screens in. </summary>
+        public const string ShowcaseFlow = "GameUI";
+
         /// <summary> Builds the generated-UI scene, injects the showcase director and re-saves. </summary>
         public static string Build()
         {
-            string path = GeneratedSceneBuilder.Build(); // leaves the new scene open
+            string path = GeneratedSceneBuilder.Build(ShowcaseFlow); // leaves the new scene open
             var directorGo = new GameObject("Showcase Director", typeof(ShowcaseDirector));
             _ = directorGo;
             EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene(), path);
