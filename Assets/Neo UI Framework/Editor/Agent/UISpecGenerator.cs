@@ -490,6 +490,32 @@ namespace Neo.UI.Editor
             RectTransform childHost = null;     // where container children land
             bool childrenInLayout = true;       // safe areas host free-anchored children, not stacked ones
 
+            // Extensibility seam (keystone): a project-registered kind builds through its own provider,
+            // then falls into the SHARED geometry/anchor/child pass below exactly like a built-in. Built-ins
+            // are NOT registered, so this pre-check is a no-op until a project calls NeoElementKinds.Register.
+            if (NeoElementKinds.TryGet(element.kind, out INeoElementKind ext))
+            {
+                var ctx = new ElementBuildContext
+                {
+                    parent = parent,
+                    element = element,
+                    index = index,
+                    inLayout = inLayout,
+                    settings = settings,
+                    report = report,
+                    category = category,
+                    name = name,
+                    registerId = RegisterId,
+                    addViewCommand = AddViewCommand
+                };
+                go = ext.Build(ctx);
+                if (go == null)
+                {
+                    report.issues.Add($"Element kind '{element.kind}' provider returned no GameObject");
+                    return null;
+                }
+            }
+            else
             switch (element.kind)
             {
                 case "button":

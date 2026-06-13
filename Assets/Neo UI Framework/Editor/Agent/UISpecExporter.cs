@@ -269,6 +269,14 @@ namespace Neo.UI.Editor
 
         private static ElementSpec ExportElementBody(GameObject go, bool inLayout)
         {
+            // Extensibility seam (keystone): a project-registered kind exports through its own provider
+            // FIRST. Built-ins are not registered (their GetComponent chain below is untouched), so this
+            // is a no-op until a project registers. A provider's TryExport must match a marker component
+            // specific to its kind so it never hijacks a built-in.
+            foreach (INeoElementKind k in NeoElementKinds.All)
+                if (k != null && k.TryExport(go, out ElementSpec extSpec) && extSpec != null)
+                    return extSpec;
+
             // a built menu exports as just its catalog reference — the catalog owns the rows
             var menuPresenter = go.GetComponent<MenuPresenter>();
             if (menuPresenter != null && menuPresenter.catalog != null)

@@ -127,6 +127,33 @@ namespace Neo.UI.Editor
         {
             if (element == null) return;
 
+            // Extensibility seam (keystone): a project-registered kind surfaces its domain signal and/or
+            // data binding so game code can wire it — a registered kind invisible to the manifest is the
+            // same 90%-then-stuck failure the binding guide's invariant exists to prevent. Built-ins are
+            // not registered, so this pre-check is a no-op until a project registers.
+            if (NeoElementKinds.TryGet(element.kind, out INeoElementKind ext))
+            {
+                string payload = string.IsNullOrEmpty(ext.SignalPayload) ? "none" : ext.SignalPayload;
+                if (element.signal != null)
+                    AddDomainSignal(domainSeen, element.signal.category, element.signal.name,
+                        payload, $"{element.kind} {element.id}");
+                if (element.onClickSignal != null)
+                    AddDomainSignal(domainSeen, element.onClickSignal.category, element.onClickSignal.name,
+                        "none", $"{element.kind} {element.id}");
+                if (!string.IsNullOrEmpty(element.bind))
+                    dataSources.Add(new DataSourceBinding
+                    {
+                        id = element.bind,
+                        tokens = CollectTokens(element.item),
+                        source = $"{element.kind} in view {viewId}"
+                    });
+
+                if (element.item != null) WalkElement(element.item, viewId, standardSeen, domainSeen);
+                foreach (ElementSpec extChild in element.children)
+                    WalkElement(extChild, viewId, standardSeen, domainSeen);
+                return;
+            }
+
             switch (element.kind)
             {
                 case "button":
@@ -198,7 +225,11 @@ namespace Neo.UI.Editor
             defaultValue = item.value
         };
 
-        /// <summary> C# value type a settings/cheat control reads/writes. </summary>
+        /// <summary> C# value type a settings/cheat control reads/writes.
+        /// PHASE-2 TODO (element-kind plan sibling): when <c>MenuItemSpec.Kinds</c> migrates to a
+        /// <c>NeoMenuItemKinds</c> registry, route this through a registered descriptor's <c>ValueType</c>
+        /// so a project's novel menu-item kind surfaces its C# value type here too. Not implemented in
+        /// Phase 1 — built-in menu-item kinds keep this switch. </summary>
         public static string TypeForKind(string kind)
         {
             switch (kind)

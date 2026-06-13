@@ -339,6 +339,21 @@ namespace Neo.UI.Editor
             "input", "stepper", "safearea", "counter", "dropdown", "settings", "cheats"
         };
 
+        /// <summary> The built-in <see cref="Kinds"/> unioned with any project-registered
+        /// <see cref="NeoElementKinds"/>. Validators, parsers and pickers read THIS so a registered novel
+        /// kind isn't flagged invalid; <see cref="Kinds"/> stays the pure built-in list. </summary>
+        public static IReadOnlyList<string> KnownKinds
+        {
+            get
+            {
+                var list = new List<string>(Kinds);
+                foreach (INeoElementKind k in NeoElementKinds.All)
+                    if (k != null && !string.IsNullOrEmpty(k.Kind) && !list.Contains(k.Kind))
+                        list.Add(k.Kind);
+                return list;
+            }
+        }
+
         public string kind;
         public string id;   // "Category/Name" for interactive elements
         public string label;
@@ -401,7 +416,7 @@ namespace Neo.UI.Editor
 
         public static ElementSpec Parse(Dictionary<string, object> obj)
         {
-            foreach (string kind in Kinds)
+            foreach (string kind in KnownKinds)
             {
                 Dictionary<string, object> body = JsonReader.GetObject(obj, kind);
                 if (body == null) continue;
@@ -498,7 +513,7 @@ namespace Neo.UI.Editor
                         spec.children.Add(Parse(JsonReader.AsObject(item, "child element")));
                 return spec;
             }
-            throw new FormatException($"Element must contain one of: {string.Join(", ", Kinds)}");
+            throw new FormatException($"Element must contain one of: {string.Join(", ", KnownKinds)}");
         }
 
         public Dictionary<string, object> ToJsonObject()

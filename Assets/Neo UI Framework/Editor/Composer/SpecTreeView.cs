@@ -227,6 +227,8 @@ namespace Neo.UI.Editor.Composer
 
         private static Color AccentFor(string kind)
         {
+            // project-registered kinds carry their own accent; built-ins fall to the category default
+            if (NeoElementKinds.TryGet(kind, out INeoElementKind ext)) return ext.Accent;
             switch (kind)
             {
                 case "button": case "toggle": case "switch": case "tab": case "slider":
@@ -385,7 +387,7 @@ namespace Neo.UI.Editor.Composer
 
         private static void AddElementCreateItems(GenericMenu menu, string prefix, Action<string> create)
         {
-            foreach (string kind in ElementSpec.Kinds)
+            foreach (string kind in ElementSpec.KnownKinds)
             {
                 string captured = kind;
                 menu.AddItem(new GUIContent(prefix + kind), false, () => create(captured));
