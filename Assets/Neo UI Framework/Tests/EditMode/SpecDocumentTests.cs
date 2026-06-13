@@ -107,6 +107,9 @@ namespace Neo.UI.Tests
             var doc = new SpecDocument();
             doc.ApplyEdit(() =>
             {
+                // a fresh document seeds a placeholder Menu/Main view (NewEmptySpec); drop it so this
+                // assertion is about the settings catalog's serialization in isolation
+                doc.Spec.views.Clear();
                 var catalog = ComposerFactory.NewCatalog(MenuCatalogSpec.SettingsKind, "Settings", "Audio");
                 var item = ComposerFactory.NewMenuItem("toggle");
                 item.category = "Audio";

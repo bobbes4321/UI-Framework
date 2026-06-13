@@ -89,17 +89,19 @@ namespace Neo.UI.Editor
             List<OffSpecFinding> findings)
         {
             if (live == null || reference == null) return;
-            Walk(live.transform, reference.transform, basePath, insideWidget: false, findings);
+            Walk(live.transform, reference.transform, basePath, insideWidget: false,
+                isExportableLabel: false, findings);
         }
 
         private static void Walk(Transform live, Transform reference, string path, bool insideWidget,
-            List<OffSpecFinding> findings)
+            bool isExportableLabel, List<OffSpecFinding> findings)
         {
             // visual divergences only matter for factory-internal nodes (below a composite widget) —
             // everything at or above the widget root is the spec-exportable layer (SpecDiff's job)
-            if (insideWidget) CompareVisuals(live, reference, path, findings);
+            if (insideWidget) CompareVisuals(live, reference, path, isExportableLabel, findings);
 
-            bool childrenInside = insideWidget || IsCompositeWidget(live);
+            bool widgetRoot = IsCompositeWidget(live);
+            bool childrenInside = insideWidget || widgetRoot;
 
             var refChildren = new Dictionary<string, Transform>();
             foreach (Transform child in reference)
@@ -110,9 +112,13 @@ namespace Neo.UI.Editor
             {
                 liveSeen.Add(child.name);
                 string childPath = $"{path}/{child.name}";
+                // the direct child the exporter reads back as the widget's `label` (UISpecExporter
+                // FindChildText(go, LabelName)) — its text round-trips, so a text edit there is NOT
+                // off-spec. Only the text is exempt; raw color/geometry on it still won't round-trip.
+                bool childIsExportableLabel = widgetRoot && child.name == UIWidgetFactory.LabelName;
                 if (refChildren.TryGetValue(child.name, out Transform refChild))
                 {
-                    Walk(child, refChild, childPath, childrenInside, findings);
+                    Walk(child, refChild, childPath, childrenInside, childIsExportableLabel, findings);
                 }
                 else if (childrenInside)
                 {
@@ -139,7 +145,7 @@ namespace Neo.UI.Editor
         }
 
         private static void CompareVisuals(Transform live, Transform reference, string path,
-            List<OffSpecFinding> findings)
+            bool isExportableLabel, List<OffSpecFinding> findings)
         {
             var liveGraphic = live.GetComponent<Graphic>();
             var refGraphic = reference.GetComponent<Graphic>();
@@ -170,7 +176,7 @@ namespace Neo.UI.Editor
 
             var liveText = live.GetComponent<TMP_Text>();
             var refText = reference.GetComponent<TMP_Text>();
-            if (liveText != null && refText != null && liveText.text != refText.text)
+            if (!isExportableLabel && liveText != null && refText != null && liveText.text != refText.text)
                 findings.Add(new OffSpecFinding
                 {
                     path = path,

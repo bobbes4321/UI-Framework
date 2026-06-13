@@ -1,9 +1,21 @@
 # Plan — Composer Catalog Unification (de-opinionated, extensible menu authoring)
 
-> A worked example of the package's **extensible-by-design** tenet (see `CLAUDE.md` →
-> *Hard constraints*). Follow-up to Plan 2 — the Neo UI Composer
-> (`human-workflow-plans/02-spec-authoring-window.md`). Related: `settings-cheats-menu-plan.md`
-> (the runtime menu system this authors).
+> **Member of `extensibility-seams-master-plan.md`** — and the **reference implementation of
+> Pattern R** (the Kinds Registry) that the whole seam family mirrors. `ComposerCatalogKinds` (the
+> registry introduced below) is the shape every other registry in the family copies, and its
+> two-phase structure ("unify the chrome without touching the model" → "generalize the model") is
+> the **seam-first / migrate-later** staging the master plan generalizes. A worked example of the
+> package's **extensible-by-design** tenet (see `CLAUDE.md` → *Hard constraints*). Follow-up to
+> Plan 2 — the Neo UI Composer (`human-workflow-plans/02-spec-authoring-window.md`). Related:
+> `settings-cheats-menu-plan.md` (the runtime menu system this authors).
+>
+> **Execution slot:** Wave 1 of the master plan — Phase 1 here touches only Composer chrome
+> (`SpecTreeView` / `NeoComposerWindow` / `MenuCatalogEditor` + new `ComposerCatalogKinds`), disjoint
+> from every other Wave-1 plan, so it runs fully concurrently. **Phase 2 (model generalization)
+> shares files with the element-kind keystone** (`UISpec.cs`, `UISpecGenerator.cs`,
+> `UISpecExporter.cs` — note the `kind = … is CheatCatalog ? "cheats" : "settings"` hardcode at
+> `UISpecExporter.cs:277`); sequence it **after** the keystone (Wave 2) and build it on the same
+> `INeoElementKind`/registry machinery rather than inventing a parallel mechanism.
 
 ## The problem
 
@@ -118,15 +130,21 @@ if needed. No behavioural change for settings/cheats.
    `CheatsHeader` and the two toolbar buttons. Result: identical capability, neutral chrome,
    `Register(…)` seam in place. **This is the shippable deliverable.**
 
-2. **(Future / optional) Generalize the model to N catalog kinds — the deeper seam.** Today the
+2. **(Wave 2 — generalize the model to N catalog kinds — the deeper seam.)** Today the
    *model* bakes the kind set shut into two named fields. To let a project's registered kind actually
    round-trip (export → spec JSON → generate), generalize storage: either add `MenuCatalogSpec.Kinds`
    + a single `List<MenuCatalogSpec> catalogs` (kind on each), or a `Dictionary<string,
    List<MenuCatalogSpec>>`, and teach `UISpec.FromJson`/`ToJson`, `UISpecGenerator.BuildMenuElement`,
-   the exporter and the runtime `MenuCatalog` to key by `kind`. Migrate `settings`/`cheats` as
-   reserved built-in kinds for back-compat. This is a cross-cutting change and a textbook example of
-   the extensibility tenet applied to the model itself — scope it as its own plan when a real third
-   kind is needed.
+   the exporter (kill the `is CheatCatalog ? "cheats" : "settings"` hardcode at
+   `UISpecExporter.cs:277`) and the runtime `MenuCatalog` to key by `kind`. Migrate `settings`/
+   `cheats` as reserved built-in kinds for back-compat.
+
+   **Alignment with the master plan:** menu *catalogs* and menu *items* are the same fixed-set shape
+   as element kinds. Do **not** invent a separate mechanism here — `settings`/`cheats` are element
+   `kind`s in `ElementSpec.Kinds`, so this phase should ride the **element-kind keystone**
+   (`extensibility-seam-element-kinds-plan.md`): the runtime catalog type resolves through a registry
+   the same way `INeoElementKind` does, and `MenuItemSpec.Kinds` becomes `NeoMenuItemKinds` (the
+   keystone's Phase-2 sibling). Run this after the keystone lands so both share one registry idiom.
 
 ## New & modified files (Phase 1)
 
