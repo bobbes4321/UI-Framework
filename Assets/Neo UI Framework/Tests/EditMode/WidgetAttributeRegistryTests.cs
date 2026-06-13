@@ -1,0 +1,229 @@
+using System.Collections.Generic;
+using System.Linq;
+using Neo.UI;
+using Neo.UI.Editor;
+using Neo.UI.Editor.Composer;
+using NUnit.Framework;
+using UnityEditor;
+using UnityEngine;
+
+namespace Neo.UI.Tests
+{
+    /// <summary>
+    /// Covers the widget-attribute extensibility seams
+    /// (extensibility-seam-widget-attributes-plan.md):
+    ///  - the Composer option sets (variants/sizes/aligns/shape names) seed exactly the built-ins
+    ///    and accept project Register() calls (Pattern R);
+    ///  - a project ButtonVariantAsset / ButtonSizeAsset on NeoUISettings flows through
+    ///    UIWidgetFactory ahead of the built-in switch, and round-trips (Pattern A);
+    ///  - an IconMapOverlay glyph resolves through IconMap before the built-in Lucide dict.
+    /// Built-in behavior must stay byte-identical when nothing is registered/overlaid
+    /// (the existing IconAndVariantTests are the golden net for that).
+    /// </summary>
+    public class WidgetAttributeRegistryTests
+    {
+        // ------------------------------------------------------------------ Pattern R: option sets
+
+        [Test]
+        public void OptionSets_SeedExactlyTheBuiltIns()
+        {
+            CollectionAssert.AreEqual(
+                new[] { "primary", "secondary", "ghost", "danger" }, ComposerOptions.ButtonVariants);
+            CollectionAssert.AreEqual(new[] { "sm", "md", "lg" }, ComposerOptions.ButtonSizes);
+            CollectionAssert.AreEqual(new[] { "left", "center", "right" }, ComposerOptions.Aligns);
+            CollectionAssert.AreEqual(
+                new[] { "roundedRect", "circle", "pill", "checkmark", "chevron", "cross", "ring", "arc" },
+                ComposerOptions.ShapeNames);
+        }
+
+        [Test]
+        public void Register_AppendsNewValue_AndIsIdempotent()
+        {
+            int before = ComposerOptions.ButtonVariants.Length;
+            ComposerOptions.RegisterVariant("success");
+            CollectionAssert.Contains(ComposerOptions.ButtonVariants, "success");
+            Assert.AreEqual(before + 1, ComposerOptions.ButtonVariants.Length, "registering adds one");
+
+            // case-insensitive no-op (built-in + re-register)
+            ComposerOptions.RegisterVariant("success");
+            ComposerOptions.RegisterVariant("PRIMARY");
+            Assert.AreEqual(before + 1, ComposerOptions.ButtonVariants.Length,
+                "re-registering an existing id (any case) is a no-op");
+
+            ComposerOptions.RegisterSize("xl");
+            ComposerOptions.RegisterAlign("justify");
+            ComposerOptions.RegisterShape("star");
+            CollectionAssert.Contains(ComposerOptions.ButtonSizes, "xl");
+            CollectionAssert.Contains(ComposerOptions.Aligns, "justify");
+            CollectionAssert.Contains(ComposerOptions.ShapeNames, "star");
+        }
+
+        [Test]
+        public void All_ReturnsSnapshot_CallerCannotMutateSeed()
+        {
+            string[] snapshot = ComposerOptions.ButtonVariants;
+            snapshot[0] = "tampered";
+            CollectionAssert.DoesNotContain(ComposerOptions.ButtonVariants, "tampered",
+                ".All must hand out a copy, not the backing list");
+        }
+
+        // ------------------------------------------------------------------ Pattern A: variant asset
+
+        private const string VariantSpecJson = @"{
+          ""views"": [ { ""id"": ""Reg/Screen"", ""elements"": [
+            { ""vstack"": { ""anchor"": ""Stretch"", ""padding"": 16, ""spacing"": 10, ""children"": [
+              { ""button"": { ""id"": ""Reg/Save"", ""label"": ""Save"", ""variant"": ""success"", ""size"": ""xl"" } }
+            ] } }
+          ] } ]
+        }";
+
+        [Test]
+        public void ProjectVariantAndSize_FlowThroughFactory_AndRoundTrip()
+        {
+            NeoUISettings settings = NeoUISettings.instance;
+            Assert.IsNotNull(settings, "settings asset must exist (Create or Repair Settings)");
+
+            List<ButtonVariantAsset> savedVariants = settings.buttonVariants;
+            List<ButtonSizeAsset> savedSizes = settings.buttonSizes;
+            try
+            {
+                settings.buttonVariants = new List<ButtonVariantAsset>
+                {
+                    new ButtonVariantAsset
+                    {
+                        name = "success",
+                        contentToken = UIWidgetFactory.TokenTextOnPrimary,
+                        colors = new SelectableColorSet
+                        {
+                            normal = new ThemeColorRef(UIWidgetFactory.TokenSuccess),
+                            highlighted = new ThemeColorRef(UIWidgetFactory.TokenSuccessHover),
+                            pressed = new ThemeColorRef(UIWidgetFactory.TokenSuccessPressed),
+                            selected = new ThemeColorRef(UIWidgetFactory.TokenSuccessHover),
+                            disabled = new ThemeColorRef(new Color(0.5f, 0.5f, 0.5f, 0.5f))
+                        }
+                    }
+                };
+                settings.buttonSizes = new List<ButtonSizeAsset>
+                {
+                    new ButtonSizeAsset { name = "xl", height = 88f, labelStyle = UIWidgetFactory.TextStyleButtonLabelLarge }
+                };
+
+                GenerateReport report = UISpecGenerator.Generate(UISpec.FromJson(VariantSpecJson));
+                Assert.IsEmpty(report.issues, report.ToString());
+
+                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(
+                    $"{UISpecGenerator.GeneratedRoot}/Views/Reg_Screen.prefab");
+                Assert.IsNotNull(prefab, "generated view prefab missing");
+
+                GameObject save = prefab.GetComponentsInChildren<UIButton>(true)
+                    .First(b => b.id.Matches("Reg", "Save")).gameObject;
+
+                // variant colors came from the asset, not the built-in switch
+                SelectableColorSet colors = save.GetComponent<UISelectableColorAnimator>().colors;
+                Assert.AreEqual(UIWidgetFactory.TokenSuccess, colors.normal.token,
+                    "success variant must use the asset's color set");
+                Assert.AreEqual(UIWidgetFactory.TokenSuccessHover, colors.highlighted.token);
+
+                // size dimensions came from the asset
+                Assert.AreEqual(88f, save.GetComponent<UnityEngine.UI.LayoutElement>().preferredHeight,
+                    "xl size height comes from the ButtonSizeAsset");
+
+                // WidgetStyleTag stores the free strings, so they round-trip through export
+                WidgetStyleTag tag = save.GetComponent<WidgetStyleTag>();
+                Assert.AreEqual("success", tag.variant);
+                Assert.AreEqual("xl", tag.size);
+
+                UISpec exported = UISpecExporter.ExportProject();
+                ElementSpec exportedSave = exported.views.First(v => v.id == "Reg/Screen")
+                    .elements.First(e => e.kind == "vstack").children.First(e => e.id == "Reg/Save");
+                Assert.AreEqual("success", exportedSave.variant, "project variant round-trips");
+                Assert.AreEqual("xl", exportedSave.sizeVariant, "project size round-trips");
+            }
+            finally
+            {
+                settings.buttonVariants = savedVariants;
+                settings.buttonSizes = savedSizes;
+            }
+        }
+
+        [Test]
+        public void BuiltInVariant_IsByteIdentical_WhenNoAssetOverridesIt()
+        {
+            // With no project variants registered, the built-in danger variant must be untouched.
+            NeoUISettings settings = NeoUISettings.instance;
+            List<ButtonVariantAsset> saved = settings.buttonVariants;
+            try
+            {
+                settings.buttonVariants = new List<ButtonVariantAsset>(); // empty: pure built-in path
+
+                const string json = @"{ ""views"": [ { ""id"": ""Reg/Danger"", ""elements"": [
+                    { ""button"": { ""id"": ""Reg/Del"", ""label"": ""Delete"", ""variant"": ""danger"" } } ] } ] }";
+                GenerateReport report = UISpecGenerator.Generate(UISpec.FromJson(json));
+                Assert.IsEmpty(report.issues, report.ToString());
+                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(
+                    $"{UISpecGenerator.GeneratedRoot}/Views/Reg_Danger.prefab");
+                SelectableColorSet colors = prefab.GetComponentsInChildren<UIButton>(true)
+                    .First(b => b.id.Matches("Reg", "Del")).GetComponent<UISelectableColorAnimator>().colors;
+                Assert.AreEqual(UIWidgetFactory.TokenDanger, colors.normal.token);
+                Assert.AreEqual(UIWidgetFactory.TokenDangerHover, colors.highlighted.token);
+                Assert.AreEqual(UIWidgetFactory.TokenDangerPressed, colors.pressed.token);
+            }
+            finally
+            {
+                settings.buttonVariants = saved;
+            }
+        }
+
+        // ------------------------------------------------------------------ Pattern A: icon overlay
+
+        [Test]
+        public void IconOverlay_ResolvesBeforeBuiltInDict_AndReverses()
+        {
+            NeoUISettings settings = NeoUISettings.instance;
+            IconMapOverlay saved = settings.iconOverlay;
+            IconMapOverlay overlay = ScriptableObject.CreateInstance<IconMapOverlay>();
+            try
+            {
+                overlay.glyphs = new List<IconMapOverlay.Entry>
+                {
+                    new IconMapOverlay.Entry { name = "brand-logo", codepoint = "F1A0" }
+                };
+                overlay.aliases = new List<IconMapOverlay.Alias>
+                {
+                    new IconMapOverlay.Alias { alias = "logo", target = "brand-logo" }
+                };
+                settings.iconOverlay = overlay;
+
+                Assert.IsTrue(IconMap.TryGetGlyph("brand-logo", out char glyph), "overlay glyph resolves");
+                Assert.AreEqual((char)0xF1A0, glyph);
+                Assert.IsTrue(IconMap.TryGetGlyph("logo", out char aliased), "overlay alias resolves");
+                Assert.AreEqual(glyph, aliased);
+
+                Assert.IsTrue(IconMap.TryGetName(glyph, out string name), "overlay glyph reverses");
+                Assert.AreEqual("brand-logo", name);
+
+                CollectionAssert.Contains(IconMap.Names.ToList(), "brand-logo",
+                    "overlay names appear in the picker source");
+
+                // built-ins still resolve with an overlay present
+                Assert.IsTrue(IconMap.TryGetGlyph("play", out _));
+                Assert.IsTrue(IconMap.TryGetGlyph("home", out _), "built-in aliases still work");
+            }
+            finally
+            {
+                settings.iconOverlay = saved;
+                Object.DestroyImmediate(overlay);
+            }
+        }
+
+        [TearDown]
+        public void ResetRegistries() => ComposerOptions.ResetAttributeRegistriesForTests();
+
+        [OneTimeTearDown]
+        public void Cleanup()
+        {
+            AssetDatabase.DeleteAsset(UISpecGenerator.GeneratedRoot);
+            AssetDatabase.SaveAssets();
+        }
+    }
+}
