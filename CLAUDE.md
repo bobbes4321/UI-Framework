@@ -6,6 +6,9 @@ rationale + field catalog: `Assets/docs/editor-ux-analysis.md`. Visual-polish ro
 icons, variants, theme bundles, juice — phased, with acceptance criteria):
 `Assets/docs/ui-beautification-plan.md`.
 
+> Formerly "AlterEyes UI" — rebranded to **Neo UI Framework** (namespaces `Neo.*`, type prefix
+> `Neo`). Older commits/issues that say AlterEyes / `AE*` map to the current Neo names.
+
 ## Layout
 
 - `Assets/Neo UI Framework/Runtime` — asmdef `Neo.UI` (containers, interactive, animation/tweens,
@@ -82,6 +85,13 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   verify the kit stays dependency-free.
 - **When no editor holds the lock**: batch tests via
   `Unity.exe -batchmode -nographics -runTests -testPlatform EditMode|PlayMode -projectPath .`.
+- **Running the EditMode suite DELETES `Assets/Neo UI Generated/`** — many EditMode tests call
+  `AssetDatabase.DeleteAsset(UISpecGenerator.GeneratedRoot)` in setup/teardown, wiping the committed
+  demo assets there. So always (re)generate the demo AFTER testing, never before. To rebuild it:
+  headless `AgentBridge.RunBatch` with `[{"action":"generate","spec":
+  "Assets/Mockups/ColorACube/color-a-cube.json"},{"action":"buildScene"}]` (the generated views/
+  popups/flow + the `NeoUIGeneratedDemo` scene). Other generated/bootstrapped assets (Starter kit,
+  settings, fonts) live OUTSIDE `GeneratedRoot` and survive test runs.
 - Settings/databases are created via `Tools → Neo UI → Create or Repair Settings`; the themed
   widget prefab library + Dark/Light palette + type scale via `Tools → Neo UI → Create or
   Repair Starter Kit`. TMP SDF font assets (Inter + the Lucide icon font, committed under
