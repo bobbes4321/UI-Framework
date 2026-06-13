@@ -228,7 +228,29 @@ namespace Neo.UI.Editor
 
         private static Dictionary<char, string> s_reverse;
 
-        public static IEnumerable<string> Names => Glyphs.Keys;
+        private static IconMapOverlay Overlay
+        {
+            get
+            {
+                NeoUISettings settings = NeoUISettings.instance;
+                return settings != null ? settings.iconOverlay : null;
+            }
+        }
+
+        /// <summary> Built-in names plus any project overlay names (overlay first, deduped). </summary>
+        public static IEnumerable<string> Names
+        {
+            get
+            {
+                var seen = new HashSet<string>();
+                IconMapOverlay overlay = Overlay;
+                if (overlay != null)
+                    foreach (string name in overlay.Names())
+                        if (seen.Add(name)) yield return name;
+                foreach (string name in Glyphs.Keys)
+                    if (seen.Add(name)) yield return name;
+            }
+        }
 
         public static int Count => Glyphs.Count;
 
@@ -241,18 +263,24 @@ namespace Neo.UI.Editor
             return new string(characters);
         }
 
-        /// <summary> Resolves an icon name (or alias) to its font glyph. </summary>
+        /// <summary> Resolves an icon name (or alias) to its font glyph. A project overlay on the
+        /// settings asset is consulted first, then the built-in Lucide dict + forgiving aliases. </summary>
         public static bool TryGetGlyph(string name, out char glyph)
         {
             glyph = default;
             if (string.IsNullOrEmpty(name)) return false;
+            IconMapOverlay overlay = Overlay;
+            if (overlay != null && overlay.TryGetGlyph(name, out glyph)) return true;
             if (Aliases.TryGetValue(name, out string canonical)) name = canonical;
             return Glyphs.TryGetValue(name, out glyph);
         }
 
-        /// <summary> Reverse lookup for the exporter: glyph → canonical icon name. </summary>
+        /// <summary> Reverse lookup for the exporter: glyph → canonical icon name. The project
+        /// overlay is consulted first so custom glyphs export under their overlay name. </summary>
         public static bool TryGetName(char glyph, out string name)
         {
+            IconMapOverlay overlay = Overlay;
+            if (overlay != null && overlay.TryGetName(glyph, out name)) return true;
             if (s_reverse == null)
             {
                 s_reverse = new Dictionary<char, string>(Glyphs.Count);

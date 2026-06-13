@@ -438,6 +438,11 @@ namespace Neo.UI.Editor
 
         private static (float height, string labelStyle) ButtonSize(string size)
         {
+            // Pattern A seam (extensibility-seam-widget-attributes-plan.md): a project-authored size
+            // on the settings asset wins; the built-in sm/md/lg switch is the fallback (unchanged).
+            NeoUISettings settings = NeoUISettings.instance;
+            if (settings != null && settings.TryGetButtonSize(size, out float h, out string style))
+                return (h, string.IsNullOrEmpty(style) ? TextStyleButtonLabel : style);
             switch (size)
             {
                 case SizeSmall: return (40f, TextStyleButtonLabelSmall);
@@ -446,9 +451,20 @@ namespace Neo.UI.Editor
             }
         }
 
-        /// <summary> Per-variant state colors; contentToken colors the label and icon. </summary>
+        /// <summary> Per-variant state colors; contentToken colors the label and icon. A project
+        /// variant on the settings asset is consulted first (Pattern A); the built-in 4-case switch
+        /// is the unchanged fallback. </summary>
         private static SelectableColorSet VariantColors(string variant, out string contentToken)
         {
+            // Pattern A seam (extensibility-seam-widget-attributes-plan.md): project-authored
+            // variant wins; the built-in switch below is byte-identical fallback.
+            NeoUISettings settings = NeoUISettings.instance;
+            if (settings != null && settings.TryGetVariantColors(variant, out SelectableColorSet projectColors,
+                    out string projectToken))
+            {
+                contentToken = string.IsNullOrEmpty(projectToken) ? TokenTextOnPrimary : projectToken;
+                return projectColors;
+            }
             switch (variant)
             {
                 case VariantSecondary:
