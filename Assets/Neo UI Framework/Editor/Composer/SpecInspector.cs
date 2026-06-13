@@ -275,38 +275,49 @@ namespace Neo.UI.Editor.Composer
             if (EditorGUI.EndChangeCheck()) onChange(v);
         }
 
+        // a row is: [ label column ][ 14px enable toggle ][ label-less field… ]. Drawing the label
+        // through PrefixLabel (never letting the field draw its own) keeps it on ONE line and stops
+        // the toggle/label/field from overlapping.
+        private const float ToggleWidth = 14f;
+        private const float ToggleGap = 18f;
+        private static readonly GUIContent[] XY = { new GUIContent("X"), new GUIContent("Y") };
+
+        private static void SplitToggleRow(string label, out Rect toggleRect, out Rect fieldRect)
+        {
+            Rect content = EditorGUI.PrefixLabel(EditorGUILayout.GetControlRect(), new GUIContent(label));
+            toggleRect = new Rect(content.x, content.y, ToggleWidth, content.height);
+            fieldRect = new Rect(content.x + ToggleGap, content.y, content.width - ToggleGap, content.height);
+        }
+
         private void DrawNullableFloat(string label, float? current, Action<float?> onChange)
         {
-            Rect rect = EditorGUILayout.GetControlRect();
-            var toggleRect = new Rect(rect.x, rect.y, 16f, rect.height);
-            Rect fieldRect = new Rect(rect.x + 16f, rect.y, rect.width - 16f, rect.height);
-
+            SplitToggleRow(label, out Rect toggleRect, out Rect fieldRect);
             EditorGUI.BeginChangeCheck();
             bool has = EditorGUI.Toggle(toggleRect, current.HasValue);
             using (new EditorGUI.DisabledScope(!has))
             {
-                float value = EditorGUI.DelayedFloatField(fieldRect, label, current ?? 0f);
+                float value = EditorGUI.DelayedFloatField(fieldRect, current ?? 0f);
                 if (EditorGUI.EndChangeCheck()) onChange(has ? (float?)value : null);
             }
         }
 
         private void DrawSnapFloat(string label, float? current, Action<float?> onChange)
         {
-            Rect rect = EditorGUILayout.GetControlRect();
-            var toggleRect = new Rect(rect.x, rect.y, 16f, rect.height);
-            rect = new Rect(rect.x + 16f, rect.y, rect.width - 16f, rect.height);
+            SplitToggleRow(label, out Rect toggleRect, out Rect fieldRect);
+            const float snapWidth = 34f;
+            var snapRect = new Rect(fieldRect.xMax - snapWidth, fieldRect.y, snapWidth, fieldRect.height);
+            fieldRect.width -= snapWidth + 2f;
+
             EditorGUI.BeginChangeCheck();
             bool has = EditorGUI.Toggle(toggleRect, current.HasValue);
-            Rect labelled = EditorGUI.PrefixLabel(rect, new GUIContent(label));
-            var fieldRect = new Rect(labelled.x, labelled.y, labelled.width - 24f, labelled.height);
-            var snapRect = new Rect(labelled.xMax - 22f, labelled.y, 22f, labelled.height);
             using (new EditorGUI.DisabledScope(!has))
             {
                 float value = EditorGUI.DelayedFloatField(fieldRect, current ?? 0f);
                 if (EditorGUI.EndChangeCheck()) onChange(has ? (float?)value : null);
             }
-            // on-scale snap dropdown (4/8/12/16/24/32/48/64)
-            NeoDropdown.ValuePopup(snapRect, "›", ScaleStrings, s =>
+            // on-scale snap dropdown (4/8/12/16/24/32/48/64) — selecting a value also enables the field.
+            // empty label → just the popup's arrow (a compact "pick a scale value" affordance)
+            NeoDropdown.ValuePopup(snapRect, "", ScaleStrings, s =>
             {
                 if (float.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out float parsed))
                     onChange(parsed);
@@ -322,30 +333,29 @@ namespace Neo.UI.Editor.Composer
 
         private void DrawNullableInt(string label, int? current, Action<int?> onChange)
         {
-            Rect rect = EditorGUILayout.GetControlRect();
-            var toggleRect = new Rect(rect.x, rect.y, 16f, rect.height);
-            var fieldRect = new Rect(rect.x + 16f, rect.y, rect.width - 16f, rect.height);
+            SplitToggleRow(label, out Rect toggleRect, out Rect fieldRect);
             EditorGUI.BeginChangeCheck();
             bool has = EditorGUI.Toggle(toggleRect, current.HasValue);
             using (new EditorGUI.DisabledScope(!has))
             {
-                int value = EditorGUI.DelayedIntField(fieldRect, label, current ?? 0);
+                int value = EditorGUI.DelayedIntField(fieldRect, current ?? 0);
                 if (EditorGUI.EndChangeCheck()) onChange(has ? (int?)value : null);
             }
         }
 
         private void DrawSizeArray(string label, float[] current, Action<float[]> onChange)
         {
-            Rect rect = EditorGUILayout.GetControlRect();
-            var toggleRect = new Rect(rect.x, rect.y, 16f, rect.height);
-            Rect fieldRect = new Rect(rect.x + 16f, rect.y, rect.width - 16f, rect.height);
+            SplitToggleRow(label, out Rect toggleRect, out Rect fieldRect);
+            bool present = current != null && current.Length >= 2;
             EditorGUI.BeginChangeCheck();
-            bool has = EditorGUI.Toggle(toggleRect, current != null && current.Length >= 2);
+            bool has = EditorGUI.Toggle(toggleRect, present);
             using (new EditorGUI.DisabledScope(!has))
             {
-                Vector2 value = current != null && current.Length >= 2 ? new Vector2(current[0], current[1]) : Vector2.zero;
-                value = EditorGUI.Vector2Field(fieldRect, label, value);
-                if (EditorGUI.EndChangeCheck()) onChange(has ? new[] { value.x, value.y } : null);
+                var values = new[] { present ? current[0] : 0f, present ? current[1] : 0f };
+                float previousLabelWidth = EditorGUIUtility.labelWidth;
+                EditorGUI.MultiFloatField(fieldRect, XY, values);
+                EditorGUIUtility.labelWidth = previousLabelWidth;
+                if (EditorGUI.EndChangeCheck()) onChange(has ? new[] { values[0], values[1] } : null);
             }
         }
 
