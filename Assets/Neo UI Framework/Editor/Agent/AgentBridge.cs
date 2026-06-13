@@ -27,6 +27,13 @@ namespace Neo.UI.Editor
     /// - <c>{"action":"merge","incoming":"new.json","out":"merged.json","conflictPolicy":"preferTheirs"}</c>
     ///   — three-way merge of stored baseline + live project + incoming spec; writes the merged spec
     ///   and returns applied / conflicts / dropped (off-spec edits that cannot be folded in)
+    /// - <c>{"action":"sync","incoming":"new.json","force":false,"conflictPolicy":"preferTheirs"}</c>
+    ///   — the safe-regenerate protocol and the STANDING way an agent changes generated UI: export →
+    ///   drift+lint vs the baseline → (refuse on off-spec edits unless "force") → three-way merge →
+    ///   generate from the merged spec → rewrite the baseline. Preserves human prefab edits a stale
+    ///   incoming spec would otherwise wipe. Omit "incoming" to just capture the human's edits into the
+    ///   baseline (export + fold drift, no regenerate). Returns ok / refused / regenerated / applied /
+    ///   conflicts / offSpecWarnings / dropped / merged.
     /// - <c>{"action":"buildScene"}</c> — builds the playable scene from generated assets
     ///   (refuses while the open scene has unsaved changes)
     /// - <c>{"action":"specReference","out":"path.md"}</c> — writes the code-generated spec
@@ -99,7 +106,7 @@ namespace Neo.UI.Editor
                 // play-mode hazard applies (AddComponent fires Awake/OnEnable mid-construction)
                 bool mutatesAssets = action == "generate" || action == "buildScene"
                                      || action == "screenshot" || action == "preview"
-                                     || action == "diff" || action == "merge";
+                                     || action == "diff" || action == "merge" || action == "sync";
                 if (mutatesAssets && UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode)
                 {
                     result["ok"] = false;
@@ -115,13 +122,14 @@ namespace Neo.UI.Editor
                     case "validate": HandleValidate(result); break;
                     case "diff": HandleDiff(request, result); break;
                     case "merge": HandleMerge(request, result); break;
+                    case "sync": HandleSync(request, result); break;
                     case "buildScene": HandleBuildScene(request, result); break;
                     case "specReference": HandleSpecReference(request, result); break;
                     case "preview": HandlePreview(request, result); break;
                     case "importSprites": HandleImportSprites(request, result); break;
                     default:
                         result["ok"] = false;
-                        result["error"] = $"Unknown action '{action}' (screenshot | generate | export | validate | diff | merge | buildScene | specReference | preview | importSprites)";
+                        result["error"] = $"Unknown action '{action}' (screenshot | generate | export | validate | diff | merge | sync | buildScene | specReference | preview | importSprites)";
                         break;
                 }
             }
@@ -155,6 +163,10 @@ namespace Neo.UI.Editor
             result["updated"] = new List<object>(report.updated);
             result["collisions"] = new List<object>(report.collisions);
             result["issues"] = new List<object>(report.issues);
+            // a plain generate against a drifted tree overwrites human prefab edits — surface that
+            // loudly (points at 'sync', which preserves them). Soft: never flips "ok".
+            result["warnings"] = new List<object>(report.warnings);
+            if (report.warnings.Count > 0) result["warning"] = string.Join(" ", report.warnings);
         }
 
         private static void HandleExport(Dictionary<string, object> request, Dictionary<string, object> result)
@@ -293,6 +305,74 @@ namespace Neo.UI.Editor
                 case "fail": return ConflictPolicy.Fail;
                 default: return ConflictPolicy.PreferTheirs;
             }
+        }
+
+        /// <summary>
+        /// The safe-regenerate protocol (Plan 4). With "incoming": export → drift+lint vs baseline →
+        /// (refuse on off-spec edits unless "force") → three-way merge → generate → rewrite baseline.
+        /// Without "incoming": capture the human's edits into the baseline (no regenerate). This is the
+        /// standing way agents change generated UI — it preserves human prefab edits a stale incoming
+        /// spec would otherwise wipe, and never discards a non-round-trippable edit silently.
+        /// </summary>
+        private static void HandleSync(Dictionary<string, object> request, Dictionary<string, object> result)
+        {
+            string incomingPath = JsonReader.GetString(request, "incoming");
+            UISpec incoming = null;
+            if (!string.IsNullOrEmpty(incomingPath))
+            {
+                if (!File.Exists(incomingPath))
+                    throw new ArgumentException($"sync \"incoming\" points at a missing file: '{incomingPath}' " +
+                                                "(omit \"incoming\" to capture the human's edits into the baseline)");
+                incoming = UISpec.FromJson(File.ReadAllText(incomingPath));
+            }
+
+            bool force = JsonReader.GetBool(request, "force");
+            ConflictPolicy policy = ParsePolicy(JsonReader.GetString(request, "conflictPolicy"));
+
+            SyncResult sync = SpecBaseline.Sync(incoming, policy, force);
+
+            result["ok"] = sync.ok;
+            result["refused"] = sync.refused;
+            result["regenerated"] = sync.regenerated;
+            result["baselineUpdated"] = sync.baselineUpdated;
+            result["humanChanges"] = ChangeList(sync.humanChanges);
+            result["applied"] = ChangeList(sync.applied);
+            result["conflicts"] = ChangeList(sync.conflicts);
+            result["offSpecWarnings"] = FindingList(sync.offSpecWarnings);
+            result["dropped"] = FindingList(sync.dropped);
+            if (sync.merged != null) result["merged"] = sync.merged.ToJson();
+            if (sync.generateReport != null)
+            {
+                result["created"] = new List<object>(sync.generateReport.created);
+                result["updated"] = new List<object>(sync.generateReport.updated);
+                result["collisions"] = new List<object>(sync.generateReport.collisions);
+                result["issues"] = new List<object>(sync.generateReport.issues);
+            }
+            if (!string.IsNullOrEmpty(sync.note)) result["note"] = sync.note;
+
+            // optional: also write the merged/captured spec out for inspection (like merge's "out")
+            string outPath = JsonReader.GetString(request, "out");
+            if (!string.IsNullOrEmpty(outPath) && sync.merged != null)
+            {
+                string directory = Path.GetDirectoryName(outPath);
+                if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
+                File.WriteAllText(outPath, sync.merged.ToJson());
+                result["path"] = Path.GetFullPath(outPath);
+            }
+        }
+
+        private static List<object> ChangeList(List<SpecChange> changes)
+        {
+            var list = new List<object>(changes.Count);
+            foreach (SpecChange change in changes) list.Add(change.ToJsonObject());
+            return list;
+        }
+
+        private static List<object> FindingList(List<OffSpecFinding> findings)
+        {
+            var list = new List<object>(findings.Count);
+            foreach (OffSpecFinding finding in findings) list.Add(finding.ToJsonObject());
+            return list;
         }
 
         private static void HandleImportSprites(Dictionary<string, object> request, Dictionary<string, object> result)
