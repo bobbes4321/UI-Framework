@@ -107,6 +107,9 @@ namespace Neo.UI.Tests
             var doc = new SpecDocument();
             doc.ApplyEdit(() =>
             {
+                // a fresh document seeds a placeholder Menu/Main view (NewEmptySpec); drop it so this
+                // assertion is about the settings catalog's serialization in isolation
+                doc.Spec.views.Clear();
                 var catalog = ComposerFactory.NewCatalog(MenuCatalogSpec.SettingsKind, "Settings", "Audio");
                 var item = ComposerFactory.NewMenuItem("toggle");
                 item.category = "Audio";
@@ -119,6 +122,24 @@ namespace Neo.UI.Tests
             const string expected = @"{ ""settings"": [ { ""id"": ""Settings/Audio"", ""items"": [
                 { ""toggle"": { ""id"": ""Audio/Music"", ""label"": ""Music"", ""value"": true } } ] } ] }";
             Assert.AreEqual(Canonical(expected), doc.Spec.ToJson());
+        }
+
+        [Test]
+        public void Origin_DecidesSaveMode()
+        {
+            var doc = new SpecDocument();
+            // a brand-new doc is authored standalone — Save generates from it directly
+            Assert.AreEqual(SpecDocument.DocumentOrigin.New, doc.Origin);
+            Assert.IsFalse(doc.SavesThroughSync, "a new doc must not merge over the live project");
+
+            // a doc loaded from a file is likewise authoritative/standalone
+            doc.Load(SpecDocument.NewEmptySpec(), "Assets/some-spec.json", SpecDocument.DocumentOrigin.File);
+            Assert.IsFalse(doc.SavesThroughSync);
+
+            // a doc opened FROM the project saves through the safe sync/merge protocol
+            doc.Load(SpecDocument.NewEmptySpec(), null, SpecDocument.DocumentOrigin.Project);
+            Assert.IsTrue(doc.SavesThroughSync,
+                "a project-derived doc must fold edits back safely, never clobber prefab edits");
         }
 
         [Test]

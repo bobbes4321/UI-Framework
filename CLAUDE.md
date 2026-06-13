@@ -27,6 +27,16 @@ icons, variants, theme bundles, juice — phased, with acceptance criteria):
 
 ## Hard constraints (apply to ALL code)
 
+- **Extensible by design**: every subsystem must be open for a *consuming project* to extend without
+  forking the package. There is nothing worse than a team getting 90% of the way there with a great
+  package and then being unable to do the last thing because it wasn't provided out of the box — so a
+  team using this package must be able to cleanly and easily expand on it. Wherever code defines a
+  fixed set — a widget kind, a catalog kind, an animation preset, a theme token, an inspector field, a
+  flow node, an id database — ask "what does a project plausibly add here?" and ship an explicit
+  **seam** for it (a documented interface, a `ScriptableObject`/registry the project populates, a
+  `virtual`/`protected` hook, a `partial`), not a sealed `enum`/`switch`/hardcoded list. Ship sensible
+  defaults *through* that seam, never around it. The bias to avoid: baking a list shut because today
+  only two cases exist. (Worked example: `composer-catalog-unification-plan.md`.)
 - **Agent-first**: everything addressable by category/name strings (never GUIDs); flat force-text
   ScriptableObjects; prefer signals (`Signals.On<T>` / `Signals.Send`) over serialized UnityEvents.
 - **Editor performance**: no animated inspector chrome, no editor-tick subscriptions for visuals,

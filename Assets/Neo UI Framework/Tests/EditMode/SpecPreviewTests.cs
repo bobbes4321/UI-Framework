@@ -45,5 +45,52 @@ namespace Neo.UI.Tests
                     if (root != null) Object.DestroyImmediate(root);
             }
         }
+
+        /// <summary>
+        /// The WYSIWYG canvas (Plan 2 Phase 4) hit-tests and drags by mapping a rendered object back to
+        /// the exact <see cref="ElementSpec"/> it must mutate. That map is the generator's
+        /// <see cref="UISpecGenerator.ElementObjectSink"/>: when set, every built element records its
+        /// GameObject keyed by its OWN spec instance (reference equality). This pins that contract —
+        /// every element in the tree (nested children included) lands in the sink with a live object.
+        /// </summary>
+        [Test]
+        public void ElementObjectSink_MapsEverySpecElement_ToItsBuiltObject()
+        {
+            UISpec spec = UISpec.FromJson(Spec);
+            ElementSpec vstack = spec.views[0].elements[0];
+            ElementSpec text = vstack.children[0];
+            ElementSpec button = vstack.children[1];
+
+            var sink = new Dictionary<ElementSpec, GameObject>();
+            UISpecGenerator.ElementObjectSink = sink;
+            List<GameObject> roots = null;
+            try
+            {
+                roots = UISpecPreview.BuildViews(spec);
+
+                Assert.IsTrue(sink.ContainsKey(vstack), "the container element is recorded");
+                Assert.IsTrue(sink.ContainsKey(text), "a nested child is recorded");
+                Assert.IsTrue(sink.ContainsKey(button), "every nested child is recorded");
+                Assert.IsNotNull(sink[button], "the recorded object is a live GameObject");
+                // reference identity, not name-matching: the button's spec maps to a UIButton object
+                Assert.IsNotNull(sink[button].GetComponentInChildren<UIButton>(true));
+            }
+            finally
+            {
+                UISpecGenerator.ElementObjectSink = null;
+                if (roots != null)
+                    foreach (GameObject root in roots)
+                        if (root != null) Object.DestroyImmediate(root);
+            }
+        }
+
+        /// <summary> The sink is opt-in: normal generation/preview never touches it, so it can't leak
+        /// objects or cost anything outside the Composer. </summary>
+        [Test]
+        public void ElementObjectSink_IsNullByDefault()
+        {
+            Assert.IsNull(UISpecGenerator.ElementObjectSink,
+                "the sink must default to null — only the Composer sets it, around a single build");
+        }
     }
 }

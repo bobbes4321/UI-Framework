@@ -37,7 +37,7 @@ namespace Neo.UI.Editor.Composer
         {
             if (_document == null) _document = new SpecDocument();
             _tree = new SpecTreeView(_document);
-            _preview = new SpecPreviewPane(_document, () => _previewGui?.MarkDirtyRepaint());
+            _preview = new SpecPreviewPane(_document, () => _previewGui?.MarkDirtyRepaint(), ReselectPath);
             _inspector = new SpecInspector(_document, ReselectPath, OpenFlow);
 
             _document.Changed += OnDocumentChanged;
@@ -184,7 +184,8 @@ namespace Neo.UI.Editor.Composer
         {
             if (_statusLabel == null) return;
             string file = string.IsNullOrEmpty(_document.FilePath) ? "(unsaved — no file)" : _document.FilePath;
-            _statusLabel.text = (_document.Dirty ? "● " : "") + file;
+            string mode = _document.SavesThroughSync ? "   ·   Project — Save merges safely into the live UI" : "";
+            _statusLabel.text = (_document.Dirty ? "● " : "") + file + mode;
         }
 
         // ------------------------------------------------------------------ commands
@@ -212,6 +213,9 @@ namespace Neo.UI.Editor.Composer
 
         private void Save()
         {
+            // a project doc records itself in the baseline (rewritten by the safe sync) — no spec file
+            // is required, so don't make the designer pick one just to apply an edit
+            if (_document.SavesThroughSync) { DoSave(); return; }
             if (string.IsNullOrEmpty(_document.FilePath)) { SaveAs(); return; }
             DoSave();
         }
@@ -226,14 +230,69 @@ namespace Neo.UI.Editor.Composer
 
         private void DoSave()
         {
-            GenerateReport report = _document.Save(out string error);
-            if (error != null) { EditorUtility.DisplayDialog("Save Failed", error, "OK"); return; }
+            if (_document.SavesThroughSync) DoSyncSave();
+            else DoGenerateSave();
             UpdateStatus();
+        }
+
+        // standalone (New/File) document — the doc is the whole intended spec, generate from it
+        private void DoGenerateSave()
+        {
+            GenerateReport report = _document.GenerateSave(out string error);
+            if (error != null) { EditorUtility.DisplayDialog("Save Failed", error, "OK"); return; }
             if (report != null && report.hasProblems)
                 EditorUtility.DisplayDialog("Saved with issues",
                     "Generated assets, but the generator reported:\n\n" + report, "OK");
             else
                 ShowNotification(new GUIContent("Saved + regenerated"));
+        }
+
+        // project document — fold the edits back through the safe merge so prefab edits elsewhere are
+        // preserved and screens this doc doesn't mention are never deleted
+        private void DoSyncSave()
+        {
+            SyncResult result = _document.SyncSave(false, out string error);
+            if (error != null) { EditorUtility.DisplayDialog("Save Failed", error, "OK"); return; }
+
+            if (result != null && result.refused)
+            {
+                bool force = EditorUtility.DisplayDialog("Some edits can't round-trip",
+                    result.note + "\n\n" + Bullet(result.offSpecWarnings, f => f.ToString(), 8) +
+                    "\n\nForce regenerate and lose them, or cancel and fix them first?",
+                    "Force Regenerate", "Cancel");
+                if (!force) return;
+                result = _document.SyncSave(true, out error);
+                if (error != null) { EditorUtility.DisplayDialog("Save Failed", error, "OK"); return; }
+            }
+            SummarizeSync(result);
+        }
+
+        private void SummarizeSync(SyncResult result)
+        {
+            if (result == null) return;
+            if (result.conflicts != null && result.conflicts.Count > 0)
+                EditorUtility.DisplayDialog("Saved — review conflicts",
+                    $"{result.conflicts.Count} node(s) were changed both in the project and in your edits. " +
+                    "Your edits won by default:\n\n" + Bullet(result.conflicts, c => c.path, 10), "OK");
+            else if (result.generateReport != null && result.generateReport.hasProblems)
+                EditorUtility.DisplayDialog("Saved with issues",
+                    "Regenerated, but the generator reported:\n\n" + result.generateReport, "OK");
+            else
+            {
+                int merged = result.applied?.Count ?? 0;
+                ShowNotification(new GUIContent(merged > 0
+                    ? $"Saved — merged {merged} project edit(s) with yours"
+                    : "Saved + regenerated"));
+            }
+        }
+
+        private static string Bullet<T>(System.Collections.Generic.List<T> items, System.Func<T, string> text, int max)
+        {
+            if (items == null || items.Count == 0) return "";
+            var sb = new System.Text.StringBuilder();
+            for (int i = 0; i < items.Count && i < max; i++) sb.Append("• ").Append(text(items[i])).Append('\n');
+            if (items.Count > max) sb.Append($"…and {items.Count - max} more");
+            return sb.ToString();
         }
 
         private bool ConfirmDiscard()
