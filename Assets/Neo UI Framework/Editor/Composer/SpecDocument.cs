@@ -20,11 +20,21 @@ namespace Neo.UI.Editor.Composer
     {
         private const int MaxHistory = 128;
 
+        /// <summary> Where this document came from — it decides how Save materializes.
+        /// <see cref="Project"/> documents (loaded via "Open Project") are a derivative of the live
+        /// committed UI, so Save merges them back through the safe <see cref="SpecBaseline.Sync"/>
+        /// protocol (never clobbering prefab edits, never deleting screens the doc happens not to
+        /// mention). <see cref="New"/>/<see cref="File"/> documents are authored standalone, so the
+        /// doc IS the intended whole and Save generates from it directly. </summary>
+        public enum DocumentOrigin { New, File, Project }
+
         public UISpec Spec { get; private set; }
 
         /// <summary> Backing JSON file (under Assets) this document was loaded from / saves to.
         /// Null for a brand-new doc or one loaded from the live project until first "Save As". </summary>
         public string FilePath { get; private set; }
+
+        public DocumentOrigin Origin { get; private set; } = DocumentOrigin.New;
 
         public bool Dirty { get; private set; }
 
@@ -101,10 +111,11 @@ namespace Neo.UI.Editor.Composer
         // ------------------------------------------------------------------ load
 
         /// <summary> Replaces the document, clearing history. Used by all the open paths. </summary>
-        public void Load(UISpec spec, string filePath)
+        public void Load(UISpec spec, string filePath, DocumentOrigin origin = DocumentOrigin.New)
         {
             Spec = spec ?? NewEmptySpec();
             FilePath = filePath;
+            Origin = origin;
             _undo.Clear();
             _redo.Clear();
             Dirty = false;
@@ -113,51 +124,84 @@ namespace Neo.UI.Editor.Composer
 
         public void LoadFromFile(string path)
         {
-            Load(UISpec.FromJson(File.ReadAllText(path)), path);
+            Load(UISpec.FromJson(File.ReadAllText(path)), path, DocumentOrigin.File);
         }
 
         /// <summary> "Open Current Project": seed the document from whatever assets already exist, so a
         /// human can start authoring from the live state. The file path is left null — the project is
-        /// the source, not a particular spec file — so Save prompts for a location. </summary>
+        /// the source, not a particular spec file — so Save prompts for a location. Marked
+        /// <see cref="DocumentOrigin.Project"/> so Save folds the edits back through the safe sync. </summary>
         public void LoadCurrentProject()
         {
-            Load(UISpecExporter.ExportProject(), null);
+            Load(UISpecExporter.ExportProject(), null, DocumentOrigin.Project);
         }
 
         // ------------------------------------------------------------------ save
 
+        /// <summary> True when Save should take the safe, project-aware merge path. </summary>
+        public bool SavesThroughSync => Origin == DocumentOrigin.Project;
+
         /// <summary>
-        /// The ONLY moment assets are written: serialize the document to <see cref="FilePath"/> then
-        /// run the generator over it, materializing the committed prefabs/assets. Returns the
-        /// generator report (collisions/issues surfaced to the user), or null with
-        /// <paramref name="error"/> set when the write itself failed.
+        /// Standalone save (New/File documents): the doc IS the whole intended spec, so serialize it to
+        /// <see cref="FilePath"/> and generate the committed assets from it directly. Returns the
+        /// generator report, or null with <paramref name="error"/> set when the write failed.
         /// </summary>
-        public GenerateReport Save(out string error)
+        public GenerateReport GenerateSave(out string error)
         {
             error = null;
-            if (string.IsNullOrEmpty(FilePath))
-            {
-                error = "No file path — use Save As first.";
-                return null;
-            }
-            try
-            {
-                string directory = Path.GetDirectoryName(FilePath);
-                if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
-                File.WriteAllText(FilePath, Spec.ToJson());
-                AssetDatabase.ImportAsset(ToAssetPath(FilePath));
-            }
-            catch (Exception e)
-            {
-                error = e.Message;
-                return null;
-            }
-
+            if (!WriteSpecFile(Spec, out error)) return null;
             GenerateReport report = UISpecGenerator.Generate(Spec);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             Dirty = false;
             return report;
+        }
+
+        /// <summary>
+        /// Safe save for a document opened FROM the project (the scenario the Composer is built for —
+        /// adding to existing UI). Routes through <see cref="SpecBaseline.Sync"/>: it exports the live
+        /// project, three-way merges (base = baseline, ours = live project + any prefab drift,
+        /// theirs = THIS document) and regenerates from the merge — so a designer who added one setting
+        /// can't wipe a teammate's prefab tweak, and screens the doc doesn't mention are never deleted.
+        ///
+        /// <para>Refuses (writes nothing, <see cref="SyncResult.refused"/>) when off-spec editor edits
+        /// would be silently lost, unless <paramref name="force"/>. On success the MERGED spec (the new
+        /// truth) is written to <see cref="FilePath"/> and folded back into the live document.</para>
+        /// </summary>
+        public SyncResult SyncSave(bool force, out string error)
+        {
+            error = null;
+            SyncResult result;
+            try { result = SpecBaseline.Sync(Spec, ConflictPolicy.PreferTheirs, force); }
+            catch (Exception e) { error = e.Message; return null; }
+
+            if (result.refused) return result; // nothing written — the window offers Force
+
+            // Sync already rewrote the canonical baseline + the assets. A separate spec file is optional
+            // for a project doc — only write it when the designer chose a path (Save As). Then reflect
+            // the MERGE back into the document so the Composer shows exactly what was regenerated.
+            if (!string.IsNullOrEmpty(FilePath) && !WriteSpecFile(result.merged ?? Spec, out error)) return result;
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            if (result.merged != null) Load(result.merged, FilePath, DocumentOrigin.Project);
+            Dirty = false;
+            return result;
+        }
+
+        private bool WriteSpecFile(UISpec spec, out string error)
+        {
+            error = null;
+            if (string.IsNullOrEmpty(FilePath)) { error = "No file path — use Save As first."; return false; }
+            try
+            {
+                string directory = Path.GetDirectoryName(FilePath);
+                if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
+                File.WriteAllText(FilePath, spec.ToJson());
+                AssetDatabase.ImportAsset(ToAssetPath(FilePath));
+                return true;
+            }
+            catch (Exception e) { error = e.Message; return false; }
         }
 
         public void SetFilePath(string path) => FilePath = path;

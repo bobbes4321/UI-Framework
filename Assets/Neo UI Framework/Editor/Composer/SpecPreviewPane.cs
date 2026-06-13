@@ -26,14 +26,18 @@ namespace Neo.UI.Editor.Composer
 
         private readonly SpecDocument _document;
         private readonly Action _repaint;
+        private readonly ComposerCanvas _canvas;   // Tier 3: direct manipulation on the rendered view
 
         private ViewSpec _target;
-        private string _highlightName;             // id/label of the element to outline (best effort)
+        private ElementSpec _selected;             // element to outline / drive the canvas selection
         private (string name, int width, int height) _resolution = UISpecPreview.DefaultResolutions[0];
         private string _variant;
 
         private Texture2D _texture;
-        private Rect? _highlightNorm;              // selected element rect in 0..1 canvas space
+        // every built element's geometry (normalized rect + exact anchoredPos/size) captured from the
+        // live build before the temp objects are destroyed — the canvas hit-tests / drags against this
+        private readonly System.Collections.Generic.Dictionary<ElementSpec, ElementBox> _boxes =
+            new System.Collections.Generic.Dictionary<ElementSpec, ElementBox>();
         private double _rebuildAt = -1;
         private bool _pending;
         private string _error;
@@ -44,18 +48,17 @@ namespace Neo.UI.Editor.Composer
         private readonly System.Collections.Generic.List<string> _panelNames = new System.Collections.Generic.List<string>();
         private string _activePanel;
 
-        public SpecPreviewPane(SpecDocument document, Action repaint)
+        public SpecPreviewPane(SpecDocument document, Action repaint, Action<string> selectPath)
         {
             _document = document;
             _repaint = repaint;
+            _canvas = new ComposerCanvas(document, selectPath, repaint);
         }
 
         /// <summary> The view + element to show. Triggers a debounced rebuild when the view changes. </summary>
-        public void SetTarget(ViewSpec view, ElementSpec highlight)
+        public void SetTarget(ViewSpec view, ElementSpec selected)
         {
-            _highlightName = highlight != null
-                ? (!string.IsNullOrEmpty(highlight.id) ? highlight.id : highlight.label)
-                : null;
+            _selected = selected;
             if (!ReferenceEquals(view, _target))
             {
                 _target = view;
@@ -109,14 +112,9 @@ namespace Neo.UI.Editor.Composer
                 canvasRect.y + (canvasRect.height - drawH) * 0.5f, drawW, drawH);
             GUI.DrawTexture(drawRect, _texture, ScaleMode.ScaleToFit, false);
 
-            if (_highlightNorm.HasValue)
-            {
-                Rect n = _highlightNorm.Value;
-                // n is in 0..1 with y from bottom — flip to GUI space
-                var hl = new Rect(drawRect.x + n.x * drawW,
-                    drawRect.y + (1f - n.y - n.height) * drawH, n.width * drawW, n.height * drawH);
-                DrawOutline(hl, NeoColors.Interactive);
-            }
+            // hand the rendered geometry to the WYSIWYG canvas: it owns selection outlines, resize
+            // handles, marquee and all the drag gestures (move/resize/reparent) on top of the texture
+            _canvas.OnGUI(drawRect, scale, _target, null, _boxes, _selected);
         }
 
         private void DrawToolbar(Rect rect)
@@ -168,22 +166,13 @@ namespace Neo.UI.Editor.Composer
             return list;
         }
 
-        private static void DrawOutline(Rect rect, Color color)
-        {
-            if (Event.current.type != EventType.Repaint) return;
-            EditorGUI.DrawRect(new Rect(rect.x, rect.y, rect.width, 1f), color);
-            EditorGUI.DrawRect(new Rect(rect.x, rect.yMax - 1f, rect.width, 1f), color);
-            EditorGUI.DrawRect(new Rect(rect.x, rect.y, 1f, rect.height), color);
-            EditorGUI.DrawRect(new Rect(rect.xMax - 1f, rect.y, 1f, rect.height), color);
-        }
-
         // ------------------------------------------------------------------ render
 
         private void Rebuild()
         {
             Release();
             _error = null;
-            _highlightNorm = null;
+            _boxes.Clear();
             if (_target == null) return;
 
             if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
@@ -207,11 +196,15 @@ namespace Neo.UI.Editor.Composer
             }
 
             System.Collections.Generic.List<GameObject> roots = null;
+            // collect each element's built GameObject (by ElementSpec reference) so we can read back
+            // exact rects/positions for the canvas; cleared again the moment the build is done
+            var sink = new System.Collections.Generic.Dictionary<ElementSpec, GameObject>();
+            UISpecGenerator.ElementObjectSink = sink;
             try
             {
                 roots = UISpecPreview.BuildViews(temp);
                 if (roots.Count > 0)
-                    RenderRoot(roots[0], _resolution.width, _resolution.height);
+                    RenderRoot(roots[0], sink, _resolution.width, _resolution.height);
             }
             catch (Exception e)
             {
@@ -219,6 +212,7 @@ namespace Neo.UI.Editor.Composer
             }
             finally
             {
+                UISpecGenerator.ElementObjectSink = null;
                 if (roots != null)
                     foreach (GameObject root in roots)
                         if (root != null) UnityEngine.Object.DestroyImmediate(root);
@@ -226,7 +220,8 @@ namespace Neo.UI.Editor.Composer
             }
         }
 
-        private void RenderRoot(GameObject root, int width, int height)
+        private void RenderRoot(GameObject root,
+            System.Collections.Generic.Dictionary<ElementSpec, GameObject> sink, int width, int height)
         {
             Scene scene = EditorSceneManager.NewPreviewScene();
             RenderTexture renderTexture = null;
@@ -266,7 +261,7 @@ namespace Neo.UI.Editor.Composer
                 Canvas.ForceUpdateCanvases();
 
                 ApplyPanelSelection(root);
-                ComputeHighlight(root, width, height);
+                CaptureBoxes(sink, width, height);
 
                 renderTexture = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32);
                 camera.targetTexture = renderTexture;
@@ -314,37 +309,33 @@ namespace Neo.UI.Editor.Composer
             }
         }
 
-        /// <summary> Best-effort selection outline: find the built GameObject whose name matches the
-        /// selected element's id/label and record its rect in normalized canvas space. Skipped (no
-        /// overlay) when it can't be resolved — precise element→object mapping is a later tier. </summary>
-        private void ComputeHighlight(GameObject root, int width, int height)
+        /// <summary>
+        /// Reads each built element's geometry off its live RectTransform — the normalized canvas rect
+        /// (for hit-testing / overlay) plus the exact <c>anchoredPosition</c> and rect size (the base a
+        /// drag adds its delta to). Keyed by the SAME <see cref="ElementSpec"/> instances the document
+        /// holds, so the canvas maps a hit straight back to the spec node it must mutate. Must run while
+        /// the temp objects are still alive (before the build is destroyed).
+        /// </summary>
+        private void CaptureBoxes(System.Collections.Generic.Dictionary<ElementSpec, GameObject> sink,
+            int width, int height)
         {
-            if (string.IsNullOrEmpty(_highlightName)) return;
-            Transform match = FindByName(root.transform, _highlightName);
-            if (match == null || !(match is RectTransform rect)) return;
-
             var corners = new Vector3[4];
-            rect.GetWorldCorners(corners);
-            // canvas is centered at origin, 1 world unit = 1 px; map to 0..1 (y from bottom)
-            float minX = Mathf.Min(corners[0].x, corners[2].x), maxX = Mathf.Max(corners[0].x, corners[2].x);
-            float minY = Mathf.Min(corners[0].y, corners[2].y), maxY = Mathf.Max(corners[0].y, corners[2].y);
-            float nx = (minX + width * 0.5f) / width;
-            float ny = (minY + height * 0.5f) / height;
-            float nw = (maxX - minX) / width;
-            float nh = (maxY - minY) / height;
-            _highlightNorm = new Rect(Mathf.Clamp01(nx), Mathf.Clamp01(ny), Mathf.Clamp01(nw), Mathf.Clamp01(nh));
-        }
-
-        private static Transform FindByName(Transform node, string name)
-        {
-            if (string.Equals(node.name, name, StringComparison.Ordinal)) return node;
-            // generators sometimes suffix names; also accept a contains match on the leaf
-            for (int i = 0; i < node.childCount; i++)
+            foreach (var entry in sink)
             {
-                Transform found = FindByName(node.GetChild(i), name);
-                if (found != null) return found;
+                if (entry.Value == null || !(entry.Value.transform is RectTransform rect)) continue;
+                rect.GetWorldCorners(corners);
+                // canvas is centered at origin, 1 world unit = 1 px; map to 0..1 (y from bottom)
+                float minX = Mathf.Min(corners[0].x, corners[2].x), maxX = Mathf.Max(corners[0].x, corners[2].x);
+                float minY = Mathf.Min(corners[0].y, corners[2].y), maxY = Mathf.Max(corners[0].y, corners[2].y);
+                _boxes[entry.Key] = new ElementBox
+                {
+                    norm = new Rect((minX + width * 0.5f) / width, (minY + height * 0.5f) / height,
+                        (maxX - minX) / width, (maxY - minY) / height),
+                    anchoredPos = rect.anchoredPosition,
+                    size = rect.rect.size,
+                    pivot = rect.pivot,
+                };
             }
-            return null;
         }
 
         private void Release()

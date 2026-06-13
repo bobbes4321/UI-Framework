@@ -54,6 +54,8 @@ namespace Neo.UI.Editor.Composer
         private readonly List<SpecNode> _rows = new List<SpecNode>();
         private bool _dirty = true;
         private Vector2 _scroll;
+        private string _filter = "";   // search box: when set, the tree shows matches + their ancestors
+        private bool _filtering;
 
         public SpecNode Selected { get; private set; }
         public string SelectedPath { get; private set; }
@@ -69,7 +71,27 @@ namespace Neo.UI.Editor.Composer
         public void Select(string path)
         {
             SelectedPath = path;
+            ExpandAncestors(path);  // so a path selected from the canvas/inspector resolves to a row
             _dirty = true;
+        }
+
+        /// <summary> Expands every ancestor node of <paramref name="path"/> (the section, the owning
+        /// view/popup/catalog, and each enclosing element) so a selection driven from the preview
+        /// canvas isn't swallowed when its tree branch happens to be collapsed. </summary>
+        private void ExpandAncestors(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return;
+            int firstSlash = path.IndexOf('/');
+            _expanded.Add(firstSlash < 0 ? path : path.Substring(0, firstSlash)); // section header
+            foreach (string marker in new[] { "/elements[", "/children[", "/items[" })
+            {
+                int at = 0;
+                while ((at = path.IndexOf(marker, at, StringComparison.Ordinal)) >= 0)
+                {
+                    _expanded.Add(path.Substring(0, at)); // owner / enclosing element node
+                    at += marker.Length;
+                }
+            }
         }
 
         // ------------------------------------------------------------------ build
@@ -79,6 +101,7 @@ namespace Neo.UI.Editor.Composer
             if (!_dirty) return;
             _dirty = false;
             _rows.Clear();
+            _filtering = !string.IsNullOrEmpty(_filter);
             UISpec spec = _document.Spec;
 
             AddRow(new SpecNode { kind = SpecNodeKind.Theme, label = "Theme", path = "theme", depth = 0, accent = NeoColors.Theming });
@@ -110,10 +133,36 @@ namespace Neo.UI.Editor.Composer
 
             AddRow(new SpecNode { kind = SpecNodeKind.Flow, label = spec.flow != null ? $"Flow: {spec.flow.name}" : "Flow (none)", path = "flow", depth = 0, accent = NeoColors.Flow });
 
+            ApplyFilter();
+
             // resolve selection against the new rows
             Selected = null;
             foreach (SpecNode node in _rows)
                 if (node.path == SelectedPath) { Selected = node; break; }
+        }
+
+        /// <summary> Keeps only rows that match the search box plus the ancestors needed to reach them,
+        /// so a search over a big project collapses straight to the screens/settings you mean. Matching
+        /// is a case-insensitive substring of the row label (which already folds in the kind + id/name).
+        /// Ancestors are recovered from the flat list by walking back over decreasing depth. </summary>
+        private void ApplyFilter()
+        {
+            if (!_filtering) return;
+            string needle = _filter.ToLowerInvariant();
+            int n = _rows.Count;
+            var keep = new bool[n];
+            for (int i = 0; i < n; i++)
+            {
+                if (_rows[i].label == null || !_rows[i].label.ToLowerInvariant().Contains(needle)) continue;
+                keep[i] = true;
+                int needDepth = _rows[i].depth;
+                for (int j = i - 1; j >= 0 && needDepth > 0; j--)
+                    if (_rows[j].depth < needDepth) { keep[j] = true; needDepth = _rows[j].depth; }
+            }
+            var filtered = new List<SpecNode>(n);
+            for (int i = 0; i < n; i++) if (keep[i]) filtered.Add(_rows[i]);
+            _rows.Clear();
+            _rows.AddRange(filtered);
         }
 
         private void AddCatalogSection(List<MenuCatalogSpec> catalogs, string section, SpecNodeKind headerKind, string title)
@@ -196,20 +245,39 @@ namespace Neo.UI.Editor.Composer
         }
 
         private void AddRow(SpecNode node) => _rows.Add(node);
-        private bool IsExpanded(string path) => _expanded.Contains(path);
+        // while a search is active every node is treated as expanded so matches deep in the tree surface
+        private bool IsExpanded(string path) => _filtering || _expanded.Contains(path);
 
         // ------------------------------------------------------------------ draw
 
+        private const float SearchHeight = 20f;
+
         public void OnGUI(Rect rect)
         {
+            DrawSearch(new Rect(rect.x + 2f, rect.y + 2f, rect.width - 4f, SearchHeight - 4f));
             RebuildIfNeeded();
 
-            var viewRect = new Rect(0, 0, rect.width - 16f, _rows.Count * RowHeight);
-            _scroll = GUI.BeginScrollView(rect, _scroll, viewRect);
+            var listRect = new Rect(rect.x, rect.y + SearchHeight, rect.width, rect.height - SearchHeight);
+            var viewRect = new Rect(0, 0, listRect.width - 16f, _rows.Count * RowHeight);
+            _scroll = GUI.BeginScrollView(listRect, _scroll, viewRect);
             for (int i = 0; i < _rows.Count; i++)
                 DrawRow(new Rect(0, i * RowHeight, viewRect.width, RowHeight), _rows[i]);
             GUI.EndScrollView();
+            if (_filtering && _rows.Count == 0)
+                GUI.Label(new Rect(listRect.x + 6f, listRect.y + 4f, listRect.width - 8f, 18f),
+                    $"No match for “{_filter}”", EditorStyles.miniLabel);
         }
+
+        private void DrawSearch(Rect rect)
+        {
+            EditorGUI.BeginChangeCheck();
+            string next = EditorGUI.TextField(rect, _filter, GetSearchStyle());
+            if (EditorGUI.EndChangeCheck()) { _filter = next ?? ""; _dirty = true; }
+        }
+
+        private static GUIStyle s_search;
+        private static GUIStyle GetSearchStyle() =>
+            s_search ??= new GUIStyle(GUI.skin.FindStyle("ToolbarSearchTextField") ?? EditorStyles.toolbarTextField);
 
         private void DrawRow(Rect rect, SpecNode node)
         {
@@ -285,6 +353,7 @@ namespace Neo.UI.Editor.Composer
                 case SpecNodeKind.Popup:
                     AddElementCreateItems(menu, "Add Element/", k => AddElementTo(node.popup.elements, node, k));
                     menu.AddSeparator("");
+                    menu.AddItem(new GUIContent("Duplicate Popup"), false, () => DuplicatePopup(node.popup));
                     menu.AddItem(new GUIContent("Delete Popup"), false, () => DeletePopup(node.popup));
                     break;
                 case SpecNodeKind.Element:
@@ -303,6 +372,7 @@ namespace Neo.UI.Editor.Composer
                         menu.AddItem(new GUIContent($"Add Item/{itemKind}"), false, () => AddMenuItem(node.catalog, captured));
                     }
                     menu.AddSeparator("");
+                    menu.AddItem(new GUIContent("Duplicate Catalog"), false, () => DuplicateCatalog(node.catalog));
                     menu.AddItem(new GUIContent("Delete Catalog"), false, () => DeleteCatalog(node.catalog));
                     break;
                 case SpecNodeKind.MenuItem:
@@ -364,10 +434,37 @@ namespace Neo.UI.Editor.Composer
             SelectAfter(SpecPath.Popup(name));
         }
 
+        private void DuplicatePopup(PopupSpec popup)
+        {
+            PopupSpec clone = ComposerFactory.Clone(popup);
+            int n = 2;
+            string baseName = popup.name;
+            clone.name = $"{baseName}Copy";
+            while (_document.Spec.popups.Exists(p => p.name == clone.name)) clone.name = $"{baseName}Copy{n++}";
+            _document.ApplyEdit(() => _document.Spec.popups.Add(clone), "Duplicate Popup");
+            SelectAfter(SpecPath.Popup(clone.name));
+        }
+
         private void DeletePopup(PopupSpec popup)
         {
             _document.ApplyEdit(() => _document.Spec.popups.Remove(popup), "Delete Popup");
             SelectAfter("popups");
+        }
+
+        private void DuplicateCatalog(MenuCatalogSpec catalog)
+        {
+            MenuCatalogSpec clone = ComposerFactory.Clone(catalog);
+            bool cheat = catalog.kind == MenuCatalogSpec.CheatKind;
+            List<MenuCatalogSpec> list = cheat ? _document.Spec.cheats : _document.Spec.settings;
+            string section = cheat ? "cheats" : "settings";
+            int n = 2;
+            string baseName = catalog.menuName;
+            clone.menuName = $"{baseName}Copy";
+            while (list.Exists(c => c.menuName == clone.menuName && c.category == clone.category))
+                clone.menuName = $"{baseName}Copy{n++}";
+            _document.ApplyEdit(() => list.Add(clone), "Duplicate Catalog");
+            _expanded.Add(section);
+            SelectAfter(SpecPath.Catalog(section, clone.id));
         }
 
         private void AddCatalog(string kind)

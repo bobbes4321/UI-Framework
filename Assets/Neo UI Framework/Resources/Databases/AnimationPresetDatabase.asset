@@ -12,14 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 202bf77ffb876604f87ad7176569404e, type: 3}
   m_Name: AnimationPresetDatabase
   m_EditorClassIdentifier: Neo.UI::Neo.UI.AnimationPresetDatabase
-  presets:
-  - {fileID: 11400000, guid: 8e839f1298a72c541bd069f44ea84209, type: 2}
-  - {fileID: 11400000, guid: 06ebf9f09d0ebb249a1826c7ee5e9b2b, type: 2}
-  - {fileID: 11400000, guid: 0ea4d2e5fdc851f4d956b73e5836d20a, type: 2}
-  - {fileID: 11400000, guid: 7110e2ce2a2b8bb4e90479493370b840, type: 2}
-  - {fileID: 11400000, guid: 7fc8e46c93eb94c41a7287ccc51f3bd5, type: 2}
-  - {fileID: 11400000, guid: 5fe059e72ca930a43953710838633dee, type: 2}
-  - {fileID: 11400000, guid: 4558f12390fb8ce44a0fe9f2b6b89a92, type: 2}
-  - {fileID: 11400000, guid: 86b86a57126b2464d97334c605f649d4, type: 2}
-  - {fileID: 11400000, guid: 66ddd85d6412c21478587ffdc533443d, type: 2}
-  - {fileID: 11400000, guid: 38b946af3e679ca42853a3de4027b7c8, type: 2}
+  presets: []

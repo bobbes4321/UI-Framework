@@ -122,6 +122,24 @@ namespace Neo.UI.Tests
         }
 
         [Test]
+        public void Origin_DecidesSaveMode()
+        {
+            var doc = new SpecDocument();
+            // a brand-new doc is authored standalone — Save generates from it directly
+            Assert.AreEqual(SpecDocument.DocumentOrigin.New, doc.Origin);
+            Assert.IsFalse(doc.SavesThroughSync, "a new doc must not merge over the live project");
+
+            // a doc loaded from a file is likewise authoritative/standalone
+            doc.Load(SpecDocument.NewEmptySpec(), "Assets/some-spec.json", SpecDocument.DocumentOrigin.File);
+            Assert.IsFalse(doc.SavesThroughSync);
+
+            // a doc opened FROM the project saves through the safe sync/merge protocol
+            doc.Load(SpecDocument.NewEmptySpec(), null, SpecDocument.DocumentOrigin.Project);
+            Assert.IsTrue(doc.SavesThroughSync,
+                "a project-derived doc must fold edits back safely, never clobber prefab edits");
+        }
+
+        [Test]
         public void ReplaceFlow_UpdatesSpec_AndMarksDirty()
         {
             var doc = new SpecDocument();
