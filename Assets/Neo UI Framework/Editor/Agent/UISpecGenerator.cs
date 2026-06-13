@@ -19,6 +19,13 @@ namespace Neo.UI.Editor
         public readonly List<string> collisions = new List<string>();
         public readonly List<string> issues = new List<string>();
 
+        /// <summary>
+        /// Soft warnings that do NOT make the run "fail" (so batch/test flows keep working) — e.g. the
+        /// drift warning emitted when a plain <see cref="UISpecGenerator.Generate(UISpec,bool,bool)"/>
+        /// is about to overwrite human prefab edits that were never folded into the spec.
+        /// </summary>
+        public readonly List<string> warnings = new List<string>();
+
         public bool hasProblems => collisions.Count > 0 || issues.Count > 0;
 
         public override string ToString()
@@ -28,6 +35,7 @@ namespace Neo.UI.Editor
             lines.AddRange(updated.Select(u => $"[updated] {u}"));
             lines.AddRange(collisions.Select(c => $"[COLLISION] {c}"));
             lines.AddRange(issues.Select(i => $"[ISSUE] {i}"));
+            lines.AddRange(warnings.Select(w => $"[warning] {w}"));
             return lines.Count == 0 ? "Nothing to do." : string.Join("\n", lines);
         }
     }
@@ -97,10 +105,45 @@ namespace Neo.UI.Editor
             EditorApplication.Exit(report.hasProblems ? 1 : 0);
         }
 
-        public static GenerateReport Generate(UISpec spec)
+        public static GenerateReport Generate(UISpec spec) => Generate(spec, writeBaseline: true, warnOnDrift: true);
+
+        /// <summary>
+        /// Spec → assets. <paramref name="writeBaseline"/> rewrites <c>.neo-baseline.json</c> to
+        /// <paramref name="spec"/> after a successful run (the baseline is "the exact spec the current
+        /// generated assets were last produced from"). <paramref name="warnOnDrift"/> compares the live
+        /// project against the existing baseline first and, if a human has edited the generated tree,
+        /// adds a soft warning that this destructive regenerate will overwrite that work — pointing at
+        /// the <c>sync</c> action which preserves it. The <c>sync</c> macro passes
+        /// <c>warnOnDrift:false</c> because it has already merged that drift into <paramref name="spec"/>.
+        /// </summary>
+        public static GenerateReport Generate(UISpec spec, bool writeBaseline, bool warnOnDrift)
         {
             var report = new GenerateReport();
             NeoUISettings settings = NeoUISettingsBootstrap.GetOrCreateSettings();
+
+            // BEFORE overwriting: if the live tree has drifted from its baseline, a plain generate
+            // silently wipes the human's prefab edits. Don't hard-block (batch/test flows need
+            // generate), but make the loss impossible to miss. Best-effort: never let drift detection
+            // break generation.
+            if (warnOnDrift && NeoBaseline.Exists)
+            {
+                try
+                {
+                    UISpec baseline = NeoBaseline.Load();
+                    if (baseline != null)
+                    {
+                        int drift = SpecDiff.Compare(baseline, UISpecExporter.ExportProject()).Count;
+                        if (drift > 0)
+                            report.warnings.Add(
+                                $"{drift} human edit(s) in the generated project will be overwritten — " +
+                                "use the 'sync' action (or Tools/Neo UI/Sync With Spec…) to preserve them.");
+                    }
+                }
+                catch (Exception e)
+                {
+                    report.warnings.Add($"Could not check for drift before generating: {e.Message}");
+                }
+            }
 
             try
             {
@@ -140,6 +183,21 @@ namespace Neo.UI.Editor
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+
+            // record the spec these assets were produced from as the new baseline — the common
+            // ancestor for the next drift check / three-way merge. Save the EXPORTED project (not the
+            // raw input spec): a hand-authored spec isn't canonical, so baseline==export(assets) is what
+            // makes drift read exactly zero right after a generate (the same convention as
+            // NeoBaseline.Establish / the Drift window's "Fold Edits"). Only after a clean run: a partial
+            // generate (collisions/issues) didn't fully materialize the spec. The path follows
+            // GeneratedRoot, so scratch/test runs never touch the committed baseline.
+            if (writeBaseline && !report.hasProblems)
+            {
+                try { NeoBaseline.Save(UISpecExporter.ExportProject()); }
+                catch (Exception e)
+                { report.warnings.Add($"Generated assets but could not record the baseline: {e.Message}"); }
+            }
+
             return report;
         }
 

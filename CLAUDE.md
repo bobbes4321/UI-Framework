@@ -121,6 +121,16 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   · `{"action":"merge","incoming":"new.json","out":"merged.json","conflictPolicy":"preferTheirs"}`
   (three-way merge of stored baseline + live project + incoming spec; preserves human prefab edits
   against a stale incoming spec — returns `applied`/`conflicts`/`dropped`) ·
+  `{"action":"sync","incoming":"new.json","force":false,"conflictPolicy":"preferTheirs"}` — **the
+  STANDING way an agent changes generated UI** (use this, not `generate`). It is the safe-regenerate
+  protocol: export → drift+lint vs the baseline → refuse if off-spec edits exist (they'd be lost;
+  pass `"force":true` to proceed and have them returned in `dropped`, never silently) → three-way
+  merge → generate from the merged spec → rewrite the baseline. Preserves human prefab edits a stale
+  `incoming` would wipe; returns `ok`/`refused`/`regenerated`/`applied`/`conflicts`/`offSpecWarnings`/
+  `dropped`/`merged`. Omit `incoming` to just capture the human's edits into the baseline (export +
+  fold drift, no regenerate). `generate` stays the raw, unsafe primitive — first generation,
+  scratch/test roots, explicit clean rebuilds — and now warns (`warning`) when run against a drifted
+  tree. ·
   `{"action":"screenshot","prefab":"Assets/...","out":"shot.png"}` ·
   `{"action":"preview","spec":"path.json","out":"dir"}` (renders a spec's views to PNGs across the
   resolution matrix IN-MEMORY — commits no prefabs/assets; the agent render-and-critique loop;
@@ -147,10 +157,17 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   `OffSpecLint` flags edits BELOW a composite widget root (raw colors/materials, internal geometry,
   added/removed internals) that the exporter can't see — these can't be merged (they land in
   `dropped`/`offSpecWarnings`) so the fix is to bind a theme token or move the change into the spec.
-  The baseline is a hidden `{GeneratedRoot}/.neo-baseline.json` (`NeoBaseline`). Human entry point:
-  `Tools → Neo UI → Check For Drift` (`DriftWindow`) — green = round-trips, red = will be lost; "Fold
-  Edits Into Spec" re-captures the baseline. Tests: `SpecDiffTests`, `SpecMergeTests`,
-  `OffSpecLintTests`, `RoundTripSafetyTests`.
+  The baseline is a hidden `{GeneratedRoot}/.neo-baseline.json` (`NeoBaseline`, raw read/write) — the
+  exact spec the committed assets were last generated from. It is rewritten by every successful
+  `generate` (to the exported project, so drift reads zero right after), by `sync`, and by the Drift
+  window's "Fold Edits". Human entry point: `Tools → Neo UI → Check For Drift` (`DriftWindow`) — green
+  = round-trips, red = will be lost; "Fold Edits Into Spec" re-captures the baseline. The **policy
+  layer** on top (`SpecBaseline`, the `sync` action) enforces the invariant that the live, merged spec
+  — not whatever the agent last wrote — is always the canonical input to the next generate; agents
+  call `sync` rather than `generate`. Human sync entry points: `Tools → Neo UI → Sync With Spec…`
+  (merge an agent's incoming spec, surfacing conflicts/off-spec in a window) and `Tools → Neo UI →
+  Capture My Edits` (fold the current project into the baseline, no regenerate). Tests: `SpecDiffTests`,
+  `SpecMergeTests`, `OffSpecLintTests`, `RoundTripSafetyTests`, `SyncProtocolTests`, `BaselineTests`.
 - Spec element kinds: button, toggle, switch, tab, slider, progress, tabbar, list/scroll, vstack,
   hstack, grid, panel (a `UIPanel : UIContainer` content surface a tab shows/hides — see tab
   `controls` below), overlay (z-stack: children keep anchors/positions inside layout cells —
