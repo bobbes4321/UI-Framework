@@ -1,84 +1,120 @@
 {
   "theme": {
     "tokens": {
-      "Primary": "#E8B04B",
-      "Background": "#101B14",
+      "Primary": "#3B82F6",
+      "Background": "#0B0D10",
       "Accent": "#FCA311",
-      "TextDefault": "#CFC9B4",
+      "TextDefault": "#C6CCD6",
       "Panel": "#1D2D50",
-      "Surface": "#18261C",
-      "SurfaceElevated": "#24362A",
-      "Outline": "#3A523F",
-      "PrimaryHover": "#ECBE6B",
-      "PrimaryPressed": "#E39E22",
-      "TextOnPrimary": "#241A05",
-      "TextStrong": "#F3EEDC",
-      "TextMuted": "#9D957C",
-      "Success": "#7BC47F",
-      "Warning": "#E8B04B",
-      "Error": "#D9776B",
-      "Shadow": "#000D0073",
-      "SuccessHover": "#94CF97",
-      "SuccessPressed": "#5BB660",
-      "Danger": "#D9776B",
-      "DangerHover": "#E09187",
-      "DangerPressed": "#D05546",
+      "Surface": "#16191E",
+      "SurfaceElevated": "#21252C",
+      "Outline": "#343A44",
+      "PrimaryHover": "#5D98F8",
+      "PrimaryPressed": "#0F66F4",
+      "TextOnPrimary": "#FFFFFF",
+      "TextStrong": "#F5F7FA",
+      "TextMuted": "#8E96A4",
+      "Success": "#22C55E",
+      "Warning": "#F59E0B",
+      "Error": "#EF4444",
+      "Shadow": "#00000080",
+      "SuccessHover": "#30DB6F",
+      "SuccessPressed": "#1B9E4B",
+      "Danger": "#EF4444",
+      "DangerHover": "#F26565",
+      "DangerPressed": "#EB1A1A",
       "TextDark": "#6B6390"
     },
     "variants": {
       "Light": {
-        "Primary": "#7A5C2E",
-        "Background": "#F1E8D4",
+        "Primary": "#2563EB",
+        "Background": "#F4F6F8",
         "Accent": "#FB8500",
-        "TextDefault": "#44392A",
+        "TextDefault": "#303A49",
         "Panel": "#FFFFFF",
-        "Surface": "#FAF4E6",
-        "SurfaceElevated": "#E7DCC2",
-        "Outline": "#CDBF9F",
-        "PrimaryHover": "#947038",
-        "PrimaryPressed": "#594321",
-        "TextOnPrimary": "#FFF8E7",
-        "TextStrong": "#2A2113",
-        "TextMuted": "#6E6147",
-        "Success": "#4C7A3F",
-        "Warning": "#9A6A1B",
-        "Error": "#A84632",
-        "Shadow": "#3D290A4C",
-        "SuccessHover": "#5B924B",
-        "SuccessPressed": "#395C2F",
-        "Danger": "#A84632",
-        "DangerHover": "#C4513A",
-        "DangerPressed": "#853727",
+        "Surface": "#FFFFFF",
+        "SurfaceElevated": "#EAEEF3",
+        "Outline": "#D3DAE3",
+        "PrimaryHover": "#467AEE",
+        "PrimaryPressed": "#134ECF",
+        "TextOnPrimary": "#FFFFFF",
+        "TextStrong": "#111827",
+        "TextMuted": "#5D6675",
+        "Success": "#15803D",
+        "Warning": "#B45309",
+        "Error": "#DC2626",
+        "Shadow": "#00000038",
+        "SuccessHover": "#1A9F4C",
+        "SuccessPressed": "#0F592A",
+        "Danger": "#DC2626",
+        "DangerHover": "#E14545",
+        "DangerPressed": "#B71D1D",
         "TextDark": "#6B6390"
       },
       "Dark": {
-        "Primary": "#E8B04B",
-        "Background": "#101B14",
+        "Primary": "#3B82F6",
+        "Background": "#0B0D10",
         "Accent": "#FCA311",
-        "TextDefault": "#CFC9B4",
+        "TextDefault": "#C6CCD6",
         "Panel": "#1D2D50",
-        "Surface": "#18261C",
-        "SurfaceElevated": "#24362A",
-        "Outline": "#3A523F",
-        "PrimaryHover": "#ECBE6B",
-        "PrimaryPressed": "#E39E22",
-        "TextOnPrimary": "#241A05",
-        "TextStrong": "#F3EEDC",
-        "TextMuted": "#9D957C",
-        "Success": "#7BC47F",
-        "Warning": "#E8B04B",
-        "Error": "#D9776B",
-        "Shadow": "#000D0073",
-        "SuccessHover": "#94CF97",
-        "SuccessPressed": "#5BB660",
-        "Danger": "#D9776B",
-        "DangerHover": "#E09187",
-        "DangerPressed": "#D05546",
+        "Surface": "#16191E",
+        "SurfaceElevated": "#21252C",
+        "Outline": "#343A44",
+        "PrimaryHover": "#5D98F8",
+        "PrimaryPressed": "#0F66F4",
+        "TextOnPrimary": "#FFFFFF",
+        "TextStrong": "#F5F7FA",
+        "TextMuted": "#8E96A4",
+        "Success": "#22C55E",
+        "Warning": "#F59E0B",
+        "Error": "#EF4444",
+        "Shadow": "#00000080",
+        "SuccessHover": "#30DB6F",
+        "SuccessPressed": "#1B9E4B",
+        "Danger": "#EF4444",
+        "DangerHover": "#F26565",
+        "DangerPressed": "#EB1A1A",
         "TextDark": "#6B6390"
       }
     }
   },
   "presets": [
+    {
+      "name": "ShowDefault",
+      "type": "Show",
+      "duration": 0.18000000715255737,
+      "ease": "OutCubic",
+      "scale": {
+        "from": "0.96,0.96,1",
+        "to": "1,1,1",
+        "duration": 0.18000000715255737,
+        "ease": "OutCubic"
+      },
+      "fade": {
+        "from": 0,
+        "to": 1,
+        "duration": 0.18000000715255737,
+        "ease": "OutCubic"
+      }
+    },
+    {
+      "name": "HideDefault",
+      "type": "Hide",
+      "duration": 0.18000000715255737,
+      "ease": "OutCubic",
+      "scale": {
+        "from": "1,1,1",
+        "to": "0.96,0.96,1",
+        "duration": 0.18000000715255737,
+        "ease": "OutCubic"
+      },
+      "fade": {
+        "from": 1,
+        "to": 0,
+        "duration": 0.18000000715255737,
+        "ease": "OutCubic"
+      }
+    },
     {
       "name": "SlideInLeft",
       "type": "Show",
@@ -522,7 +558,7 @@
                 "vstack": {
                   "background": "Surface",
                   "style": "Card",
-                  "radius": 20,
+                  "radius": 12,
                   "anchor": "BottomLeft",
                   "size": [
                     380,
@@ -681,8 +717,8 @@
     },
     {
       "id": "Game/Inventory",
-      "showAnimation": "PopIn",
-      "hideAnimation": "PopOut",
+      "showAnimation": "ShowDefault",
+      "hideAnimation": "HideDefault",
       "background": "Shadow",
       "elements": [
         {
@@ -749,7 +785,7 @@
                             "vstack": {
                               "background": "Surface",
                               "style": "Card",
-                              "radius": 20,
+                              "radius": 12,
                               "padding": 16,
                               "spacing": 8,
                               "children": [
@@ -794,7 +830,7 @@
                             "vstack": {
                               "background": "Surface",
                               "style": "Card",
-                              "radius": 20,
+                              "radius": 12,
                               "padding": 16,
                               "spacing": 8,
                               "children": [
@@ -843,7 +879,7 @@
                             "vstack": {
                               "background": "Surface",
                               "style": "Card",
-                              "radius": 20,
+                              "radius": 12,
                               "padding": 16,
                               "spacing": 8,
                               "children": [
@@ -892,7 +928,7 @@
                             "vstack": {
                               "background": "Surface",
                               "style": "Card",
-                              "radius": 20,
+                              "radius": 12,
                               "padding": 16,
                               "spacing": 8,
                               "children": [
@@ -941,7 +977,7 @@
                             "vstack": {
                               "background": "Surface",
                               "style": "Card",
-                              "radius": 20,
+                              "radius": 12,
                               "padding": 16,
                               "spacing": 8,
                               "children": [
@@ -990,7 +1026,7 @@
                             "vstack": {
                               "background": "Surface",
                               "style": "Card",
-                              "radius": 20,
+                              "radius": 12,
                               "padding": 16,
                               "spacing": 8,
                               "children": [
@@ -1039,7 +1075,7 @@
                             "vstack": {
                               "background": "Surface",
                               "style": "Card",
-                              "radius": 20,
+                              "radius": 12,
                               "padding": 16,
                               "spacing": 8,
                               "children": [
@@ -1084,7 +1120,7 @@
                             "vstack": {
                               "background": "Surface",
                               "style": "Card",
-                              "radius": 20,
+                              "radius": 12,
                               "padding": 16,
                               "spacing": 8,
                               "children": [
@@ -1161,8 +1197,8 @@
     },
     {
       "id": "Menu/Cheats",
-      "showAnimation": "PopIn",
-      "hideAnimation": "PopOut",
+      "showAnimation": "ShowDefault",
+      "hideAnimation": "HideDefault",
       "background": "Shadow",
       "elements": [
         {
@@ -1184,7 +1220,7 @@
                       "vstack": {
                         "background": "SurfaceElevated",
                         "style": "Card",
-                        "radius": 20,
+                        "radius": 12,
                         "padding": 32,
                         "spacing": 16,
                         "children": [
@@ -1599,7 +1635,7 @@
                 "vstack": {
                   "anchor": "Stretch",
                   "padding": 48,
-                  "spacing": 16,
+                  "spacing": 64,
                   "children": [
                     {
                       "hstack": {
@@ -1640,48 +1676,12 @@
                       }
                     },
                     {
-                      "tabbar": {
-                        "id": "SettingsTabs/TabBar",
-                        "size": [
-                          0,
-                          56
-                        ],
-                        "children": [
-                          {
-                            "tab": {
-                              "id": "SettingsTabs/Audio",
-                              "label": "Audio",
-                              "icon": "volume-2",
-                              "textStyle": "ButtonLabel",
-                              "controls": "SettingsPanels/Audio"
-                            }
-                          },
-                          {
-                            "tab": {
-                              "id": "SettingsTabs/Video",
-                              "label": "Video",
-                              "icon": "video",
-                              "textStyle": "ButtonLabel",
-                              "controls": "SettingsPanels/Video"
-                            }
-                          },
-                          {
-                            "tab": {
-                              "id": "SettingsTabs/Game",
-                              "label": "Game",
-                              "icon": "gamepad-2",
-                              "textStyle": "ButtonLabel",
-                              "controls": "SettingsPanels/Game"
-                            }
-                          }
-                        ]
-                      }
-                    },
-                    {
                       "panel": {
                         "id": "SettingsPanels/Audio",
+                        "style": "Panel",
+                        "radius": 12,
                         "padding": 0,
-                        "spacing": 12,
+                        "spacing": 32,
                         "children": [
                           {
                             "text": {
@@ -1706,13 +1706,13 @@
                           {
                             "toggle": {
                               "id": "Settings/Music",
-                              "label": "Music",
+                              "label": "Music and balls",
                               "size": [
                                 0,
                                 40
                               ],
                               "value": 1,
-                              "textStyle": "Body"
+                              "textStyle": "ButtonLabelLarge"
                             }
                           },
                           {
@@ -1869,6 +1869,44 @@
                       }
                     },
                     {
+                      "tabbar": {
+                        "id": "SettingsTabs/TabBar",
+                        "size": [
+                          0,
+                          56
+                        ],
+                        "children": [
+                          {
+                            "tab": {
+                              "id": "SettingsTabs/Audio",
+                              "label": "Audio",
+                              "icon": "volume-2",
+                              "textStyle": "ButtonLabel",
+                              "controls": "SettingsPanels/Audio"
+                            }
+                          },
+                          {
+                            "tab": {
+                              "id": "SettingsTabs/Video",
+                              "label": "Video",
+                              "icon": "video",
+                              "textStyle": "ButtonLabel",
+                              "controls": "SettingsPanels/Video"
+                            }
+                          },
+                          {
+                            "tab": {
+                              "id": "SettingsTabs/Game",
+                              "label": "Game",
+                              "icon": "gamepad-2",
+                              "textStyle": "ButtonLabel",
+                              "controls": "SettingsPanels/Game"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
                       "panel": {
                         "id": "SettingsPanels/Game",
                         "padding": 0,
@@ -1960,15 +1998,16 @@
                     {
                       "button": {
                         "id": "Settings/Back",
-                        "label": "BACK",
-                        "icon": "arrow-left",
-                        "labelColor": "TextStrong",
+                        "label": "BACK and balls",
+                        "icon": "circle-user",
+                        "labelColor": "Danger",
+                        "background": "TextStrong",
                         "variant": "secondary",
                         "size": [
                           0,
                           56
                         ],
-                        "textStyle": "ButtonLabel"
+                        "textStyle": "Heading"
                       }
                     }
                   ]
@@ -1981,7 +2020,7 @@
     },
     {
       "id": "Race/Victory",
-      "showAnimation": "PopIn",
+      "showAnimation": "ShowDefault",
       "hideAnimation": "FadeOut",
       "background": "Background",
       "elements": [
@@ -2344,7 +2383,7 @@
                       "vstack": {
                         "background": "SurfaceElevated",
                         "style": "Card",
-                        "radius": 20,
+                        "radius": 12,
                         "padding": 24,
                         "spacing": 8,
                         "children": [
@@ -2462,7 +2501,7 @@
                         "item": {
                           "hstack": {
                             "style": "Control",
-                            "radius": 16,
+                            "radius": 10,
                             "size": [
                               0,
                               96
@@ -2584,7 +2623,8 @@
         "Gameplay",
         "Graphics",
         "Audio",
-        "Controls"
+        "Controls",
+        "Yippie"
       ],
       "inputActionAsset": "Assets/InputSystem_Actions.inputactions",
       "items": [
@@ -2648,7 +2688,7 @@
           "switch": {
             "id": "Graphics/VSync",
             "group": "Graphics",
-            "label": "222",
+            "label": "V-Sync",
             "value": true
           }
         },
@@ -2752,32 +2792,35 @@
           }
         },
         {
-          "slider": {
+          "button": {
             "id": "Controls/Reset",
             "group": "Controls",
-            "label": "Reset to Defaults",
-            "min": 0,
-            "max": 1
+            "label": "Reset to Defaults"
           }
         },
         {
           "button": {
-            "id": "Controls/Yet Another Control",
-            "group": "Controls",
-            "label": "Yet Another Control"
+            "id": "Gameplay/PunchBalls",
+            "group": "Gameplay",
+            "label": "Punch Balls"
           }
         }
       ]
+    },
+    {
+      "id": "Settings/Catalog2"
     }
   ],
   "cheats": [
+    {
+      "id": "Cheats/Catalog2"
+    },
     {
       "id": "Debug/Cheats",
       "groups": [
         "Player",
         "Economy",
-        "World",
-        "Test"
+        "World"
       ],
       "items": [
         {
@@ -2836,8 +2879,7 @@
           "button": {
             "id": "Economy/UnlockAll",
             "group": "Economy",
-            "label": "Unlock All Cars",
-            "tooltip": "Woohoooo caaaarssss"
+            "label": "Unlock All Cars"
           }
         },
         {
@@ -2875,7 +2917,7 @@
         },
         {
           "button": {
-            "id": "Test/Penis",
+            "id": "World/Twerk It",
             "group": "World",
             "label": "Finish Race Instantly"
           }

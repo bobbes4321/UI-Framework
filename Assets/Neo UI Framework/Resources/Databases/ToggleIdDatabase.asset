@@ -35,6 +35,9 @@ MonoBehaviour:
   - category: Juice
     names:
     - Sound
+  - category: Lint
+    names:
+    - Mute
   - category: Player
     names:
     - God

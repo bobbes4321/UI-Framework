@@ -162,7 +162,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Neo.UI::Neo.UI.NeoShape
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0.05, b: 0, a: 0.45}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.5}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -277,7 +277,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontColor: {r: 0.9529412, g: 0.93333334, b: 0.8627451, a: 1}
+  m_fontColor: {r: 0.9607843, g: 0.96862745, b: 0.98039216, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -567,7 +567,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontColor: {r: 0.8117647, g: 0.7882353, b: 0.7058824, a: 1}
+  m_fontColor: {r: 0.7764706, g: 0.8, b: 0.8392157, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -719,7 +719,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Neo.UI::Neo.UI.NeoShape
   m_Material: {fileID: 0}
-  m_Color: {r: 0.09411765, g: 0.14901961, b: 0.10980392, a: 1}
+  m_Color: {r: 0.08627451, g: 0.09803922, b: 0.11764706, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -729,7 +729,7 @@ MonoBehaviour:
   shapeType: 0
   radiusUnit: 0
   uniformRadius: 1
-  radius: 20
+  radius: 12
   radiusPerCorner: {x: 12, y: 12, z: 12, w: 12}
   fillMode: 0
   fillColorB: {r: 1, g: 1, b: 1, a: 1}
@@ -849,7 +849,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontColor: {r: 0.14117648, g: 0.101960786, b: 0.019607844, a: 1}
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -1070,7 +1070,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Neo.UI::Neo.UI.NeoShape
   m_Material: {fileID: 0}
-  m_Color: {r: 0.9098039, g: 0.6901961, b: 0.29411766, a: 1}
+  m_Color: {r: 0.23137255, g: 0.50980395, b: 0.9647059, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1080,13 +1080,13 @@ MonoBehaviour:
   shapeType: 0
   radiusUnit: 0
   uniformRadius: 1
-  radius: 16
+  radius: 10
   radiusPerCorner: {x: 12, y: 12, z: 12, w: 12}
   fillMode: 0
   fillColorB: {r: 1, g: 1, b: 1, a: 1}
   gradientAngle: 90
   borderWidth: 1
-  borderColor: {r: 0.22745098, g: 0.32156864, b: 0.24705882, a: 1}
+  borderColor: {r: 0.20392157, g: 0.22745098, b: 0.26666668, a: 1}
   softness: 0
   thickness: 8
   arcStartAngle: 0
@@ -2420,7 +2420,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Neo.UI::Neo.UI.NeoShape
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0.05, b: 0, a: 0.45}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.5}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2430,14 +2430,14 @@ MonoBehaviour:
   shapeType: 0
   radiusUnit: 0
   uniformRadius: 1
-  radius: 22
+  radius: 14
   radiusPerCorner: {x: 12, y: 12, z: 12, w: 12}
   fillMode: 0
   fillColorB: {r: 1, g: 1, b: 1, a: 1}
   gradientAngle: 90
   borderWidth: 0
   borderColor: {r: 0, g: 0, b: 0, a: 1}
-  softness: 22
+  softness: 16
   thickness: 8
   arcStartAngle: 0
   arcSweepAngle: 270

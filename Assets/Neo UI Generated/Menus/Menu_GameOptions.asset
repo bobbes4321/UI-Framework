@@ -19,6 +19,7 @@ MonoBehaviour:
   - Graphics
   - Audio
   - Controls
+  - Yippie
   startGroup: 
   inputActionAssetPath: Assets/InputSystem_Actions.inputactions
   items:
@@ -118,7 +119,7 @@ MonoBehaviour:
   - category: Graphics
     name: VSync
     kind: 3
-    label: 222
+    label: V-Sync
     tooltip: 
     group: Graphics
     persisted: 1
@@ -325,6 +326,23 @@ MonoBehaviour:
     label: Reset to Defaults
     tooltip: 
     group: Controls
+    persisted: 1
+    min: 0
+    max: 1
+    step: 1
+    wholeNumbers: 0
+    defaultValue: 
+    options: []
+    emitOnDrag: 1
+    emitOnRelease: 1
+    inputAction: 
+    bindingIndex: 0
+  - category: Gameplay
+    name: PunchBalls
+    kind: 1
+    label: Punch Balls
+    tooltip: 
+    group: Gameplay
     persisted: 1
     min: 0
     max: 1

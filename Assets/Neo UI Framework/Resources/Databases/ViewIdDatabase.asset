@@ -13,6 +13,15 @@ MonoBehaviour:
   m_Name: ViewIdDatabase
   m_EditorClassIdentifier: Neo.UI::Neo.UI.ViewIdDatabase
   categories:
+  - category: A
+    names:
+    - Main
+  - category: B
+    names:
+    - Main
+  - category: Base
+    names:
+    - Main
   - category: Bundle
     names:
     - Screen
@@ -61,6 +70,9 @@ MonoBehaviour:
   - category: Race
     names:
     - Victory
+  - category: Round
+    names:
+    - Main
   - category: Settings
     names:
     - Root
@@ -76,6 +88,9 @@ MonoBehaviour:
   - category: Starter
     names:
     - Showcase
+  - category: Sync
+    names:
+    - Main
   - category: Typo
     names:
     - Screen

@@ -13,10 +13,19 @@ MonoBehaviour:
   m_Name: ButtonIdDatabase
   m_EditorClassIdentifier: Neo.UI::Neo.UI.ButtonIdDatabase
   categories:
+  - category: A
+    names:
+    - Play
   - category: Action
     names:
     - Play
     - Settings
+  - category: B
+    names:
+    - Go
+  - category: Base
+    names:
+    - Play
   - category: Bundle
     names:
     - Go
@@ -31,6 +40,7 @@ MonoBehaviour:
     - Reset
     - ResetDefaults
     - Sprint_Rebind
+    - Yet Another Control
   - category: Deco
     names:
     - Play
@@ -53,6 +63,9 @@ MonoBehaviour:
     - Pause
     - Resume
     - SaveLeave
+  - category: Gameplay
+    names:
+    - PunchBalls
   - category: Gap
     names:
     - Count_Minus
@@ -74,6 +87,7 @@ MonoBehaviour:
   - category: Lint
     names:
     - Empty
+    - Go
     - IconOnly
     - Labeled
   - category: Menu
@@ -120,6 +134,9 @@ MonoBehaviour:
   - category: Prev
     names:
     - Go
+  - category: Round
+    names:
+    - Play
   - category: Row
     names:
     - Pick
@@ -130,6 +147,7 @@ MonoBehaviour:
     - Difficulty_Plus
     - FpsCap_Minus
     - FpsCap_Plus
+    - NewItem
     - Quality_Minus
     - Quality_Plus
   - category: Shop
@@ -147,6 +165,12 @@ MonoBehaviour:
   - category: Spec
     names:
     - Go
+  - category: Sync
+    names:
+    - Play
+  - category: Test
+    names:
+    - Penis
   - category: Typo
     names:
     - Apply
@@ -158,3 +182,4 @@ MonoBehaviour:
     names:
     - FinishRace
     - SpawnEnemy
+    - Twerk It

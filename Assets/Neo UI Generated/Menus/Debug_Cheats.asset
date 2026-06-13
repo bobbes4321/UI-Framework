@@ -18,7 +18,6 @@ MonoBehaviour:
   - Player
   - Economy
   - World
-  - Test
   startGroup: 
   inputActionAssetPath: 
   items:
@@ -128,7 +127,7 @@ MonoBehaviour:
     name: UnlockAll
     kind: 1
     label: Unlock All Cars
-    tooltip: Woohoooo caaaarssss
+    tooltip: 
     group: Economy
     persisted: 1
     min: 0
@@ -196,8 +195,8 @@ MonoBehaviour:
     emitOnRelease: 1
     inputAction: 
     bindingIndex: 0
-  - category: Test
-    name: Penis
+  - category: World
+    name: Twerk It
     kind: 1
     label: Finish Race Instantly
     tooltip: 

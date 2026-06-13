@@ -20,6 +20,7 @@ MonoBehaviour:
     - Music
   - category: Controls
     names:
+    - Reset
     - Sensitivity
   - category: Gameplay
     names:
@@ -27,6 +28,9 @@ MonoBehaviour:
   - category: Graphics
     names:
     - RenderScale
+  - category: Lint
+    names:
+    - Vol
   - category: Set
     names:
     - CursorSize

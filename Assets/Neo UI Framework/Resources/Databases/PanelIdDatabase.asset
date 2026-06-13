@@ -21,13 +21,16 @@ MonoBehaviour:
     names:
     - Economy
     - Player
+    - Test
     - World
   - category: Menu
     names:
     - Audio
+    - Balls
     - Controls
     - Gameplay
     - Graphics
+    - Yippie
   - category: Panels
     names:
     - Audio
