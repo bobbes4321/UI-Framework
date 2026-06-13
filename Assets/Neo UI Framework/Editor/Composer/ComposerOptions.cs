@@ -18,8 +18,22 @@ namespace Neo.UI.Editor.Composer
         public static readonly string[] ShapeNames =
             { "roundedRect", "circle", "pill", "checkmark", "chevron", "cross", "ring", "arc" };
 
-        /// <summary> The on-scale spacing/padding snap values the design lint blesses. </summary>
-        public static readonly float[] SpacingScale = { 0, 4, 8, 12, 16, 24, 32, 48, 64 };
+        /// <summary> The on-scale spacing/padding snap values the design lint blesses. Single source
+        /// of truth: reads <see cref="NeoUISettings.spacingScale"/> so the Composer snap and the
+        /// design lint always agree (a project overrides the scale once, on settings). Falls back to
+        /// the package default when there is no settings asset. </summary>
+        public static float[] SpacingScale
+        {
+            get
+            {
+                NeoUISettings settings = NeoUISettings.instance;
+                if (settings != null && settings.spacingScale != null && settings.spacingScale.Length > 0)
+                    return settings.spacingScale;
+                return DefaultSpacingScale;
+            }
+        }
+
+        private static readonly float[] DefaultSpacingScale = { 0, 4, 8, 12, 16, 24, 32, 48, 64 };
 
         private static Theme ProjectTheme
         {

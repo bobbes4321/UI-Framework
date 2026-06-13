@@ -49,8 +49,15 @@ namespace Neo.UI.Editor
             ValidatePresetDatabase(settings, issues);
             ValidateGeneratedViews(settings, issues);
             ValidateFlowGraphs(settings, issues);
-            ValidateInteractivity(issues);
+            ValidateInteractivity(settings, issues);
             ValidateMenuBindings(issues);
+
+            // Project-registered HARD rules run AFTER the built-in contracts. The built-ins above
+            // always run regardless of registration, so a missing registration can never weaken a
+            // hard contract (per the validation-rules plan). Design/Interactivity rules NEVER run
+            // here — they belong to ValidateDesign so this list stays the hard-fail set.
+            NeoValidationRules.Run(ValidationBucket.Hard,
+                new ValidationContext(settings, GeneratedViewPrefabs(), issues));
 
             return issues;
         }
@@ -68,15 +75,10 @@ namespace Neo.UI.Editor
             Theme theme = settings.theme;
 
             // ---- contrast: text token on surface token, per variant (WCAG AA-ish)
-            (string text, string surface, float minimum)[] pairs =
-            {
-                (UIWidgetFactory.TokenTextStrong, UIWidgetFactory.TokenSurface, 4.5f),
-                (UIWidgetFactory.TokenTextDefault, UIWidgetFactory.TokenSurface, 4.5f),
-                (UIWidgetFactory.TokenTextDefault, UIWidgetFactory.TokenBackground, 4.5f),
-                (UIWidgetFactory.TokenTextMuted, UIWidgetFactory.TokenSurface, 3f),
-                // button labels are 24px semibold = WCAG large text, so 3:1
-                (UIWidgetFactory.TokenTextOnPrimary, UIWidgetFactory.TokenPrimary, 3f)
-            };
+            // Pairs come from settings so a project on a different token scheme can override them;
+            // an empty list falls back to the package defaults below (defaults live editor-side
+            // because they reference the editor's UIWidgetFactory token-name constants).
+            (string text, string surface, float minimum)[] pairs = ContrastPairs(settings);
             foreach (Theme.ThemeVariant variant in theme.Variants)
             {
                 foreach ((string text, string surface, float minimum) pair in pairs)
@@ -91,7 +93,7 @@ namespace Neo.UI.Editor
             }
 
             bool hasTextStyles = theme.TextStyles.Count > 0;
-            float[] scale = { 0f, 4f, 8f, 12f, 16f, 24f, 32f, 48f, 64f };
+            float[] scale = SpacingScale(settings);
             bool OnScale(float value) => scale.Any(s => Mathf.Approximately(s, value));
 
             foreach (GameObject prefab in LoadGeneratedPrefabs())
@@ -157,12 +159,51 @@ namespace Neo.UI.Editor
                 }
             }
 
-            ValidateWidgetContrast(warnings);
+            ValidateWidgetContrast(settings, warnings);
+
+            // Project-registered DESIGN rules run after the built-in soft checks, into the same
+            // warnings list. They are surfaced as designWarnings and never reach ValidateAll.
+            NeoValidationRules.Run(ValidationBucket.Design,
+                new ValidationContext(settings, GeneratedViewPrefabs(), warnings));
+
             return warnings;
         }
 
-        private const float TextContrastMinimum = 3f;        // large text / icon glyphs on widget surfaces
-        private const float AffordanceContrastMinimum = 2f;  // knobs and handles against their tracks
+        // ── Design-lint config seam (read from NeoUISettings; the project's single source of truth) ─
+
+        /// <summary> Package-default contrast pairs (used when settings.contrastPairs is empty). </summary>
+        private static readonly (string text, string surface, float minimum)[] DefaultContrastPairs =
+        {
+            (UIWidgetFactory.TokenTextStrong, UIWidgetFactory.TokenSurface, 4.5f),
+            (UIWidgetFactory.TokenTextDefault, UIWidgetFactory.TokenSurface, 4.5f),
+            (UIWidgetFactory.TokenTextDefault, UIWidgetFactory.TokenBackground, 4.5f),
+            (UIWidgetFactory.TokenTextMuted, UIWidgetFactory.TokenSurface, 3f),
+            // button labels are 24px semibold = WCAG large text, so 3:1
+            (UIWidgetFactory.TokenTextOnPrimary, UIWidgetFactory.TokenPrimary, 3f)
+        };
+
+        /// <summary> The blessed spacing scale (settings override, else the package default). </summary>
+        private static float[] SpacingScale(NeoUISettings settings)
+        {
+            if (settings != null && settings.spacingScale != null && settings.spacingScale.Length > 0)
+                return settings.spacingScale;
+            return new[] { 0f, 4f, 8f, 12f, 16f, 24f, 32f, 48f, 64f };
+        }
+
+        private static (string text, string surface, float minimum)[] ContrastPairs(NeoUISettings settings)
+        {
+            if (settings != null && settings.contrastPairs != null && settings.contrastPairs.Length > 0)
+                return settings.contrastPairs
+                    .Select(p => (p.text, p.surface, p.minimum))
+                    .ToArray();
+            return DefaultContrastPairs;
+        }
+
+        private static float TextContrastMinimum(NeoUISettings settings) =>
+            settings != null && settings.textContrastMin > 0f ? settings.textContrastMin : 3f;
+
+        private static float AffordanceContrastMinimum(NeoUISettings settings) =>
+            settings != null && settings.affordanceContrastMin > 0f ? settings.affordanceContrastMin : 2f;
 
         /// <summary>
         /// Widget-level contrast lint: walks REAL generated widgets and checks the baked + state
@@ -172,8 +213,10 @@ namespace Neo.UI.Editor
         /// token-pair checks above only cover the naming conventions; this catches any theme ×
         /// widget combination that ships unreadable, no matter which tokens built it.
         /// </summary>
-        private static void ValidateWidgetContrast(List<string> warnings)
+        private static void ValidateWidgetContrast(NeoUISettings settings, List<string> warnings)
         {
+            float textContrastMinimum = TextContrastMinimum(settings);
+            float affordanceContrastMinimum = AffordanceContrastMinimum(settings);
             var seen = new HashSet<string>(); // identical widgets repeat across views — report each pair once
 
             void Check(GameObject prefab, Component content, string contentState, Color contentColor,
@@ -233,14 +276,14 @@ namespace Neo.UI.Editor
                         // state-coupled pair (tab label + tab surface): only matching states co-occur
                         for (int i = 0; i < contentStates.Count; i++)
                             Check(prefab, text, contentStates[i].state, contentStates[i].color,
-                                backdrop, backdropStates[i].state, backdropStates[i].color, TextContrastMinimum);
+                                backdrop, backdropStates[i].state, backdropStates[i].color, textContrastMinimum);
                     }
                     else
                     {
                         foreach ((string contentState, Color contentColor) in contentStates)
                             foreach ((string backdropState, Color backdropColor) in backdropStates)
                                 Check(prefab, text, contentState, contentColor,
-                                    backdrop, backdropState, backdropColor, TextContrastMinimum);
+                                    backdrop, backdropState, backdropColor, textContrastMinimum);
                     }
                 }
 
@@ -250,7 +293,7 @@ namespace Neo.UI.Editor
                     NeoShape handle = slider.handleRect != null ? slider.handleRect.GetComponent<NeoShape>() : null;
                     NeoShape track = slider.transform.Find(UIWidgetFactory.TrackName)?.GetComponent<NeoShape>();
                     if (handle != null && track != null)
-                        Check(prefab, handle, null, handle.color, track, null, track.color, AffordanceContrastMinimum);
+                        Check(prefab, handle, null, handle.color, track, null, track.color, affordanceContrastMinimum);
                 }
 
                 // switch knob vs its track, per state
@@ -265,7 +308,7 @@ namespace Neo.UI.Editor
                     for (int i = 0; i < pairs; i++)
                         Check(prefab, knob.GetComponent<NeoShape>(), knobStates[i].state, knobStates[i].color,
                             track.GetComponent<NeoShape>(), trackStates[i].state, trackStates[i].color,
-                            AffordanceContrastMinimum);
+                            affordanceContrastMinimum);
                 }
             }
         }
@@ -275,7 +318,7 @@ namespace Neo.UI.Editor
         /// a flow trigger, a signal, a view command, a popup or a wired event. "Renders fine,
         /// does nothing when clicked" is the most common way generated UI disappoints.
         /// </summary>
-        private static void ValidateInteractivity(List<string> issues)
+        private static void ValidateInteractivity(NeoUISettings settings, List<string> issues)
         {
             var flowButtonIds = new HashSet<string>();
             var flowToggleIds = new HashSet<string>();
@@ -311,7 +354,9 @@ namespace Neo.UI.Editor
                     bool wired = button.GetComponent<ViewCommandOnClick>() != null
                                  || button.GetComponent<ShowPopupOnClick>() != null
                                  || button.GetComponent<HideContainerOnClick>() != null
-                                 || flowButtonIds.Contains(button.id.ToString());
+                                 || flowButtonIds.Contains(button.id.ToString())
+                                 // a project's custom wiring component can declare itself live
+                                 || NeoInteractivityProviders.ClaimsWired(button.gameObject);
                     if (!wired)
                     {
                         foreach (UIActionBehaviour behaviour in button.behaviours)
@@ -331,11 +376,16 @@ namespace Neo.UI.Editor
 
                 foreach (UITab tab in prefab.GetComponentsInChildren<UITab>(true))
                 {
-                    if (tab.targetContainer == null && !flowToggleIds.Contains(tab.id.ToString()))
+                    if (tab.targetContainer == null && !flowToggleIds.Contains(tab.id.ToString())
+                        && !NeoInteractivityProviders.ClaimsWired(tab.gameObject))
                         issues.Add($"Tab '{tab.id}' in '{prefab.name}' highlights but controls nothing " +
                                    "(no container reference and no flow trigger listens to it)");
                 }
             }
+
+            // Project-registered INTERACTIVITY rules run after the built-in dead-interaction check.
+            NeoValidationRules.Run(ValidationBucket.Interactivity,
+                new ValidationContext(settings, GeneratedViewPrefabs(), issues));
         }
 
         /// <summary>
@@ -495,6 +545,18 @@ namespace Neo.UI.Editor
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Generated UIView-rooted prefabs, materialized as a list, for the <see cref="ValidationContext"/>
+        /// handed to registered rules — the same set the built-in design/interactivity checks walk.
+        /// </summary>
+        private static IReadOnlyList<GameObject> GeneratedViewPrefabs()
+        {
+            var views = new List<GameObject>();
+            foreach (GameObject prefab in LoadGeneratedPrefabs())
+                if (prefab.GetComponent<UIView>() != null) views.Add(prefab);
+            return views;
         }
 
         private static IEnumerable<GameObject> LoadGeneratedPrefabs()
