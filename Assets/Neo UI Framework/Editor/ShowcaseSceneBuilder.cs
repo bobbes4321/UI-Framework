@@ -7,8 +7,9 @@ namespace Neo.UI.Editor
 {
     /// <summary>
     /// Builds the playable showcase scene: <see cref="GeneratedSceneBuilder.Build"/> (camera, input,
-    /// canvases, every generated view, flow controller) plus a <see cref="ShowcaseDirector"/> so the
-    /// HUD simulates a live game and the shop's bound list streams rows from UIData.
+    /// canvases, every generated view, flow controller) plus a <see cref="ShowcaseDirector"/> (the
+    /// live HUD simulation) and the project-side <c>Game.UI.GameUIBindings</c> (the binding-guide
+    /// worked example — domain signals, the typed Shop/Deals list, the coin economy).
     /// Batch entry point: <c>-executeMethod Neo.UI.Editor.ShowcaseSceneBuilder.BuildBatch</c>.
     /// </summary>
     public static class ShowcaseSceneBuilder
@@ -25,12 +26,25 @@ namespace Neo.UI.Editor
         /// generated spec (e.g. ColorACube) sharing the generated folder can't leak its screens in. </summary>
         public const string ShowcaseFlow = "GameUI";
 
-        /// <summary> Builds the generated-UI scene, injects the showcase director and re-saves. </summary>
+        /// <summary> Builds the generated-UI scene, injects the showcase director + binding example
+        /// and re-saves. </summary>
         public static string Build()
         {
             string path = GeneratedSceneBuilder.Build(ShowcaseFlow); // leaves the new scene open
-            var directorGo = new GameObject("Showcase Director", typeof(ShowcaseDirector));
-            _ = directorGo;
+            new GameObject("Showcase Director", typeof(ShowcaseDirector)); // HUD output simulation
+
+            // The shop economy / domain-signal / list wiring lives in Game.UI.GameUIBindings — the
+            // worked example for Assets/docs/developer-binding-guide.md. It is the *developer's* own
+            // code in Assembly-CSharp, which this package editor assembly can't reference by type, so
+            // resolve + attach it reflectively. Skips cleanly if the stub hasn't been generated yet
+            // (Tools ▸ Neo UI ▸ Generate Binding Stub).
+            System.Type bindingsType = System.Type.GetType("Game.UI.GameUIBindings, Assembly-CSharp");
+            if (bindingsType != null)
+                new GameObject("Game UI Bindings", bindingsType);
+            else
+                Debug.Log("[Neo.UI] Showcase: Game.UI.GameUIBindings not found — generate the binding " +
+                          "stub (Tools ▸ Neo UI ▸ Generate Binding Stub) to wire the shop economy.");
+
             EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene(), path);
             return path;
         }

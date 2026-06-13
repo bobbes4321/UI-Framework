@@ -5,24 +5,21 @@ using Neo.UI.Menus;
 namespace Neo.UI.Demo
 {
     /// <summary>
-    /// Makes the generated showcase scene feel like a live game: streams shop rows through
-    /// <see cref="UIData"/>, simulates the HUD (score ticks, health/boost, speed dial, cooldown
-    /// loops) and reacts to shop/cheat signals. Deliberately a pure consumer of the package's
-    /// public APIs — UIData.Set, Signals.On, UICounter.SetValue, Progressor.SetValueAt — i.e.
-    /// exactly the wiring a real game would write against generated UI.
+    /// Makes the generated showcase scene feel like a live game: simulates the HUD (score ticks,
+    /// health/boost, speed dial, cooldown loops) and reacts to player/world cheat signals.
     ///
-    /// Widget binding leans on hierarchy order inside the generated views (first bar = health,
-    /// largest radial = speed dial, first counter = score…), so it tolerates renames but tracks
-    /// the demo spec's element order.
+    /// This is deliberately the package's <b>low-level output-driving</b> consumer: it reaches HUD
+    /// widgets by hierarchy order (first bar = health, largest radial = speed dial, first counter =
+    /// score…) and drives them imperatively with <see cref="Progressor.SetValueAt"/> /
+    /// <see cref="UICounter.SetValue"/>. Scalar output like this is outside the binding contract — a
+    /// view has no string-addressed "set this counter" command — so direct widget access is the
+    /// honest tool here. For the <i>blessed</i> input/list/settings wiring (domain signals, typed
+    /// list data, generated <c>Wire()</c>) see the companion <c>Game.UI.GameUIBindings</c> and
+    /// <c>Assets/docs/developer-binding-guide.md</c>; that class owns the shop economy.
     /// </summary>
     [AddComponentMenu("Neo/UI/Demo/Showcase Director")]
     public class ShowcaseDirector : MonoBehaviour
     {
-        [Tooltip("Coins shown in the HUD and the Garage header")]
-        public float startCoins = 2450f;
-        [Tooltip("Featured car price deducted per Shop/Buy signal")]
-        public float purchaseCost = 980f;
-
         private Progressor _healthBar;
         private Progressor _boostBar;
         private Progressor _speedDial;
@@ -30,9 +27,7 @@ namespace Neo.UI.Demo
         private readonly List<float> _cooldownValues = new List<float>();
         private UICounter _scoreCounter;
         private UICounter _speedCounter;
-        private readonly List<UICounter> _coinCounters = new List<UICounter>();
 
-        private float _coins;
         private float _score = 124500f;
         private float _clock;
         private float _scoreTimer;
@@ -42,27 +37,11 @@ namespace Neo.UI.Demo
 
         private void Start()
         {
-            _coins = startCoins;
-            SeedShopData();
             BindHudWidgets();
-            BindShopWidgets();
             SubscribeSignals();
         }
 
         private void OnDestroy() => UnsubscribeSignals();
-
-        // ------------------------------------------------------------------ data binding showcase
-
-        private void SeedShopData()
-        {
-            UIData.Set("Shop", "Deals", new[]
-            {
-                new Dictionary<string, string> { ["name"] = "Nitro Cell MkII", ["tag"] = "consumable · +18% boost", ["price"] = "1,250" },
-                new Dictionary<string, string> { ["name"] = "Slipstream Tyres", ["tag"] = "equipment · wet grip", ["price"] = "3,400" },
-                new Dictionary<string, string> { ["name"] = "Chrome Wrap", ["tag"] = "cosmetic · limited", ["price"] = "980" },
-                new Dictionary<string, string> { ["name"] = "Pit Crew Contract", ["tag"] = "service · 7 days", ["price"] = "5,000" },
-            });
-        }
 
         // ------------------------------------------------------------------ widget lookup
 
@@ -98,25 +77,18 @@ namespace Neo.UI.Demo
 
             UICounter[] counters = hud.GetComponentsInChildren<UICounter>(true);
             if (counters.Length > 0) _scoreCounter = counters[0];
-            if (counters.Length > 1) _coinCounters.Add(counters[1]);
             if (counters.Length > 2) _speedCounter = counters[2];
         }
 
-        private void BindShopWidgets()
-        {
-            UIView shop = UIView.GetFirstView("Shop", "Store");
-            if (shop == null) return;
-            UICounter[] counters = shop.GetComponentsInChildren<UICounter>(true);
-            if (counters.Length > 0) _coinCounters.Add(counters[0]);
-        }
-
         // ------------------------------------------------------------------ signal reactions
+        // Player/World cheats modulate the HUD simulation below, so they live here with the sim
+        // they drive. They are cheat *catalog* entries (not view widgets), so the binding manifest
+        // surfaces them differently: the valued ones (GodMode/InfiniteBoost/TimeScale) are bound
+        // through GameUIBindings' generated Wire(); HealFull is a cheat *button* (no value) so it is
+        // reached by the raw cheat stream, as below. See GameUIBindings for the contrasting path.
 
         private void SubscribeSignals()
         {
-            Signals.On("Shop", "Buy", OnPurchase);
-            Signals.On(UserSettingsService.CheatCategory, "Economy/Give1k", OnGive1k);
-            Signals.On(UserSettingsService.CheatCategory, "Economy/Give10k", OnGive10k);
             Signals.On(UserSettingsService.CheatCategory, "Player/HealFull", OnHealFull);
             Signals.On<object>(UserSettingsService.CheatCategory, "Player/GodMode", OnGodMode);
             Signals.On<object>(UserSettingsService.CheatCategory, "Player/InfiniteBoost", OnInfiniteBoost);
@@ -125,18 +97,12 @@ namespace Neo.UI.Demo
 
         private void UnsubscribeSignals()
         {
-            Signals.Off("Shop", "Buy", OnPurchase);
-            Signals.Off(UserSettingsService.CheatCategory, "Economy/Give1k", OnGive1k);
-            Signals.Off(UserSettingsService.CheatCategory, "Economy/Give10k", OnGive10k);
             Signals.Off(UserSettingsService.CheatCategory, "Player/HealFull", OnHealFull);
             Signals.Off<object>(UserSettingsService.CheatCategory, "Player/GodMode", OnGodMode);
             Signals.Off<object>(UserSettingsService.CheatCategory, "Player/InfiniteBoost", OnInfiniteBoost);
             Signals.Off<object>(UserSettingsService.CheatCategory, "World/TimeScale", OnTimeScale);
         }
 
-        private void OnPurchase() => SetCoins(Mathf.Max(0f, _coins - purchaseCost));
-        private void OnGive1k() => SetCoins(_coins + 1000f);
-        private void OnGive10k() => SetCoins(_coins + 10000f);
         private void OnHealFull() => _clock = 0f;
         private void OnGodMode(object value) => _godMode = value is bool b && b;
         private void OnInfiniteBoost(object value) => _infiniteBoost = value is bool b && b;
@@ -144,13 +110,6 @@ namespace Neo.UI.Demo
         {
             if (value is float f) _simSpeed = f;
             else if (value is double d) _simSpeed = (float)d;
-        }
-
-        private void SetCoins(float coins)
-        {
-            _coins = coins;
-            foreach (UICounter counter in _coinCounters)
-                if (counter != null) counter.SetValue(_coins);
         }
 
         // ------------------------------------------------------------------ HUD simulation

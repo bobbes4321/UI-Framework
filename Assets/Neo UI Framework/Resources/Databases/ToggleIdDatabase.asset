@@ -85,6 +85,9 @@ MonoBehaviour:
     names:
     - Home
     - Options
+  - category: Tab
+    names:
+    - Tab1
   - category: Tabs
     names:
     - Collection

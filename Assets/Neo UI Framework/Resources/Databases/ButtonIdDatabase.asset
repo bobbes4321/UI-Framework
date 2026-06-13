@@ -18,6 +18,7 @@ MonoBehaviour:
     - Play
   - category: Action
     names:
+    - Button
     - Play
     - Settings
   - category: B

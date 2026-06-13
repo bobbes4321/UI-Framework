@@ -184,6 +184,33 @@ Out-of-range indices or a missing projection log a warning rather than failing s
 Regenerate the UI as often as you like — your handler partial and your subscriptions are addressed
 by string id, so they survive.
 
+## Worked example: the showcase
+
+The committed showcase wires its `GameUI` flow through exactly this path — read the two files end to end:
+
+- **`Assets/Scripts/Generated/GameUIBindings.g.cs`** — the generated stub for the showcase spec
+  (`neo-demo-game-ui.json`). It surfaces the *whole* contract: every view / signal / setting / cheat
+  id, a `Wire()` that subscribes `Shop/Buy` and binds ~20 settings and cheats, and ~30 `partial void`
+  hooks — even though the example implements only a handful.
+- **`Assets/Scripts/GameUIBindings.Handlers.cs`** — the hand-written sibling partial you own. It
+  `Start()`-calls `Wire()`, fills the `Shop/Deals` list from a typed `Deal` model, reacts to the
+  `Shop/Buy` domain signal, and implements one settings hook (`OnAudioMasterChanged`). The other ~29
+  generated hooks stay empty no-ops — that's the point: you pay only for what you wire.
+
+The sibling `ShowcaseDirector` (`Runtime/Demo/ShowcaseDirector.cs`) deliberately takes the *low-level*
+road for the things the contract doesn't model (the live HUD simulation) — see the boundaries below.
+
+### Two boundaries the contract does not cover
+
+- **Cheat/settings *buttons* aren't auto-wired.** A button carries no value, so `Wire()` can't bind it
+  — the manifest lists it but the stub generates no hook for it. React on the raw cheat stream instead:
+  `Signals.On(UserSettingsService.CheatCategory, "Economy/Give1k", …)`. (Valued controls — toggle,
+  switch, slider, dropdown, stepper — *are* auto-wired, through `UserSettingsService.Bind`.)
+- **Scalar *output* widgets aren't string-addressable.** A `UICounter` / `Progressor` you drive from
+  game state (a coin total, a health bar) has no "set this widget by id" command — the contract covers
+  inputs and list data, not arbitrary output. Fetch the widget once by a generated **view-id** const
+  and drive it directly: `UIView.GetFirstView(category, name).GetComponentInChildren<UICounter>()`.
+
 ## Reference
 
 | You want to… | Use |

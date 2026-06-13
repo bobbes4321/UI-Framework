@@ -31,6 +31,9 @@ MonoBehaviour:
     - Gameplay
     - Graphics
     - Yippie
+  - category: Panel
+    names:
+    - Tab1
   - category: Panels
     names:
     - Audio
