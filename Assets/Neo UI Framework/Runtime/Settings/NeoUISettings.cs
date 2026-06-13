@@ -137,6 +137,44 @@ namespace Neo.UI
             return false;
         }
 
+        // ── Design-lint configuration (extensibility seam: validation rules) ─────────────────────
+        // The blessed spacing scale + WCAG thresholds + contrast token pairs the soft design lint
+        // (AgentValidation.ValidateDesign) and the Composer's spacing snap (ComposerOptions) read.
+        // A consuming project on a different design system overrides these here — single source of
+        // truth so the lint and the Composer always agree, with no package file edited.
+        // See Assets/docs/extensibility-seam-validation-rules-plan.md.
+
+        /// <summary> A text/surface token pair and the minimum WCAG contrast ratio it must meet. </summary>
+        [System.Serializable]
+        public struct ContrastPair
+        {
+            [Tooltip("Theme token of the foreground (text/icon) color")] public string text;
+            [Tooltip("Theme token of the background (surface) color")] public string surface;
+            [Tooltip("Minimum WCAG contrast ratio (e.g. 4.5 body, 3 large/label text)")] public float minimum;
+
+            public ContrastPair(string text, string surface, float minimum)
+            {
+                this.text = text;
+                this.surface = surface;
+                this.minimum = minimum;
+            }
+        }
+
+        [Header("Design Lint")]
+        [Tooltip("The on-scale spacing/padding values the design lint blesses and the Composer snaps to. " +
+                 "Override for a different design system (single source of truth for the blessed scale).")]
+        public float[] spacingScale = { 0f, 4f, 8f, 12f, 16f, 24f, 32f, 48f, 64f };
+
+        [Tooltip("Minimum contrast ratio for large text / icon glyphs on widget surfaces")]
+        public float textContrastMin = 3f;
+
+        [Tooltip("Minimum contrast ratio for affordances (knobs, handles) against their tracks")]
+        public float affordanceContrastMin = 2f;
+
+        [Tooltip("Theme token contrast pairs the design lint checks per variant. Empty = use the " +
+                 "built-in default set.")]
+        public ContrastPair[] contrastPairs = System.Array.Empty<ContrastPair>();
+
         public IdDatabase GetDatabaseFor(System.Type idType)
         {
             if (idType == typeof(ViewId)) return viewIds;
