@@ -1,4 +1,4 @@
-# AlterEyes UI Package
+# Neo UI Package
 
 A Unity 6 (6000.4.10f1) clean-room rebuild of Doozy UI Manager 4 into a fully fledged,
 reusable, **agent-first** UI package.
@@ -11,15 +11,15 @@ whole UI can be generated, exported, and validated programmatically.
 
 | Path | Assembly | What lives here |
 | --- | --- | --- |
-| `Assets/AE UI Package/Runtime` | `AlterEyes.UI` | Containers, interactive widgets, animation/tweens, flow graphs, signals, theming, id/databases, settings, and `Graphics/` (the `AEShape` SDF vector graphic all visuals are built from — one shared material batches everything). |
-| `Assets/AE UI Package/Editor` | `AlterEyes.UI.Editor` | Inspectors, property drawers, the flow-graph window, and the agent spec tooling. |
-| `Assets/AE UI Package/Editor/EditorUI` | `AlterEyes.EditorUI` | Standalone editor tooling kit (AEGUI, AEColors, AEStyles, dropdowns, list views) — kept dependency-free so it lifts into other projects. |
-| `Assets/AE UI Package/Tests` | EditMode + PlayMode | Behaviour-regression and pipeline tests. |
+| `Assets/Neo UI Framework/Runtime` | `Neo.UI` | Containers, interactive widgets, animation/tweens, flow graphs, signals, theming, id/databases, settings, and `Graphics/` (the `NeoShape` SDF vector graphic all visuals are built from — one shared material batches everything). |
+| `Assets/Neo UI Framework/Editor` | `Neo.UI.Editor` | Inspectors, property drawers, the flow-graph window, and the agent spec tooling. |
+| `Assets/Neo UI Framework/Editor/EditorUI` | `Neo.EditorUI` | Standalone editor tooling kit (NeoGUI, NeoColors, NeoStyles, dropdowns, list views) — kept dependency-free so it lifts into other projects. |
+| `Assets/Neo UI Framework/Tests` | EditMode + PlayMode | Behaviour-regression and pipeline tests. |
 | `Assets/docs` | — | Feature spec, editor-UX analysis, beautification roadmap, generated spec reference. |
 
 ## Documentation
 
-- **Feature spec:** `Assets/docs/altereyes-ui-package-feature-spec.md`
+- **Feature spec:** `Assets/docs/neo-ui-package-feature-spec.md`
 - **Editor UX rationale + field catalog:** `Assets/docs/editor-ux-analysis.md`
 - **Visual-polish roadmap:** `Assets/docs/ui-beautification-plan.md`
 - **Spec reference + JSON schema:** `Assets/docs/spec-reference.md` (regenerate via the agent bridge `specReference` action)
@@ -36,9 +36,9 @@ git clone https://github.com/bobbes4321/UI-Framework.git
 
 Open the folder in Unity 6 (6000.4.10f1). Then, from the Unity menu:
 
-1. `Tools → AlterEyes UI → Create or Repair Settings` — settings asset + databases.
-2. `Tools → AlterEyes UI → Create or Repair Fonts` — Inter + Lucide icon TMP SDF fonts.
-3. `Tools → AlterEyes UI → Create or Repair Starter Kit` — themed widget prefab library + Dark/Light palette + type scale.
+1. `Tools → Neo UI → Create or Repair Settings` — settings asset + databases.
+2. `Tools → Neo UI → Create or Repair Fonts` — Inter + Lucide icon TMP SDF fonts.
+3. `Tools → Neo UI → Create or Repair Starter Kit` — themed widget prefab library + Dark/Light palette + type scale.
 
 ## Hard constraints
 

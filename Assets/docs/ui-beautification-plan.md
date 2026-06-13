@@ -4,15 +4,15 @@
 > (P3), button variants/sizes + WidgetStyleTag (P2), Ring/Arc + gradients + elevation + radial
 > progress (P4), CleanSlate/NeonArcade/SoftFantasy bundles + design lint (P5), press-scale /
 > spring knobs / cascade / counter / badge / UISoundRelay (P6). Acceptance renders:
-> `aeui-screenshots/beautification/` (demo spec × starter + 3 bundles), regenerate via
-> `-executeMethod AlterEyes.UI.Editor.BeautificationAcceptance.Run`. Still open from P6:
+> `neo-screenshots/beautification/` (demo spec × starter + 3 bundles), regenerate via
+> `-executeMethod Neo.UI.Editor.BeautificationAcceptance.Run`. Still open from P6:
 > segmented progress, rarity frame, real-art support (sprites/9-slice); tab panels remain
 > explicitly deferred.
 
 Goal: agent-generated UI that looks professionally designed — web-app-grade polish first, then
-game-grade "juice." Companion to `altereyes-ui-package-feature-spec.md` and
+game-grade "juice." Companion to `neo-ui-package-feature-spec.md` and
 `editor-ux-analysis.md`. Written 2026-06-11, after the agent loop e2e test (see
-`aeui-demo-game-ui.json` + `aeui-screenshots/`): layout/widgets/flow all work; what's missing is
+`neo-demo-game-ui.json` + `neo-screenshots/`): layout/widgets/flow all work; what's missing is
 the curated design system the way Tailwind/shadcn give it to web LLMs.
 
 **Core principle: don't make agents better designers — give them a designer-made system to lean
@@ -21,10 +21,10 @@ on.** Beauty comes from curated tokens/styles/motion an agent *selects*, never v
 **Cross-cutting rules (every phase):**
 - Every new spec field gets deterministic export and an extension to the fixed-point tests
   (`Export_Generate_Export_IsFixedPoint` style — byte-identical round trips).
-- One shared AEShape material stays sacred; new rendering features ride vertex channels.
+- One shared NeoShape material stays sacred; new rendering features ride vertex channels.
 - No editor-side animation; new serializable types get EditorUI drawers (searchable dropdowns for
   any style/token name reference).
-- Each phase ends with: tests green + regenerate `aeui-demo-game-ui.json` + screenshot comparison.
+- Each phase ends with: tests green + regenerate `neo-demo-game-ui.json` + screenshot comparison.
 
 ---
 
@@ -34,7 +34,7 @@ The #1 "programmer art" tell in the current renders is TMP's default LiberationS
 weight. Fix:
 
 1. **Assets**: commit Inter (SIL OFL — include the license file) as TTFs (Regular, SemiBold, Bold)
-   under `AE UI Package/Fonts/`, plus pre-generated TMP SDF font assets (commit the .asset files;
+   under `Neo UI Framework/Fonts/`, plus pre-generated TMP SDF font assets (commit the .asset files;
    don't generate at runtime/bootstrap — generation is slow and version-sensitive).
 2. **Data model**: `TextStyle` ([Serializable], `Runtime/Theming/TextStyle.cs`): name, TMP_FontAsset,
    size, FontStyles, characterSpacing, lineSpacing, default colorToken. `Theme` gets
@@ -48,7 +48,7 @@ weight. Fix:
    present, export `textStyle` and DON'T export fontSize (style owns it); raw fontSize stays the
    styleless fallback.
 6. **Editor**: style-name dropdown drawer for ThemeTextStyleTarget; Theme inspector gets an
-   AEListView section for text styles.
+   NeoListView section for text styles.
 
 Acceptance: settings screen rendered with Display/Title/Body hierarchy looks like a designed page.
 
@@ -76,7 +76,7 @@ Acceptance: a screen with one primary CTA + quiet secondary/ghost buttons reads 
    zero load cost; ~100-icon curated subset: play, pause, settings, x, check, chevron-*, arrow-*,
    heart, star, coin, shield, sword, bag, lock, volume-*, music, user, trash, plus, minus, info,
    alert-*, home, search, refresh, share, trophy, gift, map, flag, clock, zap…).
-2. **Settings**: `AEUISettings.iconFont` (TMP_FontAsset reference).
+2. **Settings**: `NeoUISettings.iconFont` (TMP_FontAsset reference).
 3. **Factory**: `CreateIcon(parent, iconName, size, colorToken)` = TMP_Text using the icon font +
    the mapped glyph. Button/tab factories get an optional icon slot (`Icon` child-name const,
    horizontal icon+label arrangement; icon-only buttons when label empty).
@@ -88,16 +88,16 @@ Acceptance: HUD pause button shows a real pause icon; settings rows have leading
 
 ## Phase 4 — Depth, gradients, new SDF shapes
 
-The pieces half-exist: `AEGradient` (theme-riding two-stop vertex gradient on any Graphic) isn't
+The pieces half-exist: `NeoGradient` (theme-riding two-stop vertex gradient on any Graphic) isn't
 reachable from styles/spec; the SDF shader does soft shadows only via the Card recipe.
 
-1. **ShapeStyle extensions**: gradient (bool + tokenB + angle — applied via AEGradient so the
+1. **ShapeStyle extensions**: gradient (bool + tokenB + angle — applied via NeoGradient so the
    shared material survives), border color token, and an `elevation` int (0–3) mapping to a
    standardized drop-shadow recipe (offset/softness/alpha per level — extract from CreateCard).
 2. **Factory**: a `WithElevation(go, level)` helper that builds the shadow sibling the Card way;
    Card/Popup refactored onto it.
 3. **New shape types**: `Ring` (annulus, thickness param) and `Arc` (start/sweep angles) in
-   AEShape + shader. Channel budget: ring thickness and arc angles pack into the radii channel
+   NeoShape + shader. Channel budget: ring thickness and arc angles pack into the radii channel
    (UV1) — those params are meaningless for rounded-rect corners, so the channel is free per-mode.
 4. **Radial progress**: `ShapeProgressTarget : ProgressTarget` driving an Arc's sweep — radial
    cooldowns/dials for free. Spec: `"progress": { "style": "radial", ... }`.
@@ -115,12 +115,12 @@ Acceptance: main-menu CTA with subtle gradient + elevation; a radial cooldown de
    - **NeonArcade** — dark, saturated gradients, glow accents, radius 8, snappy springs.
    - **SoftFantasy** — warm parchment/deep-forest, radius 20, slower eased motion.
 2. **Spec**: `"theme": { "bundle": "NeonArcade", "tokens": { overrides... } }` — bundle applies
-   first, explicit tokens override. Menu: `Tools → AlterEyes UI → Apply Theme Bundle…`.
+   first, explicit tokens override. Menu: `Tools → Neo UI → Apply Theme Bundle…`.
 3. **Design lint** (extend AgentValidation): contrast check (WCAG relative luminance) for text
    tokens vs surface tokens; warnings for raw fontSize where a textStyle exists and for off-scale
    spacing/radius values (scale: 4/8/12/16/24/32/48/64).
 
-Acceptance: the SAME `aeui-demo-game-ui.json` rendered under each bundle — three distinct,
+Acceptance: the SAME `neo-demo-game-ui.json` rendered under each bundle — three distinct,
 professional looks from one spec. This pair of before/after screenshots is the proof the whole
 plan works.
 
@@ -135,10 +135,10 @@ plan works.
    `badge` (notification dot/count on any widget corner), segmented progress (tick marks),
    rarity frame (gradient border + glow preset).
 4. **Sound hooks**: `UISoundRelay` (runtime, optional) — listens to the existing UIButton/UIToggle
-   signal streams, plays AudioClips referenced from AEUISettings (click/hover/toggle). Zero
+   signal streams, plays AudioClips referenced from NeoUISettings (click/hover/toggle). Zero
    per-widget wiring, signals already carry everything.
 5. **Real art support** (when CBN needs it): sprite path references in spec for image elements,
-   9-slice support, rounded-corner sprite masking (AEShape as mask), background art layers.
+   9-slice support, rounded-corner sprite masking (NeoShape as mask), background art layers.
 
 ## Done after the plan
 

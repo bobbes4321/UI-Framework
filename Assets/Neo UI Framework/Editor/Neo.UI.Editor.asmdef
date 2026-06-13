@@ -1,0 +1,23 @@
+{
+    "name": "Neo.UI.Editor",
+    "rootNamespace": "Neo.UI.Editor",
+    "references": [
+        "Neo.UI",
+        "Neo.EditorUI",
+        "UnityEngine.UI",
+        "UnityEditor.UI",
+        "Unity.TextMeshPro",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

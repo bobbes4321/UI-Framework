@@ -1,8 +1,0 @@
-using UnityEngine;
-
-namespace AlterEyes.UI.Menus
-{
-    /// <summary> A <see cref="MenuPresenter"/> specialised for a <see cref="SettingsCatalog"/>. </summary>
-    [AddComponentMenu("AlterEyes/UI/Menus/Settings Menu")]
-    public class SettingsMenu : MenuPresenter { }
-}

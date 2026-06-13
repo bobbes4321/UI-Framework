@@ -1,6 +1,6 @@
-# AlterEyes UI — Spec Reference
+# Neo UI — Spec Reference
 
-> Generated from code by `Tools → AlterEyes UI → Generate Spec Reference` (or bridge `{"action":"specReference"}`). Do not edit by hand — regenerate.
+> Generated from code by `Tools → Neo UI → Generate Spec Reference` (or bridge `{"action":"specReference"}`). Do not edit by hand — regenerate.
 
 A spec is JSON with optional top-level sections: `theme`, `presets`, `views`, `popups`, `flow`. Run one through `{"action":"generate","spec":"path.json"}`, round-trip with `{"action":"export"}`, lint with `{"action":"validate"}`.
 

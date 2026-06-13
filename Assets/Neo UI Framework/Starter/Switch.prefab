@@ -1,0 +1,863 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &122852948560805319
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3957847219086872706}
+  - component: {fileID: 2474281772559783649}
+  - component: {fileID: 8204968667300974078}
+  - component: {fileID: 368966713804222800}
+  - component: {fileID: 7298668507452372412}
+  m_Layer: 0
+  m_Name: Knob
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &3957847219086872706
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 122852948560805319}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 1664467095694136359}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0.5}
+  m_AnchorMax: {x: 0, y: 0.5}
+  m_AnchoredPosition: {x: 4, y: 0}
+  m_SizeDelta: {x: 24, y: 24}
+  m_Pivot: {x: 0, y: 0.5}
+--- !u!222 &2474281772559783649
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 122852948560805319}
+  m_CullTransparentMesh: 1
+--- !u!114 &8204968667300974078
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 122852948560805319}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ced6d6f35eed4b009ea309bf32174e4b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.NeoShape
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.9490196, g: 0.95686275, b: 0.972549, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  shapeType: 1
+  radiusUnit: 0
+  uniformRadius: 1
+  radius: 12
+  radiusPerCorner: {x: 12, y: 12, z: 12, w: 12}
+  fillMode: 0
+  fillColorB: {r: 1, g: 1, b: 1, a: 1}
+  gradientAngle: 90
+  borderWidth: 0
+  borderColor: {r: 0, g: 0, b: 0, a: 1}
+  softness: 0
+  thickness: 8
+  arcStartAngle: 0
+  arcSweepAngle: 270
+  fillSprite: {fileID: 0}
+  textureFit: 0
+--- !u!114 &368966713804222800
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 122852948560805319}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6ae3cf2a1541344f9babda51d2e7252, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.UIToggleColorAnimator
+  controller: {fileID: 0}
+  onColor:
+    useToken: 1
+    token: TextOnPrimary
+    color: {r: 1, g: 1, b: 1, a: 1}
+  offColor:
+    useToken: 1
+    token: TextStrong
+    color: {r: 1, g: 1, b: 1, a: 1}
+  transitionSettings:
+    playMode: 0
+    easeMode: 0
+    ease: 5
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    duration: 0.15
+    useRandomDuration: 0
+    randomDuration: {x: 0.2, y: 0.5}
+    startDelay: 0
+    useRandomStartDelay: 0
+    randomStartDelay: {x: 0, y: 0.2}
+    loops: 0
+    useRandomLoops: 0
+    randomLoops: {x: 0, y: 2}
+    loopDelay: 0
+    useRandomLoopDelay: 0
+    randomLoopDelay: {x: 0, y: 0.2}
+    strength: 1
+    vibration: 8
+    elasticity: 1
+    fadeOutShake: 0
+--- !u!114 &7298668507452372412
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 122852948560805319}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1f73ba54adea4f4ea864f669666211e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.UIToggleUIAnimator
+  controller: {fileID: 0}
+  onAnimation:
+    purpose: 4
+    move:
+      enabled: 1
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 31
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.35
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromDirection: 13
+      toDirection: 13
+      fromReference: 2
+      toReference: 2
+      fromCustomValue: {x: 4, y: 0, z: 0}
+      toCustomValue: {x: 36, y: 0, z: 0}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    rotate:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 0, y: 0, z: 0}
+      toCustomValue: {x: 0, y: 0, z: 0}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    scale:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 1, y: 1, z: 1}
+      toCustomValue: {x: 1, y: 1, z: 1}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    fade:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 2
+      toReference: 2
+      fromCustomValue: 0
+      toCustomValue: 1
+      fromOffset: 0
+      toOffset: 0
+  offAnimation:
+    purpose: 4
+    move:
+      enabled: 1
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 31
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.35
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromDirection: 13
+      toDirection: 13
+      fromReference: 2
+      toReference: 2
+      fromCustomValue: {x: 36, y: 0, z: 0}
+      toCustomValue: {x: 4, y: 0, z: 0}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    rotate:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 0, y: 0, z: 0}
+      toCustomValue: {x: 0, y: 0, z: 0}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    scale:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 1, y: 1, z: 1}
+      toCustomValue: {x: 1, y: 1, z: 1}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    fade:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 2
+      toReference: 2
+      fromCustomValue: 0
+      toCustomValue: 1
+      fromOffset: 0
+      toOffset: 0
+--- !u!1 &175874818703116572
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8480075083346793194}
+  - component: {fileID: 7483710173961268110}
+  - component: {fileID: 3993063755678135249}
+  - component: {fileID: 6782359736341373992}
+  m_Layer: 0
+  m_Name: Track
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &8480075083346793194
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 175874818703116572}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 1664467095694136359}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &7483710173961268110
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 175874818703116572}
+  m_CullTransparentMesh: 1
+--- !u!114 &3993063755678135249
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 175874818703116572}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ced6d6f35eed4b009ea309bf32174e4b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.NeoShape
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.7882353, g: 0.80784315, b: 0.8392157, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  shapeType: 2
+  radiusUnit: 0
+  uniformRadius: 1
+  radius: 12
+  radiusPerCorner: {x: 12, y: 12, z: 12, w: 12}
+  fillMode: 0
+  fillColorB: {r: 1, g: 1, b: 1, a: 1}
+  gradientAngle: 90
+  borderWidth: 0
+  borderColor: {r: 0, g: 0, b: 0, a: 1}
+  softness: 0
+  thickness: 8
+  arcStartAngle: 0
+  arcSweepAngle: 270
+  fillSprite: {fileID: 0}
+  textureFit: 0
+--- !u!114 &6782359736341373992
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 175874818703116572}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6ae3cf2a1541344f9babda51d2e7252, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.UIToggleColorAnimator
+  controller: {fileID: 0}
+  onColor:
+    useToken: 1
+    token: Primary
+    color: {r: 1, g: 1, b: 1, a: 1}
+  offColor:
+    useToken: 1
+    token: TextDefault
+    color: {r: 1, g: 1, b: 1, a: 1}
+  transitionSettings:
+    playMode: 0
+    easeMode: 0
+    ease: 5
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    duration: 0.15
+    useRandomDuration: 0
+    randomDuration: {x: 0.2, y: 0.5}
+    startDelay: 0
+    useRandomStartDelay: 0
+    randomStartDelay: {x: 0, y: 0.2}
+    loops: 0
+    useRandomLoops: 0
+    randomLoops: {x: 0, y: 2}
+    loopDelay: 0
+    useRandomLoopDelay: 0
+    randomLoopDelay: {x: 0, y: 0.2}
+    strength: 1
+    vibration: 8
+    elasticity: 1
+    fadeOutShake: 0
+--- !u!1 &4957548220690131533
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1664467095694136359}
+  - component: {fileID: 1927512681989488394}
+  - component: {fileID: 6507909805160492859}
+  - component: {fileID: 4201368767673803808}
+  m_Layer: 0
+  m_Name: Switch
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1664467095694136359
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4957548220690131533}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
+  m_Children:
+  - {fileID: 8480075083346793194}
+  - {fileID: 3957847219086872706}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 64, y: 32}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1927512681989488394
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4957548220690131533}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f87208e627704354ea8e6e13755d3ba7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.UIToggle
+  m_Navigation:
+    m_Mode: 3
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
+  m_Transition: 0
+  m_Colors:
+    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0.1
+  m_SpriteState:
+    m_HighlightedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 0}
+    m_DisabledSprite: {fileID: 0}
+  m_AnimationTriggers:
+    m_NormalTrigger: Normal
+    m_HighlightedTrigger: Highlighted
+    m_PressedTrigger: Pressed
+    m_SelectedTrigger: Selected
+    m_DisabledTrigger: Disabled
+  m_Interactable: 1
+  m_TargetGraphic: {fileID: 0}
+  id:
+    category: Starter
+    name: Switch
+  isOnValue: 0
+  groupReference: {fileID: 0}
+  onValueChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  onToggleOn:
+    m_PersistentCalls:
+      m_Calls: []
+  onToggleOff:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &6507909805160492859
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4957548220690131533}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: 64
+  m_PreferredHeight: 32
+  m_FlexibleWidth: 0
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
+--- !u!114 &4201368767673803808
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4957548220690131533}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b524e16854b7a74aaf222a8043892ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.GeneratedMarker
+  specSource: starter:Switch
+  generatorVersion: 1

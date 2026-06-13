@@ -1,9 +1,9 @@
 # Settings & Cheats Menu Subsystem — Implementation Plan
 
 A data-driven, agent-authorable, pluggable subsystem for **settings menus**, **cheats menus**, and
-**input rebinding**, coherent with the AlterEyes UI package's spec pipeline, signal model, theming,
+**input rebinding**, coherent with the Neo UI package's spec pipeline, signal model, theming,
 and editor-perf constraints. Reference implementations studied: `color_by_numbers_4`
-(`SettingsHolder`, `ColorByNumbersCheatHolder`) and `com.altereyes.common`
+(`SettingsHolder`, `ColorByNumbersCheatHolder`) and `com.neo.common`
 (`UserSettingsHolderBase`, `CheatHolderBase`, `CheatMenuGameWindow`, `ReflectedValue`,
 `ServiceLocator`, `PlayerPrefsHelper`).
 
@@ -11,7 +11,7 @@ and editor-perf constraints. Reference implementations studied: `color_by_number
 
 ## 1. Goal & the central design decision
 
-The Doozy-era AlterEyes systems (CBN / common) declare settings with a **fluent C# builder**
+The Doozy-era Neo systems (CBN / common) declare settings with a **fluent C# builder**
 (`CreateSetting(_toggle).SetToggleAction(...).SetValueFunction(...)`). Each control is bound to game
 state with live `Func<T>` getters and `Action<T>` setters, and the holder instantiates prefabs into
 a panel at runtime.
@@ -33,9 +33,9 @@ of the package already implies:
 This keeps everything addressable by category/name, signal-first, flat-SO, and testable without play
 mode — exactly the package's grain.
 
-> **Naming note.** The existing `AEUISettings` (in `Runtime/Settings/`) is the *editor/package*
+> **Naming note.** The existing `NeoUISettings` (in `Runtime/Settings/`) is the *editor/package*
 > config asset. The new *user-facing* preferences live under a distinct folder/namespace to avoid
-> confusion: proposed `Runtime/Menus/` → `namespace AlterEyes.UI.Menus`, runtime value store named
+> confusion: proposed `Runtime/Menus/` → `namespace Neo.UI.Menus`, runtime value store named
 > `UserSettingsService` (nods to common's `UserSettings`). Adjust if you prefer `Options`.
 
 ---
@@ -110,7 +110,7 @@ RuntimePlatformMask platforms
   defaults to `Signals.Send("Cheat", id)`.
 
 Catalogs are referenced by **category/name strings** and registered in an
-`IdDatabase`-style picker on `AEUISettings` (a `MenuCatalogDatabase`) so inspectors/drawers get
+`IdDatabase`-style picker on `NeoUISettings` (a `MenuCatalogDatabase`) so inspectors/drawers get
 searchable dropdowns, consistent with `IdDatabaseOptions.DrawCategoryNamePair`.
 
 ---
@@ -182,7 +182,7 @@ Confirmed gaps to fill (the factory has `CreateButton/Toggle/Switch/Slider/Stepp
 ListView/Panel/Stack/Grid` but **no dropdown**, and `UISlider` emits only Unity's `onValueChanged`):
 
 1. **`UIDropdown` runtime widget** + `CreateDropdown` factory method + `"dropdown"` spec element
-   kind. A themed `TMP_Dropdown` equivalent built from `AEShape` (one shared material), publishing a
+   kind. A themed `TMP_Dropdown` equivalent built from `NeoShape` (one shared material), publishing a
    `Signals.Send("UIDropdown","Behaviour", DropdownSignalData)` on the existing behaviour-stream
    pattern (so flow triggers can react too). Add `DropdownId` + `DropdownIdDatabase`.
 2. **`UISlider` commit/preview events.** Add an `onRelease`/commit signal (pointer-up + keyboard
@@ -193,12 +193,12 @@ ListView/Panel/Stack/Grid` but **no dropdown**, and `UISlider` emits only Unity'
 4. **Starter kit** (`StarterKitBootstrap`): generate default row prefabs (setting row, dropdown,
    key-rebind row, cheat row, category sidebar) into the widget prefab library so presenters have
    defaults — the equivalent of CBN's `_button/_slider/_toggle/_enum/_category` prefab slots, but
-   theme-driven AEShape prefabs.
-5. **`AEUISettings`** gains references to the default row/widget library + the `MenuCatalogDatabase`
+   theme-driven NeoShape prefabs.
+5. **`NeoUISettings`** gains references to the default row/widget library + the `MenuCatalogDatabase`
    and `DropdownIdDatabase` (still one settings asset — just more fields).
 
 All new inspectors/drawers (catalog editor, control-kind dropdown, catalog picker) go through the
-**EditorUI kit** (`AEGUI`/`AEDropdown`/`AEListView`), header accent for the new "Menus" category
+**EditorUI kit** (`NeoGUI`/`NeoDropdown`/`NeoListView`), header accent for the new "Menus" category
 (pick an unused accent), cached styles/lists, no per-OnGUI allocations.
 
 ---
@@ -242,7 +242,7 @@ machinery in the flow graph.
 
 ### 7.2 Generator (`UISpecGenerator.cs`)
 - Emit a `SettingsCatalog`/`CheatCatalog` asset per `settings`/`cheats` entry into
-  `Assets/AEUI Generated/`, carry the `GeneratedMarker` (idempotent, collision-aware), register ids
+  `Assets/Neo UI Generated/`, carry the `GeneratedMarker` (idempotent, collision-aware), register ids
   into the databases.
 - When a view embeds a menu element, build the menu view prefab via `MenuRowBuilder` and add the
   presenter component pointing at the catalog. Bake WYSIWYG values.
@@ -334,7 +334,7 @@ tests, and ends with `{"action":"validate"}` clean.
 *Accept:* `UserSettingsServiceTests` green; statics reset on subsystem registration.
 
 **P2 — Catalog model & databases.** `MenuControlKind`, `MenuItemDefinition`, `MenuCatalog`/
-`SettingsCatalog`/`CheatCatalog`, `MenuCatalogDatabase` on `AEUISettings`, catalog inspector via the
+`SettingsCatalog`/`CheatCatalog`, `MenuCatalogDatabase` on `NeoUISettings`, catalog inspector via the
 EditorUI kit. *Accept:* flat force-text round-trip; searchable catalog/id pickers; no per-OnGUI
 allocations.
 
@@ -361,8 +361,8 @@ through settings + cheats asserting service state.
 
 ## 12. Open decisions (recommend, easy to flip)
 
-- **Naming:** `Runtime/Menus/` + `AlterEyes.UI.Menus` + `UserSettingsService` (recommended) vs
-  `Options`. Keeps clear distance from editor `AEUISettings`.
+- **Naming:** `Runtime/Menus/` + `Neo.UI.Menus` + `UserSettingsService` (recommended) vs
+  `Options`. Keeps clear distance from editor `NeoUISettings`.
 - **Settings vs Cheats unification:** shared `MenuCatalog` base, separate subclasses (recommended) —
   same builder/service, distinct semantics (persistence, favourites, signal namespace).
 - **Dropdown options source:** explicit `options` list (recommended, agent-friendly + flat) with an

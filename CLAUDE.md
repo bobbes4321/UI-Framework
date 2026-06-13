@@ -1,24 +1,24 @@
-# UI Package (AlterEyes UI)
+# UI Package (Neo UI)
 
 Unity 6 (6000.4.10f1) clean-room rebuild of Doozy UI Manager 4 into a fully fledged, reusable UI
-package. Full feature spec: `Assets/docs/altereyes-ui-package-feature-spec.md`. Editor UX design
+package. Full feature spec: `Assets/docs/neo-ui-package-feature-spec.md`. Editor UX design
 rationale + field catalog: `Assets/docs/editor-ux-analysis.md`. Visual-polish roadmap (typography,
 icons, variants, theme bundles, juice — phased, with acceptance criteria):
 `Assets/docs/ui-beautification-plan.md`.
 
 ## Layout
 
-- `Assets/AE UI Package/Runtime` — asmdef `AlterEyes.UI` (containers, interactive, animation/tweens,
-  flow graphs, signals, theming, ids/databases, settings, and `Graphics/` — `AEShape`, the SDF
-  vector graphic all visuals are built from; its shader lives at `Resources/AEShape.shader`, params
+- `Assets/Neo UI Framework/Runtime` — asmdef `Neo.UI` (containers, interactive, animation/tweens,
+  flow graphs, signals, theming, ids/databases, settings, and `Graphics/` — `NeoShape`, the SDF
+  vector graphic all visuals are built from; its shader lives at `Resources/NeoShape.shader`, params
   ride vertex channels UV1-3+tangent so ONE shared material batches everything — never give an
-  AEShape its own material).
-- `Assets/AE UI Package/Editor` — asmdef `AlterEyes.UI.Editor` (inspectors in `Inspectors/`,
+  NeoShape its own material).
+- `Assets/Neo UI Framework/Editor` — asmdef `Neo.UI.Editor` (inspectors in `Inspectors/`,
   property drawers in `Drawers/`, flow graph window in `Flow/`, agent spec tooling in `Agent/`).
-- `Assets/AE UI Package/Editor/EditorUI` — asmdef `AlterEyes.EditorUI`: **standalone** editor
-  tooling kit (AEGUI, AEColors, AEStyles, AESearchablePopup, AEDropdown, AEListView). It must keep
-  zero references to AlterEyes.UI so it stays liftable into other projects.
-- `Assets/AE UI Package/Tests` — EditMode + PlayMode test asmdefs.
+- `Assets/Neo UI Framework/Editor/EditorUI` — asmdef `Neo.EditorUI`: **standalone** editor
+  tooling kit (NeoGUI, NeoColors, NeoStyles, NeoSearchablePopup, NeoDropdown, NeoListView). It must keep
+  zero references to Neo.UI so it stays liftable into other projects.
+- `Assets/Neo UI Framework/Tests` — EditMode + PlayMode test asmdefs.
 - `Assets/References/Doozy~` — Doozy 4 reference source (tilde = not imported). Port math/behavior
   from here; never import it, never copy its editor machinery.
 
@@ -27,22 +27,22 @@ icons, variants, theme bundles, juice — phased, with acceptance criteria):
 - **Agent-first**: everything addressable by category/name strings (never GUIDs); flat force-text
   ScriptableObjects; prefer signals (`Signals.On<T>` / `Signals.Send`) over serialized UnityEvents.
 - **Editor performance**: no animated inspector chrome, no editor-tick subscriptions for visuals,
-  no reflection scans on selection, one settings asset max (`Resources/AEUISettings`).
+  no reflection scans on selection, one settings asset max (`Resources/NeoUISettings`).
 - **New Input System only** (`activeInputHandler=1`) — never `UnityEngine.Input`.
 
 ## Editor tooling conventions
 
 All inspectors/drawers go through the EditorUI kit so everything looks and behaves the same:
 
-- Inspectors: subclass `AEUIEditor` (see `Editor/Inspectors/ComponentEditors.cs`); Selectable-based
+- Inspectors: subclass `NeoUIEditor` (see `Editor/Inspectors/ComponentEditors.cs`); Selectable-based
   components subclass `SelectableEditor`/`SliderEditor` and tuck the base GUI into
-  `AEGUI.BeginFoldoutSection`. Header accents come from `AEColors` (Interactive=blue,
+  `NeoGUI.BeginFoldoutSection`. Header accents come from `NeoColors` (Interactive=blue,
   Containers=cyan, Animation=orange, Flow=purple, Theming=pink, Signals=teal, Data=yellow).
 - Any category/name string gets a searchable dropdown: `IdDatabaseOptions.DrawCategoryNamePair`
-  (databases live on `AEUISettings`). Plain string pickers use `AEDropdown.StringPopup/ValuePopup`
+  (databases live on `NeoUISettings`). Plain string pickers use `NeoDropdown.StringPopup/ValuePopup`
   with an inline "+ Add" row — never modal dialogs.
 - IMGUI rules: never create GUIStyles/ReorderableLists/SerializedObjects per OnGUI pass (cache —
-  see `AEListView`/`AEStyles`); fetch dropdown options only when the dropdown opens; conditional
+  see `NeoListView`/`NeoStyles`); fetch dropdown options only when the dropdown opens; conditional
   display = draw or don't draw; guard `enumValueIndex < 0` (multi-edit mixed values); wrap manual
   `GUI.Toggle`-style writes in `BeginChangeCheck` so multi-edit drawing never stomps data.
 - The flow graph window keeps ONE cached SerializedObject (foldout state lives there — recreating
@@ -77,26 +77,26 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   Roslyn instead:
   `dotnet "<UnityDir>/Editor/Data/DotNetSdkRoslyn/csc.dll" -nologo -target:library -langversion:9.0
   -define:UNITY_EDITOR -r:<Data/Managed/UnityEngine/*.dll> -r:<Data/NetStandard/ref/2.1.0/netstandard.dll>
-  -r:<Library/ScriptAssemblies/{AlterEyes.UI,UnityEngine.UI,UnityEditor.UI,Unity.TextMeshPro,Unity.InputSystem}.dll>
+  -r:<Library/ScriptAssemblies/{Neo.UI,UnityEngine.UI,UnityEditor.UI,Unity.TextMeshPro,Unity.InputSystem}.dll>
   <sources>` — use forward-slash output paths. Compile `Editor/EditorUI` alone (engine refs only) to
   verify the kit stays dependency-free.
 - **When no editor holds the lock**: batch tests via
   `Unity.exe -batchmode -nographics -runTests -testPlatform EditMode|PlayMode -projectPath .`.
-- Settings/databases are created via `Tools → AlterEyes UI → Create or Repair Settings`; the themed
-  widget prefab library + Dark/Light palette + type scale via `Tools → AlterEyes UI → Create or
+- Settings/databases are created via `Tools → Neo UI → Create or Repair Settings`; the themed
+  widget prefab library + Dark/Light palette + type scale via `Tools → Neo UI → Create or
   Repair Starter Kit`. TMP SDF font assets (Inter + the Lucide icon font, committed under
-  `AE UI Package/Fonts`) regenerate via `Tools → AlterEyes UI → Create or Repair Fonts`
-  (`FontAssetBootstrap` — also wires `AEUISettings.iconFont`). Curated theme bundles
+  `Neo UI Framework/Fonts`) regenerate via `Tools → Neo UI → Create or Repair Fonts`
+  (`FontAssetBootstrap` — also wires `NeoUISettings.iconFont`). Curated theme bundles
   (CleanSlate/NeonArcade/SoftFantasy — complete token/type/shape/motion systems) apply via
-  `Tools → AlterEyes UI → Apply Theme Bundle` or spec `"theme": { "bundle": "..." }`
+  `Tools → Neo UI → Apply Theme Bundle` or spec `"theme": { "bundle": "..." }`
   (`Editor/ThemeBundles.cs`); the acceptance render (demo spec × every bundle) is
-  `-executeMethod AlterEyes.UI.Editor.BeautificationAcceptance.Run` (needs graphics).
+  `-executeMethod Neo.UI.Editor.BeautificationAcceptance.Run` (needs graphics).
 - Build UI hierarchies in editor code through `UIWidgetFactory` (Editor/Agent) — it is the single
   source of widget structure; the spec generator AND exporter both rely on its child names.
-- Agent workflow with the editor OPEN: toggle `Tools → AlterEyes UI → Agent Bridge` once, then
-  write `Temp/aeui-request.json` and read `Temp/aeui-result.json`. With the editor CLOSED, run the
+- Agent workflow with the editor OPEN: toggle `Tools → Neo UI → Agent Bridge` once, then
+  write `Temp/neo-request.json` and read `Temp/neo-result.json`. With the editor CLOSED, run the
   same requests headlessly: `Unity.exe -batchmode -projectPath . -executeMethod
-  AlterEyes.UI.Editor.AgentBridge.RunBatch -aeuiRequest req.json -aeuiResult res.json` (req.json =
+  Neo.UI.Editor.AgentBridge.RunBatch -neoRequest req.json -neoResult res.json` (req.json =
   one request or an array, processed in order; omit `-nographics` when screenshots/previews are in
   it; exit code 1 when any request fails). Actions:
   `{"action":"generate","spec":"path.json"}` · `{"action":"export","out":"path.json"}` ·
@@ -104,9 +104,9 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   `{"action":"preview","spec":"path.json","out":"dir"}` (renders a spec's views to PNGs across the
   resolution matrix IN-MEMORY — commits no prefabs/assets; the agent render-and-critique loop;
   `UISpecPreview`/`UIScreenshotter.CaptureLive`) · `{"action":"specReference"}` (writes
-  `Assets/docs/spec-reference.md` + `aeui-spec.schema.json`) ·
+  `Assets/docs/spec-reference.md` + `neo-spec.schema.json`) ·
   `{"action":"buildScene"}` (playable scene from generated assets; also
-  `Tools → AlterEyes UI → Build Scene From Generated UI`) ·
+  `Tools → Neo UI → Build Scene From Generated UI`) ·
   `{"action":"importSprites","folder":"Assets/..."}` (imports every texture under the folder as a
   Single sprite — run it BEFORE generating a spec whose image `src` points there; `textureType`
   alone leaves `spriteImportMode` None and no Sprite sub-asset exists)
@@ -122,7 +122,7 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   size, raw `fontSize` is the styleless fallback), button `variant` (primary/secondary/ghost/
   danger) + string-form `size` (sm/md/lg — polymorphic with the `[w,h]` array, read back from
   `WidgetStyleTag`), `icon` + `badge` on button/tab, `gradient` `{from,to,angle}` on shape/image
-  (rides AEGradient, tokens stay live), `src` on image (sprite asset path — rides an AEShape
+  (rides NeoGradient, tokens stay live), `src` on image (sprite asset path — rides an NeoShape
   texture fill so `radius` rounds the corners; full-rect sprites only, the shared material
   survives because the texture binds per CanvasRenderer; missing sprites report an issue),
   `"style": "radial"` on progress (arc dial via

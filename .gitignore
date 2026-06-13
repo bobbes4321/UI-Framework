@@ -27,7 +27,7 @@ sysinfo.txt
 # Profiler / test output ------------------------------------------------------
 /[Pp]rofilerCaptures/
 /[Tt]estResults/
-/aeui-screenshots/
+/neo-screenshots/
 
 # Reference-only material -----------------------------------------------------
 # Doozy 4 source kept on disk for porting (Unity-ignored `~` folder); not part

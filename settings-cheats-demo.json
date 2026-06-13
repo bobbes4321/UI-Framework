@@ -53,7 +53,7 @@
       "hideAnimation": "MenuOut",
       "background": "Background",
       "elements": [
-        { "text":   { "label": "AlterEyes UI Demo", "color": "TextStrong", "textStyle": "Title", "anchor": "Top", "position": [0, -80] } },
+        { "text":   { "label": "Neo UI Demo", "color": "TextStrong", "textStyle": "Title", "anchor": "Top", "position": [0, -80] } },
         { "vstack": { "anchor": "Center", "size": [360, 220], "spacing": 16, "padding": 16, "children": [
           { "button": { "id": "Menu/OpenSettings", "label": "Settings", "icon": "settings", "onClick": { "showView": "Menu/Settings", "hideView": "Menu/Main" } } },
           { "button": { "id": "Menu/OpenCheats",   "label": "Cheats", "icon": "wand-sparkles", "variant": "secondary", "onClick": { "showView": "Menu/Cheats", "hideView": "Menu/Main" } } }
