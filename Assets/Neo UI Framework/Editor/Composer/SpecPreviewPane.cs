@@ -38,6 +38,12 @@ namespace Neo.UI.Editor.Composer
         private bool _pending;
         private string _error;
 
+        // panel/group preview: a view with tabs+panels (or a settings/cheats menu with groups) bakes
+        // only ONE panel visible at a time. These let the user flip through them in the preview
+        // without play mode — the chosen panel is forced visible at render, the rest hidden.
+        private readonly System.Collections.Generic.List<string> _panelNames = new System.Collections.Generic.List<string>();
+        private string _activePanel;
+
         public SpecPreviewPane(SpecDocument document, Action repaint)
         {
             _document = document;
@@ -53,6 +59,7 @@ namespace Neo.UI.Editor.Composer
             if (!ReferenceEquals(view, _target))
             {
                 _target = view;
+                _activePanel = null; // a different view has a different set of panels/groups
                 RequestRebuild();
             }
         }
@@ -130,6 +137,14 @@ namespace Neo.UI.Editor.Composer
                     _variant = string.IsNullOrEmpty(v) ? null : v;
                     RequestRebuild();
                 }, "default variant");
+
+                // group/tab selector — only when the view has more than one panel to flip between
+                if (_panelNames.Count > 1)
+                {
+                    Rect panelRect = GUILayoutUtility.GetRect(140f, 18f);
+                    NeoDropdown.ValuePopup(panelRect, _activePanel, () => new System.Collections.Generic.List<string>(_panelNames),
+                        name => { _activePanel = name; RequestRebuild(); }, "tab / group");
+                }
 
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button("Refresh", EditorStyles.toolbarButton)) Rebuild();
@@ -250,6 +265,7 @@ namespace Neo.UI.Editor.Composer
                 UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)root.transform);
                 Canvas.ForceUpdateCanvases();
 
+                ApplyPanelSelection(root);
                 ComputeHighlight(root, width, height);
 
                 renderTexture = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32);
@@ -268,6 +284,33 @@ namespace Neo.UI.Editor.Composer
             {
                 if (renderTexture != null) { renderTexture.Release(); UnityEngine.Object.DestroyImmediate(renderTexture); }
                 EditorSceneManager.ClosePreviewScene(scene);
+            }
+        }
+
+        /// <summary>
+        /// Records the panels found in the built view and, when the user has picked one in the
+        /// toolbar, forces that panel visible and the rest hidden (via their CanvasGroups) so a menu's
+        /// other groups / a tab layout's other panels can be inspected without entering play mode. With
+        /// no pick, the authored start-panel visibility is left untouched.
+        /// </summary>
+        private void ApplyPanelSelection(GameObject root)
+        {
+            _panelNames.Clear();
+            UIPanel[] panels = root.GetComponentsInChildren<UIPanel>(includeInactive: true);
+            foreach (UIPanel panel in panels)
+                if (!_panelNames.Contains(panel.gameObject.name))
+                    _panelNames.Add(panel.gameObject.name);
+
+            if (string.IsNullOrEmpty(_activePanel) || !_panelNames.Contains(_activePanel)) return;
+
+            foreach (UIPanel panel in panels)
+            {
+                var group = panel.GetComponent<CanvasGroup>();
+                if (group == null) group = panel.gameObject.AddComponent<CanvasGroup>();
+                bool active = panel.gameObject.name == _activePanel;
+                group.alpha = active ? 1f : 0f;
+                group.blocksRaycasts = active;
+                panel.gameObject.SetActive(true);
             }
         }
 

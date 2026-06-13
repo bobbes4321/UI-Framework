@@ -182,14 +182,14 @@ namespace Neo.UI.Editor.Composer
 
         private static void NullableFloat(SpecDocument document, string label, float? current, Action<float?> set)
         {
-            Rect rect = EditorGUILayout.GetControlRect();
-            var toggleRect = new Rect(rect.x, rect.y, 16f, rect.height);
-            var fieldRect = new Rect(rect.x + 16f, rect.y, rect.width - 16f, rect.height);
+            Rect content = EditorGUI.PrefixLabel(EditorGUILayout.GetControlRect(), new GUIContent(label));
+            var toggleRect = new Rect(content.x, content.y, 14f, content.height);
+            var fieldRect = new Rect(content.x + 18f, content.y, content.width - 18f, content.height);
             EditorGUI.BeginChangeCheck();
             bool has = EditorGUI.Toggle(toggleRect, current.HasValue);
             using (new EditorGUI.DisabledScope(!has))
             {
-                float value = EditorGUI.DelayedFloatField(fieldRect, label, current ?? 0f);
+                float value = EditorGUI.DelayedFloatField(fieldRect, current ?? 0f);
                 if (EditorGUI.EndChangeCheck()) document.ApplyEdit(() => set(has ? (float?)value : null), "Edit " + label);
             }
         }
