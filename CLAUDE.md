@@ -218,6 +218,23 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   (id of a sibling `panel` it shows/hides — generator wires `UITab.containerReference` in a deferred
   per-view pass and bakes WYSIWYG start visibility; selected tab's panel shown, the rest hidden),
   `value: 1` on a standalone tab (bakes the selected sidebar entry; tabbars bake their first tab).
+  **Responsive layout (Composer overhaul, `composer-authoring-overhaul`):** every element takes an
+  optional `layout` object — a Figma-style per-axis constraint+offset model (`h`/`v` ∈
+  left|right|leftRight|center|scale, `offset`, `size`, per-child `sizing` ∈ fixed|hug|fill) that maps
+  to Unity anchorMin/Max/pivot + offsetMin/Max (NOT absolute `anchoredPosition`, the old "disappears
+  in landscape" bug) so elements survive aspect/orientation change. Additive: `layout` wins over the
+  legacy `anchor`/`position`/`size`/`flex`; the 16 anchor presets re-express as constraint pairs
+  (`ConstraintLayout` in `UIWidgetFactory`, marker `NeoLayoutTag`). `padding4` `[l,t,r,b]` = per-side
+  container padding (wins over uniform `padding`). Top-level `breakpoints` (ordered named conditions:
+  orientation/minAspect/maxAspect/minWidth/maxWidth) + per-element `overrides` (breakpoint-name →
+  delta `LayoutSpec`, cascades over base via `LayoutSpec.MergedWith`) drive a runtime
+  `UIResponsiveRoot` that applies the matching breakpoint's pre-resolved layout on resize/orientation,
+  only on change (base bakes = WYSIWYG). All round-trip byte-identical; merge via the single new
+  `SpecPath` breakpoints-by-name key. Seams: `LayoutConstraints`/`LayoutSizingModes`/
+  `BreakpointConditions` registries. Opt-in `Tools → Neo UI → Migrate Spec To Layout Model` rewrites
+  legacy → `layout` (never automatic). Tests: `LayoutSpecParseTests`, `ConstraintLayoutRoundTripTests`,
+  `ConstraintResponsivenessTests`, `SpecMigrationTests`, `BreakpointRoundTripTests`,
+  `BreakpointCascadeTests`, `ResponsiveDriverTests` (PlayMode), `PaddingRoundTripTests`.
   Popups: plain `{name,title,message}` keeps the canonical OK card; rich popups add `elements`
   (same vocabulary, stacked in the card), `size` [w,h] and `close: true` (X button on the card
   corner); a button `"onClick": {"close": true}` hides its popup (`HideContainerOnClick`); the
@@ -229,6 +246,22 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   deterministic export. NEVER let
   the exporter fall back to scanning all of Assets when a generated subfolder is missing
   (`UISpecExporter.FindGenerated`) — it would hijack committed demo/starter popups.
+- The **Composer** (`Tools → Neo UI → Composer`, `Editor/Composer/NeoComposerWindow.cs`) is the
+  from-scratch, no-agent authoring surface: it edits a `UISpec` in memory and regenerates the prefab
+  as a live preview, so everything round-trips losslessly by construction (the spec stays the single
+  source of truth — never a scene-first editor). Tree · canvas · inspector panes, plus: a **widget
+  palette** with drag-to-create onto canvas/tree (`ComposerPalette` registry — auto-includes
+  `NeoElementKinds`) and **layout templates** (`ComposerTemplates`, `Editor/Composer/Templates~/*`);
+  a **free, draggable/resizable viewport** with device presets (`ComposerDevicePresets` registry),
+  rotate, zoom, and a CanvasScaler-equivalent so content scales like a real device
+  (`SpecPreviewPane`, gated `RenderOptions.deviceScale` keeps agent renders byte-stable); a
+  **Figma-grade canvas** — constraint-aware drag/resize writeback (`ConstraintWriteback`),
+  drag-to-reorder in layout groups, smart alignment guides + equal-spacing, multi-select
+  align/distribute, keyboard nudge/duplicate/delete; a **constraint-widget inspector**
+  (`NeoConstraintWidget` in the EditorUI kit, Neo.UI-free) with Fixed/Hug/Fill sizing + auto-layout
+  panel; **breakpoint authoring** (`BreakpointBar` — scope inspector edits to a breakpoint's override
+  delta); and **live preview** (theme recolor, sample rows in bound lists via `PreviewSampleData`,
+  breakpoint-override preview via an effective-spec merge). Every new fixed set is an extension seam.
 - Soft design lint (`AgentValidation.ValidateDesign`, surfaced as `designWarnings` by the bridge's
   validate action): WCAG contrast on theme token pairs (3:1 for button labels — large text),
   raw fontSize where text styles exist, off-scale container spacing (4/8/12/16/24/32/48/64).
