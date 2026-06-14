@@ -25,6 +25,12 @@ namespace Neo.UI.Editor.Composer
         PopupRef,       // popup name
         PanelRef,       // sibling panel id (tab.controls)
         DataRef,        // bound UIData id (list.bind)
+
+        // ---- Pillar F composite layout editors (read/write element.layout / padding4, not a single
+        //      boxed value — the inspector draws them specially; get/set are unused sentinels). ----
+        Constraint,     // Figma constraint widget over element.layout.h/v/offset/size
+        SizingMode,     // per-child Fixed/Hug/Fill over element.layout.sizing (axis encoded in the key)
+        AutoLayout,     // vstack/hstack/grid panel: direction/gap/per-side padding/align
     }
 
     /// <summary>
@@ -72,6 +78,18 @@ namespace Neo.UI.Editor.Composer
         private static readonly string[] Ranged = { "slider", "progress", "stepper" };
 
         private static readonly List<SpecField> All = new List<SpecField>();
+
+        // Pillar F composite layout editors. Kept OUT of <see cref="All"/> (and thus <see cref="AllKeys"/>,
+        // which pins the single-value field set) because they don't carry a boxed value — the inspector
+        // reads/writes element.layout / padding4 directly. They DO surface through <see cref="For"/> so
+        // the inspector and tests see them per kind. Stacks-only fields are filtered by their kinds set.
+        private static readonly List<SpecField> LayoutFields = new List<SpecField>();
+
+        /// <summary> Stable field keys for the composite layout editors (test ids). </summary>
+        public const string ConstraintKey = "constraint";
+        public const string SizingWKey = "sizingW";
+        public const string SizingHKey = "sizingH";
+        public const string AutoLayoutKey = "autolayout";
 
         static SpecFieldCatalog()
         {
@@ -147,6 +165,21 @@ namespace Neo.UI.Editor.Composer
 
             // ---- catalog reference (settings/cheats elements) ----
             Add("catalog", "Catalog", FieldKind.Text, e => e.catalog, (e, v) => e.catalog = (string)v, new[] { "settings", "cheats" });
+
+            // ---- Pillar F composite layout editors (drawn specially; see LayoutFields note) ----
+            // Constraint + per-child sizing apply to every kind (sizing is further gated to layout-group
+            // children by the inspector, since "is my parent a stack/grid" isn't a per-kind property).
+            AddLayout(ConstraintKey, "Constraint", FieldKind.Constraint, null);
+            AddLayout(SizingWKey, "Sizing W", FieldKind.SizingMode, null);
+            AddLayout(SizingHKey, "Sizing H", FieldKind.SizingMode, null);
+            // The auto-layout panel is for layout-group containers only.
+            AddLayout(AutoLayoutKey, "Auto Layout", FieldKind.AutoLayout, Stacks);
+        }
+
+        // composite editors carry no boxed value — the inspector reads/writes element.layout/padding4
+        private static void AddLayout(string key, string label, FieldKind kind, string[] kinds)
+        {
+            LayoutFields.Add(new SpecField(key, label, kind, _ => null, (_, __) => { }, kinds));
         }
 
         private static void Add(string key, string label, FieldKind kind,
@@ -175,6 +208,9 @@ namespace Neo.UI.Editor.Composer
         public static List<SpecField> For(string elementKind)
         {
             var result = new List<SpecField>();
+            foreach (SpecField field in LayoutFields)
+                if (field.AppliesTo(elementKind))
+                    result.Add(field);
             foreach (SpecField field in All)
                 if (field.AppliesTo(elementKind))
                     result.Add(field);
