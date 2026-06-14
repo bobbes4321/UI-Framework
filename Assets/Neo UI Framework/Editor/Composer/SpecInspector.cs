@@ -116,21 +116,402 @@ namespace Neo.UI.Editor.Composer
                 if (GUILayout.Button("Delete")) { Apply(() => node.siblings.Remove(element), "Delete"); _selectPath?.Invoke(null); return; }
                 GUI.backgroundColor = prev;
             }
+
+            if (_document.IsEditingOverride)
+                EditorGUILayout.HelpBox(
+                    $"Editing the “{_document.ActiveBreakpoint}” breakpoint — layout edits below are saved as " +
+                    "an override delta over the base. Other fields still edit the base.", MessageType.None);
+
             NeoGUI.Splitter();
 
             bool buttonWithVariant = element.kind == "button" && !string.IsNullOrEmpty(element.sizeVariant);
+            ParentInfo parent = FindParent(node);
+
+            // group the kind's fields into Figma-style sections; composite layout editors are drawn
+            // bespoke (constraint widget / sizing dropdowns / auto-layout panel)
+            var layout = new List<SpecField>();
+            var appearance = new List<SpecField>();
+            var behavior = new List<SpecField>();
+            var data = new List<SpecField>();
             foreach (SpecField field in SpecFieldCatalog.For(element.kind))
             {
-                // polymorphic "size": a button with a size-variant owns the "size" key — don't also
-                // draw the [w,h] array (they'd fight over the same JSON key)
-                if (field.key == "size" && buttonWithVariant) continue;
-                DrawField(element, field);
+                if (field.key == "size" && buttonWithVariant) continue; // polymorphic "size" — variant owns the key
+                switch (SectionOf(field.key))
+                {
+                    case Section.Layout: layout.Add(field); break;
+                    case Section.Appearance: appearance.Add(field); break;
+                    case Section.Behavior: behavior.Add(field); break;
+                    case Section.Data: data.Add(field); break;
+                }
             }
 
-            if (HasOnClick(element.kind)) DrawOnClick(element);
+            DrawSection("neo.composer.sec.layout", "Layout", NeoColors.Containers, true, () =>
+            {
+                foreach (SpecField field in layout) DrawLayoutField(element, field, parent);
+            });
+            if (appearance.Count > 0)
+                DrawSection("neo.composer.sec.appearance", "Appearance", NeoColors.Rendering, true, () =>
+                {
+                    foreach (SpecField field in appearance) DrawField(element, field);
+                });
+            if (behavior.Count > 0 || HasOnClick(element.kind))
+                DrawSection("neo.composer.sec.behavior", "Behavior", NeoColors.Interactive, true, () =>
+                {
+                    foreach (SpecField field in behavior) DrawField(element, field);
+                    if (HasOnClick(element.kind)) DrawOnClick(element);
+                });
+            if (data.Count > 0)
+                DrawSection("neo.composer.sec.data", "Data", NeoColors.Data, false, () =>
+                {
+                    foreach (SpecField field in data) DrawField(element, field);
+                });
 
             EditorGUILayout.Space(4f);
             DrawAddChildRow(element.children, node.path);
+        }
+
+        // ------------------------------------------------------------------ sections
+
+        private enum Section { Layout, Appearance, Behavior, Data }
+
+        // map a field key to a section (the catalog is unordered by section, so this is the projection)
+        private static Section SectionOf(string key)
+        {
+            switch (key)
+            {
+                case SpecFieldCatalog.ConstraintKey:
+                case SpecFieldCatalog.SizingWKey:
+                case SpecFieldCatalog.SizingHKey:
+                case SpecFieldCatalog.AutoLayoutKey:
+                case "anchor": case "size": case "position": case "rotation": case "flex":
+                case "padding": case "spacing": case "cascade": case "columns": case "cellSize": case "align":
+                    return Section.Layout;
+                case "background": case "style": case "radius":
+                case "labelColor": case "textStyle": case "fontSize": case "outlineColor": case "outlineWidth":
+                case "variant": case "sizeVariant": case "icon": case "badge":
+                case "shape": case "thickness": case "arcStart": case "arcSweep": case "src": case "fit":
+                    return Section.Appearance;
+                case "options": case "bind": case "catalog":
+                    return Section.Data;
+                default:
+                    // label/id/controls/group/min/max/value/step + project-registered fields
+                    return Section.Behavior;
+            }
+        }
+
+        private void DrawSection(string key, string title, Color accent, bool defaultOpen, Action body)
+        {
+            if (!NeoGUI.BeginFoldoutSection(key, title, null, defaultOpen)) { NeoGUI.EndFoldoutSection(); return; }
+            Rect strip = GUILayoutUtility.GetLastRect();
+            if (Event.current.type == EventType.Repaint)
+                EditorGUI.DrawRect(new Rect(strip.x, strip.y, 2f, strip.height), accent);
+            body();
+            NeoGUI.EndFoldoutSection();
+        }
+
+        // dispatch: composite layout editors are drawn bespoke (and override-scoped); everything else
+        // falls through to the generic field draw
+        private void DrawLayoutField(ElementSpec e, SpecField f, ParentInfo parent)
+        {
+            switch (f.kind)
+            {
+                case FieldKind.Constraint: DrawConstraint(e); break;
+                case FieldKind.SizingMode:
+                    if (parent.IsLayoutGroup) DrawSizing(e, f.key == SpecFieldCatalog.SizingWKey, f.label);
+                    break;
+                case FieldKind.AutoLayout: DrawAutoLayout(e); break;
+                default: DrawField(e, f); break;
+            }
+        }
+
+        // ------------------------------------------------------------------ constraint widget
+
+        // The Figma constraint control. Reads/writes the effective layout for the active edit scope:
+        // base when no breakpoint is active, else the element's overrides[breakpoint] delta. The widget
+        // POD's primary/secondary mirror UIWidgetFactory.ResolveOffset's per-constraint key convention.
+        private void DrawConstraint(ElementSpec e)
+        {
+            LayoutSpec layout = EffectiveLayout(e);
+            string h = !string.IsNullOrEmpty(layout?.h) ? layout.h : LayoutConstraints.Left;
+            string v = !string.IsNullOrEmpty(layout?.v) ? layout.v : LayoutConstraints.Top;
+            var model = new ConstraintModel { h = h, v = v };
+            ReadOffsets(layout?.offset, h, LayoutAxis.Horizontal, out model.hPrimary, out model.hSecondary);
+            ReadOffsets(layout?.offset, v, LayoutAxis.Vertical, out model.vPrimary, out model.vSecondary);
+
+            DrawOverrideHeader("Constraint", LayoutDiffersFromBase(e), () => ClearLayoutOverride(e));
+
+            Rect rect = EditorGUILayout.GetControlRect(false, NeoConstraintWidget.Height);
+            NeoConstraintWidget.Draw(rect, model, next => Apply(() => WriteConstraint(e, next), "Edit Constraint"));
+        }
+
+        // translate a constraint's primary/secondary back into the named offset keys (the inverse of
+        // UIWidgetFactory.ResolveOffset), then write the whole layout into the active scope.
+        private void WriteConstraint(ElementSpec e, ConstraintModel m)
+        {
+            LayoutSpec target = ScopedLayout(e, create: true);
+            target.h = m.h;
+            target.v = m.v;
+            var off = target.offset ?? new LayoutOffset();
+            off.values.Clear();
+            WriteOffsets(off, m.h, LayoutAxis.Horizontal, m.hPrimary, m.hSecondary);
+            WriteOffsets(off, m.v, LayoutAxis.Vertical, m.vPrimary, m.vSecondary);
+            target.offset = off.IsEmpty ? null : off;
+            NormalizeScopedLayout(e);
+        }
+
+        internal static void ReadOffsets(LayoutOffset off, string id, LayoutAxis axis, out float primary, out float secondary)
+        {
+            primary = 0f; secondary = 0f;
+            if (off == null) { if (id == LayoutConstraints.Scale) secondary = 1f; return; }
+            switch (id)
+            {
+                case LayoutConstraints.Left: primary = off.GetOr("left", 0f); break;
+                case LayoutConstraints.Right: primary = off.GetOr("right", 0f); break;
+                case LayoutConstraints.Top: primary = off.GetOr("top", 0f); break;
+                case LayoutConstraints.Bottom: primary = off.GetOr("bottom", 0f); break;
+                case LayoutConstraints.Center: primary = off.GetOr(axis == LayoutAxis.Horizontal ? "h" : "v", 0f); break;
+                case LayoutConstraints.LeftRight: primary = off.GetOr("left", 0f); secondary = off.GetOr("right", 0f); break;
+                case LayoutConstraints.TopBottom: primary = off.GetOr("top", 0f); secondary = off.GetOr("bottom", 0f); break;
+                case LayoutConstraints.Scale:
+                    primary = off.GetOr(axis == LayoutAxis.Horizontal ? "left" : "bottom", 0f);
+                    secondary = off.GetOr(axis == LayoutAxis.Horizontal ? "right" : "top", 1f);
+                    break;
+            }
+        }
+
+        internal static void WriteOffsets(LayoutOffset off, string id, LayoutAxis axis, float primary, float secondary)
+        {
+            switch (id)
+            {
+                case LayoutConstraints.Left: off.Set("left", primary); break;
+                case LayoutConstraints.Right: off.Set("right", primary); break;
+                case LayoutConstraints.Top: off.Set("top", primary); break;
+                case LayoutConstraints.Bottom: off.Set("bottom", primary); break;
+                case LayoutConstraints.Center: off.Set(axis == LayoutAxis.Horizontal ? "h" : "v", primary); break;
+                case LayoutConstraints.LeftRight: off.Set("left", primary); off.Set("right", secondary); break;
+                case LayoutConstraints.TopBottom: off.Set("top", primary); off.Set("bottom", secondary); break;
+                case LayoutConstraints.Scale:
+                    off.Set(axis == LayoutAxis.Horizontal ? "left" : "bottom", primary);
+                    off.Set(axis == LayoutAxis.Horizontal ? "right" : "top", secondary);
+                    break;
+            }
+        }
+
+        // ------------------------------------------------------------------ sizing dropdown
+
+        // per-child Fixed/Hug/Fill, sourced from the LayoutSizingModes registry (so a project's mode
+        // appears). Edits element.layout.sizing.{w|h} in the active scope.
+        private void DrawSizing(ElementSpec e, bool horizontal, string label)
+        {
+            LayoutSpec layout = EffectiveLayout(e);
+            string current = layout?.sizing == null ? null : (horizontal ? layout.sizing.w : layout.sizing.h);
+            DrawPopupRow(label, current, SizingModeOptions, value => Apply(() =>
+            {
+                LayoutSpec target = ScopedLayout(e, create: true);
+                if (target.sizing == null) target.sizing = new LayoutSizing();
+                if (horizontal) target.sizing.w = Empty(value); else target.sizing.h = Empty(value);
+                if (target.sizing.IsEmpty) target.sizing = null;
+                NormalizeScopedLayout(e);
+            }, "Edit " + label));
+        }
+
+        private static List<string> SizingModeOptions()
+        {
+            var list = new List<string>();
+            foreach (ILayoutSizingMode mode in LayoutSizingModes.All)
+                if (mode != null && !string.IsNullOrEmpty(mode.Id)) list.Add(mode.Id);
+            return list;
+        }
+
+        // ------------------------------------------------------------------ auto-layout panel
+
+        // direction (the kind / columns), gap (spacing), per-side padding (padding4 over uniform
+        // padding), child alignment (align). Base-only — overrides carry only layout deltas (Pillar B).
+        private void DrawAutoLayout(ElementSpec e)
+        {
+            EditorGUILayout.LabelField(e.kind == "grid" ? "Grid" : (e.kind == "hstack" ? "Row (hstack)" : "Column (vstack)"),
+                EditorStyles.miniBoldLabel);
+
+            // direction: vstack ↔ hstack swap (grid is its own kind — offer columns instead)
+            if (e.kind == "vstack" || e.kind == "hstack")
+            {
+                DrawEnumRow("Direction", e.kind, new[] { "vstack", "hstack" },
+                    v => { if (!string.IsNullOrEmpty(v) && v != e.kind) Apply(() => e.kind = v, "Edit Direction"); });
+            }
+            else if (e.kind == "grid")
+            {
+                DrawNullableInt("Columns", e.columns, v => Apply(() => e.columns = v, "Edit Columns"));
+            }
+
+            DrawSnapFloat("Gap (spacing)", e.spacing, v => Apply(() => e.spacing = v, "Edit Spacing"));
+            DrawPadding4(e);
+            DrawEnumRow("Child Align", e.align, ComposerOptions.Aligns, v => Apply(() => e.align = Empty(v), "Edit Align"));
+        }
+
+        // a 4-field per-side padding editor over padding4 [left, top, right, bottom]. When padding4 is
+        // absent it shows the uniform "padding" splatted across the four sides; the first edit
+        // materializes padding4 (which wins over uniform per the model). A "uniform" toggle collapses
+        // back to the single value.
+        private static readonly GUIContent[] LTRB =
+            { new GUIContent("L"), new GUIContent("T"), new GUIContent("R"), new GUIContent("B") };
+
+        private void DrawPadding4(ElementSpec e)
+        {
+            bool per = e.padding4 != null && e.padding4.Length >= 4;
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.PrefixLabel("Padding");
+                EditorGUI.BeginChangeCheck();
+                bool nowPer = GUILayout.Toggle(per, "per-side", EditorStyles.miniButton, GUILayout.Width(64f));
+                if (EditorGUI.EndChangeCheck() && nowPer != per)
+                {
+                    if (nowPer)
+                    {
+                        float u = e.padding ?? 0f;
+                        Apply(() => { e.padding4 = new[] { u, u, u, u }; }, "Per-side Padding");
+                    }
+                    else
+                    {
+                        float l = e.padding4 != null && e.padding4.Length >= 1 ? e.padding4[0] : 0f;
+                        Apply(() => { e.padding4 = null; e.padding = l != 0f ? (float?)l : e.padding; }, "Uniform Padding");
+                    }
+                    return;
+                }
+            }
+
+            if (!per)
+            {
+                DrawSnapFloat("  Uniform", e.padding, v => Apply(() => e.padding = v, "Edit Padding"));
+                return;
+            }
+
+            var values = new[] { e.padding4[0], e.padding4[1], e.padding4[2], e.padding4[3] };
+            Rect rect = EditorGUI.PrefixLabel(EditorGUILayout.GetControlRect(), new GUIContent("  Sides"));
+            EditorGUI.BeginChangeCheck();
+            EditorGUI.MultiFloatField(rect, LTRB, values);
+            if (EditorGUI.EndChangeCheck())
+                Apply(() => e.padding4 = new[] { values[0], values[1], values[2], values[3] }, "Edit Padding");
+        }
+
+        // ------------------------------------------------------------------ override scoping helpers
+
+        // the layout the editor should READ for the active scope: the override delta MERGED over base so
+        // the widget shows the resolved value, falling back to base when there is no override.
+        private LayoutSpec EffectiveLayout(ElementSpec e)
+        {
+            if (!_document.IsEditingOverride) return e.layout;
+            LayoutSpec delta = OverrideDelta(e, _document.ActiveBreakpoint);
+            LayoutSpec baseLayout = e.layout ?? new LayoutSpec();
+            return baseLayout.MergedWith(delta);
+        }
+
+        // the layout object writes should target: base, or the overrides[bp] delta (created on demand).
+        private LayoutSpec ScopedLayout(ElementSpec e, bool create)
+        {
+            if (!_document.IsEditingOverride)
+            {
+                if (e.layout == null && create) e.layout = new LayoutSpec();
+                return e.layout;
+            }
+            string bp = _document.ActiveBreakpoint;
+            LayoutSpec delta = OverrideDelta(e, bp);
+            if (delta == null && create)
+            {
+                if (e.overrides == null) e.overrides = new Dictionary<string, LayoutSpec>();
+                delta = new LayoutSpec();
+                e.overrides[bp] = delta;
+            }
+            return delta;
+        }
+
+        private static LayoutSpec OverrideDelta(ElementSpec e, string bp) =>
+            e.overrides != null && e.overrides.TryGetValue(bp, out LayoutSpec d) ? d : null;
+
+        // after a scoped write, drop an emptied override key so a no-op edit doesn't leave a dangling
+        // breakpoint entry (and base stays null when emptied).
+        private void NormalizeScopedLayout(ElementSpec e)
+        {
+            if (!_document.IsEditingOverride)
+            {
+                if (e.layout != null && e.layout.IsEmpty) e.layout = null;
+                return;
+            }
+            string bp = _document.ActiveBreakpoint;
+            if (e.overrides != null && e.overrides.TryGetValue(bp, out LayoutSpec d) && (d == null || d.IsEmpty))
+            {
+                e.overrides.Remove(bp);
+                if (e.overrides.Count == 0) e.overrides = null;
+            }
+        }
+
+        // does this element carry a layout override for the active breakpoint? (the badge condition)
+        private bool LayoutDiffersFromBase(ElementSpec e)
+        {
+            if (!_document.IsEditingOverride) return false;
+            LayoutSpec d = OverrideDelta(e, _document.ActiveBreakpoint);
+            return d != null && !d.IsEmpty;
+        }
+
+        private void ClearLayoutOverride(ElementSpec e)
+        {
+            if (!_document.IsEditingOverride) return;
+            string bp = _document.ActiveBreakpoint;
+            Apply(() =>
+            {
+                if (e.overrides != null && e.overrides.Remove(bp) && e.overrides.Count == 0) e.overrides = null;
+            }, "Reset To Base");
+        }
+
+        // a sub-header for an override-scoped editor: shows an "overridden" badge + reset affordance when
+        // the active breakpoint carries a delta. No-op chrome on base scope.
+        private void DrawOverrideHeader(string title, bool overridden, Action reset)
+        {
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField(title, EditorStyles.miniBoldLabel);
+                GUILayout.FlexibleSpace();
+                if (overridden)
+                {
+                    NeoGUI.Badge("overridden", NeoColors.Animation);
+                    if (GUILayout.Button("Reset", EditorStyles.miniButton, GUILayout.Width(48f))) reset?.Invoke();
+                }
+            }
+        }
+
+        // ------------------------------------------------------------------ parent lookup
+
+        private struct ParentInfo
+        {
+            public ElementSpec element;   // null when the element is top-level in a view/popup
+            public bool IsLayoutGroup;    // parent is a vstack/hstack (Unity layout group); grid uses GridLayoutGroup
+        }
+
+        // find the element whose children list IS this node's sibling list — gives the parent kind so the
+        // sizing dropdowns only show inside a layout group. Bounded walk of the owning view/popup, done
+        // on draw (cheap; no per-frame registry scan).
+        private static ParentInfo FindParent(SpecNode node)
+        {
+            var info = new ParentInfo();
+            if (node.siblings == null) return info;
+            List<ElementSpec> roots = node.view != null ? node.view.elements : node.popup?.elements;
+            if (roots == null) return info;
+            if (ReferenceEquals(roots, node.siblings)) return info; // top-level: no element parent
+            ElementSpec found = FindOwner(roots, node.siblings);
+            info.element = found;
+            info.IsLayoutGroup = found != null && (found.kind == "vstack" || found.kind == "hstack");
+            return info;
+        }
+
+        private static ElementSpec FindOwner(List<ElementSpec> elements, List<ElementSpec> target)
+        {
+            foreach (ElementSpec el in elements)
+            {
+                if (el.children == null || el.children.Count == 0) continue;
+                if (ReferenceEquals(el.children, target)) return el;
+                ElementSpec deeper = FindOwner(el.children, target);
+                if (deeper != null) return deeper;
+            }
+            return null;
         }
 
         private static bool HasOnClick(string kind) => kind == "button" || kind == "toggle" || kind == "tab";

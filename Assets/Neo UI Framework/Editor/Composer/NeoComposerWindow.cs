@@ -22,10 +22,12 @@ namespace Neo.UI.Editor.Composer
         private SpecTreeView _tree;
         private SpecInspector _inspector;
         private SpecPreviewPane _preview;
+        private BreakpointBar _breakpointBar;
 
         private IMGUIContainer _treeGui;
         private IMGUIContainer _previewGui;
         private IMGUIContainer _inspectorGui;
+        private IMGUIContainer _breakpointGui;
         private Label _statusLabel;
 
         private FlowGraph _flowGraph; // transient graph the flow window edits on this document's behalf
@@ -39,8 +41,10 @@ namespace Neo.UI.Editor.Composer
             _tree = new SpecTreeView(_document);
             _preview = new SpecPreviewPane(_document, () => _previewGui?.MarkDirtyRepaint(), ReselectPath);
             _inspector = new SpecInspector(_document, ReselectPath, OpenFlow);
+            _breakpointBar = new BreakpointBar(_document);
 
             _document.Changed += OnDocumentChanged;
+            _document.ActiveBreakpointChanged += OnActiveBreakpointChanged;
             _tree.SelectionChanged += OnSelectionChanged;
             EditorApplication.update += OnUpdate;
 
@@ -51,6 +55,7 @@ namespace Neo.UI.Editor.Composer
         private void OnDisable()
         {
             _document.Changed -= OnDocumentChanged;
+            _document.ActiveBreakpointChanged -= OnActiveBreakpointChanged;
             if (_tree != null) _tree.SelectionChanged -= OnSelectionChanged;
             EditorApplication.update -= OnUpdate;
             _preview?.Dispose();
@@ -65,6 +70,10 @@ namespace Neo.UI.Editor.Composer
         {
             rootVisualElement.Clear();
             rootVisualElement.Add(BuildToolbar());
+
+            // breakpoint authoring bar (Pillar B "B-ui"): scope selector + manager
+            _breakpointGui = new IMGUIContainer(DrawBreakpointBar);
+            rootVisualElement.Add(_breakpointGui);
 
             var outer = new TwoPaneSplitView(0, 250f, TwoPaneSplitViewOrientation.Horizontal);
             outer.style.flexGrow = 1f;
@@ -153,6 +162,8 @@ namespace Neo.UI.Editor.Composer
 
         private void DrawInspector() => _inspector.OnGUI(LocalRect(_inspectorGui), _tree.Selected);
 
+        private void DrawBreakpointBar() => _breakpointBar.OnGUI();
+
         private static Rect LocalRect(IMGUIContainer container) =>
             new Rect(0f, 0f, container.contentRect.width, container.contentRect.height);
 
@@ -180,6 +191,15 @@ namespace Neo.UI.Editor.Composer
         private void OnSelectionChanged()
         {
             _treeGui?.MarkDirtyRepaint();
+            _inspectorGui?.MarkDirtyRepaint();
+            _previewGui?.MarkDirtyRepaint();
+        }
+
+        // active edit breakpoint changed: re-scope the inspector's layout edits + reflect in the bar.
+        // The preview wires to SpecDocument.ActiveBreakpoint in a later wave (it drives IActiveBreakpoint).
+        private void OnActiveBreakpointChanged()
+        {
+            _breakpointGui?.MarkDirtyRepaint();
             _inspectorGui?.MarkDirtyRepaint();
             _previewGui?.MarkDirtyRepaint();
         }

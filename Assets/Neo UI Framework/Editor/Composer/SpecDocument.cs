@@ -45,9 +45,58 @@ namespace Neo.UI.Editor.Composer
         private readonly List<string> _undo = new List<string>();
         private readonly List<string> _redo = new List<string>();
 
+        private string _activeBreakpoint = "";
+
         public SpecDocument()
         {
             Spec = NewEmptySpec();
+        }
+
+        // ------------------------------------------------------------------ active edit breakpoint
+
+        /// <summary>
+        /// Raised when the active edit breakpoint changes (the breakpoint bar sets it; the inspector and
+        /// preview repaint off it). Separate from <see cref="Changed"/> because it is not a document
+        /// mutation — no undo snapshot, no dirty flag.
+        /// </summary>
+        public event Action ActiveBreakpointChanged;
+
+        /// <summary>
+        /// The breakpoint name layout edits are currently scoped to (Pillar B). Empty/null = the base
+        /// layout (edits write the element's base, as before); a non-empty name routes layout edits into
+        /// <c>ElementSpec.overrides[name]</c> and tells the preview which condition to show. The active
+        /// scope is editor session state, NOT part of the spec — so it never serializes and never
+        /// round-trips.
+        /// </summary>
+        public string ActiveBreakpoint => _activeBreakpoint ?? "";
+
+        /// <summary> True when a non-base breakpoint is the edit scope. </summary>
+        public bool IsEditingOverride => !string.IsNullOrEmpty(_activeBreakpoint);
+
+        /// <summary>
+        /// Sets the active edit breakpoint. Empty/null selects base. A non-empty name that no
+        /// <see cref="UISpec.breakpoints"/> entry declares is rejected with a warning (no silent
+        /// failure) and the scope falls back to base.
+        /// </summary>
+        public void SetActiveBreakpoint(string breakpoint)
+        {
+            string next = breakpoint ?? "";
+            if (!string.IsNullOrEmpty(next) && !BreakpointExists(next))
+            {
+                Debug.LogWarning($"SpecDocument.SetActiveBreakpoint: no breakpoint named '{next}' in the spec; staying on base.");
+                next = "";
+            }
+            if (string.Equals(next, _activeBreakpoint ?? "", StringComparison.Ordinal)) return;
+            _activeBreakpoint = next;
+            ActiveBreakpointChanged?.Invoke();
+        }
+
+        private bool BreakpointExists(string name)
+        {
+            if (Spec?.breakpoints == null) return false;
+            foreach (BreakpointSpec bp in Spec.breakpoints)
+                if (bp != null && string.Equals(bp.name, name, StringComparison.Ordinal)) return true;
+            return false;
         }
 
         /// <summary> A minimal valid document: one empty view so the tree and preview have something
@@ -119,6 +168,9 @@ namespace Neo.UI.Editor.Composer
             _undo.Clear();
             _redo.Clear();
             Dirty = false;
+            // the incoming spec may not declare the previously-selected breakpoint — reset to base scope
+            // (raises ActiveBreakpointChanged only when it actually was non-base)
+            SetActiveBreakpoint("");
             Changed?.Invoke();
         }
 
