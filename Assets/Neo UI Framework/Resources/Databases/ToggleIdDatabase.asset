@@ -94,6 +94,9 @@ MonoBehaviour:
     - News
     - Settings
     - Shop
+  - category: Toggle
+    names:
+    - New
   - category: Typo
     names:
     - Music

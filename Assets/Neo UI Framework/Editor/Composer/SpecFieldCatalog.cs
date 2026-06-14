@@ -25,6 +25,8 @@ namespace Neo.UI.Editor.Composer
         PopupRef,       // popup name
         PanelRef,       // sibling panel id (tab.controls)
         DataRef,        // bound UIData id (list.bind)
+        IdRef,          // element.id — a Category/Name pair backed by the kind's ID database
+                        // (two searchable dropdowns with inline "+ Add", like CategoryNameIdDrawer)
 
         // ---- Pillar F composite layout editors (read/write element.layout / padding4, not a single
         //      boxed value — the inspector draws them specially; get/set are unused sentinels). ----
@@ -160,7 +162,7 @@ namespace Neo.UI.Editor.Composer
             Add("bind", "Data Source", FieldKind.DataRef, e => e.bind, (e, v) => e.bind = (string)v, new[] { "list", "grid", "scroll" });
 
             // ---- id (interactive elements addressed by Category/Name) ----
-            Add("id", "Id", FieldKind.Text, e => e.id, (e, v) => e.id = (string)v,
+            Add("id", "Id", FieldKind.IdRef, e => e.id, (e, v) => e.id = (string)v,
                 new[] { "button", "toggle", "switch", "tab", "slider", "progress", "stepper", "input", "dropdown", "counter", "list", "settings", "cheats" });
 
             // ---- catalog reference (settings/cheats elements) ----

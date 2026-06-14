@@ -15,15 +15,20 @@ MonoBehaviour:
   categories:
   - category: A
     names:
+    - Continue
     - Play
   - category: Action
     names:
     - Button
+    - Credits
     - Play
+    - Quit
+    - Resume
     - Settings
   - category: B
     names:
     - Go
+    - Play
   - category: Base
     names:
     - Play
@@ -85,6 +90,7 @@ MonoBehaviour:
   - category: Juice
     names:
     - Inbox
+    - Play
   - category: Lint
     names:
     - Empty
@@ -166,6 +172,10 @@ MonoBehaviour:
   - category: Spec
     names:
     - Go
+  - category: Stepper
+    names:
+    - New_Minus
+    - New_Plus
   - category: Sync
     names:
     - Play
@@ -177,6 +187,7 @@ MonoBehaviour:
     - Apply
   - category: Victory
     names:
+    - Button
     - Continue
     - Rematch
   - category: World

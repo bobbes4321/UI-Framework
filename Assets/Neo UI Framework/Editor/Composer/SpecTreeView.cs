@@ -609,6 +609,9 @@ namespace Neo.UI.Editor.Composer
                 node.siblings.RemoveAt(node.index);
                 node.siblings.Insert(target, moved);
             }, "Move Element");
+            // follow the moved element to its new slot rather than leaving selection on the old index
+            int bracket = node.path.LastIndexOf('[');
+            if (bracket >= 0) SelectAfter(node.path.Substring(0, bracket) + $"[{target}]");
         }
 
         private void DuplicateElement(SpecNode node)

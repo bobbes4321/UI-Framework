@@ -97,6 +97,20 @@ namespace Neo.UI.Editor.Composer
         private static readonly HashSet<string> FreeParents = new HashSet<string> { "overlay", "safearea" };
         private static readonly HashSet<string> ContainerKinds =
             new HashSet<string> { "vstack", "hstack", "grid", "scroll", "list", "panel", "overlay", "safearea" };
+
+        /// <summary> Whether a spec kind is a layout container that nests child elements. The canvas
+        /// treats these as drop parents; the palette click-to-add (<see cref="NeoComposerWindow"/>) nests
+        /// the new widget INTO a selected one rather than appending it to the view root. Single source so
+        /// the two stay in lockstep. Built-ins live in <see cref="ContainerKinds"/>; a project-registered
+        /// kind opts in by implementing <see cref="IElementKindContainer"/> (the extension seam — a custom
+        /// container becomes first-class on the canvas and in click-to-add with zero package edits). </summary>
+        public static bool IsContainerKind(string kind)
+        {
+            if (string.IsNullOrEmpty(kind)) return false;
+            if (ContainerKinds.Contains(kind)) return true;
+            return NeoElementKinds.TryGet(kind, out INeoElementKind ek)
+                   && ek is IElementKindContainer container && container.AcceptsChildren;
+        }
         private static readonly HashSet<string> LayoutKinds =
             new HashSet<string> { "vstack", "hstack", "grid", "scroll", "list", "panel" };
 

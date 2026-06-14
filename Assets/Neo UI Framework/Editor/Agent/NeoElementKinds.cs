@@ -82,6 +82,32 @@ namespace Neo.UI.Editor
     }
 
     /// <summary>
+    /// Optional seam: a custom element kind that nests child elements (a layout container). When a
+    /// registered kind implements this and returns true, the Composer treats it like a built-in container
+    /// — the canvas accepts drops into it and palette click-to-add nests into it instead of appending to
+    /// the view root. Built-in containers are listed in <c>ComposerCanvas.IsContainerKind</c>; a project
+    /// kind carries the same fact here. Mirrors the <see cref="ITriggerKindIdDatabase"/> pattern.
+    /// </summary>
+    public interface IElementKindContainer
+    {
+        /// <summary> True when this kind's elements hold <see cref="ElementSpec.children"/>. </summary>
+        bool AcceptsChildren { get; }
+    }
+
+    /// <summary>
+    /// Optional seam: a custom element kind that is addressed by a Category/Name id and wants its Composer
+    /// id picker to autocomplete against a specific id database. Built-in kinds map this in
+    /// <c>IdDatabaseOptions.ForElementKind</c>; a project kind carries it here. Mirrors
+    /// <see cref="ITriggerKindIdDatabase"/> (the same seam, for triggers).
+    /// </summary>
+    public interface IElementKindIdDatabase
+    {
+        /// <summary> The id-asset <see cref="System.Type"/> (e.g. <c>typeof(ButtonId)</c>) whose database
+        /// the id picker should offer, or null for none. </summary>
+        System.Type PreferredIdType { get; }
+    }
+
+    /// <summary>
     /// Pattern-R registry of project-defined element kinds. Built-ins are NOT registered here in Phase 1
     /// (they keep their proven generator switch / exporter chain), so <see cref="All"/> is empty until a
     /// project registers — zero risk to the round-trip. Mirrors the shape of the master plan's reference

@@ -179,7 +179,7 @@ MonoBehaviour:
       settings:
         playMode: 0
         easeMode: 0
-        ease: 5
+        ease: 8
         curve:
           serializedVersion: 2
           m_Curve:
@@ -204,7 +204,7 @@ MonoBehaviour:
           m_PreInfinity: 2
           m_PostInfinity: 2
           m_RotationOrder: 4
-        duration: 0.2
+        duration: 0.25
         useRandomDuration: 0
         randomDuration: {x: 0.2, y: 0.5}
         startDelay: 0

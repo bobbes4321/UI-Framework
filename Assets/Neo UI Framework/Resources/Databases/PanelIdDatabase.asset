@@ -23,6 +23,9 @@ MonoBehaviour:
     - Player
     - Test
     - World
+  - category: HUD
+    names:
+    - Minimap
   - category: Menu
     names:
     - Audio
@@ -38,12 +41,16 @@ MonoBehaviour:
     names:
     - Audio
     - General
+    - Panel3
     - SetAudio
     - SetControls
     - SetDisplay
     - SetGeneral
     - SetInterface
     - SetPainting
+  - category: Pause
+    names:
+    - Dim
   - category: Settings
     names:
     - Audio

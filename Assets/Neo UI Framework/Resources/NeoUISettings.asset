@@ -23,6 +23,8 @@ MonoBehaviour:
   toggleOffSound: {fileID: 0}
   backButtonCooldown: 0.1
   runtimeFpsCap: 0
+  previewReferenceResolution: {x: 1080, y: 1920}
+  previewMatchWidthOrHeight: 0.5
   viewIds: {fileID: 11400000, guid: c44bbd33a62afb54fabd9ff58c608604, type: 2}
   buttonIds: {fileID: 11400000, guid: c51472ca43f50a44aac2ffdbf85ab459, type: 2}
   toggleIds: {fileID: 11400000, guid: cfc3a51d11c2c6b4083b8c7e5dfd4bd4, type: 2}
@@ -32,3 +34,19 @@ MonoBehaviour:
   panelIds: {fileID: 11400000, guid: 8bc78860e6e74d747b379ac8aa66375f, type: 2}
   dropdownIds: {fileID: 0}
   menuWidgets: {fileID: 0}
+  buttonVariants: []
+  buttonSizes: []
+  iconOverlay: {fileID: 0}
+  spacingScale:
+  - 0
+  - 4
+  - 8
+  - 12
+  - 16
+  - 24
+  - 32
+  - 48
+  - 64
+  textContrastMin: 3
+  affordanceContrastMin: 2
+  contrastPairs: []

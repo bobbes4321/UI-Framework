@@ -48,6 +48,37 @@ namespace Neo.UI.Editor
             }
         }
 
+        /// <summary>
+        /// The ID database a spec element's Category/Name picker should offer, by element kind — the
+        /// Composer's <c>id</c> field uses this so the dropdown autocompletes against the same database the
+        /// generator registers that kind into (button/stepper → buttonIds, toggle/switch/tab → toggleIds,
+        /// slider → sliderIds, dropdown → dropdownIds). A project-registered kind that implements
+        /// <see cref="IElementKindIdDatabase"/> carries its own preference (the extension seam, exactly as
+        /// <see cref="ForTrigger"/> consults <see cref="ITriggerKindIdDatabase"/>). Anything else returns
+        /// null — the picker still lets you type and add a Category/Name, it just doesn't persist a reusable entry.
+        /// </summary>
+        public static IdDatabase ForElementKind(string kind)
+        {
+            NeoUISettings settings = NeoUISettings.instance;
+            if (settings == null) return null;
+            switch (kind)
+            {
+                case "button":
+                case "stepper":  return settings.buttonIds;
+                case "toggle":
+                case "switch":
+                case "tab":      return settings.toggleIds;
+                case "slider":   return settings.sliderIds;
+                case "dropdown": return settings.dropdownIds;
+                default:
+                    if (NeoElementKinds.TryGet(kind, out INeoElementKind ek)
+                        && ek is IElementKindIdDatabase withDb
+                        && withDb.PreferredIdType != null)
+                        return settings.GetDatabaseFor(withDb.PreferredIdType);
+                    return null;
+            }
+        }
+
         public static List<string> Categories(IdDatabase database)
         {
             var options = new List<string> { CategoryNameId.DefaultCategory };

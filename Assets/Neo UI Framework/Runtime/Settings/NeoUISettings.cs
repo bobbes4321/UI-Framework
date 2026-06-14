@@ -186,16 +186,46 @@ namespace Neo.UI
                  "built-in default set.")]
         public ContrastPair[] contrastPairs = System.Array.Empty<ContrastPair>();
 
+        /// <summary>
+        /// The single source of truth for "which id databases exist" — the eight built-ins (as the
+        /// settings fields above) UNION any project-registered databases (see
+        /// <see cref="NeoIdDatabaseKinds"/>). Both <see cref="GetDatabaseFor"/> and the ID Database
+        /// Manager window enumerate THIS, so the lookup and the browser can never disagree about the
+        /// set of databases. The built-ins are shipped THROUGH the seam (here), not around it.
+        /// </summary>
+        public IEnumerable<IdDatabaseDescriptor> AllIdDatabases()
+        {
+            yield return new IdDatabaseDescriptor("Views", typeof(ViewId), viewIds, "Containers");
+            yield return new IdDatabaseDescriptor("Buttons", typeof(ButtonId), buttonIds, "Interactive");
+            yield return new IdDatabaseDescriptor("Toggles", typeof(ToggleId), toggleIds, "Interactive");
+            yield return new IdDatabaseDescriptor("Sliders", typeof(SliderId), sliderIds, "Interactive");
+            yield return new IdDatabaseDescriptor("Tags", typeof(TagId), tagIds, "Data");
+            yield return new IdDatabaseDescriptor("Streams", typeof(StreamId), streamIds, "Signals");
+            yield return new IdDatabaseDescriptor("Panels", typeof(PanelId), panelIds, "Containers");
+            yield return new IdDatabaseDescriptor("Dropdowns", typeof(DropdownId), dropdownIds, "Interactive");
+
+            // Extension seam: project-defined databases (their own IdDatabase + CategoryNameId types).
+            foreach (INeoIdDatabaseProvider provider in NeoIdDatabaseKinds.All)
+            {
+                if (provider == null) continue;
+                IEnumerable<IdDatabaseDescriptor> described = provider.Describe(this);
+                if (described == null) continue;
+                foreach (IdDatabaseDescriptor descriptor in described)
+                    yield return descriptor;
+            }
+        }
+
+        /// <summary>
+        /// Resolves the database for an id <see cref="System.Type"/> through the single
+        /// <see cref="AllIdDatabases"/> enumerator (built-ins + project-registered), so a project
+        /// database type resolves here exactly like a built-in — and the two never drift.
+        /// </summary>
         public IdDatabase GetDatabaseFor(System.Type idType)
         {
-            if (idType == typeof(ViewId)) return viewIds;
-            if (idType == typeof(ButtonId)) return buttonIds;
-            if (idType == typeof(ToggleId)) return toggleIds;
-            if (idType == typeof(SliderId)) return sliderIds;
-            if (idType == typeof(TagId)) return tagIds;
-            if (idType == typeof(StreamId)) return streamIds;
-            if (idType == typeof(PanelId)) return panelIds;
-            if (idType == typeof(DropdownId)) return dropdownIds;
+            if (idType == null) return null;
+            foreach (IdDatabaseDescriptor descriptor in AllIdDatabases())
+                if (descriptor.idType == idType)
+                    return descriptor.database;
             return null;
         }
 

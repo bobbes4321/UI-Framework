@@ -236,12 +236,44 @@ namespace Neo.UI.Editor.Composer
             OnSelectionChanged();
         }
 
-        // Palette click-to-add fallback: append the kind as a top-level element of the current view (the
-        // selected view, or the view owning the selection, or the first view). Routes through ApplyEdit.
+        // Palette click-to-add: place the kind relative to the current selection, mirroring drag-to-tree.
+        //   • a selected container element  → nest it as a CHILD (VStack selected → button goes inside);
+        //   • a selected leaf element       → insert it as a following SIBLING in that leaf's own list
+        //                                      (so it stays in the right view/popup/parent, not view root);
+        //   • a selected view/popup         → append to that surface's elements;
+        //   • nothing selected              → append to the first view (create one first, else warn).
+        // Every branch routes through ApplyEdit and reselects the freshly added node.
         private void AddKindToCurrentView(string kind)
         {
             if (string.IsNullOrEmpty(kind)) return;
             SpecNode node = _tree.Selected;
+
+            if (node != null && node.kind == SpecNodeKind.Element && node.element != null)
+            {
+                if (ComposerCanvas.IsContainerKind(node.element.kind))
+                {
+                    int childIndex = node.element.children.Count;
+                    _document.ApplyEdit(() => node.element.children.Add(ComposerFactory.NewElement(kind)), $"Add {kind}");
+                    ReselectPath(node.path + $"/children[{childIndex}]");
+                    return;
+                }
+                if (node.siblings != null)
+                {
+                    int at = node.index + 1;
+                    _document.ApplyEdit(() => node.siblings.Insert(at, ComposerFactory.NewElement(kind)), $"Add {kind}");
+                    ReselectPath(ListPathOf(node.path) + $"[{at}]");
+                    return;
+                }
+            }
+
+            if (node != null && node.kind == SpecNodeKind.Popup && node.popup != null)
+            {
+                PopupSpec popup = node.popup;
+                _document.ApplyEdit(() => popup.elements.Add(ComposerFactory.NewElement(kind)), $"Add {kind}");
+                ReselectPath(node.path + $"/elements[{popup.elements.Count - 1}]");
+                return;
+            }
+
             ViewSpec view = node?.view ?? (_document.Spec.views.Count > 0 ? _document.Spec.views[0] : null);
             if (view == null)
             {
@@ -250,6 +282,14 @@ namespace Neo.UI.Editor.Composer
             }
             _document.ApplyEdit(() => view.elements.Add(ComposerFactory.NewElement(kind)), $"Add {kind}");
             ReselectPath(SpecPath.View(view.id) + $"/elements[{view.elements.Count - 1}]");
+        }
+
+        // Strips the trailing "[index]" off an element path to recover the list it lives in
+        // (e.g. ".../elements[2]" → ".../elements") so a new sibling can be addressed in that same list.
+        private static string ListPathOf(string elementPath)
+        {
+            int bracket = elementPath.LastIndexOf('[');
+            return bracket < 0 ? elementPath : elementPath.Substring(0, bracket);
         }
 
         // ------------------------------------------------------------------ templates

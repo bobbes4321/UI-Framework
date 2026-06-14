@@ -66,10 +66,13 @@ namespace Neo.UI.Editor.Composer
         {
             NeoGUI.ComponentHeader("View", view.id, NeoColors.Containers);
 
-            DrawDelayedText("Category", view.category, v => Apply(() => view.category = Sanitize(v, "View"), "Edit View",
-                SpecPath.View($"{Sanitize(v, "View")}/{view.viewName}")));
-            DrawDelayedText("Name", view.viewName, v => Apply(() => view.viewName = Sanitize(v, "Main"), "Edit View",
-                SpecPath.View($"{view.category}/{Sanitize(v, "Main")}")));
+            // The view's own addressable id, drawn with the same Category/Name picker as element ids
+            // (backed by the viewIds database) so categories stay consistent and new ones are one click away.
+            DrawCategoryNamePair("Id (Category / Name)",
+                "The view's addressable id. Pick an existing category for consistency, or type a new value and choose “+ Add”.",
+                view.category, view.viewName, IdDatabaseOptions.For(typeof(ViewId)),
+                v => { string c = Sanitize(v, "View"); Apply(() => view.category = c, "Edit View", SpecPath.View($"{c}/{view.viewName}")); },
+                v => { string n = Sanitize(v, "Main"); Apply(() => view.viewName = n, "Edit View", SpecPath.View($"{view.category}/{n}")); });
 
             DrawPopupRow("Background", view.background, () => ComposerOptions.Tokens(Spec),
                 v => Apply(() => view.background = Empty(v), "Edit Background"), AddTokenAction());
@@ -520,12 +523,12 @@ namespace Neo.UI.Editor.Composer
         {
             if (!NeoGUI.BeginFoldoutSection($"neo.composer.onclick", "On Click", null, true)) { NeoGUI.EndFoldoutSection(); return; }
 
-            DrawPopupRow("Show View", e.onClickShowView, () => ComposerOptions.ViewIds(Spec),
-                v => Apply(() => e.onClickShowView = Empty(v), "Edit On Click"));
-            DrawPopupRow("Hide View", e.onClickHideView, () => ComposerOptions.ViewIds(Spec),
-                v => Apply(() => e.onClickHideView = Empty(v), "Edit On Click"));
-            DrawPopupRow("Open Popup", e.onClickPopup, () => ComposerOptions.PopupNames(Spec),
-                v => Apply(() => e.onClickPopup = Empty(v), "Edit On Click"));
+            DrawRefRow("Show View", e.onClickShowView, () => ComposerOptions.ViewIds(Spec),
+                v => Apply(() => e.onClickShowView = v, "Edit On Click"));
+            DrawRefRow("Hide View", e.onClickHideView, () => ComposerOptions.ViewIds(Spec),
+                v => Apply(() => e.onClickHideView = v, "Edit On Click"));
+            DrawRefRow("Open Popup", e.onClickPopup, () => ComposerOptions.PopupNames(Spec),
+                v => Apply(() => e.onClickPopup = v, "Edit On Click"));
             DrawBool("Close Container", e.onClickClose, v => Apply(() => e.onClickClose = v, "Edit On Click"));
 
             string signal = e.onClickSignal != null ? $"{e.onClickSignal.category}/{e.onClickSignal.name}" : "";
@@ -592,21 +595,76 @@ namespace Neo.UI.Editor.Composer
                     DrawPopupRow(f.label, (string)f.get(e), ComposerOptions.Icons, v => Apply(() => f.set(e, Empty(v)), "Edit " + f.label));
                     break;
                 case FieldKind.ViewRef:
-                    DrawPopupRow(f.label, (string)f.get(e), () => ComposerOptions.ViewIds(Spec), v => Apply(() => f.set(e, Empty(v)), "Edit " + f.label));
+                    DrawRefRow(f.label, (string)f.get(e), () => ComposerOptions.ViewIds(Spec), v => Apply(() => f.set(e, v), "Edit " + f.label));
                     break;
                 case FieldKind.PopupRef:
-                    DrawPopupRow(f.label, (string)f.get(e), () => ComposerOptions.PopupNames(Spec), v => Apply(() => f.set(e, Empty(v)), "Edit " + f.label));
+                    DrawRefRow(f.label, (string)f.get(e), () => ComposerOptions.PopupNames(Spec), v => Apply(() => f.set(e, v), "Edit " + f.label));
                     break;
                 case FieldKind.PanelRef:
-                    DrawPopupRow(f.label, (string)f.get(e), () => CurrentViewPanels(), v => Apply(() => f.set(e, Empty(v)), "Edit " + f.label));
+                    DrawRefRow(f.label, (string)f.get(e), () => CurrentViewPanels(), v => Apply(() => f.set(e, v), "Edit " + f.label));
                     break;
                 case FieldKind.DataRef:
                     DrawDelayedText(f.label, (string)f.get(e), v => Apply(() => f.set(e, Empty(v)), "Edit " + f.label));
+                    break;
+                case FieldKind.IdRef:
+                    DrawIdRef(e, f);
                     break;
                 case FieldKind.StringList:
                     DrawStringList(f.label, (List<string>)f.get(e), v => Apply(() => f.set(e, v), "Edit " + f.label));
                     break;
             }
+        }
+
+        // element.id as a Category/Name pair — two searchable dropdowns (the package's standard id UI,
+        // mirroring CategoryNameIdDrawer) backed by the kind's ID database, each with an inline "+ Add" row
+        // so a category/name that doesn't exist yet is created on the spot (no modal). Kinds with no
+        // dedicated database still get the pair: the "+ Add" row stays enabled so a value is always typeable,
+        // it just isn't persisted into a reusable database.
+        private void DrawIdRef(ElementSpec e, SpecField f)
+        {
+            IdDatabase db = IdDatabaseOptions.ForElementKind(e.kind);
+            CategoryNameId.Parse((string)f.get(e), out string category, out string name);
+            DrawCategoryNamePair(f.label,
+                "Addressable id (Category / Name). Pick from the database, or type a new value and choose “+ Add”.",
+                category, name, db,
+                picked => Apply(() => f.set(e, ComposeId(picked, name)), "Edit " + f.label),
+                picked => Apply(() => f.set(e, ComposeId(category, picked)), "Edit " + f.label));
+        }
+
+        // The package's standard Category/Name id UI: two searchable dropdowns (mirroring CategoryNameIdDrawer)
+        // backed by `db` for autocomplete + inline "+ Add" persistence. Works with db == null too — the
+        // "+ Add" row stays enabled so a value is always typeable, it just isn't persisted to a database.
+        // Single source for the element-id field AND the view id (category/name) so they read identically.
+        private void DrawCategoryNamePair(string label, string tooltip, string category, string name,
+            IdDatabase db, Action<string> onCategory, Action<string> onName)
+        {
+            Rect row = EditorGUILayout.GetControlRect();
+            row = EditorGUI.PrefixLabel(row, new GUIContent(label, tooltip));
+            NeoGUI.SplitHorizontal(row, out Rect categoryRect, out Rect nameRect);
+
+            NeoDropdown.ValuePopup(categoryRect, category,
+                () => IdDatabaseOptions.Categories(db),
+                onCategory,
+                CategoryNameId.DefaultCategory,
+                db != null ? (Action<string>)(nv => IdDatabaseOptions.AddCategory(db, nv)) : (_ => { }));
+
+            NeoDropdown.ValuePopup(nameRect, name,
+                () => IdDatabaseOptions.Names(db, category),
+                onName,
+                CategoryNameId.DefaultName,
+                db != null ? (Action<string>)(nv => IdDatabaseOptions.AddName(db, category, nv)) : (_ => { }));
+        }
+
+        // Recombines a Category/Name pair into the element.id string: preserves the bare-name form when the
+        // category is the implicit default (so "Play" doesn't churn into "None/Play"), and clears the id
+        // entirely when both sides are empty/default.
+        private static string ComposeId(string category, string name)
+        {
+            bool catDefault = string.IsNullOrWhiteSpace(category) || category == CategoryNameId.DefaultCategory;
+            bool nameDefault = string.IsNullOrWhiteSpace(name) || name == CategoryNameId.DefaultName;
+            if (catDefault && nameDefault) return null;
+            if (catDefault) return name.Trim();
+            return category.Trim() + "/" + (nameDefault ? CategoryNameId.DefaultName : name.Trim());
         }
 
         // panel ids of the view the selected element lives in (best effort — the inspector knows the
@@ -752,6 +810,26 @@ namespace Neo.UI.Editor.Composer
             DrawPopupRow(label, current, () => new List<string>(options), onSelect);
         }
 
+        // The "(None)" sentinel surfaced at the top of a clearable reference dropdown. A real id could
+        // never collide with it (ids don't carry parentheses in this position), so selecting it unambiguously
+        // means "clear".
+        private const string NoneRef = "(None)";
+
+        // A reference dropdown that can always be reset: prepends a "(None)" entry that writes null, so a
+        // Show/Hide-View, popup or panel reference set by mistake can be cleared back to nothing. Use for
+        // every "points at another named thing" field; plain string fields keep DrawPopupRow.
+        private void DrawRefRow(string label, string current, Func<List<string>> options, Action<string> onSet)
+        {
+            DrawPopupRow(label, current, () =>
+                {
+                    var list = new List<string> { NoneRef };
+                    List<string> provided = options?.Invoke();
+                    if (provided != null) list.AddRange(provided);
+                    return list;
+                },
+                v => onSet(v == NoneRef ? null : Empty(v)));
+        }
+
         private void DrawTokenRow(string label, string current, Action<string> onSelect)
         {
             Rect rect = EditorGUILayout.GetControlRect();
@@ -834,7 +912,15 @@ namespace Neo.UI.Editor.Composer
                 ElementSpec moved = node.siblings[node.index];
                 node.siblings.RemoveAt(node.index);
                 node.siblings.Insert(target, moved);
-            }, "Move Element");
+            }, "Move Element", ListPathOf(node.path) + $"[{target}]");  // follow the moved element to its new slot
+        }
+
+        // Strips the trailing "[index]" off an element path to recover the list it lives in
+        // (e.g. ".../elements[2]" → ".../elements"), so a moved element can be re-addressed at its new index.
+        private static string ListPathOf(string elementPath)
+        {
+            int bracket = elementPath.LastIndexOf('[');
+            return bracket < 0 ? elementPath : elementPath.Substring(0, bracket);
         }
 
         private void Apply(Action mutate, string label, string reselectPath = null)
