@@ -122,13 +122,15 @@ namespace Neo.UI.Tests
         [Test]
         public void Populate_BindWithoutItem_IsSkipped_NoData()
         {
-            // a bind with no item template has no row structure to clone — preview convenience, no data
-            var list = new ElementSpec { kind = "list", bind = "Inv/Items", item = null };
+            // a bind with no item template has no row structure to clone — preview convenience, no data.
+            // Use a unique id no other test/teardown touches, so TryGet reflects ONLY this call (UIData is
+            // a shared static store and Clear leaves an empty-but-registered entry).
+            var list = new ElementSpec { kind = "list", bind = "Ghost/None", item = null };
 
             List<PreviewSampleData.Binding> filled = PreviewSampleData.Populate(View(list), 3);
 
             Assert.IsEmpty(filled, "no item template → nothing filled");
-            Assert.IsFalse(UIData.TryGet("Inv", "Items", out _), "no data pushed for an item-less bind");
+            Assert.IsFalse(UIData.TryGet("Ghost", "None", out _), "no data pushed for an item-less bind");
         }
 
         [Test]
