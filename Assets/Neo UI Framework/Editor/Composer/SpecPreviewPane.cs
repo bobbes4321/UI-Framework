@@ -17,8 +17,13 @@ namespace Neo.UI.Editor.Composer
     /// <para>Rebuilds are debounced (150 ms) so dragging a slider doesn't thrash the renderer, and the
     /// texture/temp objects from the previous build are released every rebuild (no leaks).</para>
     ///
-    /// <para>Renders under the CURRENT project theme (matching the preview action) — live theme-token
-    /// recolor is a later tier; a token edit shows after the next Save/regenerate.</para>
+    /// <para>Pillar G (preview fidelity) layers three render-time-only behaviors on this path, none of
+    /// which touch the committed assets or the spec's persisted truth: live theme-token recolor (the
+    /// document's edited <c>spec.theme</c> tokens are applied to <c>settings.theme</c> for the build then
+    /// restored), live sample rows in data-bound lists (<see cref="PreviewSampleData"/>), and a
+    /// breakpoint-override preview (the active breakpoint's per-element <c>overrides</c> are folded into
+    /// each element's base layout via <see cref="LayoutSpec.MergedWith"/> to produce an EFFECTIVE spec —
+    /// no runtime responsive driver, no generator change).</para>
     /// </summary>
     public class SpecPreviewPane
     {
@@ -57,6 +62,8 @@ namespace Neo.UI.Editor.Composer
         private ElementSpec _selected;             // element to outline / drive the canvas selection
         private readonly ViewportState _viewport = new ViewportState();
         private string _variant;
+        private int _sampleRows = 3;               // synthetic rows injected into bound lists (G.2.2)
+        private string _activeBreakpointLabel = "Base"; // resolved indicator text (active edit / auto)
 
         // --- device free-resize gesture (distinct from ComposerCanvas's ELEMENT handles, which live
         // INSIDE the device rect; these device handles live in the LETTERBOX MARGIN so the two never
@@ -97,6 +104,9 @@ namespace Neo.UI.Editor.Composer
             // opens on a real device rather than an arbitrary custom size
             if (ComposerDevicePresets.All.Count > 0)
                 _viewport.ApplyPreset(ComposerDevicePresets.All[0]);
+            // the breakpoint edit scope (Pillar F) lives on the document; when it flips, the preview must
+            // re-render against the effective spec for that breakpoint (G.2.3 — effective-spec approach).
+            _document.ActiveBreakpointChanged += RequestRebuild;
         }
 
         /// <summary> The view + element to show. Triggers a debounced rebuild when the view changes. </summary>
@@ -148,7 +158,14 @@ namespace Neo.UI.Editor.Composer
             }
             if (_texture == null)
             {
-                GUI.Label(canvasRect, "Select a view to preview", NeoStyles.PopupSearchHint);
+                // empty-state guidance: distinguish "nothing selected" from "selected view is empty"
+                bool emptyView = _target != null && (_target.elements == null || _target.elements.Count == 0);
+                string hint = _target == null
+                    ? "Select a view to preview"
+                    : emptyView
+                        ? "This view is empty — drag a widget from the palette to start designing"
+                        : "Building preview…";
+                GUI.Label(canvasRect, hint, NeoStyles.PopupSearchHint);
                 return;
             }
 
@@ -345,11 +362,24 @@ namespace Neo.UI.Editor.Composer
                         name => { _activePanel = name; RequestRebuild(); }, "tab / group");
                 }
 
+                // sample-row count — only when the target view has a data-bound list (G.2.2), so the
+                // toolbar stays clean for views that don't bind data
+                if (TargetHasBoundList())
+                {
+                    GUILayout.Label("Rows", _breakpointStyle, GUILayout.Width(30f));
+                    int newRows = EditorGUILayout.IntField(_sampleRows, GUILayout.Width(34f));
+                    if (newRows != _sampleRows)
+                    {
+                        _sampleRows = Mathf.Clamp(newRows, 0, 200);
+                        RequestRebuild();
+                    }
+                }
+
                 GUILayout.FlexibleSpace();
 
-                // breakpoint indicator — placeholder until Pillar B's IActiveBreakpoint lands (see
-                // ApplyActiveBreakpoint). Shows the live device dims so the slot is visibly wired.
-                GUILayout.Label($"{_viewport.width}×{_viewport.height} (breakpoints pending)", _breakpointStyle);
+                // breakpoint indicator — shows the active EDIT scope (Pillar F) or, on base scope, the
+                // breakpoint a real device of this aspect would AUTO-resolve to (effective-spec approach).
+                GUILayout.Label($"{_viewport.width}×{_viewport.height}  ·  {_activeBreakpointLabel}", _breakpointStyle);
 
                 if (GUILayout.Button("Refresh", EditorStyles.toolbarButton)) Rebuild();
             }
@@ -393,11 +423,20 @@ namespace Neo.UI.Editor.Composer
                 return;
             }
 
-            // build just the selected view in-memory, under the current project theme
+            // Resolve which breakpoint the preview should SHOW (G.2.3). If the author is editing an
+            // override scope (Pillar F), show that breakpoint; otherwise show the one a real device of
+            // this aspect would auto-resolve to (so base-scope editing still previews responsively).
+            string activeBreakpoint = ResolveActiveBreakpoint(_viewport.width, _viewport.height);
+
+            // build just the selected view in-memory. The EFFECTIVE spec folds the active breakpoint's
+            // per-element overrides into each element's base layout (LayoutSpec.MergedWith) BEFORE the
+            // build — no runtime UIResponsiveRoot, no generator/quartet change: the preview just renders
+            // a spec whose layouts are already resolved for the chosen breakpoint.
+            ViewSpec effectiveView = BuildEffectiveView(_target, activeBreakpoint);
             var temp = new UISpec();
             temp.theme = _document.Spec.theme;
             temp.presets = _document.Spec.presets;
-            temp.views.Add(_target);
+            temp.views.Add(effectiveView);
 
             string previousVariant = null;
             NeoUISettings settings = NeoUISettings.instance;
@@ -406,6 +445,16 @@ namespace Neo.UI.Editor.Composer
                 previousVariant = settings.theme.ActiveVariantName;
                 ThemeService.SetVariant(_variant);
             }
+
+            // Live theme recolor (G.2.1): the build resolves token colors off settings.theme, NOT the
+            // document's spec.theme. Apply the document's edited tokens to settings.theme transiently so
+            // a color edit recolors the preview immediately, then restore them in the finally so the
+            // committed theme asset is never mutated by a mere preview.
+            ThemeTokenSnapshot themeSnapshot = ApplyDocumentTheme(settings);
+
+            // Sample data for bound lists (G.2.2): synthesized rows pushed at the in-memory UIData store
+            // so the preview shows a populated list. Cleared in the finally — never pollutes a real store.
+            System.Collections.Generic.List<PreviewSampleData.Binding> sampleData = null;
 
             System.Collections.Generic.List<GameObject> roots = null;
             // collect each element's built GameObject (by ElementSpec reference) so we can read back
@@ -416,7 +465,12 @@ namespace Neo.UI.Editor.Composer
             {
                 roots = UISpecPreview.BuildViews(temp);
                 if (roots.Count > 0)
+                {
+                    // push sample rows AFTER the build (the UIBoundLists are registered on enable) so
+                    // UIData.Set rebuilds them, then capture geometry + render with rows present
+                    sampleData = PreviewSampleData.Populate(effectiveView, _sampleRows);
                     RenderRoot(roots[0], sink, _viewport.width, _viewport.height);
+                }
             }
             catch (Exception e)
             {
@@ -428,23 +482,180 @@ namespace Neo.UI.Editor.Composer
                 if (roots != null)
                     foreach (GameObject root in roots)
                         if (root != null) UnityEngine.Object.DestroyImmediate(root);
+                if (sampleData != null)
+                    foreach (PreviewSampleData.Binding b in sampleData) UIData.Clear(b.category, b.name);
+                themeSnapshot.Restore();
                 if (previousVariant != null) ThemeService.SetVariant(previousVariant);
             }
-
-            // After every re-render, tell the (Pillar B) active-breakpoint system what device the
-            // preview is now showing, so it can apply the breakpoint override a real device of this
-            // aspect would trigger. Wired during Wave-2 integration — see ApplyActiveBreakpoint.
-            ApplyActiveBreakpoint(_viewport.width, _viewport.height);
         }
 
-        // TODO(Wave2-merge): wire to Pillar B's IActiveBreakpoint. Pillar B owns that interface and is
-        // NOT in this worktree yet (defining it here would collide at merge). Until then this is a no-op
-        // integration point: the viewport calls it after each re-render with the live device w/h, and the
-        // toolbar shows "(breakpoints pending)". To wire: resolve the active breakpoint for (w,h) from
-        // Pillar B's registry and apply its overrides, then drive the breakpoint indicator label off it.
-        private void ApplyActiveBreakpoint(int width, int height)
+        /// <summary>
+        /// Effective-spec for the breakpoint preview (G.2.3): a CLONE of the target view whose elements'
+        /// <c>layout</c> is the base merged with the active breakpoint's <c>overrides[breakpoint]</c>
+        /// (<see cref="LayoutSpec.MergedWith"/>). On base scope (empty breakpoint) the view is returned
+        /// unchanged. Cloning via the spec serializer keeps it deep + lossless and never touches the
+        /// document's own ElementSpec instances (the canvas keys off those — see SetTarget). The merge
+        /// recurses through children + bound-list item templates.
+        /// </summary>
+        private static ViewSpec BuildEffectiveView(ViewSpec view, string breakpoint)
         {
-            // intentionally empty — Pillar B integration point (see DrawToolbar's indicator label)
+            if (view == null || string.IsNullOrEmpty(breakpoint)) return view;
+            // round-trip clone through JSON so we never alias the document's mutable specs
+            ViewSpec clone = ViewSpec.Parse(view.ToJsonObject());
+            foreach (ElementSpec element in clone.elements) MergeOverride(element, breakpoint);
+            return clone;
+        }
+
+        private static void MergeOverride(ElementSpec element, string breakpoint)
+        {
+            if (element == null) return;
+            if (element.overrides != null && element.overrides.TryGetValue(breakpoint, out LayoutSpec delta) && delta != null)
+            {
+                LayoutSpec baseLayout = element.layout ?? new LayoutSpec();
+                element.layout = baseLayout.MergedWith(delta);
+            }
+            if (element.item != null) MergeOverride(element.item, breakpoint);
+            if (element.children != null)
+                foreach (ElementSpec child in element.children) MergeOverride(child, breakpoint);
+        }
+
+        /// <summary>
+        /// Which breakpoint the preview shows for device (<paramref name="width"/>,<paramref name="height"/>):
+        /// the author's active EDIT scope if set (Pillar F — they want to SEE what they're editing), else the
+        /// first <see cref="UISpec.breakpoints"/> entry whose condition matches this device (what a real
+        /// device would auto-resolve to), else base. Also refreshes the toolbar indicator label.
+        /// </summary>
+        private string ResolveActiveBreakpoint(int width, int height)
+        {
+            string editScope = _document.ActiveBreakpoint;
+            if (!string.IsNullOrEmpty(editScope))
+            {
+                _activeBreakpointLabel = $"Editing: {editScope}";
+                return editScope;
+            }
+
+            string auto = AutoBreakpoint(width, height);
+            _activeBreakpointLabel = string.IsNullOrEmpty(auto) ? "Base" : $"Auto: {auto}";
+            return auto;
+        }
+
+        /// <summary> First declared breakpoint whose condition matches (w,h); empty = base. Mirrors the
+        /// runtime first-match-wins order and <c>UIResponsiveRoot.ResponsiveCondition.Matches</c>. </summary>
+        private string AutoBreakpoint(int width, int height)
+        {
+            System.Collections.Generic.List<BreakpointSpec> breakpoints = _document.Spec?.breakpoints;
+            if (breakpoints == null) return "";
+            foreach (BreakpointSpec bp in breakpoints)
+                if (bp != null && !string.IsNullOrEmpty(bp.name) && ConditionMatches(bp.when, width, height))
+                    return bp.name;
+            return "";
+        }
+
+        /// <summary> Editor-side mirror of the runtime breakpoint condition test (an empty condition never
+        /// auto-matches — it would otherwise shadow every device). </summary>
+        private static bool ConditionMatches(BreakpointCondition c, float width, float height)
+        {
+            if (c == null || c.IsEmpty) return false;
+            float aspect = height > 0f ? width / height : 0f;
+            bool portrait = height >= width;
+            if (!string.IsNullOrEmpty(c.orientation) && (c.orientation == "portrait") != portrait) return false;
+            if (c.minAspect.HasValue && aspect < c.minAspect.Value) return false;
+            if (c.maxAspect.HasValue && aspect > c.maxAspect.Value) return false;
+            if (c.minWidth.HasValue && width < c.minWidth.Value) return false;
+            if (c.maxWidth.HasValue && width > c.maxWidth.Value) return false;
+            return true;
+        }
+
+        /// <summary> Snapshot of theme tokens transiently overwritten for a live-recolor preview, so the
+        /// committed theme asset is restored exactly afterward. </summary>
+        private readonly struct ThemeTokenSnapshot
+        {
+            private readonly Theme _theme;
+            private readonly System.Collections.Generic.List<(string variant, string token, Color color, bool had)> _entries;
+            public ThemeTokenSnapshot(Theme theme,
+                System.Collections.Generic.List<(string, string, Color, bool)> entries)
+            { _theme = theme; _entries = entries; }
+
+            public void Restore()
+            {
+                if (_theme == null || _entries == null) return;
+                foreach ((string variant, string token, Color color, bool had) in _entries)
+                    if (had) _theme.SetToken(token, color, variant);
+                // tokens that did NOT exist before are left in place: they only ever resolve when an
+                // element references them, the asset isn't saved here, and dropping them would need a
+                // remove API per-variant. The committed colors (the ones that matter) are restored exactly.
+            }
+        }
+
+        /// <summary>
+        /// Applies the DOCUMENT's theme tokens onto <c>settings.theme</c> for the duration of one build so
+        /// the preview reflects unsaved color edits (the build resolves colors off settings.theme, not the
+        /// spec). Returns a snapshot to restore — nothing is saved, so the committed asset is untouched.
+        /// </summary>
+        private ThemeTokenSnapshot ApplyDocumentTheme(NeoUISettings settings)
+        {
+            ThemeSpec docTheme = _document.Spec?.theme;
+            Theme theme = settings != null ? settings.theme : null;
+            if (docTheme == null || theme == null || (docTheme.tokens.Count == 0 && docTheme.variants.Count == 0))
+                return default;
+
+            var entries = new System.Collections.Generic.List<(string, string, Color, bool)>();
+
+            // default-variant tokens (variantName == null applies to every variant missing it)
+            foreach (System.Collections.Generic.KeyValuePair<string, string> token in docTheme.tokens)
+            {
+                if (!ColorUtility.TryParseHtmlString(Hex(token.Value), out Color color)) continue;
+                SnapshotToken(theme, null, token.Key, entries);
+                theme.SetToken(token.Key, color);
+            }
+            // per-variant overrides
+            foreach (var variant in docTheme.variants)
+            {
+                if (theme.GetVariant(variant.Key) == null) continue; // a brand-new variant only Save creates
+                foreach (System.Collections.Generic.KeyValuePair<string, string> token in variant.Value)
+                {
+                    if (!ColorUtility.TryParseHtmlString(Hex(token.Value), out Color color)) continue;
+                    SnapshotToken(theme, variant.Key, token.Key, entries);
+                    theme.SetToken(token.Key, color, variant.Key);
+                }
+            }
+            return new ThemeTokenSnapshot(theme, entries);
+        }
+
+        private static void SnapshotToken(Theme theme, string variantName, string token,
+            System.Collections.Generic.List<(string, string, Color, bool)> entries)
+        {
+            // capture every variant the SetToken will touch so Restore puts each back exactly
+            foreach (Theme.ThemeVariant v in theme.Variants)
+            {
+                if (variantName != null && v.name != variantName) continue;
+                bool had = v.TryGetColor(token, out Color prev);
+                entries.Add((v.name, token, prev, had));
+            }
+        }
+
+        private static string Hex(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return "#FFFFFF";
+            return value.StartsWith("#") ? value : "#" + value;
+        }
+
+        private bool TargetHasBoundList()
+        {
+            if (_target?.elements == null) return false;
+            foreach (ElementSpec element in _target.elements)
+                if (HasBoundList(element)) return true;
+            return false;
+        }
+
+        private static bool HasBoundList(ElementSpec element)
+        {
+            if (element == null) return false;
+            if (!string.IsNullOrWhiteSpace(element.bind) && element.item != null) return true;
+            if (element.children != null)
+                foreach (ElementSpec child in element.children)
+                    if (HasBoundList(child)) return true;
+            return false;
         }
 
         private void RenderRoot(GameObject root,
@@ -573,6 +784,10 @@ namespace Neo.UI.Editor.Composer
             if (_texture != null) { UnityEngine.Object.DestroyImmediate(_texture); _texture = null; }
         }
 
-        public void Dispose() => Release();
+        public void Dispose()
+        {
+            _document.ActiveBreakpointChanged -= RequestRebuild;
+            Release();
+        }
     }
 }
