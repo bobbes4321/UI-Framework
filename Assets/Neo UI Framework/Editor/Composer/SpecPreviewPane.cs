@@ -65,6 +65,11 @@ namespace Neo.UI.Editor.Composer
         private int _sampleRows = 3;               // synthetic rows injected into bound lists (G.2.2)
         private string _activeBreakpointLabel = "Base"; // resolved indicator text (active edit / auto)
 
+        // live flow playback (G.2.3): when on, the preview instantiates the spec's flow in-memory and the
+        // author clicks interactive elements to walk it. Default OFF — static authoring preview as before.
+        private readonly PreviewFlowPlayback _playback = new PreviewFlowPlayback();
+        private bool _playMode;
+
         // --- device free-resize gesture (distinct from ComposerCanvas's ELEMENT handles, which live
         // INSIDE the device rect; these device handles live in the LETTERBOX MARGIN so the two never
         // hit-test against each other — see the handle-zone split with Pillar D) ---
@@ -107,6 +112,16 @@ namespace Neo.UI.Editor.Composer
             // the breakpoint edit scope (Pillar F) lives on the document; when it flips, the preview must
             // re-render against the effective spec for that breakpoint (G.2.3 — effective-spec approach).
             _document.ActiveBreakpointChanged += RequestRebuild;
+            // edits during live playback invalidate the built flow/views (the spec changed under them) —
+            // restart playback so its built objects stay in sync with the document (and references valid).
+            _document.Changed += OnDocumentChangedDuringPlayback;
+        }
+
+        private void OnDocumentChangedDuringPlayback()
+        {
+            if (!_playMode) return;
+            if (_playback.Begin(_document.Spec, out string error)) RequestRebuild();
+            else ExitPlayback(error); // the flow was removed out from under playback — fall back to static
         }
 
         /// <summary> The view + element to show. Triggers a debounced rebuild when the view changes. </summary>
@@ -160,11 +175,13 @@ namespace Neo.UI.Editor.Composer
             {
                 // empty-state guidance: distinguish "nothing selected" from "selected view is empty"
                 bool emptyView = _target != null && (_target.elements == null || _target.elements.Count == 0);
-                string hint = _target == null
-                    ? "Select a view to preview"
-                    : emptyView
-                        ? "This view is empty — drag a widget from the palette to start designing"
-                        : "Building preview…";
+                string hint = _playMode
+                    ? $"▶ Playing — node '{_playback.CurrentNodeName ?? "—"}' shows no view yet"
+                    : _target == null
+                        ? "Select a view to preview"
+                        : emptyView
+                            ? "This view is empty — drag a widget from the palette to start designing"
+                            : "Building preview…";
                 GUI.Label(canvasRect, hint, NeoStyles.PopupSearchHint);
                 return;
             }
@@ -183,9 +200,18 @@ namespace Neo.UI.Editor.Composer
             if (_viewport.freeMode)
                 HandleDeviceResize(canvasRect, drawRect, scale);
 
-            // hand the rendered geometry to the WYSIWYG canvas: it owns selection outlines, resize
-            // handles, marquee and all the drag gestures (move/resize/reparent) on top of the texture
-            _canvas.OnGUI(drawRect, scale, _target, null, _boxes, _selected);
+            if (_playMode)
+            {
+                // play mode: clicks drive the flow, not the editing gestures — the WYSIWYG canvas stays out
+                HandlePlaybackClick(drawRect);
+                DrawPlaybackStatus(canvasRect);
+            }
+            else
+            {
+                // hand the rendered geometry to the WYSIWYG canvas: it owns selection outlines, resize
+                // handles, marquee and all the drag gestures (move/resize/reparent) on top of the texture
+                _canvas.OnGUI(drawRect, scale, _target, null, _boxes, _selected);
+            }
 
             // live dimension readout during a device drag ("412 × 915")
             if (_showReadout && Event.current.type == EventType.Repaint)
@@ -375,11 +401,39 @@ namespace Neo.UI.Editor.Composer
                     }
                 }
 
+                // Play toggle (G.2.3) — only when the spec has a flow to play. Default OFF: the static
+                // authoring preview behaves exactly as before. ON instantiates the flow in-memory and lets
+                // the author click through it.
+                if (SpecHasFlow())
+                {
+                    bool play = GUILayout.Toggle(_playMode, "▶ Play", EditorStyles.toolbarButton, GUILayout.Width(54f));
+                    if (play != _playMode)
+                    {
+                        if (play) EnterPlayback();
+                        else ExitPlayback();
+                    }
+                }
+                else if (_playMode)
+                {
+                    // the flow was removed while playing — leave play mode cleanly
+                    ExitPlayback();
+                }
+
                 GUILayout.FlexibleSpace();
 
-                // breakpoint indicator — shows the active EDIT scope (Pillar F) or, on base scope, the
-                // breakpoint a real device of this aspect would AUTO-resolve to (effective-spec approach).
-                GUILayout.Label($"{_viewport.width}×{_viewport.height}  ·  {_activeBreakpointLabel}", _breakpointStyle);
+                if (_playMode)
+                {
+                    // status line: the live flow node + the views it shows (also drawn on the canvas)
+                    string views = string.Join(", ", _playback.ActiveViewIds);
+                    GUILayout.Label($"▶ {_playback.CurrentNodeName ?? "—"}  ·  {(string.IsNullOrEmpty(views) ? "(none)" : views)}",
+                        _breakpointStyle);
+                }
+                else
+                {
+                    // breakpoint indicator — shows the active EDIT scope (Pillar F) or, on base scope, the
+                    // breakpoint a real device of this aspect would AUTO-resolve to (effective-spec approach).
+                    GUILayout.Label($"{_viewport.width}×{_viewport.height}  ·  {_activeBreakpointLabel}", _breakpointStyle);
+                }
 
                 if (GUILayout.Button("Refresh", EditorStyles.toolbarButton)) Rebuild();
             }
@@ -415,13 +469,23 @@ namespace Neo.UI.Editor.Composer
             Release();
             _error = null;
             _boxes.Clear();
-            if (_target == null) return;
 
             if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
             {
-                _error = "Preview needs a graphics device (this editor was started with -nographics).";
+                if (_playMode || _target != null)
+                    _error = "Preview needs a graphics device (this editor was started with -nographics).";
                 return;
             }
+
+            if (_playMode) RebuildPlayback();
+            else RebuildStatic();
+        }
+
+        // ------------------------------------------------------------------ static authoring render
+
+        private void RebuildStatic()
+        {
+            if (_target == null) return;
 
             // Resolve which breakpoint the preview should SHOW (G.2.3). If the author is editing an
             // override scope (Pillar F), show that breakpoint; otherwise show the one a real device of
@@ -433,10 +497,54 @@ namespace Neo.UI.Editor.Composer
             // build — no runtime UIResponsiveRoot, no generator/quartet change: the preview just renders
             // a spec whose layouts are already resolved for the chosen breakpoint.
             ViewSpec effectiveView = BuildEffectiveView(_target, activeBreakpoint);
+            var views = new System.Collections.Generic.List<ViewSpec> { effectiveView };
+            RenderSpecViews(views, views, _viewport.width, _viewport.height);
+        }
+
+        // ------------------------------------------------------------------ live flow playback render (G.2.3)
+
+        /// <summary>
+        /// Renders the views the playing flow's active node currently shows (stacked, like the runtime
+        /// canvas). Always renders the BASE layout (no breakpoint-effective clone) so the boxes key off the
+        /// document's own ElementSpec instances — the same refs <see cref="PreviewFlowPlayback"/> built
+        /// against, so a clicked box maps straight back to the element to fire.
+        /// </summary>
+        private void RebuildPlayback()
+        {
+            if (!_playback.IsPlaying) return;
+            var views = new System.Collections.Generic.List<ViewSpec>();
+            foreach (string id in _playback.ActiveViewIds)
+            {
+                CategoryNameId.Parse(id, out string category, out string name);
+                ViewSpec view = FindDocView(category, name);
+                if (view != null && !views.Contains(view)) views.Add(view);
+            }
+            if (views.Count == 0) return; // a non-UI node (e.g. Start) shows nothing yet — blank, not an error
+            RenderSpecViews(views, views, _viewport.width, _viewport.height);
+        }
+
+        private ViewSpec FindDocView(string category, string name)
+        {
+            foreach (ViewSpec view in _document.Spec.views)
+                if (view != null && view.category == category && view.viewName == name) return view;
+            return null;
+        }
+
+        // ------------------------------------------------------------------ shared render
+
+        /// <summary>
+        /// Builds <paramref name="renderViews"/> in-memory (live theme recolor + selected variant), pushes
+        /// sample rows for <paramref name="sampleViews"/>' bound lists, renders them stacked to the texture
+        /// and captures element geometry — then destroys every temp object and restores the theme. Shared
+        /// by the static authoring preview (one effective view) and live playback (the active node's views).
+        /// </summary>
+        private void RenderSpecViews(System.Collections.Generic.List<ViewSpec> renderViews,
+            System.Collections.Generic.List<ViewSpec> sampleViews, int width, int height)
+        {
             var temp = new UISpec();
             temp.theme = _document.Spec.theme;
             temp.presets = _document.Spec.presets;
-            temp.views.Add(effectiveView);
+            foreach (ViewSpec view in renderViews) temp.views.Add(view);
 
             string previousVariant = null;
             NeoUISettings settings = NeoUISettings.instance;
@@ -468,8 +576,10 @@ namespace Neo.UI.Editor.Composer
                 {
                     // push sample rows AFTER the build (the UIBoundLists are registered on enable) so
                     // UIData.Set rebuilds them, then capture geometry + render with rows present
-                    sampleData = PreviewSampleData.Populate(effectiveView, _sampleRows);
-                    RenderRoot(roots[0], sink, _viewport.width, _viewport.height);
+                    sampleData = new System.Collections.Generic.List<PreviewSampleData.Binding>();
+                    foreach (ViewSpec view in sampleViews)
+                        sampleData.AddRange(PreviewSampleData.Populate(view, _sampleRows));
+                    RenderRoots(roots, sink, width, height);
                 }
             }
             catch (Exception e)
@@ -640,6 +750,12 @@ namespace Neo.UI.Editor.Composer
             return value.StartsWith("#") ? value : "#" + value;
         }
 
+        private bool SpecHasFlow()
+        {
+            FlowSpec flow = _document.Spec?.flow;
+            return flow != null && flow.nodes != null && flow.nodes.Count > 0;
+        }
+
         private bool TargetHasBoundList()
         {
             if (_target?.elements == null) return false;
@@ -658,7 +774,7 @@ namespace Neo.UI.Editor.Composer
             return false;
         }
 
-        private void RenderRoot(GameObject root,
+        private void RenderRoots(System.Collections.Generic.List<GameObject> roots,
             System.Collections.Generic.Dictionary<ElementSpec, GameObject> sink, int width, int height)
         {
             Scene scene = EditorSceneManager.NewPreviewScene();
@@ -690,18 +806,25 @@ namespace Neo.UI.Editor.Composer
                 UIScreenshotter.ApplyDeviceScale(canvasRect, width, height, deviceScale: true);
                 canvasRect.position = Vector3.zero;
 
-                SceneManager.MoveGameObjectToScene(root, scene);
-                root.transform.SetParent(canvasRect, worldPositionStays: false);
-                root.SetActive(true);
-
-                var rootGroup = root.GetComponent<CanvasGroup>();
-                if (rootGroup != null) rootGroup.alpha = 1f;
+                // multiple roots stack on the canvas exactly like the runtime (a node layering several
+                // views — cheat sheet over the menu); each keeps its own anchors/layout
+                foreach (GameObject root in roots)
+                {
+                    if (root == null) continue;
+                    SceneManager.MoveGameObjectToScene(root, scene);
+                    root.transform.SetParent(canvasRect, worldPositionStays: false);
+                    root.SetActive(true);
+                    var rootGroup = root.GetComponent<CanvasGroup>();
+                    if (rootGroup != null) rootGroup.alpha = 1f;
+                }
 
                 Canvas.ForceUpdateCanvases();
-                UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)root.transform);
+                foreach (GameObject root in roots)
+                    if (root != null)
+                        UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)root.transform);
                 Canvas.ForceUpdateCanvases();
 
-                ApplyPanelSelection(root);
+                ApplyPanelSelection(roots);
                 CaptureBoxes(sink, width, height);
 
                 renderTexture = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32);
@@ -729,17 +852,24 @@ namespace Neo.UI.Editor.Composer
         /// other groups / a tab layout's other panels can be inspected without entering play mode. With
         /// no pick, the authored start-panel visibility is left untouched.
         /// </summary>
-        private void ApplyPanelSelection(GameObject root)
+        private void ApplyPanelSelection(System.Collections.Generic.List<GameObject> roots)
         {
             _panelNames.Clear();
-            UIPanel[] panels = root.GetComponentsInChildren<UIPanel>(includeInactive: true);
-            foreach (UIPanel panel in panels)
-                if (!_panelNames.Contains(panel.gameObject.name))
-                    _panelNames.Add(panel.gameObject.name);
+            var panelList = new System.Collections.Generic.List<UIPanel>();
+            foreach (GameObject root in roots)
+            {
+                if (root == null) continue;
+                foreach (UIPanel panel in root.GetComponentsInChildren<UIPanel>(includeInactive: true))
+                {
+                    panelList.Add(panel);
+                    if (!_panelNames.Contains(panel.gameObject.name))
+                        _panelNames.Add(panel.gameObject.name);
+                }
+            }
 
             if (string.IsNullOrEmpty(_activePanel) || !_panelNames.Contains(_activePanel)) return;
 
-            foreach (UIPanel panel in panels)
+            foreach (UIPanel panel in panelList)
             {
                 var group = panel.GetComponent<CanvasGroup>();
                 if (group == null) group = panel.gameObject.AddComponent<CanvasGroup>();
@@ -787,7 +917,92 @@ namespace Neo.UI.Editor.Composer
         public void Dispose()
         {
             _document.ActiveBreakpointChanged -= RequestRebuild;
+            _document.Changed -= OnDocumentChangedDuringPlayback;
+            _playback.Stop();
             Release();
+        }
+
+        // ------------------------------------------------------------------ playback enter/exit (G.2.3)
+
+        private void EnterPlayback()
+        {
+            if (_playback.Begin(_document.Spec, out string error))
+            {
+                _playMode = true;
+                _error = null;
+                Rebuild();
+            }
+            else
+            {
+                // no silent failure — tell the author why Play did nothing, and stay in static preview
+                _playMode = false;
+                _error = error;
+                _repaint?.Invoke();
+            }
+        }
+
+        private void ExitPlayback(string error = null)
+        {
+            _playback.Stop();
+            _playMode = false;
+            _error = error;
+            RequestRebuild();
+        }
+
+        /// <summary>
+        /// In play mode a left-click on the rendered texture maps to the deepest element under the cursor
+        /// (via the captured boxes — no physical raycast) and fires its interaction; the synchronous flow
+        /// dispatch advances the graph, so we re-render to show the new active view(s).
+        /// </summary>
+        private void HandlePlaybackClick(Rect drawRect)
+        {
+            Event e = Event.current;
+            if (e.type != EventType.MouseDown || e.button != 0 || !drawRect.Contains(e.mousePosition)) return;
+
+            ElementSpec hit = HitTestBox(e.mousePosition, drawRect);
+            if (hit != null && _playback.ClickElement(hit))
+            {
+                Rebuild();           // active node may have changed → re-render its views immediately
+                _repaint?.Invoke();
+            }
+            e.Use();                 // consume the click so the editing canvas never sees it in play mode
+        }
+
+        // deepest (smallest-area) element box containing the point — mirrors ComposerCanvas.HitTest but
+        // standalone so play mode never drives the editing gestures
+        private ElementSpec HitTestBox(Vector2 point, Rect drawRect)
+        {
+            ElementSpec best = null;
+            float bestArea = float.MaxValue;
+            foreach (var entry in _boxes)
+            {
+                Rect n = entry.Value.norm;
+                var screen = new Rect(drawRect.x + n.x * drawRect.width,
+                    drawRect.y + (1f - n.y - n.height) * drawRect.height,
+                    n.width * drawRect.width, n.height * drawRect.height);
+                if (!screen.Contains(point)) continue;
+                float area = screen.width * screen.height;
+                if (area < bestArea) { best = entry.Key; bestArea = area; }
+            }
+            return best;
+        }
+
+        /// <summary> A small status line pinned to the top-left of the canvas: the live flow node + the
+        /// view(s) it currently shows (the click target readout). </summary>
+        private void DrawPlaybackStatus(Rect canvasRect)
+        {
+            if (Event.current.type != EventType.Repaint) return;
+            EnsureToolbarStyles();
+
+            string node = _playback.CurrentNodeName ?? "—";
+            string views = string.Join(", ", _playback.ActiveViewIds);
+            if (string.IsNullOrEmpty(views)) views = "(none)";
+            string label = $"▶  Node: {node}   ·   Views: {views}";
+
+            var size = _readoutStyle.CalcSize(new GUIContent(label));
+            var badge = new Rect(canvasRect.x + 6f, canvasRect.y + 6f, size.x + 12f, size.y + 4f);
+            EditorGUI.DrawRect(badge, new Color(0f, 0f, 0f, 0.7f));
+            GUI.Label(badge, label, _readoutStyle);
         }
     }
 }
