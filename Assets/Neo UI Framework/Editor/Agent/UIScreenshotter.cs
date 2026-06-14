@@ -55,7 +55,8 @@ namespace Neo.UI.Editor
         /// it — pass a throwaway. This is the in-memory path the spec preview / agent render loop uses
         /// so no prefab assets are committed just to look at a layout.
         /// </summary>
-        public static string CaptureLive(GameObject root, string outputPath, int width = 1080, int height = 1920)
+        public static string CaptureLive(GameObject root, string outputPath, int width = 1080, int height = 1920,
+            RenderOptions options = default)
         {
             if (root == null) throw new ArgumentNullException(nameof(root));
             return RenderInScene(width, height, outputPath, (scene, canvas) =>
@@ -64,11 +65,11 @@ namespace Neo.UI.Editor
                 root.transform.SetParent(canvas, worldPositionStays: false);
                 root.SetActive(true);
                 return root;
-            });
+            }, options);
         }
 
         private static string RenderInScene(int width, int height, string outputPath,
-            Func<Scene, RectTransform, GameObject> produceContent)
+            Func<Scene, RectTransform, GameObject> produceContent, RenderOptions options = default)
         {
             if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
                 throw new InvalidOperationException(
@@ -99,7 +100,7 @@ namespace Neo.UI.Editor
                 canvas.renderMode = RenderMode.WorldSpace;
                 canvas.worldCamera = camera;
                 var canvasRect = (RectTransform)canvasGo.transform;
-                canvasRect.sizeDelta = new Vector2(width, height);
+                ApplyDeviceScale(canvasRect, width, height, options.deviceScale);
                 canvasRect.position = Vector3.zero;
 
                 GameObject content = produceContent(scene, canvasRect);
@@ -144,6 +145,53 @@ namespace Neo.UI.Editor
                 }
                 EditorSceneManager.ClosePreviewScene(scene);
             }
+        }
+
+        /// <summary>
+        /// Sizes a WorldSpace preview canvas so it renders at <paramref name="width"/>×<paramref name="height"/>
+        /// device px. With <paramref name="deviceScale"/> false (the byte-stable agent default) the canvas
+        /// is the device size 1:1 — content is pixel-for-pixel at the render resolution. With it true the
+        /// canvas reproduces a <see cref="UnityEngine.UI.CanvasScaler"/> in
+        /// <see cref="UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize"/> mode: it lays the UI out
+        /// in REFERENCE-resolution space (from <see cref="NeoUISettings"/>) and applies a uniform localScale
+        /// so the rendered output is still the device size — so the same view at 320-wide and 1920-wide
+        /// shows the same layout proportionally, exactly like the shipped game (whose canvases use a
+        /// ScaleWithScreenSize CanvasScaler).
+        ///
+        /// <para>A real CanvasScaler only drives ScreenSpace canvases (it reads <c>Screen.width/height</c>),
+        /// so on a WorldSpace render canvas it would be a no-op — we therefore compute the scale factor
+        /// with the identical formula and apply it ourselves.</para>
+        /// </summary>
+        public static void ApplyDeviceScale(RectTransform canvasRect, int width, int height, bool deviceScale)
+        {
+            if (!deviceScale)
+            {
+                // historical behavior: 1 canvas unit = 1 device px, no scaling
+                canvasRect.localScale = Vector3.one;
+                canvasRect.sizeDelta = new Vector2(width, height);
+                return;
+            }
+
+            NeoUISettings settings = NeoUISettings.instance;
+            Vector2 reference = new Vector2(1080f, 1920f); // matches GeneratedSceneBuilder's portrait default
+            float match = 0.5f;
+            if (settings != null)
+            {
+                if (settings.previewReferenceResolution.x > 0f && settings.previewReferenceResolution.y > 0f)
+                    reference = settings.previewReferenceResolution;
+                match = Mathf.Clamp01(settings.previewMatchWidthOrHeight);
+            }
+
+            // CanvasScaler ScaleWithScreenSize + MatchWidthOrHeight, verbatim:
+            //   scaleFactor = 2 ^ lerp(log2(w/refW), log2(h/refH), match)
+            float logWidth = Mathf.Log(width / reference.x, 2f);
+            float logHeight = Mathf.Log(height / reference.y, 2f);
+            float scaleFactor = Mathf.Pow(2f, Mathf.Lerp(logWidth, logHeight, match));
+            if (scaleFactor <= 0f || float.IsNaN(scaleFactor) || float.IsInfinity(scaleFactor)) scaleFactor = 1f;
+
+            // lay out in reference space, then scale up so the rendered output is still width×height px
+            canvasRect.sizeDelta = new Vector2(width / scaleFactor, height / scaleFactor);
+            canvasRect.localScale = new Vector3(scaleFactor, scaleFactor, 1f);
         }
 
         // ------------------------------------------------------------------ menu

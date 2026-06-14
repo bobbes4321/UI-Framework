@@ -58,6 +58,17 @@ namespace Neo.UI
         [Tooltip("Runtime tick FPS cap; 0 = uncapped")]
         public int runtimeFpsCap;
 
+        [Header("Composer Preview")]
+        [Tooltip("Reference resolution the Composer's device-scaled preview lays UI out against " +
+                 "(CanvasScaler ScaleWithScreenSize). Matches the shipped canvases' reference so the " +
+                 "preview scales like the real game. (0,0) = 1080×1920 default.")]
+        public Vector2 previewReferenceResolution = new Vector2(1080f, 1920f);
+
+        [Range(0f, 1f)]
+        [Tooltip("CanvasScaler matchWidthOrHeight for the device-scaled preview (0 = match width, " +
+                 "1 = match height). Mirrors the shipped canvases.")]
+        public float previewMatchWidthOrHeight = 0.5f;
+
         [Header("ID Databases (editor pickers)")]
         public ViewIdDatabase viewIds;
         public ButtonIdDatabase buttonIds;

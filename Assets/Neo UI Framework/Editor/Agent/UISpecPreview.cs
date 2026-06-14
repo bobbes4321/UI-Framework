@@ -1,8 +1,31 @@
 using System.Collections.Generic;
+using Neo.UI.Editor.Composer;
 using UnityEngine;
 
 namespace Neo.UI.Editor
 {
+    /// <summary>
+    /// Gates the device-accurate <see cref="UnityEngine.UI.CanvasScaler"/>-equivalent in the shared
+    /// render path. The agent <c>preview</c>/<c>screenshot</c> matrix and <c>BeautificationAcceptance</c>
+    /// pass the default (<see cref="None"/>, no scaler) so their renders stay byte-stable; the Composer
+    /// viewport passes <c>deviceScale = true</c> so content scales like the shipped game.
+    /// </summary>
+    public readonly struct RenderOptions
+    {
+        /// <summary>
+        /// When true, the preview canvas scales its content like a real device (CanvasScaler-equivalent:
+        /// ScaleWithScreenSize against the settings' reference resolution) so the same view at 320-wide
+        /// and 1920-wide shows the same UI proportionally. Default false = pixel-for-pixel at the render
+        /// size (the historical, byte-stable agent behavior).
+        /// </summary>
+        public readonly bool deviceScale;
+
+        public RenderOptions(bool deviceScale) => this.deviceScale = deviceScale;
+
+        /// <summary> The historical no-scaler behavior — the default for the agent render matrix. </summary>
+        public static RenderOptions None => default;
+    }
+
     /// <summary>
     /// Renders a spec's views WITHOUT committing any prefab/asset — builds each view in-memory and
     /// (with a graphics device) captures it to PNGs at one or more resolutions. The fast feedback
@@ -14,12 +37,26 @@ namespace Neo.UI.Editor
     /// </summary>
     public static class UISpecPreview
     {
-        public static readonly (string name, int width, int height)[] DefaultResolutions =
+        /// <summary>
+        /// The resolution matrix the headless <c>preview</c>/<c>screenshot</c> actions render across.
+        /// DERIVED from <see cref="ComposerDevicePresets.All"/> (the single source of truth) so the
+        /// Composer viewport and the agent path always agree on the device spread — a project that
+        /// registers a device sees it in both. Returns a fresh array per call (the registry can grow at
+        /// runtime); callers that index it should read it once. The legacy trio
+        /// (phone-portrait/landscape, tablet-portrait) stays first because the built-in registry seeds
+        /// them first, so existing renders/indices are unchanged.
+        /// </summary>
+        public static (string name, int width, int height)[] DefaultResolutions
         {
-            ("phone-portrait", 1080, 1920),
-            ("phone-landscape", 1920, 1080),
-            ("tablet-portrait", 1536, 2048),
-        };
+            get
+            {
+                IReadOnlyList<DevicePreset> presets = ComposerDevicePresets.All;
+                var matrix = new (string name, int width, int height)[presets.Count];
+                for (int i = 0; i < presets.Count; i++)
+                    matrix[i] = (presets[i].id, presets[i].width, presets[i].height);
+                return matrix;
+            }
+        }
 
         /// <summary>
         /// Builds every view in the spec in-memory and returns the root GameObjects. The caller owns
@@ -48,7 +85,8 @@ namespace Neo.UI.Editor
         /// paths. Needs a graphics device.
         /// </summary>
         public static List<string> Render(UISpec spec, string outputDir,
-            (string name, int width, int height)[] resolutions = null)
+            (string name, int width, int height)[] resolutions = null,
+            RenderOptions options = default)
         {
             resolutions ??= DefaultResolutions;
             var written = new List<string>();
@@ -65,7 +103,7 @@ namespace Neo.UI.Editor
                     GameObject root = UISpecGenerator.BuildViewGameObject(view, settings, new GenerateReport());
                     if (root == null) continue;
                     string path = $"{outputDir}/{viewName}/{res.name}.png";
-                    written.Add(UIScreenshotter.CaptureLive(root, path, res.width, res.height));
+                    written.Add(UIScreenshotter.CaptureLive(root, path, res.width, res.height, options));
                 }
             }
             return written;
