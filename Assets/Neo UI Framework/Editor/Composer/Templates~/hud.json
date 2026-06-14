@@ -1,0 +1,54 @@
+{
+  "breakpoints": [
+    { "name": "portrait", "when": { "orientation": "portrait" } }
+  ],
+  "views": [
+    {
+      "id": "HUD/Main",
+      "elements": [
+        {
+          "hstack": {
+            "id": "HUD/TopLeft",
+            "spacing": 8,
+            "layout": {
+              "h": "left", "v": "top",
+              "offset": { "left": 24, "top": 24 },
+              "size": { "w": 240, "h": 48 }
+            },
+            "children": [
+              { "icon": { "name": "heart", "labelColor": "Danger" } },
+              { "progress": { "id": "Player/Health", "min": 0, "max": 100, "value": 75, "layout": { "sizing": { "w": "fill" } } } }
+            ]
+          }
+        },
+        {
+          "counter": {
+            "id": "Player/Score",
+            "label": "0",
+            "textStyle": "Title",
+            "layout": {
+              "h": "right", "v": "top",
+              "offset": { "right": 24, "top": 24 },
+              "size": { "w": 200, "h": 48 }
+            },
+            "overrides": {
+              "portrait": { "h": "center", "offset": { "h": 0 } }
+            }
+          }
+        },
+        {
+          "panel": {
+            "id": "HUD/Minimap",
+            "background": "Surface",
+            "radius": 12,
+            "layout": {
+              "h": "right", "v": "bottom",
+              "offset": { "right": 24, "bottom": 24 },
+              "size": { "w": 160, "h": 160 }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

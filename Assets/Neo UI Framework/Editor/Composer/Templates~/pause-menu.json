@@ -1,0 +1,47 @@
+{
+  "breakpoints": [
+    { "name": "landscape", "when": { "orientation": "landscape" } }
+  ],
+  "views": [
+    {
+      "id": "Menu/Pause",
+      "elements": [
+        {
+          "panel": {
+            "id": "Pause/Dim",
+            "background": "Background",
+            "layout": {
+              "h": "leftRight", "v": "topBottom",
+              "offset": { "left": 0, "right": 0, "top": 0, "bottom": 0 }
+            },
+            "children": [
+              {
+                "vstack": {
+                  "id": "Pause/Card",
+                  "spacing": 12,
+                  "padding": 24,
+                  "background": "Surface",
+                  "radius": 16,
+                  "layout": {
+                    "h": "center", "v": "center",
+                    "offset": { "h": 0, "v": 0 },
+                    "size": { "w": 360, "h": 360 }
+                  },
+                  "overrides": {
+                    "landscape": { "size": { "w": 440 } }
+                  },
+                  "children": [
+                    { "text": { "id": "Pause/Title", "label": "Paused", "textStyle": "Title", "align": "center" } },
+                    { "button": { "id": "Action/Resume", "label": "Resume", "variant": "primary", "size": "lg" } },
+                    { "button": { "id": "Action/Settings", "label": "Settings", "variant": "secondary", "size": "lg" } },
+                    { "button": { "id": "Action/Quit", "label": "Quit to Menu", "variant": "danger", "size": "lg" } }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

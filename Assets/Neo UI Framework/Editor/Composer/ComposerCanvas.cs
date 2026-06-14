@@ -123,6 +123,7 @@ namespace Neo.UI.Editor.Composer
 
             SyncExternalSelection(primary);
             BuildIndex();
+            HandlePaletteDrop();
             HandleKeyboard();
             HandleEvents();
             DrawOverlay();
@@ -960,5 +961,123 @@ namespace Neo.UI.Editor.Composer
 
         private static Rect RectFromPoints(Vector2 a, Vector2 b) => new Rect(
             Mathf.Min(a.x, b.x), Mathf.Min(a.y, b.y), Mathf.Abs(a.x - b.x), Mathf.Abs(a.y - b.y));
+
+        // ------------------------------------------------------------------ palette drag-to-create (Pillar E)
+
+        private const float PaletteDropW = 160f;   // device-px default footprint for a free-dropped widget
+        private const float PaletteDropH = 48f;
+
+        /// <summary>
+        /// Pillar E drag-to-create: accepts a <see cref="ComposerPalette"/> tile dragged onto the canvas.
+        /// On drop it finds the hovered container (the existing <see cref="FindDropTarget"/>), creates a
+        /// <see cref="ComposerFactory.NewElement"/> for the carried kind, and places it at the cursor —
+        /// for a free parent (overlay/safearea/top-level) it computes a constraint-correct <c>layout</c>
+        /// centered on the cursor via <see cref="ConstraintWriteback"/>; for a layout-group parent it just
+        /// inserts (the group owns placement). One <see cref="SpecDocument.ApplyEdit"/> = one undo step.
+        /// This is the ONLY Pillar-E edit to this file (an appended method + its call in OnGUI).
+        /// </summary>
+        private void HandlePaletteDrop()
+        {
+            Event e = Event.current;
+            if (e.type != EventType.DragUpdated && e.type != EventType.DragPerform) return;
+            if (!_drawRect.Contains(e.mousePosition)) return;
+
+            string kind = DragAndDrop.GetGenericData(ComposerPalette.DragKey) as string;
+            if (string.IsNullOrEmpty(kind)) return;
+
+            DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+            if (e.type == EventType.DragUpdated)
+            {
+                // surface the container the drop would land in
+                _dropTarget = FindDropTargetForKind(e.mousePosition);
+                _repaint?.Invoke();
+                e.Use();
+                return;
+            }
+
+            // DragPerform — create + insert
+            DragAndDrop.AcceptDrag();
+            ElementSpec target = FindDropTargetForKind(e.mousePosition);
+            List<ElementSpec> destination = target != null && target.children != null ? target.children
+                : target != null ? (target.children = new List<ElementSpec>())
+                : (_view != null ? _view.elements : _popup?.elements);
+            if (destination == null) { e.Use(); return; }
+
+            bool intoLayoutGroup = target != null && LayoutKinds.Contains(target.kind);
+            Vector2 dropMouse = e.mousePosition;
+            int insertAt = intoLayoutGroup ? InsertIndexAt(target, destination, dropMouse) : destination.Count;
+
+            ElementSpec created = ComposerFactory.NewElement(kind);
+            string parentPath = target != null && _index.TryGetValue(target, out Node tnode)
+                ? tnode.path : (_view != null ? SpecPath.View(_view.id)
+                    : _popup != null ? SpecPath.Popup(_popup.name) : null);
+
+            if (!intoLayoutGroup)
+            {
+                // free placement: a default footprint centered on the cursor, stored constraint-aware
+                Rect parentDevice = target != null && TryDeviceRect(target, out Rect pd)
+                    ? pd : new Rect(0f, 0f, DeviceSize.x, DeviceSize.y);
+                Vector2 centerDevice = ScreenPointToDevice(dropMouse);
+                var rect = new Rect(centerDevice.x - PaletteDropW * 0.5f, centerDevice.y - PaletteDropH * 0.5f,
+                    PaletteDropW, PaletteDropH);
+                _document.ApplyEdit(() =>
+                {
+                    destination.Insert(Mathf.Clamp(insertAt, 0, destination.Count), created);
+                    ConstraintWriteback.Write(created, rect, parentDevice);
+                }, $"Add {kind}");
+            }
+            else
+            {
+                _document.ApplyEdit(() => destination.Insert(Mathf.Clamp(insertAt, 0, destination.Count), created),
+                    $"Add {kind}");
+            }
+
+            if (parentPath != null)
+            {
+                int finalIndex = destination.IndexOf(created);
+                string marker = (target == null) ? "/elements[" : "/children[";
+                _selectPath?.Invoke($"{parentPath}{marker}{finalIndex}]");
+            }
+            _dropTarget = null;
+            _repaint?.Invoke();
+            e.Use();
+        }
+
+        // a screen-px point → device-space point (y up), reusing the rect converter on a zero-size rect
+        private Vector2 ScreenPointToDevice(Vector2 screen)
+        {
+            Rect d = ScreenRectToDevice(new Rect(screen.x, screen.y, 0f, 0f));
+            return new Vector2(d.x, d.y);
+        }
+
+        // drop target that does NOT exclude the (empty) selection — a fresh element has no selection guard
+        private ElementSpec FindDropTargetForKind(Vector2 point)
+        {
+            ElementSpec best = null;
+            int bestDepth = -1;
+            foreach (KeyValuePair<ElementSpec, Node> entry in _index)
+            {
+                Node node = entry.Value;
+                if (!node.container) continue;
+                if (!TryScreenRect(entry.Key, out Rect screen) || !screen.Contains(point)) continue;
+                if (node.depth > bestDepth) { best = entry.Key; bestDepth = node.depth; }
+            }
+            return best;
+        }
+
+        // insertion index within a layout-group destination from the cursor vs sibling box midpoints
+        private int InsertIndexAt(ElementSpec parent, List<ElementSpec> destination, Vector2 mouse)
+        {
+            bool horizontal = parent.kind == "hstack" || parent.kind == "grid";
+            int index = destination.Count;
+            for (int i = 0; i < destination.Count; i++)
+            {
+                if (!TryScreenRect(destination[i], out Rect r)) continue;
+                float mid = horizontal ? r.center.x : r.center.y;
+                float cursor = horizontal ? mouse.x : mouse.y;
+                if (cursor < mid) { index = i; break; }
+            }
+            return index;
+        }
     }
 }

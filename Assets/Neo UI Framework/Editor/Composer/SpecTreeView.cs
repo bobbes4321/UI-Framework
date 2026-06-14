@@ -330,6 +330,8 @@ namespace Neo.UI.Editor.Composer
             var labelRect = new Rect(x + 14f, rect.y, rect.width - x - 16f, rect.height);
             GUI.Label(labelRect, node.label, selected ? EditorStyles.whiteLabel : EditorStyles.label);
 
+            HandlePaletteRowDrop(rect, node);
+
             if (e.type == EventType.MouseDown && rect.Contains(e.mousePosition) && !foldoutRect.Contains(e.mousePosition))
             {
                 if (e.button == 1) // right click → context menu
@@ -542,6 +544,38 @@ namespace Neo.UI.Editor.Composer
         {
             _document.ApplyEdit(() => list.Add(ComposerFactory.NewElement(kind)), $"Add {kind}");
             if (parentNode != null) _expanded.Add(parentNode.path);
+        }
+
+        /// <summary>
+        /// Pillar E drag-to-create onto the tree: when a <see cref="ComposerPalette"/> tile is dropped on a
+        /// row, insert its kind as a child of that node — a view/popup gets a new top-level element, an
+        /// element (container or not) gets a new child — reusing <see cref="AddElementTo"/> so it routes
+        /// through <see cref="SpecDocument.ApplyEdit"/> like every other mutation. The ONLY Pillar-E edit
+        /// to this file (this appended method + its call in <see cref="DrawRow"/>).
+        /// </summary>
+        private void HandlePaletteRowDrop(Rect rect, SpecNode node)
+        {
+            Event e = Event.current;
+            if (e.type != EventType.DragUpdated && e.type != EventType.DragPerform) return;
+            if (!rect.Contains(e.mousePosition)) return;
+
+            string kind = DragAndDrop.GetGenericData(ComposerPalette.DragKey) as string;
+            if (string.IsNullOrEmpty(kind)) return;
+
+            List<ElementSpec> destination =
+                node.kind == SpecNodeKind.View ? node.view?.elements
+                : node.kind == SpecNodeKind.Popup ? node.popup?.elements
+                : node.kind == SpecNodeKind.Element ? node.element?.children
+                : null;
+            if (destination == null) { DragAndDrop.visualMode = DragAndDropVisualMode.Rejected; return; }
+
+            DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+            if (e.type == EventType.DragPerform)
+            {
+                DragAndDrop.AcceptDrag();
+                AddElementTo(destination, node, kind);
+                e.Use();
+            }
         }
 
         private void AddSibling(SpecNode node, string kind)

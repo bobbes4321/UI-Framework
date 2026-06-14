@@ -1,0 +1,51 @@
+{
+  "breakpoints": [
+    { "name": "narrow", "when": { "maxWidth": 600 } }
+  ],
+  "views": [
+    {
+      "id": "Menu/Settings",
+      "elements": [
+        {
+          "vstack": {
+            "id": "Settings/Root",
+            "spacing": 16,
+            "padding4": [32, 32, 32, 32],
+            "layout": {
+              "h": "leftRight", "v": "topBottom",
+              "offset": { "left": 0, "right": 0, "top": 0, "bottom": 0 }
+            },
+            "children": [
+              {
+                "hstack": {
+                  "id": "Settings/HeaderBar",
+                  "spacing": 12,
+                  "layout": { "sizing": { "h": "hug" } },
+                  "children": [
+                    { "button": { "id": "Action/Back", "label": "Back", "variant": "ghost", "icon": "chevron-left" } },
+                    { "text": { "id": "Settings/Title", "label": "Settings", "textStyle": "Title", "layout": { "sizing": { "w": "fill" } } } }
+                  ]
+                }
+              },
+              {
+                "scroll": {
+                  "id": "Settings/Scroll",
+                  "padding": 8,
+                  "spacing": 12,
+                  "layout": { "sizing": { "w": "fill", "h": "fill" } },
+                  "children": [
+                    { "switch": { "id": "Audio/Music", "label": "Music" } },
+                    { "switch": { "id": "Audio/Sfx", "label": "Sound Effects" } },
+                    { "slider": { "id": "Audio/Volume", "label": "Master Volume", "min": 0, "max": 1, "value": 0.8 } },
+                    { "dropdown": { "id": "Video/Quality", "label": "Quality", "options": ["Low", "Medium", "High"], "value": 2 } },
+                    { "stepper": { "id": "Gameplay/Difficulty", "label": "Difficulty", "min": 1, "max": 5, "value": 3, "step": 1 } }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

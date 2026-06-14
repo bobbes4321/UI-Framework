@@ -1,0 +1,24 @@
+{
+  "popups": [
+    {
+      "name": "ConfirmAction",
+      "title": "Are you sure?",
+      "message": "This action cannot be undone.",
+      "size": [420, 240],
+      "close": true,
+      "elements": [
+        {
+          "hstack": {
+            "id": "Confirm/Buttons",
+            "spacing": 12,
+            "layout": { "sizing": { "h": "hug" } },
+            "children": [
+              { "button": { "id": "Action/Cancel", "label": "Cancel", "variant": "secondary", "layout": { "sizing": { "w": "fill" } }, "onClick": { "close": true } } },
+              { "button": { "id": "Action/Confirm", "label": "Confirm", "variant": "danger", "layout": { "sizing": { "w": "fill" } } } }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

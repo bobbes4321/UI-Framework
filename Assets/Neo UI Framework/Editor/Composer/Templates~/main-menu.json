@@ -1,0 +1,34 @@
+{
+  "breakpoints": [
+    { "name": "landscape", "when": { "orientation": "landscape" } }
+  ],
+  "views": [
+    {
+      "id": "Menu/Main",
+      "elements": [
+        {
+          "vstack": {
+            "id": "Menu/MainStack",
+            "spacing": 16,
+            "padding": 24,
+            "layout": {
+              "h": "center", "v": "center",
+              "offset": { "h": 0, "v": 0 },
+              "size": { "w": 420, "h": 480 }
+            },
+            "overrides": {
+              "landscape": { "size": { "w": 520 } }
+            },
+            "children": [
+              { "text": { "id": "Menu/Title", "label": "GAME TITLE", "textStyle": "Display", "align": "center" } },
+              { "button": { "id": "Action/Play", "label": "Play", "variant": "primary", "size": "lg" } },
+              { "button": { "id": "Action/Settings", "label": "Settings", "variant": "secondary", "size": "lg" } },
+              { "button": { "id": "Action/Credits", "label": "Credits", "variant": "ghost", "size": "lg" } },
+              { "button": { "id": "Action/Quit", "label": "Quit", "variant": "danger", "size": "lg" } }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

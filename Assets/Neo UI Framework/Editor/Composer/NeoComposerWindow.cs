@@ -23,11 +23,13 @@ namespace Neo.UI.Editor.Composer
         private SpecInspector _inspector;
         private SpecPreviewPane _preview;
         private BreakpointBar _breakpointBar;
+        private PalettePane _palette;
 
         private IMGUIContainer _treeGui;
         private IMGUIContainer _previewGui;
         private IMGUIContainer _inspectorGui;
         private IMGUIContainer _breakpointGui;
+        private IMGUIContainer _paletteGui;
         private Label _statusLabel;
 
         private FlowGraph _flowGraph; // transient graph the flow window edits on this document's behalf
@@ -42,6 +44,7 @@ namespace Neo.UI.Editor.Composer
             _preview = new SpecPreviewPane(_document, () => _previewGui?.MarkDirtyRepaint(), ReselectPath);
             _inspector = new SpecInspector(_document, ReselectPath, OpenFlow);
             _breakpointBar = new BreakpointBar(_document);
+            _palette = new PalettePane(AddKindToCurrentView);
 
             _document.Changed += OnDocumentChanged;
             _document.ActiveBreakpointChanged += OnActiveBreakpointChanged;
@@ -79,9 +82,23 @@ namespace Neo.UI.Editor.Composer
             outer.style.flexGrow = 1f;
             rootVisualElement.Add(outer);
 
+            // Left pane: the spec tree on top, the widget palette as a collapsible strip below — a vertical
+            // split so the existing three-pane (tree · preview · inspector) horizontal layout is untouched.
+            var leftSplit = new TwoPaneSplitView(1, 200f, TwoPaneSplitViewOrientation.Vertical);
+            leftSplit.style.flexGrow = 1f;
+            leftSplit.style.minWidth = 180f;
+
             _treeGui = new IMGUIContainer(DrawTree);
-            _treeGui.style.minWidth = 180f;
-            outer.Add(WrapWithHeader("Spec", _treeGui, BuildTreeToolbar()));
+            _treeGui.style.flexGrow = 1f;
+            leftSplit.Add(WrapWithHeader("Spec", _treeGui, BuildTreeToolbar()));
+
+            _paletteGui = new IMGUIContainer(DrawPalette);
+            _paletteGui.style.flexGrow = 1f;
+            _paletteGui.style.minHeight = 80f;
+            leftSplit.Add(WrapWithHeader("Widgets", _paletteGui, null));
+
+            outer.Add(leftSplit);
+            _palette.OnOpen();
 
             var inner = new TwoPaneSplitView(1, 320f, TwoPaneSplitViewOrientation.Horizontal);
             inner.style.flexGrow = 1f;
@@ -138,6 +155,13 @@ namespace Neo.UI.Editor.Composer
                     }))
             { text = "+ Menu ▾" };
             bar.Add(menuButton);
+
+            // "New from template ▾": curated scaffolds (main menu, settings, HUD, pause, popup) + project
+            // templates, inserted into the current document collision-safe (Pillar E).
+            ToolbarButton templateButton = null;
+            templateButton = new ToolbarButton(() => ShowTemplatePicker(templateButton.worldBound))
+            { text = "+ Template ▾" };
+            bar.Add(templateButton);
             return bar;
         }
 
@@ -153,6 +177,8 @@ namespace Neo.UI.Editor.Composer
         // ------------------------------------------------------------------ pane draws
 
         private void DrawTree() => _tree.OnGUI(LocalRect(_treeGui));
+
+        private void DrawPalette() => _palette.OnGUI(LocalRect(_paletteGui));
 
         private void DrawPreview()
         {
@@ -208,6 +234,48 @@ namespace Neo.UI.Editor.Composer
         {
             _tree.Select(path);
             OnSelectionChanged();
+        }
+
+        // Palette click-to-add fallback: append the kind as a top-level element of the current view (the
+        // selected view, or the view owning the selection, or the first view). Routes through ApplyEdit.
+        private void AddKindToCurrentView(string kind)
+        {
+            if (string.IsNullOrEmpty(kind)) return;
+            SpecNode node = _tree.Selected;
+            ViewSpec view = node?.view ?? (_document.Spec.views.Count > 0 ? _document.Spec.views[0] : null);
+            if (view == null)
+            {
+                Debug.LogWarning("[Composer] No view to add a widget to — create a view first.");
+                return;
+            }
+            _document.ApplyEdit(() => view.elements.Add(ComposerFactory.NewElement(kind)), $"Add {kind}");
+            ReselectPath(SpecPath.View(view.id) + $"/elements[{view.elements.Count - 1}]");
+        }
+
+        // ------------------------------------------------------------------ templates
+
+        // "New from template ▾": stamp a curated scaffold into the document (collision-safe, via ApplyEdit).
+        private void ShowTemplatePicker(Rect anchor)
+        {
+            var labels = new System.Collections.Generic.List<string>();
+            foreach (TemplateEntry t in ComposerTemplates.All) labels.Add(t.label);
+            if (labels.Count == 0) return;
+            NeoSearchablePopup.Show(anchor, null, labels, InsertTemplateByLabel);
+        }
+
+        private void InsertTemplateByLabel(string label)
+        {
+            foreach (TemplateEntry t in ComposerTemplates.All)
+            {
+                if (t.label != label) continue;
+                string select = ComposerTemplates.Insert(_document, t, out var warnings);
+                if (warnings != null && warnings.Count > 0)
+                    ShowNotification(new GUIContent($"Inserted “{t.label}” — {warnings.Count} name clash(es) renamed"));
+                else
+                    ShowNotification(new GUIContent($"Inserted template “{t.label}”"));
+                if (select != null) ReselectPath(select);
+                return;
+            }
         }
 
         private void UpdateStatus()
