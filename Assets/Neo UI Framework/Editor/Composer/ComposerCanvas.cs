@@ -22,19 +22,22 @@ namespace Neo.UI.Editor.Composer
     }
 
     /// <summary>
-    /// Tier 3 (Plan 2 Phase 4): the WYSIWYG canvas. Turns the center preview from a passive image into
-    /// a direct-manipulation surface — click to select, drag to move, handles to resize, marquee to
-    /// multi-select, drag-onto-a-container to reparent — with snapping to sibling edges and the spacing
-    /// grid. It is purely additive: every gesture is just another <see cref="SpecDocument.ApplyEdit"/>
-    /// mutating <c>position</c>/<c>size</c>/parent lists, so everything it does round-trips losslessly,
-    /// exactly like the inspector. The preview owns the render + the element→<see cref="ElementBox"/>
-    /// map; this owns the input and the overlay it draws on top.
+    /// Tier 3 (Plan 2 Phase 4) + Pillar D: the WYSIWYG canvas. Turns the center preview into a Figma-grade
+    /// direct-manipulation surface — click to select, drag to move, handles to resize, marquee to
+    /// multi-select, drag-onto-a-container to reparent, drag-to-reorder inside a layout group, smart
+    /// alignment guides + equal-spacing snapping, a multi-select align/distribute toolbar, and keyboard
+    /// nudge/duplicate/delete.
+    ///
+    /// <para><b>Constraint-aware writeback (Pillar D correctness keystone).</b> A move/resize no longer
+    /// writes an absolute <c>position</c>/<c>size</c>; it writes the element's new device-space rect into
+    /// its <c>layout</c> offsets, stored RELATIVE TO ITS CURRENT CONSTRAINT against the live parent rect
+    /// (<see cref="ConstraintWriteback"/>). So a right-glued element stays glued, a stretched element
+    /// keeps its insets, and a scaled element keeps its fractions across a viewport aspect change.</para>
     ///
     /// <para>Moves/resizes are committed ONCE on mouse-up (a single undo step); during the drag a ghost
     /// outline tracks the cursor so it feels live without rebuilding the texture on every mouse move.
-    /// Only free-anchored elements (top-level view/popup elements, and <c>overlay</c>/<c>safearea</c>
-    /// children) carry position/size — layout-group children are placed by their parent, so for those
-    /// a drag is reparent-only.</para>
+    /// Selection is held by <see cref="ElementSpec"/> reference so it survives a viewport resize/rebuild
+    /// (handles/guides recompute from the fresh <c>_boxes</c>, never stale device px).</para>
     /// </summary>
     public class ComposerCanvas
     {
@@ -42,10 +45,12 @@ namespace Neo.UI.Editor.Composer
         private const float SnapPx = 6f;
         private const float GridCanvas = 8f;    // the on-scale spacing grid the design lint blesses
         private const float DragThreshold = 3f;
+        private const float DuplicateOffset = 16f; // canvas px a Ctrl+D clone is nudged by
 
         private readonly SpecDocument _document;
         private readonly Action<string> _selectPath;
         private readonly Action _repaint;
+        private readonly AlignmentGuides _smartGuides = new AlignmentGuides();
 
         // --- per-frame context handed in by the preview ---
         private Rect _drawRect;
@@ -81,8 +86,13 @@ namespace Neo.UI.Editor.Composer
             new Dictionary<ElementSpec, (Vector2, Vector2)>();
         private Rect _marquee;
         private ElementSpec _dropTarget;
+        private int _reorderIndex = -1;          // insertion index when reordering within a layout group
+        private ElementSpec _reorderParent;      // the layout-group parent the reorder targets
         private Vector2 _snapGuideV = new Vector2(float.NaN, 0f); // x of a vertical snap guide (screen)
         private Vector2 _snapGuideH = new Vector2(0f, float.NaN); // y of a horizontal snap guide (screen)
+
+        // cached toolbar style (built once — never allocate GUIStyles per OnGUI pass)
+        private GUIStyle _toolbarButton;
 
         private static readonly HashSet<string> FreeParents = new HashSet<string> { "overlay", "safearea" };
         private static readonly HashSet<string> ContainerKinds =
@@ -113,8 +123,10 @@ namespace Neo.UI.Editor.Composer
 
             SyncExternalSelection(primary);
             BuildIndex();
+            HandleKeyboard();
             HandleEvents();
             DrawOverlay();
+            DrawAlignToolbar();
         }
 
         // ------------------------------------------------------------------ selection sync
@@ -177,6 +189,38 @@ namespace Neo.UI.Editor.Composer
             return true;
         }
 
+        // The device-space size of the whole preview (canvas px). _drawRect = deviceSize * _scale.
+        private Vector2 DeviceSize => _scale > 0f
+            ? new Vector2(_drawRect.width / _scale, _drawRect.height / _scale)
+            : new Vector2(_drawRect.width, _drawRect.height);
+
+        // An element's DEVICE-space rect (y grows UP, bottom-origin) — the space ConstraintWriteback works
+        // in. box.norm is normalized y-from-bottom, so device = norm * deviceSize with no flip.
+        private bool TryDeviceRect(ElementSpec element, out Rect device)
+        {
+            device = default;
+            if (element == null || _boxes == null || !_boxes.TryGetValue(element, out ElementBox box)) return false;
+            device = NormToDevice(box.norm);
+            return true;
+        }
+
+        private Rect NormToDevice(Rect n)
+        {
+            Vector2 d = DeviceSize;
+            return new Rect(n.x * d.x, n.y * d.y, n.width * d.x, n.height * d.y);
+        }
+
+        // The device-space rect of an element's effective PARENT — the free container it lives in, or the
+        // whole canvas for a top-level element.
+        private Rect ParentDeviceRect(ElementSpec element)
+        {
+            if (_index.TryGetValue(element, out Node node) && node.parent != null
+                && TryDeviceRect(node.parent, out Rect parentRect))
+                return parentRect;
+            Vector2 d = DeviceSize;
+            return new Rect(0f, 0f, d.x, d.y);
+        }
+
         // screen px delta → canvas px delta (screen y is down, anchoredPosition y is up)
         private Vector2 ScreenToCanvasDelta(Vector2 screenDelta) =>
             new Vector2(screenDelta.x / _scale, -screenDelta.y / _scale);
@@ -204,7 +248,8 @@ namespace Neo.UI.Editor.Composer
         {
             _mouseDownScreen = e.mousePosition;
             _snapGuideV.x = float.NaN; _snapGuideH.y = float.NaN;
-            _dropTarget = null;
+            _dropTarget = null; _reorderIndex = -1; _reorderParent = null;
+            _smartGuides.Clear();
             GUIUtility.hotControl = _controlId; // capture the mouse for the whole gesture
 
             // a resize handle on the primary selection takes priority
@@ -267,6 +312,7 @@ namespace Neo.UI.Editor.Composer
                     break;
                 case Mode.Move:
                     _dropTarget = FindDropTarget(e.mousePosition);
+                    ComputeReorder(e.mousePosition);
                     break;
                 case Mode.Resize:
                     break;
@@ -293,12 +339,118 @@ namespace Neo.UI.Editor.Composer
             }
             _mode = Mode.None;
             _resizeHandle = -1;
-            _dropTarget = null;
+            _dropTarget = null; _reorderIndex = -1; _reorderParent = null;
             _snapGuideV.x = float.NaN; _snapGuideH.y = float.NaN;
+            _smartGuides.Clear();
             _dragStart.Clear();
             if (GUIUtility.hotControl == _controlId) GUIUtility.hotControl = 0;
             e.Use();
         }
+
+        // ------------------------------------------------------------------ keyboard affordances
+
+        private void HandleKeyboard()
+        {
+            Event e = Event.current;
+            if (e.type != EventType.KeyDown || _primary == null) return;
+            if (_mode == Mode.Move || _mode == Mode.Resize || _mode == Mode.Marquee) return;
+
+            switch (e.keyCode)
+            {
+                case KeyCode.LeftArrow: NudgeSelection(new Vector2(-(e.shift ? 10f : 1f), 0f)); e.Use(); break;
+                case KeyCode.RightArrow: NudgeSelection(new Vector2(e.shift ? 10f : 1f, 0f)); e.Use(); break;
+                case KeyCode.UpArrow: NudgeSelection(new Vector2(0f, e.shift ? 10f : 1f)); e.Use(); break;
+                case KeyCode.DownArrow: NudgeSelection(new Vector2(0f, -(e.shift ? 10f : 1f))); e.Use(); break;
+                case KeyCode.Delete:
+                case KeyCode.Backspace: DeleteSelection(); e.Use(); break;
+                case KeyCode.D when e.control || e.command: DuplicateSelection(); e.Use(); break;
+            }
+        }
+
+        // arrow nudge: shift the free elements' device rects by a canvas-px delta (y up), constraint-aware
+        private void NudgeSelection(Vector2 canvasDelta)
+        {
+            var targets = new List<ElementSpec>();
+            foreach (ElementSpec el in _selection) if (IsFree(el)) targets.Add(el);
+            if (targets.Count == 0) return;
+
+            _document.ApplyEdit(() =>
+            {
+                foreach (ElementSpec el in targets)
+                {
+                    if (!TryDeviceRect(el, out Rect device)) continue;
+                    var moved = new Rect(device.x + canvasDelta.x, device.y + canvasDelta.y, device.width, device.height);
+                    ConstraintWriteback.Write(el, moved, ParentDeviceRect(el));
+                }
+            }, targets.Count > 1 ? "Nudge Elements" : "Nudge Element");
+            SelectInTree(_primary);
+        }
+
+        private void DeleteSelection()
+        {
+            var targets = new List<ElementSpec>(_selection);
+            if (targets.Count == 0) return;
+            _document.ApplyEdit(() =>
+            {
+                foreach (ElementSpec el in targets)
+                    if (_index.TryGetValue(el, out Node node)) node.siblings.Remove(el);
+            }, targets.Count > 1 ? "Delete Elements" : "Delete Element");
+            _selection.Clear();
+            _primary = null;
+            _lastExternalPrimary = null;
+            _selectPath?.Invoke(null);
+        }
+
+        private void DuplicateSelection()
+        {
+            var sources = new List<ElementSpec>(_selection);
+            if (sources.Count == 0) return;
+            ElementSpec lastClone = null;
+            string lastClonePath = null;
+
+            _document.ApplyEdit(() =>
+            {
+                foreach (ElementSpec src in sources)
+                {
+                    if (!_index.TryGetValue(src, out Node node)) continue;
+                    ElementSpec clone = CloneElement(src);
+                    if (IsFree(clone) && TryDeviceRect(src, out Rect device))
+                    {
+                        // offset the clone slightly so it doesn't sit exactly on the original
+                        var moved = new Rect(device.x + DuplicateOffset, device.y - DuplicateOffset,
+                            device.width, device.height);
+                        ConstraintWriteback.Write(clone, moved, ParentDeviceRect(src));
+                    }
+                    int insertAt = node.index + 1;
+                    node.siblings.Insert(insertAt, clone);
+                    lastClone = clone;
+                    lastClonePath = ParentChildPath(node) + insertAt + "]";
+                }
+            }, sources.Count > 1 ? "Duplicate Elements" : "Duplicate Element");
+
+            if (lastClone != null)
+            {
+                _selection.Clear();
+                _selection.Add(lastClone);
+                _primary = lastClone;
+                _lastExternalPrimary = lastClone;
+                _selectPath?.Invoke(lastClonePath);
+            }
+        }
+
+        // path prefix up to (but not including) the index for a sibling list, e.g. ".../children["
+        private string ParentChildPath(Node node)
+        {
+            if (node.parent != null && _index.TryGetValue(node.parent, out Node pn))
+                return pn.path + "/children[";
+            string ownerPath = _view != null ? SpecPath.View(_view.id)
+                : _popup != null ? SpecPath.Popup(_popup.name) : null;
+            return ownerPath + "/elements[";
+        }
+
+        // round-trip-safe deep clone via the spec's own JSON serialization
+        private static ElementSpec CloneElement(ElementSpec src) =>
+            ElementSpec.Parse(src.ToJsonObject());
 
         // ------------------------------------------------------------------ hit testing
 
@@ -378,10 +530,19 @@ namespace Neo.UI.Editor.Composer
             SelectInTree(_primary);
         }
 
-        // ------------------------------------------------------------------ commit: move / reparent
+        // ------------------------------------------------------------------ commit: move / reparent / reorder
 
         private void CommitMove(Vector2 mouse)
         {
+            // reorder wins inside the element's own layout-group parent (an in-container drag)
+            if (_reorderParent != null && _reorderIndex >= 0
+                && _index.TryGetValue(_primary, out Node moveNode)
+                && ReferenceEquals(_reorderParent, moveNode.parent))
+            {
+                ReorderWithinParent(moveNode);
+                return;
+            }
+
             // reparent wins when the drop lands on a different container than the element's current parent
             if (_dropTarget != null && _index.TryGetValue(_primary, out Node primaryNode)
                 && !ReferenceEquals(_dropTarget, primaryNode.parent))
@@ -390,7 +551,7 @@ namespace Neo.UI.Editor.Composer
                 return;
             }
 
-            if (_primary == null || !IsFree(_primary)) return; // layout children only reparent
+            if (_primary == null || !IsFree(_primary)) return; // layout children only reparent/reorder
 
             Vector2 screenDelta = SnapMove(mouse - _mouseDownScreen);
             Vector2 canvasDelta = ScreenToCanvasDelta(screenDelta);
@@ -404,12 +565,60 @@ namespace Neo.UI.Editor.Composer
             {
                 foreach (ElementSpec el in targets)
                 {
-                    if (!_dragStart.TryGetValue(el, out var start)) continue;
-                    Vector2 pos = start.pos + canvasDelta;
-                    el.position = new[] { Round(pos.x), Round(pos.y) };
+                    if (!TryDeviceRect(el, out Rect device)) continue;
+                    // the captured device rect is the START rect; add the canvas-px delta (y up)
+                    var moved = new Rect(device.x + canvasDelta.x, device.y + canvasDelta.y,
+                        device.width, device.height);
+                    ConstraintWriteback.Write(el, moved, ParentDeviceRect(el));
                 }
             }, targets.Count > 1 ? "Move Elements" : "Move Element");
             SelectInTree(_primary);
+        }
+
+        // Drag-to-reorder: compute the insertion index from the cursor vs sibling box midpoints. vstack =
+        // vertical (screen y), hstack/grid = horizontal (screen x), row-major for grid.
+        private void ComputeReorder(Vector2 mouse)
+        {
+            _reorderIndex = -1; _reorderParent = null;
+            if (_primary == null || !_index.TryGetValue(_primary, out Node node)) return;
+            if (node.parent == null || !LayoutKinds.Contains(node.parent.kind)) return;
+            // only reorder when the cursor stays over the same parent (else it's a reparent gesture)
+            if (_dropTarget != null && !ReferenceEquals(_dropTarget, node.parent)) return;
+
+            bool horizontal = node.parent.kind == "hstack" || node.parent.kind == "grid";
+            int index = 0;
+            for (int i = 0; i < node.siblings.Count; i++)
+            {
+                ElementSpec sib = node.siblings[i];
+                if (ReferenceEquals(sib, _primary)) continue;
+                if (!TryScreenRect(sib, out Rect r)) continue;
+                float mid = horizontal ? r.center.x : r.center.y;
+                float cursor = horizontal ? mouse.x : mouse.y;
+                if (cursor > mid) index = i + 1;
+            }
+            _reorderParent = node.parent;
+            _reorderIndex = index;
+        }
+
+        private void ReorderWithinParent(Node moveNode)
+        {
+            List<ElementSpec> siblings = moveNode.siblings;
+            int from = moveNode.index;
+            int to = _reorderIndex;
+            if (to == from || to == from + 1) { SelectInTree(_primary); return; } // no-op move
+
+            ElementSpec moving = _primary;
+            _document.ApplyEdit(() =>
+            {
+                siblings.RemoveAt(from);
+                int insertAt = to > from ? to - 1 : to;     // account for the removed slot
+                insertAt = Mathf.Clamp(insertAt, 0, siblings.Count);
+                siblings.Insert(insertAt, moving);
+            }, "Reorder Element");
+
+            // re-address: find the moving element's new index in its (unchanged) sibling list
+            int newIndex = siblings.IndexOf(moving);
+            _selectPath?.Invoke(ParentChildPath(moveNode) + newIndex + "]");
         }
 
         private void ReparentSelection(ElementSpec target)
@@ -429,8 +638,8 @@ namespace Neo.UI.Editor.Composer
                     node.siblings.Remove(el);
                     if (target.children == null) target.children = new List<ElementSpec>();
                     target.children.Add(el);
-                    // a layout group owns child placement — drop the now-meaningless free position
-                    if (layout) { el.position = null; }
+                    // a layout group owns child placement — drop the now-meaningless free position/layout
+                    if (layout) { el.position = null; el.layout = null; }
                 }
             }, moving.Count > 1 ? "Reparent Elements" : "Reparent Element");
 
@@ -444,60 +653,66 @@ namespace Neo.UI.Editor.Composer
 
         private void CommitResize(Vector2 mouse)
         {
-            if (_primary == null || !IsFree(_primary) || !_dragStart.TryGetValue(_primary, out var start)
-                || !TryScreenRect(_primary, out Rect startScreen)
-                || _boxes == null || !_boxes.TryGetValue(_primary, out ElementBox box)) return;
+            if (_primary == null || !IsFree(_primary) || !TryScreenRect(_primary, out Rect startScreen)) return;
 
-            // The ghost rect IS the result the user is dragging toward — commit to exactly that, so the
-            // committed element matches the outline pixel-for-pixel regardless of the element's pivot
-            // (the bug was assuming a centred pivot, which translated off-pivot elements as they grew).
+            // The ghost rect IS the result the user is dragging toward — convert it to a device rect and
+            // write it constraint-aware, so the committed element matches the outline AND survives a
+            // viewport aspect change (it stores offsets against its constraint, not absolute pixels).
             Rect ghost = ResizeGhost(startScreen, mouse - _mouseDownScreen);
+            Rect device = ScreenRectToDevice(ghost);
+            if (device.width < 1f) device.width = 1f;
+            if (device.height < 1f) device.height = 1f;
 
-            Vector2 newSize = new Vector2(Mathf.Max(1f, ghost.width / _scale), Mathf.Max(1f, ghost.height / _scale));
-            Vector2 dSize = newSize - start.size;
-            // anchoredPosition places the PIVOT; the rect centre sits (0.5 - pivot)*size from it. Keep the
-            // centre tracking the ghost centre, then back out the pivot offset for the new size.
-            Vector2 dCenter = ScreenToCanvasDelta(ghost.center - startScreen.center);
-            Vector2 newPos = start.pos + dCenter
-                - new Vector2((0.5f - box.pivot.x) * dSize.x, (0.5f - box.pivot.y) * dSize.y);
-
-            _document.ApplyEdit(() =>
-            {
-                _primary.size = new[] { Round(newSize.x), Round(newSize.y) };
-                _primary.position = new[] { Round(newPos.x), Round(newPos.y) };
-            }, "Resize Element");
+            _document.ApplyEdit(() => ConstraintWriteback.Write(_primary, device, ParentDeviceRect(_primary)),
+                "Resize Element");
             SelectInTree(_primary);
+        }
+
+        // a screen-px rect (y down) → device-px rect (y up), inverse of ToScreen∘NormToDevice
+        private Rect ScreenRectToDevice(Rect screen)
+        {
+            Vector2 d = DeviceSize;
+            float nx = (screen.x - _drawRect.x) / _drawRect.width;
+            float nyTop = (screen.y - _drawRect.y) / _drawRect.height;        // 0 at top
+            float nw = screen.width / _drawRect.width;
+            float nh = screen.height / _drawRect.height;
+            float nyBottom = 1f - nyTop - nh;                                 // flip to y-from-bottom
+            return new Rect(nx * d.x, nyBottom * d.y, nw * d.x, nh * d.y);
         }
 
         // ------------------------------------------------------------------ snapping
 
-        // snap the moved rect's edges to sibling edges, else to the spacing grid; record guide lines
+        // snap the moved rect's edges to sibling edges via smart guides, else to the spacing grid
         private Vector2 SnapMove(Vector2 screenDelta)
         {
             _snapGuideV.x = float.NaN; _snapGuideH.y = float.NaN;
+            _smartGuides.Clear();
             if (Event.current.alt || _primary == null || !TryScreenRect(_primary, out Rect start)) return screenDelta;
 
             Rect moved = new Rect(start.position + screenDelta, start.size);
-            float sx = SnapAxis(new[] { moved.xMin, moved.center.x, moved.xMax }, SiblingEdgesX(), out bool hitX, out float guideX);
-            float sy = SnapAxis(new[] { moved.yMin, moved.center.y, moved.yMax }, SiblingEdgesY(), out bool hitY, out float guideY);
-            if (hitX) _snapGuideV.x = guideX; else sx = SnapGrid(moved.xMin, true);
-            if (hitY) _snapGuideH.y = guideY; else sy = SnapGrid(moved.yMin, false);
+            List<Rect> siblings = SiblingScreenRects();
+            Vector2 guideSnap = _smartGuides.Compute(moved, siblings);
+
+            // grid fallback on any axis the smart guides didn't already pin
+            float sx = guideSnap.x;
+            float sy = guideSnap.y;
+            bool hitX = Mathf.Abs(guideSnap.x) > 0.0001f || HasVerticalGuide();
+            bool hitY = Mathf.Abs(guideSnap.y) > 0.0001f || HasHorizontalGuide();
+            if (!hitX) sx = SnapGrid(moved.xMin, true);
+            if (!hitY) sy = SnapGrid(moved.yMin, false);
             return new Vector2(screenDelta.x + sx, screenDelta.y + sy);
         }
 
-        // returns the offset to add to bring one of the candidate positions onto the nearest target edge
-        private float SnapAxis(float[] candidates, List<float> targets, out bool hit, out float guide)
+        private bool HasVerticalGuide()
         {
-            hit = false; guide = 0f;
-            float best = SnapPx;
-            float offset = 0f;
-            foreach (float c in candidates)
-                foreach (float t in targets)
-                {
-                    float d = t - c;
-                    if (Mathf.Abs(d) < best) { best = Mathf.Abs(d); offset = d; guide = t; hit = true; }
-                }
-            return offset;
+            foreach (AlignmentGuides.Guide g in _smartGuides.Guides) if (g.vertical) return true;
+            return false;
+        }
+
+        private bool HasHorizontalGuide()
+        {
+            foreach (AlignmentGuides.Guide g in _smartGuides.Guides) if (!g.vertical) return true;
+            return false;
         }
 
         private float SnapGrid(float screenEdge, bool horizontal)
@@ -511,20 +726,12 @@ namespace Neo.UI.Editor.Composer
             return Mathf.Abs(offset) <= SnapPx ? offset : 0f;
         }
 
-        private List<float> SiblingEdgesX()
+        private List<Rect> SiblingScreenRects()
         {
-            var edges = new List<float>();
+            var rects = new List<Rect>();
             foreach (ElementSpec sib in Siblings())
-                if (TryScreenRect(sib, out Rect r)) { edges.Add(r.xMin); edges.Add(r.center.x); edges.Add(r.xMax); }
-            return edges;
-        }
-
-        private List<float> SiblingEdgesY()
-        {
-            var edges = new List<float>();
-            foreach (ElementSpec sib in Siblings())
-                if (TryScreenRect(sib, out Rect r)) { edges.Add(r.yMin); edges.Add(r.center.y); edges.Add(r.yMax); }
-            return edges;
+                if (TryScreenRect(sib, out Rect r)) rects.Add(r);
+            return rects;
         }
 
         private IEnumerable<ElementSpec> Siblings()
@@ -532,6 +739,68 @@ namespace Neo.UI.Editor.Composer
             if (_primary == null || !_index.TryGetValue(_primary, out Node node)) yield break;
             foreach (ElementSpec sib in node.siblings)
                 if (!ReferenceEquals(sib, _primary) && !_selection.Contains(sib)) yield return sib;
+        }
+
+        // ------------------------------------------------------------------ multi-select align / distribute
+
+        private void DrawAlignToolbar()
+        {
+            if (_selection.Count < 2) return;
+            EnsureToolbarStyles();
+
+            // overlay toolbar pinned top-left of the canvas
+            const float h = 22f, pad = 4f;
+            float x = _drawRect.x + 6f, y = _drawRect.y + 6f;
+            string[] labels = { "L", "C", "R", "T", "M", "B", "↔", "↕" };
+            AlignDistribute.Op[] ops =
+            {
+                AlignDistribute.Op.Left, AlignDistribute.Op.CenterX, AlignDistribute.Op.Right,
+                AlignDistribute.Op.Top, AlignDistribute.Op.CenterY, AlignDistribute.Op.Bottom,
+                AlignDistribute.Op.DistributeH, AlignDistribute.Op.DistributeV
+            };
+
+            float w = 22f;
+            float total = labels.Length * w + pad * 2f;
+            var bg = new Rect(x, y, total, h);
+            if (Event.current.type == EventType.Repaint)
+                EditorGUI.DrawRect(bg, new Color(0f, 0f, 0f, 0.6f));
+
+            for (int i = 0; i < labels.Length; i++)
+            {
+                var r = new Rect(x + pad + i * w, y + 2f, w, h - 4f);
+                if (GUI.Button(r, new GUIContent(labels[i], AlignDistribute.Label(ops[i])), _toolbarButton))
+                    ApplyAlign(ops[i]);
+            }
+        }
+
+        private void EnsureToolbarStyles()
+        {
+            _toolbarButton ??= new GUIStyle(EditorStyles.miniButton)
+            {
+                fontSize = 11,
+                alignment = TextAnchor.MiddleCenter,
+                padding = new RectOffset(0, 0, 0, 0)
+            };
+        }
+
+        // Align/distribute snapshots every selected free element's device rect, runs the pure
+        // AlignDistribute math, then writes each result back through the constraint model — one
+        // ApplyEdit = one undo. Only free elements participate.
+        private void ApplyAlign(AlignDistribute.Op op)
+        {
+            var rects = new Dictionary<ElementSpec, Rect>();
+            foreach (ElementSpec el in _selection)
+                if (IsFree(el) && TryDeviceRect(el, out Rect d)) rects[el] = d;
+            if (rects.Count < 2) return;
+
+            Dictionary<ElementSpec, Rect> result = AlignDistribute.Apply(op, rects);
+
+            _document.ApplyEdit(() =>
+            {
+                foreach (var kv in result)
+                    ConstraintWriteback.Write(kv.Key, kv.Value, ParentDeviceRect(kv.Key));
+            }, AlignDistribute.Label(op));
+            SelectInTree(_primary);
         }
 
         // ------------------------------------------------------------------ overlay drawing
@@ -555,6 +824,8 @@ namespace Neo.UI.Editor.Composer
                 Vector2 delta = SnapMove(Event.current.mousePosition - _mouseDownScreen);
                 DrawBox(new Rect(start.position + delta, start.size), NeoColors.Interactive, 1f,
                     NeoColors.Interactive.WithAlpha(0.06f));
+                _smartGuides.Draw(_drawRect);
+                DrawReorderLine();
             }
 
             // ghost while resizing
@@ -565,10 +836,10 @@ namespace Neo.UI.Editor.Composer
             // resize handles on the primary (free elements only)
             if (_primary != null && IsFree(_primary) && _mode != Mode.Move && _mode != Mode.Marquee
                 && TryScreenRect(_primary, out Rect pr))
-                foreach (Vector2 h in HandlePositions(pr))
-                    EditorGUI.DrawRect(new Rect(h.x - 3f, h.y - 3f, 6f, 6f), NeoColors.Interactive);
+                foreach (Vector2 hp in HandlePositions(pr))
+                    EditorGUI.DrawRect(new Rect(hp.x - 3f, hp.y - 3f, 6f, 6f), NeoColors.Interactive);
 
-            // snap guides
+            // legacy single-line snap guides (grid fallback retains these)
             if (!float.IsNaN(_snapGuideV.x))
                 EditorGUI.DrawRect(new Rect(_snapGuideV.x, _drawRect.y, 1f, _drawRect.height), NeoColors.Warning);
             if (!float.IsNaN(_snapGuideH.y))
@@ -577,6 +848,57 @@ namespace Neo.UI.Editor.Composer
             // marquee
             if (_mode == Mode.Marquee)
                 DrawBox(_marquee, NeoColors.Interactive, 1f, NeoColors.Interactive.WithAlpha(0.08f));
+        }
+
+        // a 2px blue insertion line between two siblings of the layout-group parent being reordered
+        private void DrawReorderLine()
+        {
+            if (_reorderParent == null || _reorderIndex < 0
+                || !_index.TryGetValue(_primary, out Node node)
+                || !ReferenceEquals(_reorderParent, node.parent)) return;
+
+            bool horizontal = node.parent.kind == "hstack" || node.parent.kind == "grid";
+            List<Rect> ordered = SiblingRectsInOrder(node);
+            if (ordered.Count == 0)
+            {
+                // empty target — draw inside the parent's rect
+                if (TryScreenRect(node.parent, out Rect pr))
+                    EditorGUI.DrawRect(new Rect(pr.x + 4f, pr.center.y - 1f, pr.width - 8f, 2f), NeoColors.Interactive);
+                return;
+            }
+
+            // clamp the insertion index against the (primary-excluded) ordered list
+            int idx = Mathf.Clamp(_reorderIndex, 0, ordered.Count);
+            if (horizontal)
+            {
+                float lineX = idx == 0 ? ordered[0].xMin - 2f
+                    : idx >= ordered.Count ? ordered[ordered.Count - 1].xMax + 1f
+                    : (ordered[idx - 1].xMax + ordered[idx].xMin) * 0.5f;
+                float top = float.MaxValue, bot = float.MinValue;
+                foreach (Rect r in ordered) { top = Mathf.Min(top, r.yMin); bot = Mathf.Max(bot, r.yMax); }
+                EditorGUI.DrawRect(new Rect(lineX, top, 2f, bot - top), NeoColors.Interactive);
+            }
+            else
+            {
+                float lineY = idx == 0 ? ordered[0].yMin - 2f
+                    : idx >= ordered.Count ? ordered[ordered.Count - 1].yMax + 1f
+                    : (ordered[idx - 1].yMax + ordered[idx].yMin) * 0.5f;
+                float left = float.MaxValue, right = float.MinValue;
+                foreach (Rect r in ordered) { left = Mathf.Min(left, r.xMin); right = Mathf.Max(right, r.xMax); }
+                EditorGUI.DrawRect(new Rect(left, lineY, right - left, 2f), NeoColors.Interactive);
+            }
+        }
+
+        // sibling screen rects (excluding the dragged primary) in their list order
+        private List<Rect> SiblingRectsInOrder(Node node)
+        {
+            var rects = new List<Rect>();
+            foreach (ElementSpec sib in node.siblings)
+            {
+                if (ReferenceEquals(sib, _primary)) continue;
+                if (TryScreenRect(sib, out Rect r)) rects.Add(r);
+            }
+            return rects;
         }
 
         // the live screen rect a resize gesture is producing — start rect with the handle's edges
@@ -635,8 +957,6 @@ namespace Neo.UI.Editor.Composer
                 _selectPath?.Invoke(node.path);
             }
         }
-
-        private static float Round(float v) => Mathf.Round(v * 100f) / 100f;
 
         private static Rect RectFromPoints(Vector2 a, Vector2 b) => new Rect(
             Mathf.Min(a.x, b.x), Mathf.Min(a.y, b.y), Mathf.Abs(a.x - b.x), Mathf.Abs(a.y - b.y));
