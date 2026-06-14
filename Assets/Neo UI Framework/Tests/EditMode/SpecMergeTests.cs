@@ -129,6 +129,44 @@ namespace Neo.UI.Tests
             Assert.IsTrue(r.merged.views.Any(v => v.id == "Spec/Added"), "a human-added view must not be dropped");
         }
 
+        // ----------------------------------------------------------------- Pillar B: breakpoints
+
+        private const string BreakpointBaseJson = @"{
+          ""breakpoints"": [ { ""name"": ""wide"", ""when"": { ""minAspect"": 1.6 } } ],
+          ""views"": [ { ""id"": ""Bp/Main"", ""elements"": [
+            { ""panel"": { ""id"": ""Bp/Card"", ""layout"": { ""h"": ""left"", ""v"": ""top"" },
+                           ""overrides"": { ""wide"": { ""h"": ""center"" } } } }
+          ] } ]
+        }";
+
+        [Test]
+        public void Breakpoint_OurRename_Survives_StaleIncoming()
+        {
+            // base + theirs share "wide"; ours renamed it to "huge". Keyed by name, the rename folds in
+            // cleanly (no add+remove collision) so the human's rename survives the stale incoming spec.
+            UISpec baseSpec = Parse(BreakpointBaseJson);
+            UISpec ours = Parse(BreakpointBaseJson.Replace(@"""name"": ""wide""", @"""name"": ""huge"""));
+            UISpec theirs = Parse(BreakpointBaseJson);
+
+            MergeResult r = SpecMerge.Merge(baseSpec, ours, theirs);
+            Assert.IsTrue(r.merged.breakpoints.Any(b => b.name == "huge"),
+                "the human's breakpoint rename must survive a stale incoming spec");
+            Assert.IsFalse(r.failed);
+        }
+
+        [Test]
+        public void Breakpoint_TheirCondition_Change_IsApplied()
+        {
+            UISpec baseSpec = Parse(BreakpointBaseJson);
+            UISpec ours = Parse(BreakpointBaseJson);
+            UISpec theirs = Parse(BreakpointBaseJson.Replace(@"""minAspect"": 1.6", @"""minAspect"": 2.0"));
+
+            MergeResult r = SpecMerge.Merge(baseSpec, ours, theirs);
+            BreakpointSpec wide = r.merged.breakpoints.Single(b => b.name == "wide");
+            Assert.AreEqual(2.0f, wide.when.minAspect, "an incoming condition tweak applies when ours didn't touch it");
+            Assert.IsEmpty(r.conflicts);
+        }
+
         private static string ButtonLabel(UISpec spec) =>
             FindElement(spec.views.Single(v => v.id == "Spec/Main").elements,
                 e => e.kind == "button" && e.id == "Spec/A")?.label;

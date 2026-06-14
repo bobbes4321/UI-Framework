@@ -92,6 +92,7 @@ namespace Neo.UI.Editor
                 case "popups":
                 case "presets":
                 case "nodes":
+                case "breakpoints":
                     return Identity(item, "name", index);
                 case "next":
                     return EdgeKey(item, index);
@@ -120,6 +121,7 @@ namespace Neo.UI.Editor
                 case "popups":
                 case "presets":
                 case "nodes":
+                case "breakpoints":
                     return $"{listPath}/{StringField(item, "name", index)}";
                 case "next":
                     return $"{listPath}/{EdgeKey(item, index)}";

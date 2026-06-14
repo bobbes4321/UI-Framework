@@ -104,6 +104,47 @@ namespace Neo.UI.Tests
                 "re-pointing an edge reads as remove(old)+add(new) under edge identity");
         }
 
+        // ----------------------------------------------------------------- Pillar B: breakpoints
+
+        private const string BreakpointJson = @"{
+          ""breakpoints"": [
+            { ""name"": ""wide"", ""when"": { ""minAspect"": 1.6 } }
+          ],
+          ""views"": [ { ""id"": ""Bp/Main"", ""elements"": [
+            { ""panel"": { ""id"": ""Bp/Card"", ""layout"": { ""h"": ""left"", ""v"": ""top"" },
+                           ""overrides"": { ""wide"": { ""h"": ""center"" } } } }
+          ] } ]
+        }";
+
+        [Test]
+        public void Breakpoint_Renamed_DiffsAsModify_NotAddRemove()
+        {
+            // keyed by name (SpecPath addition): renaming keeps the SAME path, so the condition's
+            // fields read as modifies — NOT a phantom add(new)+remove(old) of the whole breakpoint.
+            UISpec candidate = Parse(BreakpointJson.Replace(@"""name"": ""wide""", @"""name"": ""huge"""));
+            var changes = SpecDiff.Compare(Parse(BreakpointJson), candidate);
+
+            Assert.IsTrue(changes.Any(c => c.kind == SpecChangeKind.Modified && c.path.EndsWith("/name")
+                                           && c.before == "wide" && c.after == "huge"),
+                "the rename surfaces as a name modify under the breakpoint's stable path");
+            Assert.IsFalse(changes.Any(c => c.kind == SpecChangeKind.Added && c.path.Contains("breakpoints")
+                                            && c.after == "(node)"),
+                "a rename must NOT read as a whole-breakpoint add");
+        }
+
+        [Test]
+        public void Override_Change_IsReported_UnderBreakpointKey()
+        {
+            // overrides is a dict keyed by breakpoint name → DiffDict addresses it directly
+            UISpec candidate = Parse(BreakpointJson.Replace(@"""h"": ""center""", @"""h"": ""right"""));
+            var changes = SpecDiff.Compare(Parse(BreakpointJson), candidate);
+
+            SpecChange change = changes.SingleOrDefault(c => c.path.Contains("overrides/wide") && c.path.EndsWith("/h"));
+            Assert.IsNotNull(change, "the override delta change must be addressed under overrides/<name>");
+            Assert.AreEqual("center", change.before);
+            Assert.AreEqual("right", change.after);
+        }
+
         private static ElementSpec ElementOf(string json) =>
             ElementSpec.Parse(JsonReader.AsObject(MiniJson.Parse(json), "element"));
     }

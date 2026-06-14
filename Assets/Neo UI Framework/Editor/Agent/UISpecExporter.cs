@@ -51,12 +51,19 @@ namespace Neo.UI.Editor
                 else spec.settings.Add(catalogSpec);
             }
 
+            var responsiveRoots = new List<UIResponsiveRoot>();
             foreach (string guid in FindGenerated("t:Prefab", $"{UISpecGenerator.GeneratedRoot}/Views"))
             {
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guid));
                 if (prefab == null || prefab.GetComponent<UIView>() == null) continue;
                 spec.views.Add(ExportView(prefab));
+                var responsive = prefab.GetComponent<UIResponsiveRoot>();
+                if (responsive != null) responsiveRoots.Add(responsive);
             }
+
+            // Pillar B: top-level breakpoints are global — reconstruct from the (identical) condition
+            // tables on the views' UIResponsiveRoots, deduped by name preserving first-seen order.
+            ReconstructBreakpoints(spec, responsiveRoots);
 
             foreach (string guid in FindGenerated("t:Prefab", $"{UISpecGenerator.GeneratedRoot}/Popups"))
             {
@@ -226,13 +233,121 @@ namespace Neo.UI.Editor
                 if (backgroundTarget != null) viewSpec.background = backgroundTarget.token;
             }
 
-            foreach (Transform child in prefab.transform)
+            // Pillar B: capture the GameObject→ElementSpec map for this view so a UIResponsiveRoot's
+            // baked entries can be reattached as per-element `overrides` below.
+            var sink = new Dictionary<GameObject, ElementSpec>();
+            Dictionary<GameObject, ElementSpec> previousSink = s_elementSink;
+            s_elementSink = sink;
+            try
             {
-                if (child.name == "Background") continue;
-                ElementSpec element = ExportElement(child.gameObject, inLayout: false);
-                if (element != null) viewSpec.elements.Add(element);
+                foreach (Transform child in prefab.transform)
+                {
+                    if (child.name == "Background") continue;
+                    ElementSpec element = ExportElement(child.gameObject, inLayout: false);
+                    if (element != null) viewSpec.elements.Add(element);
+                }
             }
+            finally
+            {
+                s_elementSink = previousSink;
+            }
+
+            ReconstructOverrides(prefab.GetComponent<UIResponsiveRoot>(), sink);
             return viewSpec;
+        }
+
+        /// <summary>
+        /// Pillar B: rebuilds the global <c>breakpoints</c> list from the views' (identical) condition
+        /// tables, deduped by name (first-seen order preserved). The condition table is force-text and
+        /// carries the exact authored kinds, so this round-trips byte-identically.
+        /// </summary>
+        private static void ReconstructBreakpoints(UISpec spec, List<UIResponsiveRoot> roots)
+        {
+            var seen = new HashSet<string>(System.StringComparer.Ordinal);
+            foreach (UIResponsiveRoot root in roots)
+            {
+                if (root == null) continue;
+                foreach (UIResponsiveRoot.ResponsiveCondition c in root.conditions)
+                {
+                    if (c == null || string.IsNullOrEmpty(c.name) || !seen.Add(c.name)) continue;
+                    var bp = new BreakpointSpec
+                    {
+                        name = c.name,
+                        when = new BreakpointCondition
+                        {
+                            orientation = string.IsNullOrEmpty(c.orientation) ? null : c.orientation,
+                            minAspect = float.IsNaN(c.minAspect) ? (float?)null : c.minAspect,
+                            maxAspect = float.IsNaN(c.maxAspect) ? (float?)null : c.maxAspect,
+                            minWidth = float.IsNaN(c.minWidth) ? (float?)null : c.minWidth,
+                            maxWidth = float.IsNaN(c.maxWidth) ? (float?)null : c.maxWidth
+                        }
+                    };
+                    spec.breakpoints.Add(bp);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Pillar B: reconstructs each element's <c>overrides</c> from the baked
+        /// <see cref="UIResponsiveRoot"/> entries, using the stored ORIGINAL delta (not the resolved
+        /// vectors, which alias) so export round-trips byte-identically. The top-level
+        /// <c>breakpoints</c> are reconstructed separately in <see cref="ExportProject"/> from the
+        /// (global) condition table.
+        /// </summary>
+        private static void ReconstructOverrides(UIResponsiveRoot responsive,
+            Dictionary<GameObject, ElementSpec> sink)
+        {
+            if (responsive == null) return;
+            foreach (UIResponsiveRoot.ResponsiveEntry entry in responsive.entries)
+            {
+                if (entry == null || entry.target == null) continue;
+                if (!sink.TryGetValue(entry.target.gameObject, out ElementSpec element) || element == null)
+                {
+                    Debug.LogWarning($"UISpecExporter: a UIResponsiveRoot entry for breakpoint " +
+                        $"'{entry.breakpoint}' references an object not exported as an element; its override " +
+                        "is dropped from the spec.");
+                    continue;
+                }
+                LayoutSpec delta = FromResponsiveDelta(entry.delta);
+                if (delta == null || delta.IsEmpty) continue;
+                if (element.overrides == null) element.overrides = new Dictionary<string, LayoutSpec>();
+                element.overrides[entry.breakpoint] = delta;
+            }
+        }
+
+        /// <summary> Reverses <c>ToResponsiveDelta</c>: the baked force-text delta → a LayoutSpec. </summary>
+        private static LayoutSpec FromResponsiveDelta(UIResponsiveRoot.ResponsiveDelta d)
+        {
+            if (d == null) return null;
+            var spec = new LayoutSpec
+            {
+                h = string.IsNullOrEmpty(d.h) ? null : d.h,
+                v = string.IsNullOrEmpty(d.v) ? null : d.v
+            };
+            if (d.offsetKeys != null && d.offsetKeys.Count > 0)
+            {
+                var offset = new LayoutOffset();
+                for (int i = 0; i < d.offsetKeys.Count && i < d.offsetValues.Count; i++)
+                    offset.Set(d.offsetKeys[i], d.offsetValues[i]);
+                if (!offset.IsEmpty) spec.offset = offset;
+            }
+            if (!float.IsNaN(d.sizeW) || !float.IsNaN(d.sizeH))
+            {
+                var size = new LayoutSize();
+                if (!float.IsNaN(d.sizeW)) size.w = d.sizeW;
+                if (!float.IsNaN(d.sizeH)) size.h = d.sizeH;
+                if (!size.IsEmpty) spec.size = size;
+            }
+            if (!string.IsNullOrEmpty(d.sizingW) || !string.IsNullOrEmpty(d.sizingH))
+            {
+                var sizing = new LayoutSizing
+                {
+                    w = string.IsNullOrEmpty(d.sizingW) ? null : d.sizingW,
+                    h = string.IsNullOrEmpty(d.sizingH) ? null : d.sizingH
+                };
+                if (!sizing.IsEmpty) spec.sizing = sizing;
+            }
+            return spec.IsEmpty ? null : spec;
         }
 
         private static string FindMatchingPresetName(NeoUISettings settings, UIAnimation animation)
@@ -259,11 +374,17 @@ namespace Neo.UI.Editor
         /// slider ranges, layout padding, shape styles — survive the round trip. Containers
         /// recurse; widget internals do not (the factory owns them).
         /// </summary>
+        /// <summary> Per-view GameObject→ElementSpec map, populated during a view export so the
+        /// responsive pass can attach each <c>UIResponsiveRoot</c> entry's override to the right
+        /// element. Set/cleared around <see cref="ExportView"/>; null (zero-cost) otherwise. </summary>
+        private static Dictionary<GameObject, ElementSpec> s_elementSink;
+
         private static ElementSpec ExportElement(GameObject go, bool inLayout)
         {
             ElementSpec element = ExportElementBody(go, inLayout);
             if (element == null) return null;
             ExportGeometry(element, (RectTransform)go.transform, inLayout);
+            if (s_elementSink != null) s_elementSink[go] = element;
             return element;
         }
 

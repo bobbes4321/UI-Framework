@@ -77,6 +77,12 @@ namespace Neo.UI.Editor
         private static readonly Dictionary<string, InputActionAsset> s_catalogInputAssets =
             new Dictionary<string, InputActionAsset>(StringComparer.Ordinal);
 
+        /// <summary> Pillar B: the spec's top-level breakpoints for the current generate, consulted by
+        /// the per-view responsive baking pass. Set for the duration of <see cref="Generate"/>; the
+        /// Composer preview may set it directly around a <see cref="BuildViewGameObject"/> call. Null/
+        /// empty ⇒ no responsive baking (legacy specs and override-less views stay untouched). </summary>
+        internal static List<BreakpointSpec> s_activeBreakpoints;
+
         [MenuItem("Tools/Neo UI/Generate From Spec…", priority = 1)]
         public static void GenerateFromSpecFileDialog()
         {
@@ -172,6 +178,7 @@ namespace Neo.UI.Editor
                 // catalogs first — views may embed them via "settings"/"cheats" elements
                 s_catalogs.Clear();
                 s_catalogInputAssets.Clear();
+                s_activeBreakpoints = spec.breakpoints;
                 foreach (MenuCatalogSpec catalog in spec.settings) GenerateMenuCatalog(catalog, settings, report);
                 foreach (MenuCatalogSpec catalog in spec.cheats) GenerateMenuCatalog(catalog, settings, report);
 
@@ -189,6 +196,10 @@ namespace Neo.UI.Editor
             {
                 report.issues.Add($"Generation aborted: {e.Message}");
                 Debug.LogException(e);
+            }
+            finally
+            {
+                s_activeBreakpoints = null;
             }
 
             AssetDatabase.SaveAssets();
@@ -394,8 +405,153 @@ namespace Neo.UI.Editor
             for (int i = 0; i < viewSpec.elements.Count; i++)
                 BuildElement(viewSpec.elements[i], i, rootRect, settings, report, build);
             ResolveTabPanels(build, settings, report);
+            BakeResponsiveRoot(root, build, settings, report);
 
             return root;
+        }
+
+        /// <summary>
+        /// Pillar B: pre-resolves every element override's effective layout into concrete RectTransform
+        /// vectors and bakes them, the ordered breakpoint condition table, and the per-target base
+        /// vectors into a <see cref="UIResponsiveRoot"/> on the view root. The prefab is left at the
+        /// BASE breakpoint (WYSIWYG). Nothing is added when no element declares overrides.
+        /// </summary>
+        private static void BakeResponsiveRoot(GameObject root, ViewBuild build, NeoUISettings settings,
+            GenerateReport report)
+        {
+            if (build.responsiveTargets.Count == 0) return;
+            if (s_activeBreakpoints == null || s_activeBreakpoints.Count == 0)
+            {
+                report.issues.Add($"View '{root.name}' has elements with breakpoint overrides but the spec " +
+                    "declares no top-level 'breakpoints'; overrides cannot be applied at runtime.");
+                return;
+            }
+
+            var responsive = root.AddComponent<UIResponsiveRoot>();
+
+            // Ordered condition table (force-text mirror of BreakpointConditions built-ins).
+            foreach (BreakpointSpec bp in s_activeBreakpoints)
+            {
+                var cond = new UIResponsiveRoot.ResponsiveCondition { name = bp.name };
+                if (bp.when != null)
+                {
+                    cond.orientation = bp.when.orientation ?? string.Empty;
+                    cond.minAspect = bp.when.minAspect ?? float.NaN;
+                    cond.maxAspect = bp.when.maxAspect ?? float.NaN;
+                    cond.minWidth = bp.when.minWidth ?? float.NaN;
+                    cond.maxWidth = bp.when.maxWidth ?? float.NaN;
+                }
+                responsive.conditions.Add(cond);
+            }
+
+            foreach ((ElementSpec element, GameObject go) in build.responsiveTargets)
+            {
+                if (go == null) continue;
+                var rect = (RectTransform)go.transform;
+                HorizontalOrVerticalLayoutGroup parentLayout = rect.parent != null
+                    ? rect.parent.GetComponent<HorizontalOrVerticalLayoutGroup>()
+                    : null;
+
+                // The element's base layout (the prefab was just baked with it). When the element has
+                // no explicit layout, the live RectTransform IS the base — capture it as the base.
+                LayoutSpec baseLayout = element.layout != null && !element.layout.IsEmpty
+                    ? element.layout
+                    : null;
+
+                // Capture base vectors from the live (just-baked) rect.
+                responsive.bases.Add(CaptureBase(rect));
+
+                // Resolve each declared breakpoint override against the ordered breakpoint list, so an
+                // override keyed to an unknown breakpoint name surfaces (no silent failure).
+                foreach (BreakpointSpec bp in s_activeBreakpoints)
+                {
+                    if (!element.overrides.TryGetValue(bp.name, out LayoutSpec delta) || delta == null) continue;
+
+                    LayoutSpec effective = (baseLayout ?? new LayoutSpec()).MergedWith(delta);
+                    // Apply the merged layout to the rect, capture the resolved vectors + original delta.
+                    ConstraintLayout.Apply(rect, effective, parentLayout);
+                    responsive.entries.Add(CaptureEntry(bp.name, rect, delta));
+                }
+
+                // Restore the prefab to its base state (WYSIWYG) — re-apply the base layout if any,
+                // else restore the captured base vectors directly.
+                if (baseLayout != null)
+                    ConstraintLayout.Apply(rect, baseLayout, parentLayout);
+                else
+                    RestoreBase(rect, responsive.bases[responsive.bases.Count - 1]);
+
+                // Warn on overrides whose breakpoint name isn't in the table — they'd never apply.
+                foreach (string key in element.overrides.Keys)
+                    if (!BreakpointExists(key))
+                        report.issues.Add($"Element override on '{go.name}' targets unknown breakpoint " +
+                            $"'{key}' (no such top-level breakpoint); it will never apply.");
+            }
+        }
+
+        private static bool BreakpointExists(string name)
+        {
+            if (s_activeBreakpoints == null) return false;
+            foreach (BreakpointSpec bp in s_activeBreakpoints)
+                if (bp.name == name) return true;
+            return false;
+        }
+
+        private static UIResponsiveRoot.ResponsiveBase CaptureBase(RectTransform r) =>
+            new UIResponsiveRoot.ResponsiveBase
+            {
+                target = r,
+                anchorMin = r.anchorMin,
+                anchorMax = r.anchorMax,
+                offsetMin = r.offsetMin,
+                offsetMax = r.offsetMax,
+                sizeDelta = r.sizeDelta,
+                pivot = r.pivot
+            };
+
+        private static UIResponsiveRoot.ResponsiveEntry CaptureEntry(string breakpoint, RectTransform r,
+            LayoutSpec delta) =>
+            new UIResponsiveRoot.ResponsiveEntry
+            {
+                breakpoint = breakpoint,
+                target = r,
+                anchorMin = r.anchorMin,
+                anchorMax = r.anchorMax,
+                offsetMin = r.offsetMin,
+                offsetMax = r.offsetMax,
+                sizeDelta = r.sizeDelta,
+                pivot = r.pivot,
+                delta = ToResponsiveDelta(delta)
+            };
+
+        /// <summary> Force-text mirror of the original authored delta LayoutSpec, for exact export. </summary>
+        private static UIResponsiveRoot.ResponsiveDelta ToResponsiveDelta(LayoutSpec delta)
+        {
+            var result = new UIResponsiveRoot.ResponsiveDelta
+            {
+                h = delta.h ?? string.Empty,
+                v = delta.v ?? string.Empty,
+                sizeW = delta.size != null && delta.size.w.HasValue ? delta.size.w.Value : float.NaN,
+                sizeH = delta.size != null && delta.size.h.HasValue ? delta.size.h.Value : float.NaN,
+                sizingW = delta.sizing != null ? (delta.sizing.w ?? string.Empty) : string.Empty,
+                sizingH = delta.sizing != null ? (delta.sizing.h ?? string.Empty) : string.Empty
+            };
+            if (delta.offset != null && !delta.offset.IsEmpty)
+                foreach (KeyValuePair<string, float> entry in delta.offset.values)
+                {
+                    result.offsetKeys.Add(entry.Key);
+                    result.offsetValues.Add(entry.Value);
+                }
+            return result;
+        }
+
+        private static void RestoreBase(RectTransform r, UIResponsiveRoot.ResponsiveBase b)
+        {
+            r.pivot = b.pivot;
+            r.anchorMin = b.anchorMin;
+            r.anchorMax = b.anchorMax;
+            r.offsetMin = b.offsetMin;
+            r.offsetMax = b.offsetMax;
+            r.sizeDelta = b.sizeDelta;
         }
 
         /// <summary>
@@ -424,6 +580,11 @@ namespace Neo.UI.Editor
             /// rich popups copy these into the UIPopup indexed slots. </summary>
             public readonly List<Graphic> imageSlots = new List<Graphic>();
             public readonly List<UIButton> buttonSlots = new List<UIButton>();
+
+            /// <summary> Pillar B: every element that declared <c>overrides</c>, paired with its built
+            /// GameObject, so the responsive baking pass can pre-resolve each breakpoint's vectors. </summary>
+            public readonly List<(ElementSpec element, GameObject go)> responsiveTargets =
+                new List<(ElementSpec, GameObject)>();
         }
 
         private static void BuildElement(ElementSpec element, int index, RectTransform parent,
@@ -885,6 +1046,9 @@ namespace Neo.UI.Editor
                         inLayout: childrenInLayout, build: build);
 
             if (ElementObjectSink != null && go != null) ElementObjectSink[element] = go;
+            // Pillar B: record elements carrying breakpoint overrides for the post-build resolve pass.
+            if (go != null && build != null && element.overrides != null && element.overrides.Count > 0)
+                build.responsiveTargets.Add((element, go));
             return go;
         }
 

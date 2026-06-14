@@ -39,6 +39,12 @@ namespace Neo.UI.Editor
         public List<MenuCatalogSpec> settings = new List<MenuCatalogSpec>();
         /// <summary> Cheat catalogs (generated as CheatCatalog assets). </summary>
         public List<MenuCatalogSpec> cheats = new List<MenuCatalogSpec>();
+        /// <summary>
+        /// Pillar B: global, ordered responsive breakpoints (first match wins at runtime). Each names a
+        /// condition (orientation / aspect / width) that an element's per-breakpoint <see cref="ElementSpec.overrides"/>
+        /// key into. Empty by default → emits nothing, so legacy specs stay byte-identical.
+        /// </summary>
+        public List<BreakpointSpec> breakpoints = new List<BreakpointSpec>();
         public FlowSpec flow;
 
         public static UISpec FromJson(string json)
@@ -73,6 +79,11 @@ namespace Neo.UI.Editor
             if (popupArray != null)
                 foreach (object item in popupArray)
                     spec.popups.Add(PopupSpec.Parse(JsonReader.AsObject(item, "popup")));
+
+            List<object> breakpointArray = JsonReader.GetArray(root, "breakpoints");
+            if (breakpointArray != null)
+                foreach (object item in breakpointArray)
+                    spec.breakpoints.Add(BreakpointSpec.Parse(JsonReader.AsObject(item, "breakpoint")));
 
             Dictionary<string, object> flowObj = JsonReader.GetObject(root, "flow");
             if (flowObj != null) spec.flow = FlowSpec.Parse(flowObj);
@@ -114,8 +125,91 @@ namespace Neo.UI.Editor
                 foreach (PopupSpec popup in popups) array.Add(popup.ToJsonObject());
                 root["popups"] = array;
             }
+            if (breakpoints.Count > 0)
+            {
+                var array = new List<object>();
+                foreach (BreakpointSpec breakpoint in breakpoints) array.Add(breakpoint.ToJsonObject());
+                root["breakpoints"] = array;
+            }
             if (flow != null) root["flow"] = flow.ToJsonObject();
             return MiniJson.Serialize(root);
+        }
+    }
+
+    /// <summary>
+    /// One named, ordered responsive breakpoint (Pillar B). The runtime driver
+    /// (<c>UIResponsiveRoot</c>) evaluates the breakpoint list top-to-bottom and the FIRST whose
+    /// <see cref="when"/> matches the current viewport wins (else the baked base layout). The
+    /// <see cref="name"/> is the key an element's <see cref="ElementSpec.overrides"/> dict uses.
+    /// </summary>
+    [Serializable]
+    public class BreakpointSpec
+    {
+        public string name;
+        public BreakpointCondition when = new BreakpointCondition();
+
+        public static BreakpointSpec Parse(Dictionary<string, object> obj)
+        {
+            var spec = new BreakpointSpec
+            {
+                name = JsonReader.GetString(obj, "name"),
+                when = BreakpointCondition.Parse(JsonReader.GetObject(obj, "when"))
+            };
+            if (string.IsNullOrWhiteSpace(spec.name))
+                throw new FormatException("Breakpoint is missing required field 'name'");
+            return spec;
+        }
+
+        public Dictionary<string, object> ToJsonObject()
+        {
+            var result = new Dictionary<string, object> { ["name"] = name };
+            if (when != null && !when.IsEmpty) result["when"] = when.ToJsonObject();
+            return result;
+        }
+    }
+
+    /// <summary>
+    /// A breakpoint condition. The built-in kinds (orientation / minAspect / maxAspect / minWidth /
+    /// maxWidth) are sugar over registered <c>IBreakpointCondition</c> evaluators — a project adds a
+    /// new kind through that registry (see <c>BreakpointConditions</c>) without forking the package.
+    /// Exactly one kind is normally set; deterministic emit order: orientation, minAspect, maxAspect,
+    /// minWidth, maxWidth.
+    /// </summary>
+    [Serializable]
+    public class BreakpointCondition
+    {
+        public string orientation;  // "portrait" | "landscape"
+        public float? minAspect;    // width/height >=
+        public float? maxAspect;    // width/height <=
+        public float? minWidth;     // reference-px width >=
+        public float? maxWidth;     // reference-px width <=
+
+        public bool IsEmpty =>
+            string.IsNullOrEmpty(orientation)
+            && !minAspect.HasValue && !maxAspect.HasValue
+            && !minWidth.HasValue && !maxWidth.HasValue;
+
+        public static BreakpointCondition Parse(Dictionary<string, object> obj)
+        {
+            var result = new BreakpointCondition();
+            if (obj == null) return result;
+            result.orientation = JsonReader.GetString(obj, "orientation");
+            if (obj.TryGetValue("minAspect", out object minA) && minA is double mad) result.minAspect = (float)mad;
+            if (obj.TryGetValue("maxAspect", out object maxA) && maxA is double mxad) result.maxAspect = (float)mxad;
+            if (obj.TryGetValue("minWidth", out object minW) && minW is double mwd) result.minWidth = (float)mwd;
+            if (obj.TryGetValue("maxWidth", out object maxW) && maxW is double mxwd) result.maxWidth = (float)mxwd;
+            return result;
+        }
+
+        public Dictionary<string, object> ToJsonObject()
+        {
+            var result = new Dictionary<string, object>();
+            if (!string.IsNullOrEmpty(orientation)) result["orientation"] = orientation;
+            if (minAspect.HasValue) result["minAspect"] = (double)minAspect.Value;
+            if (maxAspect.HasValue) result["maxAspect"] = (double)maxAspect.Value;
+            if (minWidth.HasValue) result["minWidth"] = (double)minWidth.Value;
+            if (maxWidth.HasValue) result["maxWidth"] = (double)maxWidth.Value;
+            return result;
         }
     }
 
@@ -391,6 +485,38 @@ namespace Neo.UI.Editor
             if (sizing != null && !sizing.IsEmpty) result["sizing"] = sizing.ToJsonObject();
             return result;
         }
+
+        /// <summary>
+        /// The cascade primitive (Pillar B): this layout treated as the BASE, merged field-by-field
+        /// with <paramref name="delta"/> (a breakpoint override). Set fields in the delta win; unset
+        /// fields inherit the base. Merge granularity matches the model: <see cref="LayoutOffset"/>
+        /// merges per key (left/right/top/bottom/h/v), <see cref="LayoutSize"/>/<see cref="LayoutSizing"/>
+        /// merge per axis, and the scalar <c>h</c>/<c>v</c> constraints replace when set. A null/empty
+        /// delta returns a copy of the base; a null base treats the delta as the whole layout.
+        /// </summary>
+        public LayoutSpec MergedWith(LayoutSpec delta)
+        {
+            if (delta == null || delta.IsEmpty) return Clone();
+            var result = new LayoutSpec
+            {
+                h = !string.IsNullOrEmpty(delta.h) ? delta.h : h,
+                v = !string.IsNullOrEmpty(delta.v) ? delta.v : v,
+                offset = LayoutOffset.Merge(offset, delta.offset),
+                size = LayoutSize.Merge(size, delta.size),
+                sizing = LayoutSizing.Merge(sizing, delta.sizing)
+            };
+            return result;
+        }
+
+        /// <summary> A deep copy (so a merge never aliases the base's sub-objects). </summary>
+        public LayoutSpec Clone() => new LayoutSpec
+        {
+            h = h,
+            v = v,
+            offset = offset != null && !offset.IsEmpty ? LayoutOffset.Merge(offset, null) : null,
+            size = size != null && !size.IsEmpty ? LayoutSize.Merge(size, null) : null,
+            sizing = sizing != null && !sizing.IsEmpty ? LayoutSizing.Merge(sizing, null) : null
+        };
     }
 
     /// <summary>
@@ -418,6 +544,20 @@ namespace Neo.UI.Editor
             var result = new LayoutOffset();
             foreach (KeyValuePair<string, object> entry in obj)
                 if (entry.Value is double d) result.values[entry.Key] = (float)d;
+            return result.IsEmpty ? null : result;
+        }
+
+        /// <summary> Per-key merge: base keys, then delta keys override. Either side may be null. </summary>
+        public static LayoutOffset Merge(LayoutOffset baseOffset, LayoutOffset delta)
+        {
+            bool hasBase = baseOffset != null && !baseOffset.IsEmpty;
+            bool hasDelta = delta != null && !delta.IsEmpty;
+            if (!hasBase && !hasDelta) return null;
+            var result = new LayoutOffset();
+            if (hasBase)
+                foreach (KeyValuePair<string, float> entry in baseOffset.values) result.values[entry.Key] = entry.Value;
+            if (hasDelta)
+                foreach (KeyValuePair<string, float> entry in delta.values) result.values[entry.Key] = entry.Value;
             return result.IsEmpty ? null : result;
         }
 
@@ -453,6 +593,20 @@ namespace Neo.UI.Editor
             return result.IsEmpty ? null : result;
         }
 
+        /// <summary> Per-axis merge: a set delta axis wins, else the base axis. Either side may be null. </summary>
+        public static LayoutSize Merge(LayoutSize baseSize, LayoutSize delta)
+        {
+            bool hasBase = baseSize != null && !baseSize.IsEmpty;
+            bool hasDelta = delta != null && !delta.IsEmpty;
+            if (!hasBase && !hasDelta) return null;
+            var result = new LayoutSize
+            {
+                w = delta != null && delta.w.HasValue ? delta.w : baseSize?.w,
+                h = delta != null && delta.h.HasValue ? delta.h : baseSize?.h
+            };
+            return result.IsEmpty ? null : result;
+        }
+
         public Dictionary<string, object> ToJsonObject()
         {
             var result = new Dictionary<string, object>();
@@ -478,6 +632,20 @@ namespace Neo.UI.Editor
             {
                 w = JsonReader.GetString(obj, "w"),
                 h = JsonReader.GetString(obj, "h")
+            };
+            return result.IsEmpty ? null : result;
+        }
+
+        /// <summary> Per-axis merge: a set delta axis wins, else the base axis. Either side may be null. </summary>
+        public static LayoutSizing Merge(LayoutSizing baseSizing, LayoutSizing delta)
+        {
+            bool hasBase = baseSizing != null && !baseSizing.IsEmpty;
+            bool hasDelta = delta != null && !delta.IsEmpty;
+            if (!hasBase && !hasDelta) return null;
+            var result = new LayoutSizing
+            {
+                w = delta != null && !string.IsNullOrEmpty(delta.w) ? delta.w : baseSizing?.w,
+                h = delta != null && !string.IsNullOrEmpty(delta.h) ? delta.h : baseSizing?.h
             };
             return result.IsEmpty ? null : result;
         }
@@ -547,6 +715,9 @@ namespace Neo.UI.Editor
         public string anchor;      // anchor preset name (legacy placement)
         public LayoutSpec layout;  // Figma-style constraint+offset placement; when set it WINS over
                                    // anchor/position/size/flex (which stay valid when layout is null)
+        public Dictionary<string, LayoutSpec> overrides; // Pillar B: breakpoint name → delta LayoutSpec.
+                                   // Only changed fields per breakpoint; merges OVER the base layout at
+                                   // runtime (LayoutSpec.MergedWith). Null/empty → emits nothing.
         public float[] size;       // [w,h] (JSON key "size" — array form)
         public float? flex;        // in stacks: share of leftover space on the parent's main axis
                                    // (size becomes the minimum); 0/absent = rigid authored size
@@ -676,6 +847,19 @@ namespace Neo.UI.Editor
                         if (option != null) spec.options.Add(option.ToString());
                 }
 
+                // Pillar B: per-breakpoint layout deltas, keyed by breakpoint name.
+                Dictionary<string, object> overridesObj = JsonReader.GetObject(body, "overrides");
+                if (overridesObj != null)
+                {
+                    var map = new Dictionary<string, LayoutSpec>();
+                    foreach (KeyValuePair<string, object> entry in overridesObj)
+                    {
+                        LayoutSpec delta = LayoutSpec.Parse(JsonReader.AsObject(entry.Value, $"override '{entry.Key}'"));
+                        if (delta != null) map[entry.Key] = delta;
+                    }
+                    if (map.Count > 0) spec.overrides = map;
+                }
+
                 Dictionary<string, object> itemObj = JsonReader.GetObject(body, "item");
                 if (itemObj != null) spec.item = Parse(itemObj);
 
@@ -707,6 +891,19 @@ namespace Neo.UI.Editor
             if (radius.HasValue) body["radius"] = (double)radius.Value;
             if (!string.IsNullOrEmpty(anchor)) body["anchor"] = anchor;
             if (layout != null && !layout.IsEmpty) body["layout"] = layout.ToJsonObject();
+            if (overrides != null && overrides.Count > 0)
+            {
+                // deterministic key order so export is byte-stable regardless of dict insertion order
+                var keys = new List<string>(overrides.Keys);
+                keys.Sort(System.StringComparer.Ordinal);
+                var map = new Dictionary<string, object>();
+                foreach (string key in keys)
+                {
+                    LayoutSpec delta = overrides[key];
+                    if (delta != null && !delta.IsEmpty) map[key] = delta.ToJsonObject();
+                }
+                if (map.Count > 0) body["overrides"] = map;
+            }
             // string size variant and [w,h] share the "size" key — the variant owns it when set
             if (!string.IsNullOrEmpty(sizeVariant)) body["size"] = sizeVariant;
             else if (size != null) body["size"] = ToJsonArray(size);
