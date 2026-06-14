@@ -1,16 +1,17 @@
 # Compile-check helper for the Neo UI package while the editor holds the lock.
 # Usage: powershell -File neo-compilecheck.ps1 -Target runtime|editor|tests|all
 # Compiles Runtime -> Temp dll, Editor against it, then EditMode+PlayMode tests against both.
-param([string]$Target = "all")
+param([string]$Target = "all", [string]$RefProj = "C:\Users\maxim\RiderProjects\UI-Framework")
 
 $ErrorActionPreference = "Stop"
 $UnityDir = "C:\Program Files\Unity\Hub\Editor\6000.4.10f1"
-$Proj     = "C:\_git\UI Package"
-$Pkg      = "$Proj\Assets\Neo UI Framework"
+# Sources compiled from THIS worktree (where the script lives). Reference DLLs (ScriptAssemblies,
+# PackageCache/nunit) come from $RefProj — a checkout that HAS Library/ScriptAssemblies on disk.
+$Pkg      = "$PSScriptRoot\Assets\Neo UI Framework"
 $Data     = "$UnityDir\Editor\Data"
 $csc      = "$Data\DotNetSdkRoslyn\csc.dll"
-$SA       = "$Proj\Library\ScriptAssemblies"
-$Tmp      = "$Proj\TestResults"
+$SA       = "$RefProj\Library\ScriptAssemblies"
+$Tmp      = "$PSScriptRoot\TestResults"
 if (-not (Test-Path $Tmp)) { New-Item -ItemType Directory $Tmp | Out-Null }
 
 $netstd   = "$Data\NetStandard\ref\2.1.0\netstandard.dll"
@@ -57,7 +58,7 @@ if ($Target -eq "editor" -or $Target -eq "all") {
 }
 
 if ($Target -eq "tests" -or $Target -eq "all") {
-    $nunit = Get-ChildItem "$Proj\Library\PackageCache" -Recurse -Filter nunit.framework.dll | Where-Object { $_.FullName -match "net40\\unity-custom" } | Select-Object -First 1
+    $nunit = Get-ChildItem "$RefProj\Library\PackageCache" -Recurse -Filter nunit.framework.dll | Where-Object { $_.FullName -match "net40\\unity-custom" } | Select-Object -First 1
     $tRefs = @("-r:`"$runtimeOut`"", "-r:`"$editorOut`"", "-r:`"$editoruiOut`"", "-r:`"$netstd`"",
         "-r:`"$SA\UnityEngine.UI.dll`"", "-r:`"$SA\Unity.TextMeshPro.dll`"", "-r:`"$SA\Unity.InputSystem.dll`"",
         "-r:`"$SA\UnityEngine.TestRunner.dll`"", "-r:`"$SA\UnityEditor.TestRunner.dll`"",
@@ -65,12 +66,12 @@ if ($Target -eq "tests" -or $Target -eq "all") {
 
     Write-Host "=== EditMode tests ===" -ForegroundColor Cyan
     $tSrc = Get-ChildItem "$Pkg\Tests\EditMode" -Recurse -Filter *.cs
-    if ((Compile "$Tmp\NeoUI_TestsEdit.dll" @("UNITY_EDITOR","UNITY_INCLUDE_TESTS") $tRefs $tSrc) -ne 0) { Write-Host "EDIT TESTS FAILED" -ForegroundColor Red; exit 1 }
+    if ((Compile "$Tmp\Neo.UI.Tests.EditMode.dll" @("UNITY_EDITOR","UNITY_INCLUDE_TESTS") $tRefs $tSrc) -ne 0) { Write-Host "EDIT TESTS FAILED" -ForegroundColor Red; exit 1 }
     Write-Host "EDIT TESTS OK" -ForegroundColor Green
 
     Write-Host "=== PlayMode tests ===" -ForegroundColor Cyan
     $pSrc = Get-ChildItem "$Pkg\Tests\PlayMode" -Recurse -Filter *.cs
-    if ((Compile "$Tmp\NeoUI_TestsPlay.dll" @("UNITY_EDITOR","UNITY_INCLUDE_TESTS") $tRefs $pSrc) -ne 0) { Write-Host "PLAY TESTS FAILED" -ForegroundColor Red; exit 1 }
+    if ((Compile "$Tmp\Neo.UI.Tests.PlayMode.dll" @("UNITY_EDITOR","UNITY_INCLUDE_TESTS") $tRefs $pSrc) -ne 0) { Write-Host "PLAY TESTS FAILED" -ForegroundColor Red; exit 1 }
     Write-Host "PLAY TESTS OK" -ForegroundColor Green
 }
 Write-Host "DONE" -ForegroundColor Green
