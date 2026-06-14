@@ -806,7 +806,7 @@ namespace Neo.UI.Editor
                 case "vstack":
                 case "hstack":
                     go = UIWidgetFactory.CreateStack(parent, element.kind == "vstack",
-                        element.padding ?? 0f, element.spacing ?? 8f);
+                        element.padding ?? 0f, element.spacing ?? 8f, element.padding4);
                     childHost = (RectTransform)go.transform;
                     if (element.cascade) go.AddComponent<UICascadeChildren>();
                     if (!string.IsNullOrEmpty(element.align))
@@ -819,7 +819,7 @@ namespace Neo.UI.Editor
                         ? new Vector2(element.cellSize[0], element.cellSize[1])
                         : new Vector2(120f, 120f);
                     go = UIWidgetFactory.CreateGrid(parent, element.padding ?? 0f,
-                        element.spacing ?? 8f, element.columns ?? 0, cell);
+                        element.spacing ?? 8f, element.columns ?? 0, cell, element.padding4);
                     // no explicit column count = responsive: fit as many cells as the width allows
                     if ((element.columns ?? 0) <= 0) go.AddComponent<UIResponsiveGridColumns>();
                     childHost = (RectTransform)go.transform;
@@ -832,7 +832,7 @@ namespace Neo.UI.Editor
                 {
                     string panelCategory = category ?? "Panels", panelName = name ?? $"Panel{index}";
                     go = UIWidgetFactory.CreatePanel(parent, panelCategory, panelName,
-                        element.padding ?? 0f, element.spacing ?? 8f);
+                        element.padding ?? 0f, element.spacing ?? 8f, element.padding4);
                     childHost = (RectTransform)go.transform;
                     if (element.cascade) go.AddComponent<UICascadeChildren>();
                     RegisterId(settings.panelIds, panelCategory, panelName);

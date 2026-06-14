@@ -117,19 +117,37 @@ namespace Neo.UI.Tests
         }";
 
         [Test]
-        public void Breakpoint_Renamed_DiffsAsModify_NotAddRemove()
+        public void Breakpoint_ConditionChange_DiffsAsModify_UnderStableName()
         {
-            // keyed by name (SpecPath addition): renaming keeps the SAME path, so the condition's
-            // fields read as modifies — NOT a phantom add(new)+remove(old) of the whole breakpoint.
+            // Breakpoints key by name (SpecPath addition), like popups/presets/nodes. Changing a
+            // breakpoint's CONDITION while keeping its name reads as a clean field modify addressed
+            // under the breakpoint's stable name path — NOT a phantom add+remove. That is the value
+            // of name-keying.
+            UISpec candidate = Parse(BreakpointJson.Replace(@"""minAspect"": 1.6", @"""minAspect"": 3"));
+            var changes = SpecDiff.Compare(Parse(BreakpointJson), candidate);
+
+            // minAspect is a float? widened to double for JSON, so 1.6f serializes as "1.60000002…";
+            // assert on the path + that the value changed, not on an exact float string.
+            Assert.IsTrue(changes.Any(c => c.kind == SpecChangeKind.Modified
+                                           && c.path.Contains("wide") && c.path.Contains("minAspect")
+                                           && c.before.StartsWith("1.6") && c.after.StartsWith("3")),
+                "a condition tweak surfaces as a modify under the breakpoint's stable name path");
+            Assert.IsFalse(changes.Any(c => c.kind == SpecChangeKind.Added || c.kind == SpecChangeKind.Removed),
+                "tweaking a same-named breakpoint must NOT read as add/remove");
+        }
+
+        [Test]
+        public void Breakpoint_Rename_DiffsAsAddRemove_LikeNamedEntities()
+        {
+            // A name IS the identity for breakpoints (overrides reference it by name), so a rename is
+            // legitimately remove(old)+add(new) — identical to the FlowEdge re-point convention above.
             UISpec candidate = Parse(BreakpointJson.Replace(@"""name"": ""wide""", @"""name"": ""huge"""));
             var changes = SpecDiff.Compare(Parse(BreakpointJson), candidate);
 
-            Assert.IsTrue(changes.Any(c => c.kind == SpecChangeKind.Modified && c.path.EndsWith("/name")
-                                           && c.before == "wide" && c.after == "huge"),
-                "the rename surfaces as a name modify under the breakpoint's stable path");
-            Assert.IsFalse(changes.Any(c => c.kind == SpecChangeKind.Added && c.path.Contains("breakpoints")
-                                            && c.after == "(node)"),
-                "a rename must NOT read as a whole-breakpoint add");
+            Assert.IsTrue(changes.Any(c => c.kind == SpecChangeKind.Removed && c.path.Contains("breakpoints") && c.path.Contains("wide")),
+                "the old breakpoint name reads as a remove");
+            Assert.IsTrue(changes.Any(c => c.kind == SpecChangeKind.Added && c.path.Contains("breakpoints") && c.path.Contains("huge")),
+                "the new breakpoint name reads as an add");
         }
 
         [Test]

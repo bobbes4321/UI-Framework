@@ -638,12 +638,12 @@ namespace Neo.UI.Editor
                 var element = new ElementSpec
                 {
                     kind = "grid",
-                    padding = grid.padding.left,
                     spacing = grid.spacing.x,
                     cellSize = new[] { grid.cellSize.x, grid.cellSize.y },
                     cascade = go.GetComponent<UICascadeChildren>() != null,
                     align = ExportGridAlign(grid)
                 };
+                ExportPadding(grid.padding, element);
                 ExportContainerDecor(go, element);
                 // a responsive grid mutates constraintCount at runtime — its column count is
                 // derived, not authored, so it round-trips as an absent "columns"
@@ -667,10 +667,10 @@ namespace Neo.UI.Editor
                 {
                     kind = "panel",
                     id = panelComponent.id.ToString(),
-                    padding = panelLayout != null ? panelLayout.padding.left : 0f,
                     spacing = panelLayout != null ? panelLayout.spacing : 0f,
                     cascade = go.GetComponent<UICascadeChildren>() != null
                 };
+                ExportPadding(panelLayout != null ? panelLayout.padding : null, element);
                 ExportContainerDecor(go, element);
                 foreach (Transform child in go.transform)
                 {
@@ -686,11 +686,11 @@ namespace Neo.UI.Editor
                 var element = new ElementSpec
                 {
                     kind = stack is VerticalLayoutGroup ? "vstack" : "hstack",
-                    padding = stack.padding.left,
                     spacing = stack.spacing,
                     cascade = go.GetComponent<UICascadeChildren>() != null,
                     align = ExportStackAlign(stack)
                 };
+                ExportPadding(stack.padding, element);
                 ExportContainerDecor(go, element);
                 foreach (Transform child in go.transform)
                 {
@@ -842,6 +842,32 @@ namespace Neo.UI.Editor
             if (element.gradient == null)
                 element.background = go.GetComponent<ThemeColorTarget>()?.token;
             element.radius = shape.cornerRadius;
+        }
+
+        /// <summary>
+        /// Reads a layout group's <see cref="RectOffset"/> padding back into spec form.
+        /// Round-trip determinism rule (no marker): when the four sides are all equal it emits the
+        /// uniform <see cref="ElementSpec.padding"/> (exactly as before — the only form pre-padding4
+        /// specs ever produced, so they stay byte-identical); only when the sides differ does it emit
+        /// the per-side <see cref="ElementSpec.padding4"/> array [left, top, right, bottom]. Note the
+        /// side reorder from RectOffset (left, right, top, bottom). One accepted consequence: a uniform
+        /// padding4 like [8,8,8,8] normalizes to padding:8 on round-trip — semantically identical.
+        /// </summary>
+        private static void ExportPadding(RectOffset padding, ElementSpec element)
+        {
+            if (padding == null) { element.padding = 0f; return; }
+            if (padding.left == padding.right && padding.left == padding.top && padding.left == padding.bottom)
+            {
+                element.padding = padding.left;
+                return;
+            }
+            element.padding4 = new float[]
+            {
+                padding.left,    // [0] left
+                padding.top,     // [1] top
+                padding.right,   // [2] right
+                padding.bottom   // [3] bottom
+            };
         }
 
         /// <summary>

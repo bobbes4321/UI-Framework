@@ -727,7 +727,9 @@ namespace Neo.UI.Editor
         public float? outlineWidth; // text: SDF outline width 0..1 (default 0.25 when only the
                                     // color is given)
         public float[] position;   // [x,y] anchored position
-        public float? padding;     // containers
+        public float? padding;     // containers (uniform)
+        public float[] padding4;   // containers: per-side [left, top, right, bottom]; when present it
+                                   // WINS over uniform "padding". Absent → the uniform path is unchanged.
         public float? spacing;     // containers
         public int? columns;       // grid
         public float[] cellSize;   // grid [w,h]
@@ -778,6 +780,7 @@ namespace Neo.UI.Editor
                     size = GetFloatArray(body, "size"),
                     position = GetFloatArray(body, "position"),
                     padding = GetNullableFloat(body, "padding"),
+                    padding4 = GetFloatArray(body, "padding4"),
                     spacing = GetNullableFloat(body, "spacing"),
                     cellSize = GetFloatArray(body, "cellSize"),
                     min = GetNullableFloat(body, "min"),
@@ -909,6 +912,7 @@ namespace Neo.UI.Editor
             else if (size != null) body["size"] = ToJsonArray(size);
             if (position != null) body["position"] = ToJsonArray(position);
             if (padding.HasValue) body["padding"] = (double)padding.Value;
+            if (padding4 != null) body["padding4"] = ToJsonArray(padding4);
             if (spacing.HasValue) body["spacing"] = (double)spacing.Value;
             if (columns.HasValue) body["columns"] = (double)columns.Value;
             if (cellSize != null) body["cellSize"] = ToJsonArray(cellSize);

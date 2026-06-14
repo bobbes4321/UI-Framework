@@ -1337,14 +1337,33 @@ namespace Neo.UI.Editor
 
         // ------------------------------------------------------------------ layout containers
 
-        public static GameObject CreateStack(RectTransform parent, bool vertical, float padding, float spacing)
+        /// <summary>
+        /// Builds the layout-group <see cref="RectOffset"/> for a container. The uniform
+        /// <paramref name="padding"/> is the default; when the optional per-side
+        /// <paramref name="padding4"/> (spec array order [left, top, right, bottom]) is supplied it
+        /// WINS. Note the side reorder: Unity's RectOffset ctor is (left, right, top, bottom), so the
+        /// spec's [left, top, right, bottom] maps to (p[0], p[2], p[1], p[3]).
+        /// </summary>
+        private static RectOffset MakePadding(float padding, float[] padding4)
+        {
+            if (padding4 != null && padding4.Length >= 4)
+                return new RectOffset(
+                    Mathf.RoundToInt(padding4[0]),  // left
+                    Mathf.RoundToInt(padding4[2]),  // right
+                    Mathf.RoundToInt(padding4[1]),  // top
+                    Mathf.RoundToInt(padding4[3])); // bottom
+            int pad = Mathf.RoundToInt(padding);
+            return new RectOffset(pad, pad, pad, pad);
+        }
+
+        public static GameObject CreateStack(RectTransform parent, bool vertical, float padding, float spacing,
+            float[] padding4 = null)
         {
             GameObject go = CreateRect(parent, vertical ? "VStack" : "HStack", new Vector2(400f, 400f));
             HorizontalOrVerticalLayoutGroup layout = vertical
                 ? go.AddComponent<VerticalLayoutGroup>()
                 : (HorizontalOrVerticalLayoutGroup)go.AddComponent<HorizontalLayoutGroup>();
-            int pad = Mathf.RoundToInt(padding);
-            layout.padding = new RectOffset(pad, pad, pad, pad);
+            layout.padding = MakePadding(padding, padding4);
             layout.spacing = spacing;
             ConfigureStackSizing(layout, vertical);
             return go;
@@ -1373,7 +1392,7 @@ namespace Neo.UI.Editor
         /// generator once every sibling is built.
         /// </summary>
         public static GameObject CreatePanel(RectTransform parent, string category, string name,
-            float padding, float spacing)
+            float padding, float spacing, float[] padding4 = null)
         {
             GameObject go = CreateRect(parent, "Panel", new Vector2(480f, 480f));
             go.AddComponent<CanvasGroup>();
@@ -1385,20 +1404,18 @@ namespace Neo.UI.Editor
             panel.disableGameObjectWhenHidden = true;
 
             var layout = go.AddComponent<VerticalLayoutGroup>();
-            int pad = Mathf.RoundToInt(padding);
-            layout.padding = new RectOffset(pad, pad, pad, pad);
+            layout.padding = MakePadding(padding, padding4);
             layout.spacing = spacing;
             ConfigureStackSizing(layout, vertical: true);
             return go;
         }
 
         public static GameObject CreateGrid(RectTransform parent, float padding, float spacing,
-            int columns, Vector2 cellSize)
+            int columns, Vector2 cellSize, float[] padding4 = null)
         {
             GameObject go = CreateRect(parent, "Grid", new Vector2(400f, 400f));
             var layout = go.AddComponent<GridLayoutGroup>();
-            int pad = Mathf.RoundToInt(padding);
-            layout.padding = new RectOffset(pad, pad, pad, pad);
+            layout.padding = MakePadding(padding, padding4);
             layout.spacing = new Vector2(spacing, spacing);
             layout.cellSize = cellSize;
             if (columns > 0)
