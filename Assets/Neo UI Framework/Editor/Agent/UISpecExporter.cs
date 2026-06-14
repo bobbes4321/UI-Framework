@@ -798,6 +798,18 @@ namespace Neo.UI.Editor
             float zRotation = rect.localEulerAngles.z;
             if (zRotation > 180f) zRotation -= 360f;
             if (Mathf.Abs(zRotation) > 0.01f) element.rotation = zRotation;
+
+            // Constraint+offset model: a NeoLayoutTag marks an element placed through the layout
+            // model — emit `layout` (reverse-mapped from the live RectTransform, gated by the tag so
+            // anchor/offset aliasing can't break byte-identity) and SKIP the legacy anchor/position/
+            // size/flex emit entirely. Absence of the tag ⇒ legacy path below, byte-identical as before.
+            var layoutTag = rect.GetComponent<NeoLayoutTag>();
+            if (layoutTag != null)
+            {
+                element.layout = ConstraintLayout.Detect(rect, layoutTag);
+                return;
+            }
+
             // a string size variant (sm/md/lg) owns the "size" key — the factory derives the
             // pixel height from it, so exporting geometry too would collide
             bool sizeOwnedByVariant = !string.IsNullOrEmpty(element.sizeVariant);

@@ -156,6 +156,20 @@ namespace Neo.UI.Editor
             return null;
         }
 
+        /// <summary>
+        /// OR a force-expand request onto a layout group AFTER it is configured — Unity's
+        /// force-expand is a group-level flag, so a single child requesting "fill" turns it on for
+        /// the whole group (documented limitation; per-child fill within a non-expanding group still
+        /// works via flexibleWidth/Height=1). Never turns force-expand OFF — that would stomp the
+        /// factory defaults (a vstack force-expands width so rows fill the column).
+        /// </summary>
+        public static void ForceExpandAxis(HorizontalOrVerticalLayoutGroup layout, bool horizontal)
+        {
+            if (layout == null) return;
+            if (horizontal) layout.childForceExpandWidth = true;
+            else layout.childForceExpandHeight = true;
+        }
+
         // ------------------------------------------------------------------ primitives
 
         public static GameObject CreateRect(RectTransform parent, string name, Vector2 size, string anchor = "Center")
@@ -1437,6 +1451,276 @@ namespace Neo.UI.Editor
             animation.move.toCustomValue = to;
             animation.move.settings.duration = duration;
             animation.move.settings.ease = ease;
+        }
+    }
+
+    /// <summary>
+    /// The bidirectional converter between the spec's <see cref="LayoutSpec"/> and a RectTransform's
+    /// anchor/pivot/offset configuration, plus the per-child sizing pass. This is the single owner of
+    /// the constraint write path (the generator calls <see cref="Apply"/>, the exporter calls
+    /// <see cref="Detect"/>). Constraint and sizing kinds come from the <see cref="LayoutConstraints"/>
+    /// / <see cref="LayoutSizingModes"/> registries — adding a kind never touches this class.
+    /// </summary>
+    public static class ConstraintLayout
+    {
+        public const string DefaultH = LayoutConstraints.Left;
+        public const string DefaultV = LayoutConstraints.Top;
+
+        /// <summary>
+        /// The 16 legacy anchor presets re-expressed as (horizontal, vertical) constraint pairs. The
+        /// legacy presets are NOT deleted (TryApplyAnchor/DetectAnchor stay for un-migrated specs);
+        /// this map is what the opt-in migration pass (A4) uses to rewrite a preset into the
+        /// equivalent constraint model. Edge presets map to edge constraints; the Stretch family maps
+        /// to leftRight/topBottom on the stretched axis.
+        /// </summary>
+        public static readonly IReadOnlyDictionary<string, (string h, string v)> PresetConstraints =
+            new Dictionary<string, (string h, string v)>(System.StringComparer.OrdinalIgnoreCase)
+            {
+                ["TopLeft"] = (LayoutConstraints.Left, LayoutConstraints.Top),
+                ["Top"] = (LayoutConstraints.Center, LayoutConstraints.Top),
+                ["TopRight"] = (LayoutConstraints.Right, LayoutConstraints.Top),
+                ["Left"] = (LayoutConstraints.Left, LayoutConstraints.Center),
+                ["Center"] = (LayoutConstraints.Center, LayoutConstraints.Center),
+                ["Right"] = (LayoutConstraints.Right, LayoutConstraints.Center),
+                ["BottomLeft"] = (LayoutConstraints.Left, LayoutConstraints.Bottom),
+                ["Bottom"] = (LayoutConstraints.Center, LayoutConstraints.Bottom),
+                ["BottomRight"] = (LayoutConstraints.Right, LayoutConstraints.Bottom),
+                ["Stretch"] = (LayoutConstraints.LeftRight, LayoutConstraints.TopBottom),
+                ["StretchTop"] = (LayoutConstraints.LeftRight, LayoutConstraints.Top),
+                ["StretchBottom"] = (LayoutConstraints.LeftRight, LayoutConstraints.Bottom),
+                ["StretchLeft"] = (LayoutConstraints.Left, LayoutConstraints.TopBottom),
+                ["StretchRight"] = (LayoutConstraints.Right, LayoutConstraints.TopBottom),
+                ["StretchHorizontal"] = (LayoutConstraints.LeftRight, LayoutConstraints.Center),
+                ["StretchVertical"] = (LayoutConstraints.Center, LayoutConstraints.TopBottom)
+            };
+
+        /// <summary>
+        /// Applies a <see cref="LayoutSpec"/> to <paramref name="rect"/>, stamping a
+        /// <see cref="NeoLayoutTag"/> so the exporter can reverse-map deterministically. Placement
+        /// (constraints) applies to a FREE element; per-child sizing applies when the element is a
+        /// child of a layout group (<paramref name="parentLayout"/> non-null). Returns the tag.
+        /// </summary>
+        public static NeoLayoutTag Apply(RectTransform rect, LayoutSpec layout,
+            HorizontalOrVerticalLayoutGroup parentLayout)
+        {
+            if (rect == null || layout == null) return null;
+
+            var tag = rect.GetComponent<NeoLayoutTag>();
+            if (tag == null) tag = rect.gameObject.AddComponent<NeoLayoutTag>();
+
+            bool inLayout = parentLayout != null;
+
+            if (!inLayout)
+                ApplyConstraints(rect, layout, tag);
+            else
+                StampConstraintDefaults(tag);
+
+            ApplySizing(rect.gameObject, layout, parentLayout, tag);
+            return tag;
+        }
+
+        private static void StampConstraintDefaults(NeoLayoutTag tag)
+        {
+            // a layout-group child has no free constraint; record nothing placement-wise so the
+            // exporter doesn't emit a spurious h/v/offset for it.
+            tag.h = null;
+            tag.v = null;
+            tag.widthSize = -1f;
+            tag.heightSize = -1f;
+        }
+
+        private static void ApplyConstraints(RectTransform rect, LayoutSpec layout, NeoLayoutTag tag)
+        {
+            string hId = string.IsNullOrEmpty(layout.h) ? DefaultH : layout.h;
+            string vId = string.IsNullOrEmpty(layout.v) ? DefaultV : layout.v;
+
+            ILayoutConstraint hc = LayoutConstraints.Get(hId, LayoutAxis.Horizontal);
+            ILayoutConstraint vc = LayoutConstraints.Get(vId, LayoutAxis.Vertical);
+
+            float? width = layout.size != null ? layout.size.w : null;
+            float? height = layout.size != null ? layout.size.h : null;
+
+            LayoutOffsetValue hOff = ResolveOffset(layout, hc, LayoutAxis.Horizontal);
+            LayoutOffsetValue vOff = ResolveOffset(layout, vc, LayoutAxis.Vertical);
+
+            if (hc != null) hc.Apply(rect, hOff, hc.Stretches ? null : width);
+            if (vc != null) vc.Apply(rect, vOff, vc.Stretches ? null : height);
+
+            tag.h = hId;
+            tag.v = vId;
+            tag.hOffset0 = hOff.primary;
+            tag.hOffset1 = hOff.secondary;
+            tag.vOffset0 = vOff.primary;
+            tag.vOffset1 = vOff.secondary;
+            tag.widthSize = (hc != null && !hc.Stretches && width.HasValue) ? width.Value : -1f;
+            tag.heightSize = (vc != null && !vc.Stretches && height.HasValue) ? height.Value : -1f;
+        }
+
+        /// <summary> Reads the offset for an axis out of the constraint-keyed offset dict. </summary>
+        private static LayoutOffsetValue ResolveOffset(LayoutSpec layout, ILayoutConstraint constraint,
+            LayoutAxis axis)
+        {
+            LayoutOffset off = layout.offset;
+            if (constraint == null || off == null) return default;
+
+            switch (constraint.Id)
+            {
+                case LayoutConstraints.Left: return new LayoutOffsetValue(off.GetOr("left", 0f));
+                case LayoutConstraints.Right: return new LayoutOffsetValue(off.GetOr("right", 0f));
+                case LayoutConstraints.Top: return new LayoutOffsetValue(off.GetOr("top", 0f));
+                case LayoutConstraints.Bottom: return new LayoutOffsetValue(off.GetOr("bottom", 0f));
+                case LayoutConstraints.Center:
+                    return new LayoutOffsetValue(off.GetOr(axis == LayoutAxis.Horizontal ? "h" : "v", 0f));
+                case LayoutConstraints.LeftRight:
+                    return new LayoutOffsetValue(off.GetOr("left", 0f), off.GetOr("right", 0f));
+                case LayoutConstraints.TopBottom:
+                    return new LayoutOffsetValue(off.GetOr("top", 0f), off.GetOr("bottom", 0f));
+                case LayoutConstraints.Scale:
+                    return axis == LayoutAxis.Horizontal
+                        ? new LayoutOffsetValue(off.GetOr("left", 0f), off.GetOr("right", 1f))
+                        : new LayoutOffsetValue(off.GetOr("bottom", 0f), off.GetOr("top", 1f));
+                default:
+                    // project constraint: feed primary/secondary from generic axis keys
+                    return axis == LayoutAxis.Horizontal
+                        ? new LayoutOffsetValue(off.GetOr("left", 0f), off.GetOr("right", 0f))
+                        : new LayoutOffsetValue(off.GetOr("bottom", 0f), off.GetOr("top", 0f));
+            }
+        }
+
+        /// <summary> Per-child Fixed/Hug/Fill, driving LayoutElement/ContentSizeFitter + group force-expand. </summary>
+        private static void ApplySizing(GameObject go, LayoutSpec layout,
+            HorizontalOrVerticalLayoutGroup parentLayout, NeoLayoutTag tag)
+        {
+            if (layout.sizing == null || layout.sizing.IsEmpty || parentLayout == null) return;
+
+            float? width = layout.size != null ? layout.size.w : null;
+            float? height = layout.size != null ? layout.size.h : null;
+
+            if (!string.IsNullOrEmpty(layout.sizing.w))
+            {
+                ILayoutSizingMode mode = LayoutSizingModes.Get(layout.sizing.w);
+                if (mode != null)
+                {
+                    mode.Apply(go, horizontal: true, width);
+                    if (mode.WantsForceExpand) UIWidgetFactory.ForceExpandAxis(parentLayout, horizontal: true);
+                    tag.sizingW = mode.Id;
+                }
+            }
+            if (!string.IsNullOrEmpty(layout.sizing.h))
+            {
+                ILayoutSizingMode mode = LayoutSizingModes.Get(layout.sizing.h);
+                if (mode != null)
+                {
+                    mode.Apply(go, horizontal: false, height);
+                    if (mode.WantsForceExpand) UIWidgetFactory.ForceExpandAxis(parentLayout, horizontal: false);
+                    tag.sizingH = mode.Id;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Reverse-maps a tagged RectTransform into a <see cref="LayoutSpec"/>. Reads the
+        /// <see cref="NeoLayoutTag"/> for the resolved constraint ids (anchors alias, so the tag is
+        /// authoritative), then re-detects offsets/sizing from the live RectTransform so hand edits
+        /// to the prefab still round-trip. Returns null when the tag carries nothing.
+        /// </summary>
+        public static LayoutSpec Detect(RectTransform rect, NeoLayoutTag tag)
+        {
+            if (rect == null || tag == null) return null;
+            var spec = new LayoutSpec();
+
+            if (!string.IsNullOrEmpty(tag.h) || !string.IsNullOrEmpty(tag.v))
+            {
+                var offset = new LayoutOffset();
+                var size = new LayoutSize();
+
+                DetectAxis(rect, tag.h, LayoutAxis.Horizontal, spec, offset, size);
+                DetectAxis(rect, tag.v, LayoutAxis.Vertical, spec, offset, size);
+
+                if (!offset.IsEmpty) spec.offset = offset;
+                if (!size.IsEmpty) spec.size = size;
+            }
+
+            if (!string.IsNullOrEmpty(tag.sizingW) || !string.IsNullOrEmpty(tag.sizingH))
+            {
+                var sizing = new LayoutSizing();
+                if (DetectSizing(rect.gameObject, tag.sizingW, horizontal: true, out string wMode)) sizing.w = wMode;
+                if (DetectSizing(rect.gameObject, tag.sizingH, horizontal: false, out string hMode)) sizing.h = hMode;
+                if (!sizing.IsEmpty) spec.sizing = sizing;
+
+                // "fixed" sizing carries an authored extent (min=preferred): round-trip it through
+                // layout.size so a regenerate re-applies the same rigid size.
+                var le = rect.GetComponent<LayoutElement>();
+                if (le != null)
+                {
+                    LayoutSize size = spec.size ?? new LayoutSize();
+                    if (sizing.w == LayoutSizingModes.Fixed && le.preferredWidth > 0f) size.w = le.preferredWidth;
+                    if (sizing.h == LayoutSizingModes.Fixed && le.preferredHeight > 0f) size.h = le.preferredHeight;
+                    if (!size.IsEmpty) spec.size = size;
+                }
+            }
+
+            return spec.IsEmpty ? null : spec;
+        }
+
+        private static void DetectAxis(RectTransform rect, string constraintId, LayoutAxis axis,
+            LayoutSpec spec, LayoutOffset offset, LayoutSize size)
+        {
+            if (string.IsNullOrEmpty(constraintId)) return;
+            ILayoutConstraint c = LayoutConstraints.Get(constraintId, axis);
+            if (c == null) return;
+
+            if (axis == LayoutAxis.Horizontal) spec.h = constraintId;
+            else spec.v = constraintId;
+
+            if (!c.TryDetect(rect, out LayoutOffsetValue value, out float? detectedSize)) return;
+
+            WriteOffset(offset, c, axis, value);
+            if (!c.Stretches && detectedSize.HasValue && detectedSize.Value > 0f)
+            {
+                if (axis == LayoutAxis.Horizontal) size.w = detectedSize.Value;
+                else size.h = detectedSize.Value;
+            }
+        }
+
+        private static void WriteOffset(LayoutOffset offset, ILayoutConstraint constraint, LayoutAxis axis,
+            LayoutOffsetValue value)
+        {
+            switch (constraint.Id)
+            {
+                case LayoutConstraints.Left: offset.Set("left", value.primary); break;
+                case LayoutConstraints.Right: offset.Set("right", value.primary); break;
+                case LayoutConstraints.Top: offset.Set("top", value.primary); break;
+                case LayoutConstraints.Bottom: offset.Set("bottom", value.primary); break;
+                case LayoutConstraints.Center:
+                    offset.Set(axis == LayoutAxis.Horizontal ? "h" : "v", value.primary); break;
+                case LayoutConstraints.LeftRight:
+                    offset.Set("left", value.primary); offset.Set("right", value.secondary); break;
+                case LayoutConstraints.TopBottom:
+                    offset.Set("top", value.primary); offset.Set("bottom", value.secondary); break;
+                case LayoutConstraints.Scale:
+                    if (axis == LayoutAxis.Horizontal) { offset.Set("left", value.primary); offset.Set("right", value.secondary); }
+                    else { offset.Set("bottom", value.primary); offset.Set("top", value.secondary); }
+                    break;
+                default:
+                    if (axis == LayoutAxis.Horizontal) { offset.Set("left", value.primary); offset.Set("right", value.secondary); }
+                    else { offset.Set("bottom", value.primary); offset.Set("top", value.secondary); }
+                    break;
+            }
+        }
+
+        private static bool DetectSizing(GameObject go, string declaredMode, bool horizontal, out string detected)
+        {
+            detected = null;
+            if (string.IsNullOrEmpty(declaredMode)) return false;
+            // Prefer the declared mode if it still matches; else re-detect in registry order (a hand
+            // edit may have changed it). Keeps round-trip honest without aliasing.
+            ILayoutSizingMode declared = LayoutSizingModes.Get(declaredMode);
+            if (declared != null && declared.TryDetect(go, horizontal)) { detected = declared.Id; return true; }
+            foreach (ILayoutSizingMode mode in LayoutSizingModes.All)
+                if (mode.TryDetect(go, horizontal)) { detected = mode.Id; return true; }
+            // nothing matches anymore (edit cleared it): drop the field rather than lie.
+            return false;
         }
     }
 }

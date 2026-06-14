@@ -192,6 +192,46 @@ namespace Neo.UI.Tests
             Assert.IsTrue(exported.popups.Any(p => p.name == "SpecConfirm" && p.title == "Sure?"));
         }
 
+        private const string LayoutModelSpecJson = @"{
+          ""views"": [ { ""id"": ""Spec/LayoutModel"", ""elements"": [
+            { ""image"": { ""layout"": {
+                ""h"": ""right"", ""v"": ""bottom"",
+                ""offset"": { ""right"": 24, ""bottom"": 40 },
+                ""size"": { ""w"": 160, ""h"": 90 } } } }
+          ] } ]
+        }";
+
+        [Test]
+        public void LayoutModel_GeneratesConstraintRect_AndRoundTrips()
+        {
+            GenerateReport report = UISpecGenerator.Generate(UISpec.FromJson(LayoutModelSpecJson));
+            Assert.IsEmpty(report.issues, report.ToString());
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(
+                $"{UISpecGenerator.GeneratedRoot}/Views/Spec_LayoutModel.prefab");
+            Assert.IsNotNull(prefab);
+
+            RectTransform image = prefab.GetComponentsInChildren<Image>(true)
+                .Select(i => (RectTransform)i.transform).First(r => r.name.StartsWith("image"));
+            // bottom-right corner: anchors (1,0), pivot (1,0)
+            Assert.AreEqual(new Vector2(1f, 0f), image.anchorMin);
+            Assert.AreEqual(new Vector2(1f, 0f), image.anchorMax);
+            Assert.AreEqual(-24f, image.offsetMax.x, 1e-3f);
+            Assert.AreEqual(40f, image.offsetMin.y, 1e-3f);
+            Assert.IsNotNull(image.GetComponent<NeoLayoutTag>(), "layout element carries the round-trip tag");
+
+            // exported spec carries the layout, not legacy anchor/position
+            UISpec exported = UISpecExporter.ExportProject();
+            ViewSpec view = exported.views.First(v => v.id == "Spec/LayoutModel");
+            ElementSpec el = view.elements.First(e => e.kind == "image");
+            Assert.IsNotNull(el.layout, "must export as a layout");
+            Assert.AreEqual("right", el.layout.h);
+            Assert.AreEqual("bottom", el.layout.v);
+            Assert.IsNull(el.anchor, "layout elements do not emit a legacy anchor");
+            Assert.IsNull(el.position, "layout elements do not emit a legacy position");
+
+            AssetDatabase.DeleteAsset(UISpecGenerator.GeneratedRoot);
+        }
+
         [Test]
         public void StarterKit_CreatesThemedPrefabLibrary()
         {

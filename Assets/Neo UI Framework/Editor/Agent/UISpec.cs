@@ -323,6 +323,175 @@ namespace Neo.UI.Editor
     }
 
     /// <summary>
+    /// The Figma-style constraint+offset placement model — the additive, preferred alternative to
+    /// the legacy <c>anchor</c>/<c>position</c>/<c>size</c>/<c>flex</c> fields. When present on an
+    /// element it WINS; when absent the legacy fields drive generation exactly as before (zero
+    /// behavior change for un-migrated specs). Per axis a constraint declares intent — stick to an
+    /// edge, stretch both edges, center, or scale proportionally — so the offset is stored relative
+    /// to that intent, not as absolute canvas pixels (the structural fix for "moved it in portrait,
+    /// it disappears in landscape").
+    ///
+    /// JSON shape (all keys optional):
+    /// <code>
+    /// "layout": {
+    ///   "h": "leftRight",                  // left|right|leftRight|center|scale   (default "left")
+    ///   "v": "center",                     // top|bottom|topBottom|center|scale   (default "top")
+    ///   "offset": { "left": 24, "right": 24, "v": 0 },  // keyed BY CONSTRAINT (self-documenting):
+    ///                                       //   left/right/top/bottom = edge distance; h/v = signed
+    ///                                       //   center offset; leftRight/topBottom reuse left/right/
+    ///                                       //   top/bottom as [start,end] insets; scale reuses them
+    ///                                       //   as [startFraction,endFraction]
+    ///   "size":   { "w": 320, "h": 96 },    // ignored on a stretched axis
+    ///   "sizing": { "w": "fill", "h": "fixed" }   // per-child mode in a layout-group parent
+    /// }
+    /// </code>
+    /// Deterministic <see cref="ToJsonObject"/> key order: h, v, offset, size, sizing.
+    /// </summary>
+    [Serializable]
+    public class LayoutSpec
+    {
+        /// <summary> Horizontal constraint id (default "left" when omitted at apply time). </summary>
+        public string h;
+        /// <summary> Vertical constraint id (default "top" when omitted at apply time). </summary>
+        public string v;
+        /// <summary> Per-constraint offsets (see class doc). Forward-compatible string→float dict. </summary>
+        public LayoutOffset offset;
+        /// <summary> Fixed-axis sizes; ignored on a stretched axis. </summary>
+        public LayoutSize size;
+        /// <summary> Per-child sizing mode (fixed/hug/fill) in a layout-group parent. </summary>
+        public LayoutSizing sizing;
+
+        public bool IsEmpty =>
+            string.IsNullOrEmpty(h) && string.IsNullOrEmpty(v)
+            && (offset == null || offset.IsEmpty)
+            && (size == null || size.IsEmpty)
+            && (sizing == null || sizing.IsEmpty);
+
+        public static LayoutSpec Parse(Dictionary<string, object> obj)
+        {
+            if (obj == null) return null;
+            var spec = new LayoutSpec
+            {
+                h = JsonReader.GetString(obj, "h"),
+                v = JsonReader.GetString(obj, "v"),
+                offset = LayoutOffset.Parse(JsonReader.GetObject(obj, "offset")),
+                size = LayoutSize.Parse(JsonReader.GetObject(obj, "size")),
+                sizing = LayoutSizing.Parse(JsonReader.GetObject(obj, "sizing"))
+            };
+            return spec.IsEmpty ? null : spec;
+        }
+
+        public Dictionary<string, object> ToJsonObject()
+        {
+            var result = new Dictionary<string, object>();
+            if (!string.IsNullOrEmpty(h)) result["h"] = h;
+            if (!string.IsNullOrEmpty(v)) result["v"] = v;
+            if (offset != null && !offset.IsEmpty) result["offset"] = offset.ToJsonObject();
+            if (size != null && !size.IsEmpty) result["size"] = size.ToJsonObject();
+            if (sizing != null && !sizing.IsEmpty) result["sizing"] = sizing.ToJsonObject();
+            return result;
+        }
+    }
+
+    /// <summary>
+    /// Per-constraint offsets, keyed by constraint name (left/right/top/bottom/h/v) so the JSON is
+    /// self-documenting — a given axis has exactly one constraint, so a key set is unambiguous.
+    /// Backed by an ordered string→float dict to stay forward-compatible with project constraints.
+    /// Deterministic emit order: left, right, top, bottom, h, v (then any extra keys, sorted).
+    /// </summary>
+    [Serializable]
+    public class LayoutOffset
+    {
+        private static readonly string[] CanonicalOrder = { "left", "right", "top", "bottom", "h", "v" };
+
+        public Dictionary<string, float> values = new Dictionary<string, float>();
+
+        public bool IsEmpty => values == null || values.Count == 0;
+
+        public bool TryGet(string key, out float value) => values.TryGetValue(key, out value);
+        public float GetOr(string key, float fallback) => values.TryGetValue(key, out float v) ? v : fallback;
+        public void Set(string key, float value) { if (!string.IsNullOrEmpty(key)) values[key] = value; }
+
+        public static LayoutOffset Parse(Dictionary<string, object> obj)
+        {
+            if (obj == null) return null;
+            var result = new LayoutOffset();
+            foreach (KeyValuePair<string, object> entry in obj)
+                if (entry.Value is double d) result.values[entry.Key] = (float)d;
+            return result.IsEmpty ? null : result;
+        }
+
+        public Dictionary<string, object> ToJsonObject()
+        {
+            var result = new Dictionary<string, object>();
+            foreach (string key in CanonicalOrder)
+                if (values.TryGetValue(key, out float v)) result[key] = (double)v;
+            var extras = new List<string>();
+            foreach (string key in values.Keys)
+                if (System.Array.IndexOf(CanonicalOrder, key) < 0) extras.Add(key);
+            extras.Sort(System.StringComparer.Ordinal);
+            foreach (string key in extras) result[key] = (double)values[key];
+            return result;
+        }
+    }
+
+    /// <summary> Fixed-axis sizes { w, h }; ignored on a stretched axis. </summary>
+    [Serializable]
+    public class LayoutSize
+    {
+        public float? w;
+        public float? h;
+
+        public bool IsEmpty => !w.HasValue && !h.HasValue;
+
+        public static LayoutSize Parse(Dictionary<string, object> obj)
+        {
+            if (obj == null) return null;
+            var result = new LayoutSize();
+            if (obj.TryGetValue("w", out object wv) && wv is double wd) result.w = (float)wd;
+            if (obj.TryGetValue("h", out object hv) && hv is double hd) result.h = (float)hd;
+            return result.IsEmpty ? null : result;
+        }
+
+        public Dictionary<string, object> ToJsonObject()
+        {
+            var result = new Dictionary<string, object>();
+            if (w.HasValue) result["w"] = (double)w.Value;
+            if (h.HasValue) result["h"] = (double)h.Value;
+            return result;
+        }
+    }
+
+    /// <summary> Per-child sizing modes { w, h } ∈ {fixed, hug, fill} for a layout-group child. </summary>
+    [Serializable]
+    public class LayoutSizing
+    {
+        public string w;
+        public string h;
+
+        public bool IsEmpty => string.IsNullOrEmpty(w) && string.IsNullOrEmpty(h);
+
+        public static LayoutSizing Parse(Dictionary<string, object> obj)
+        {
+            if (obj == null) return null;
+            var result = new LayoutSizing
+            {
+                w = JsonReader.GetString(obj, "w"),
+                h = JsonReader.GetString(obj, "h")
+            };
+            return result.IsEmpty ? null : result;
+        }
+
+        public Dictionary<string, object> ToJsonObject()
+        {
+            var result = new Dictionary<string, object>();
+            if (!string.IsNullOrEmpty(w)) result["w"] = w;
+            if (!string.IsNullOrEmpty(h)) result["h"] = h;
+            return result;
+        }
+    }
+
+    /// <summary>
     /// One element in a view. Widgets: button, toggle, switch, tab, slider, progress, tabbar,
     /// list, text, image, shape. Layout containers: vstack, hstack, grid, scroll, spacer —
     /// containers carry padding/spacing(/columns/cellSize) and nest anything via "children".
@@ -375,7 +544,9 @@ namespace Neo.UI.Editor
         public bool cascade;       // vstack/hstack/grid: staggered child entrance on show
         public float? badge;       // button/tab: notification badge count (0 = hidden)
         public float? radius;      // corner radius override (px)
-        public string anchor;      // anchor preset name
+        public string anchor;      // anchor preset name (legacy placement)
+        public LayoutSpec layout;  // Figma-style constraint+offset placement; when set it WINS over
+                                   // anchor/position/size/flex (which stay valid when layout is null)
         public float[] size;       // [w,h] (JSON key "size" — array form)
         public float? flex;        // in stacks: share of leftover space on the parent's main axis
                                    // (size becomes the minimum); 0/absent = rigid authored size
@@ -431,6 +602,7 @@ namespace Neo.UI.Editor
                     shape = JsonReader.GetString(body, "shape"),
                     variant = JsonReader.GetString(body, "variant"),
                     anchor = JsonReader.GetString(body, "anchor"),
+                    layout = LayoutSpec.Parse(JsonReader.GetObject(body, "layout")),
                     radius = GetNullableFloat(body, "radius"),
                     size = GetFloatArray(body, "size"),
                     position = GetFloatArray(body, "position"),
@@ -534,6 +706,7 @@ namespace Neo.UI.Editor
             if (!string.IsNullOrEmpty(variant)) body["variant"] = variant;
             if (radius.HasValue) body["radius"] = (double)radius.Value;
             if (!string.IsNullOrEmpty(anchor)) body["anchor"] = anchor;
+            if (layout != null && !layout.IsEmpty) body["layout"] = layout.ToJsonObject();
             // string size variant and [w,h] share the "size" key — the variant owns it when set
             if (!string.IsNullOrEmpty(sizeVariant)) body["size"] = sizeVariant;
             else if (size != null) body["size"] = ToJsonArray(size);

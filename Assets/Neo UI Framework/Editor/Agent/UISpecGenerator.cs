@@ -895,6 +895,20 @@ namespace Neo.UI.Editor
             // corner ribbons and slanted banners ride it in both layout and free contexts
             if (element.rotation.HasValue)
                 rect.localRotation = Quaternion.Euler(0f, 0f, element.rotation.Value);
+
+            // Figma-style constraint+offset model: when present it OWNS placement (and per-child
+            // sizing in a layout group), replacing the legacy anchor/position/size/flex path. A
+            // NeoLayoutTag is stamped so the exporter reverse-maps deterministically. Backward
+            // compatible: layout == null falls straight through to the untouched legacy path below.
+            if (element.layout != null && !element.layout.IsEmpty)
+            {
+                HorizontalOrVerticalLayoutGroup parentLayout = inLayout && rect.parent != null
+                    ? rect.parent.GetComponent<HorizontalOrVerticalLayoutGroup>()
+                    : null;
+                ConstraintLayout.Apply(rect, element.layout, parentLayout);
+                return;
+            }
+
             if (inLayout)
             {
                 // the layout group owns placement; explicit size rides a LayoutElement.
