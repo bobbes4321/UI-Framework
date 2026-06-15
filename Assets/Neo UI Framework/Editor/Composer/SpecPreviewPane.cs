@@ -90,6 +90,10 @@ namespace Neo.UI.Editor.Composer
         // live build before the temp objects are destroyed — the canvas hit-tests / drags against this
         private readonly System.Collections.Generic.Dictionary<ElementSpec, ElementBox> _boxes =
             new System.Collections.Generic.Dictionary<ElementSpec, ElementBox>();
+        // last on-screen device rect + canvas px→screen px scale, captured each draw — the agent probe
+        // maps a spec element to its on-screen rect through these (see Automation.ComposerDriver)
+        private Rect _lastDrawRect;
+        private float _lastScale = 1f;
         private double _rebuildAt = -1;
         private bool _pending;
         private string _error;
@@ -148,9 +152,19 @@ namespace Neo.UI.Editor.Composer
             if (_pending && EditorApplication.timeSinceStartup >= _rebuildAt)
             {
                 _pending = false;
-                Rebuild();
+                RebuildTimed();
                 _repaint?.Invoke();
             }
+        }
+
+        // Rebuild + record the cost for an active probe session (the debounce-stall metric). Outside a
+        // session ComposerProbeMetrics.Active is false, so this is a plain Rebuild() with no overhead.
+        private void RebuildTimed()
+        {
+            if (!Automation.ComposerProbeMetrics.Active) { Rebuild(); return; }
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            Rebuild();
+            Automation.ComposerProbeMetrics.AddRebuildMs(sw.Elapsed.TotalMilliseconds);
         }
 
         // ------------------------------------------------------------------ draw
@@ -193,6 +207,8 @@ namespace Neo.UI.Editor.Composer
             float drawW = _texture.width * scale, drawH = _texture.height * scale;
             var drawRect = new Rect(canvasRect.x + (canvasRect.width - drawW) * 0.5f,
                 canvasRect.y + (canvasRect.height - drawH) * 0.5f, drawW, drawH);
+            _lastDrawRect = drawRect;
+            _lastScale = scale;
             GUI.DrawTexture(drawRect, _texture, ScaleMode.ScaleToFit, false);
 
             // device free-resize handles — drawn + driven in the LETTERBOX MARGIN (outside drawRect) so
@@ -921,6 +937,60 @@ namespace Neo.UI.Editor.Composer
             _playback.Stop();
             Release();
         }
+
+        // ------------------------------------------------------------------ agent probe automation seam
+
+        /// <summary> Rebuilds the preview synchronously (cancelling the debounce) so an agent probe can
+        /// read fresh element geometry without waiting an editor tick. Used only by the automation
+        /// harness; normal authoring keeps the debounced <see cref="Update"/> path. </summary>
+        internal void ForceRebuild()
+        {
+            _pending = false;
+            RebuildTimed();
+        }
+
+        /// <summary>
+        /// Maps a built element to its rect in PANE-LOCAL coordinates (the same space the canvas hit-tests
+        /// in), using the geometry captured by the last build and the last on-screen device rect. The
+        /// automation facade adds the preview IMGUIContainer's window offset to get a window-space point
+        /// it can inject a mouse event at. Returns false when the element wasn't built (off-screen / not
+        /// in the current view) or nothing has been drawn yet.
+        /// </summary>
+        internal bool TryGetElementLocalRect(ElementSpec element, out Rect rect)
+        {
+            rect = default;
+            if (element == null || _texture == null || !_boxes.TryGetValue(element, out ElementBox box)) return false;
+            Rect d = _lastDrawRect;
+            if (d.width <= 0f || d.height <= 0f) return false;
+            Rect n = box.norm;
+            rect = new Rect(d.x + n.x * d.width, d.y + (1f - n.y - n.height) * d.height,
+                n.width * d.width, n.height * d.height);
+            return true;
+        }
+
+        /// <summary> Canvas px → screen px scale of the last draw (a probe converts device-space drag
+        /// deltas to on-screen deltas through this). </summary>
+        internal float LastScale => _lastScale;
+
+        /// <summary> Sets the preview device to a free custom size (probe <c>setDevice</c> with w/h). </summary>
+        internal void SetDeviceSize(int width, int height)
+        {
+            _viewport.width = Mathf.Max(64, width);
+            _viewport.height = Mathf.Max(64, height);
+            _viewport.freeMode = true;
+            _viewport.presetId = null;
+            RequestRebuild();
+        }
+
+        /// <summary> Applies a registered device preset by id (probe <c>setDevice</c> with a preset). </summary>
+        internal void ApplyPresetById(string id)
+        {
+            if (ComposerDevicePresets.TryGet(id, out DevicePreset p)) { _viewport.ApplyPreset(p); RequestRebuild(); }
+            else Debug.LogWarning($"[ComposerProbe] No device preset registered for id '{id}'.");
+        }
+
+        /// <summary> Current preview device size in device px. </summary>
+        internal (int width, int height) DeviceSizePx => (_viewport.width, _viewport.height);
 
         // ------------------------------------------------------------------ playback enter/exit (G.2.3)
 

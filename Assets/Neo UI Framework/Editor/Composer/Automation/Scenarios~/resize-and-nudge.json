@@ -1,0 +1,15 @@
+{
+  "name": "resize-and-nudge",
+  "open": "new",
+  "width": 1080,
+  "height": 1920,
+  "steps": [
+    { "action": "addWidget", "kind": "image" },
+    { "action": "select", "path": "views/Menu/Main/elements[0]" },
+    { "action": "resize", "path": "views/Menu/Main/elements[0]", "handle": "br", "dx": 160, "dy": -160 },
+    { "action": "nudge", "path": "views/Menu/Main/elements[0]", "dir": "right", "count": 5 },
+    { "action": "nudge", "path": "views/Menu/Main/elements[0]", "dir": "up", "count": 1, "shift": true },
+    { "action": "undo" },
+    { "action": "redo" }
+  ]
+}

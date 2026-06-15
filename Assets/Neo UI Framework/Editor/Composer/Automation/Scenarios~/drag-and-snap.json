@@ -1,0 +1,13 @@
+{
+  "name": "drag-and-snap",
+  "open": "new",
+  "width": 1080,
+  "height": 1920,
+  "steps": [
+    { "action": "addWidget", "kind": "image" },
+    { "action": "addWidget", "kind": "image" },
+    { "action": "select", "path": "views/Menu/Main/elements[0]" },
+    { "action": "drag", "path": "views/Menu/Main/elements[0]", "dx": 240, "dy": -160 },
+    { "action": "drag", "path": "views/Menu/Main/elements[0]", "dx": -40, "dy": 0 }
+  ]
+}
