@@ -33,7 +33,7 @@ MonoBehaviour:
       type: {class: StartNode, ns: Neo.UI, asm: Neo.UI}
       data:
         name: Start
-        position: {x: 0, y: 0}
+        position: {x: 0, y: 102}
         outputs:
         - portName: Start
           toNode: Collection
@@ -49,7 +49,7 @@ MonoBehaviour:
       type: {class: UINode, ns: Neo.UI, asm: Neo.UI}
       data:
         name: Collection
-        position: {x: 280, y: 0}
+        position: {x: 340, y: 58}
         outputs:
         - portName: ToggleOn Tabs/Shop
           toNode: Shop
@@ -110,7 +110,7 @@ MonoBehaviour:
       type: {class: UINode, ns: Neo.UI, asm: Neo.UI}
       data:
         name: Shop
-        position: {x: 560, y: 120}
+        position: {x: 680, y: 0}
         outputs:
         - portName: ToggleOn Tabs/Collection
           toNode: Collection
@@ -151,7 +151,7 @@ MonoBehaviour:
       type: {class: UINode, ns: Neo.UI, asm: Neo.UI}
       data:
         name: News
-        position: {x: 840, y: 240}
+        position: {x: 1020, y: 22}
         outputs:
         - portName: ToggleOn Tabs/Collection
           toNode: Collection
@@ -192,7 +192,7 @@ MonoBehaviour:
       type: {class: UINode, ns: Neo.UI, asm: Neo.UI}
       data:
         name: SettingsPage
-        position: {x: 1120, y: 0}
+        position: {x: 1700, y: 80}
         outputs:
         - portName: ToggleOn Tabs/Collection
           toNode: Collection
@@ -233,7 +233,7 @@ MonoBehaviour:
       type: {class: UINode, ns: Neo.UI, asm: Neo.UI}
       data:
         name: Detail
-        position: {x: 1400, y: 120}
+        position: {x: 680, y: 160}
         outputs:
         - portName: ButtonClick Nav/Back
           toNode: Collection
@@ -274,7 +274,7 @@ MonoBehaviour:
       type: {class: UINode, ns: Neo.UI, asm: Neo.UI}
       data:
         name: Painting
-        position: {x: 1680, y: 240}
+        position: {x: 1020, y: 182}
         outputs:
         - portName: ButtonClick Game/Pause
           toNode: Paused
@@ -295,7 +295,7 @@ MonoBehaviour:
       type: {class: UINode, ns: Neo.UI, asm: Neo.UI}
       data:
         name: Paused
-        position: {x: 1960, y: 0}
+        position: {x: 1340, y: 79}
         outputs:
         - portName: ButtonClick Game/Resume
           toNode: Painting

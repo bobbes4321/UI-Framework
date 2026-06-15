@@ -49,6 +49,7 @@ MonoBehaviour:
   - category: Juice
     names:
     - Screen
+    - Screen Two
   - category: Lint
     names:
     - Screen

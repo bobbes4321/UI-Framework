@@ -56,6 +56,12 @@ namespace Neo.UI.Editor
         {
             /// <summary> id Type → the set of Category/Name references found for it. </summary>
             public readonly Dictionary<Type, HashSet<Ref>> referencesByType = new Dictionary<Type, HashSet<Ref>>();
+            /// <summary>
+            /// id Type + Ref → how many distinct slots reference it (NOT deduped, unlike
+            /// <see cref="referencesByType"/>). Powers the per-id "N refs" badge in the Browse pane;
+            /// presence/orphan checks still go through <see cref="referencesByType"/>.
+            /// </summary>
+            public readonly Dictionary<Type, Dictionary<Ref, int>> countsByType = new Dictionary<Type, Dictionary<Ref, int>>();
             /// <summary> Spec files parsed successfully. </summary>
             public int filesScanned;
             /// <summary> "path: message" for every spec that failed to parse (surfaced, never swallowed). </summary>
@@ -67,6 +73,14 @@ namespace Neo.UI.Editor
                 return referencesByType.TryGetValue(idType, out HashSet<Ref> set) ? set : new HashSet<Ref>();
             }
 
+            /// <summary> The number of slots that reference <paramref name="reference"/> (0 when none). </summary>
+            public int CountFor(Type idType, Ref reference)
+            {
+                if (idType == null) return 0;
+                return countsByType.TryGetValue(idType, out Dictionary<Ref, int> counts)
+                       && counts.TryGetValue(reference, out int count) ? count : 0;
+            }
+
             internal void Add(Type idType, string category, string name)
             {
                 if (idType == null) return;
@@ -75,6 +89,11 @@ namespace Neo.UI.Editor
                 if (!referencesByType.TryGetValue(idType, out HashSet<Ref> set))
                     referencesByType[idType] = set = new HashSet<Ref>();
                 set.Add(reference);
+
+                if (!countsByType.TryGetValue(idType, out Dictionary<Ref, int> tally))
+                    countsByType[idType] = tally = new Dictionary<Ref, int>();
+                tally.TryGetValue(reference, out int current);
+                tally[reference] = current + 1;
             }
 
             internal void Add(Type idType, string slashed)
