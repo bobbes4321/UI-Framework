@@ -112,7 +112,7 @@ namespace Neo.UI.Editor
                 bool mutatesAssets = action == "generate" || action == "buildScene"
                                      || action == "screenshot" || action == "preview"
                                      || action == "diff" || action == "merge" || action == "sync"
-                                     || action == "bindings";
+                                     || action == "bindings" || action == "composerSession";
                 if (mutatesAssets && UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode)
                 {
                     result["ok"] = false;
@@ -134,9 +134,10 @@ namespace Neo.UI.Editor
                     case "preview": HandlePreview(request, result); break;
                     case "importSprites": HandleImportSprites(request, result); break;
                     case "bindings": HandleBindings(request, result); break;
+                    case "composerSession": HandleComposerSession(request, result); break;
                     default:
                         result["ok"] = false;
-                        result["error"] = $"Unknown action '{action}' (screenshot | generate | export | validate | diff | merge | sync | buildScene | specReference | preview | importSprites | bindings)";
+                        result["error"] = $"Unknown action '{action}' (screenshot | generate | export | validate | diff | merge | sync | buildScene | specReference | preview | importSprites | bindings | composerSession)";
                         break;
                 }
             }
@@ -157,6 +158,38 @@ namespace Neo.UI.Editor
             string written = UIScreenshotter.CapturePrefab(prefabPath, outPath, width, height);
             result["ok"] = true;
             result["path"] = Path.GetFullPath(written);
+        }
+
+        // Drives the live Composer window through a scripted scenario and returns a filmstrip + per-step
+        // interaction telemetry — the agent's "try it and watch it" loop. Needs a graphics device
+        // (window capture + preview render), so a headless batch run must omit -nographics. The session
+        // only mutates the in-memory document (never saves), so committed assets are untouched.
+        private static void HandleComposerSession(Dictionary<string, object> request, Dictionary<string, object> result)
+        {
+            Dictionary<string, object> inline = JsonReader.GetObject(request, "scenario");
+            string scenarioPath = JsonReader.GetString(request, "scenarioPath");
+
+            Composer.Automation.ComposerScenario scenario;
+            if (inline != null) scenario = Composer.Automation.ComposerScenario.Parse(inline);
+            else if (!string.IsNullOrEmpty(scenarioPath)) scenario = Composer.Automation.ComposerScenario.FromFile(scenarioPath);
+            else throw new ArgumentException("composerSession needs a \"scenario\" object or a \"scenarioPath\" file");
+
+            var options = new Composer.Automation.ProbeOptions
+            {
+                outputDir = JsonReader.GetString(request, "out", "Temp/neo-composer-session"),
+            };
+            int w = (int)JsonReader.GetFloat(request, "windowWidth", 0f);
+            int h = (int)JsonReader.GetFloat(request, "windowHeight", 0f);
+            if (w > 0) options.width = w;
+            if (h > 0) options.height = h;
+
+            Composer.Automation.SessionReport report = Composer.Automation.ComposerProbe.RunSession(scenario, options);
+            string sessionJson = report.WriteJson(Path.Combine(options.outputDir, "session.json"));
+
+            result["ok"] = true;
+            result["dir"] = Path.GetFullPath(options.outputDir);
+            result["session"] = sessionJson;
+            result["report"] = report.ToJsonObject();
         }
 
         private static void HandleGenerate(Dictionary<string, object> request, Dictionary<string, object> result)

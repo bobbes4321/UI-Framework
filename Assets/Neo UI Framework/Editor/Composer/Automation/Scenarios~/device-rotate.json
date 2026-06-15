@@ -1,0 +1,11 @@
+{
+  "name": "device-rotate",
+  "open": "new",
+  "steps": [
+    { "action": "addWidget", "kind": "image" },
+    { "action": "setDevice", "preset": "phone-portrait" },
+    { "action": "select", "path": "views/Menu/Main/elements[0]" },
+    { "action": "setDevice", "preset": "phone-landscape" },
+    { "action": "setDevice", "preset": "phone-portrait" }
+  ]
+}

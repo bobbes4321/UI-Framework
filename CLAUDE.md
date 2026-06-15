@@ -170,6 +170,25 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   `BindingManifest`/`BindingStubGenerator`, tests `BindingManifestTests`/`BindingStubTests`)
   (screenshot output paths must live OUTSIDE Temp/ if they need to survive an editor exit; the
   screenshotter needs a graphics device — batch runs must omit -nographics).
+- `{"action":"composerSession","scenarioPath":"…/Scenarios~/drag-and-snap.json","out":"Temp/neo-composer-session"}`
+  (also inline `"scenario":{…}`) — **the agent's "try it and watch it" loop for the Composer**. Drives
+  the LIVE Composer window through a scripted scenario of user gestures and returns a filmstrip (one
+  window PNG per step) + per-step interaction telemetry, so an agent can experience the Composer's feel
+  instead of only mutating the spec. Steps split honestly: *injected* (select/drag/resize/nudge feed
+  real `Event`s via `EditorWindow.SendEvent` through the genuine `ComposerCanvas` handlers — the feel
+  surface) vs *driven* (addWidget/setDevice/setBreakpoint/undo/redo call the same code path the control
+  hits, because Unity's `DragAndDrop`/per-frame toolbars can't be faithfully synthesized). The session
+  only mutates the in-memory document (never saves). Metrics = the measurable face of "clunky":
+  input-events-per-step (economy), event→repaint latency (responsiveness), repaint count + preview
+  rebuild-stall ms, GC bytes/step (cost), spec round-trip (correctness). The loop: run scenario → read
+  `session.json` + frames → fix Composer code → re-run SAME scenario → `SessionReport.Diff` proves the
+  delta. `Editor/Composer/Automation/` (`ComposerProbe`/`ComposerDriver`/`WindowCapture`/`ComposerScenario`/
+  `ComposerProbeActions`/`SessionReport`, gated `ComposerProbeMetrics`); window+pane geometry via the
+  `Probe_*`/`internal` automation seam on `NeoComposerWindow`/`SpecPreviewPane`; seed scenarios under
+  `Automation/Scenarios~/`; step kinds extend via `ComposerProbeActions.Register`. Needs a graphics
+  device (window capture + preview) — a batch run must omit -nographics; without graphics the session
+  still completes (capture null, preview-dependent gestures skipped). Tests `ComposerScenarioParseTests`/
+  `ComposerProbeTests`.
 - First-class domain signals: toggle/slider/dropdown take an optional `signal` ("Category/Name") that the
   widget publishes its typed value to (bool/float/int) IN ADDITION to its standard "…/Behaviour" stream —
   so game code does `Signals.On<bool>("Audio","Muted", …)` directly instead of branching the firehose
@@ -262,6 +281,8 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   panel; **breakpoint authoring** (`BreakpointBar` — scope inspector edits to a breakpoint's override
   delta); and **live preview** (theme recolor, sample rows in bound lists via `PreviewSampleData`,
   breakpoint-override preview via an effective-spec merge). Every new fixed set is an extension seam.
+  To improve the Composer's *feel*, drive it through the `composerSession` probe (above) rather than
+  testing by hand — it captures a filmstrip + interaction telemetry an agent can critique and re-run.
 - Soft design lint (`AgentValidation.ValidateDesign`, surfaced as `designWarnings` by the bridge's
   validate action): WCAG contrast on theme token pairs (3:1 for button labels — large text),
   raw fontSize where text styles exist, off-scale container spacing (4/8/12/16/24/32/48/64).

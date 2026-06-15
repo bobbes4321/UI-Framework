@@ -176,17 +176,28 @@ namespace Neo.UI.Editor.Composer
 
         // ------------------------------------------------------------------ pane draws
 
-        private void DrawTree() => _tree.OnGUI(LocalRect(_treeGui));
+        private void DrawTree() => Timed("tree", () => _tree.OnGUI(LocalRect(_treeGui)));
 
         private void DrawPalette() => _palette.OnGUI(LocalRect(_paletteGui));
 
-        private void DrawPreview()
+        private void DrawPreview() => Timed("preview", () =>
         {
+            if (Event.current.type == EventType.Repaint) Automation.ComposerProbeMetrics.CountRepaint();
             SyncPreviewTarget();
             _preview.OnGUI(LocalRect(_previewGui));
-        }
+        });
 
-        private void DrawInspector() => _inspector.OnGUI(LocalRect(_inspectorGui), _tree.Selected);
+        private void DrawInspector() => Timed("inspector", () => _inspector.OnGUI(LocalRect(_inspectorGui), _tree.Selected));
+
+        // Wraps a pane draw so an active agent-probe session can attribute OnGUI cost per pane. Zero
+        // overhead when ComposerProbeMetrics.Active is false (all normal authoring) — it just draws.
+        private static void Timed(string pane, System.Action draw)
+        {
+            if (!Automation.ComposerProbeMetrics.Active) { draw(); return; }
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            draw();
+            Automation.ComposerProbeMetrics.AddPaneDraw(pane, sw.Elapsed.TotalMilliseconds);
+        }
 
         private void DrawBreakpointBar() => _breakpointBar.OnGUI();
 
@@ -451,6 +462,51 @@ namespace Neo.UI.Editor.Composer
             _flowGraph = ComposerFlowBridge.ToGraph(_document.Spec.flow);
             FlowGraphWindow.OpenForSpec(_flowGraph,
                 () => _document.ReplaceFlow(ComposerFlowBridge.ToFlowSpec(_flowGraph)));
+        }
+
+        // ------------------------------------------------------------------ agent probe automation seam
+        //
+        // Lets the Composer Probe (Editor/Composer/Automation) drive and observe THIS window — without a
+        // public API explosion. It resolves a spec path to the element's on-screen rect so a synthesized
+        // mouse event lands on the right widget, and exposes the document plus the few navigation/setup
+        // commands the driver invokes directly (the same code paths the corresponding UI controls hit).
+        // All internal: only the package's own automation code reaches it.
+
+        internal SpecDocument Document => _document;
+        internal SpecPreviewPane Preview => _preview;
+        internal string SelectedPath => _tree?.SelectedPath;
+
+        internal void Probe_SyncPreviewTarget() => SyncPreviewTarget();
+        internal void Probe_SelectPath(string path) => ReselectPath(path);
+        internal void Probe_AddWidget(string kind) => AddKindToCurrentView(kind);
+        internal void Probe_SetBreakpoint(string name) => _document.SetActiveBreakpoint(name);
+        internal void Probe_Undo() => _document.Undo();
+        internal void Probe_Redo() => _document.Redo();
+        internal void Probe_FocusPreview() => _previewGui?.Focus();
+
+        /// <summary> Resolves a <see cref="SpecPath"/> to the <see cref="ElementSpec"/> the tree
+        /// addresses (forces a one-off tree rebuild — automation only). Null for non-element paths
+        /// (views/popups) or an unknown path. </summary>
+        internal ElementSpec Probe_ResolveElement(string path)
+        {
+            if (string.IsNullOrEmpty(path) || _tree == null) return null;
+            foreach (SpecNode node in _tree.RebuildForTest())
+                if (node.path == path) return node.element;
+            return null;
+        }
+
+        /// <summary> The window-space rect of a spec element on the preview canvas: the preview's
+        /// pane-local rect plus the preview IMGUIContainer's offset within the window. False when the
+        /// element isn't currently built/visible (wrong view, off-screen, or nothing drawn yet). </summary>
+        internal bool Probe_TryGetElementWindowRect(string path, out Rect rect)
+        {
+            rect = default;
+            ElementSpec element = Probe_ResolveElement(path);
+            if (element == null || _preview == null) return false;
+            if (!_preview.TryGetElementLocalRect(element, out Rect local)) return false;
+            Rect world = _previewGui != null ? _previewGui.worldBound : new Rect();
+            rect = new Rect(local.x + world.x, local.y + world.y, local.width, local.height);
+            return true;
         }
     }
 }

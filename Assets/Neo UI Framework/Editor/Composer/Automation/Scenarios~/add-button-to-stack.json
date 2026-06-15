@@ -1,0 +1,12 @@
+{
+  "name": "add-button-to-stack",
+  "open": "new",
+  "width": 1080,
+  "height": 1920,
+  "steps": [
+    { "action": "addWidget", "kind": "vstack" },
+    { "action": "addWidget", "kind": "button", "target": "views/Menu/Main/elements[0]" },
+    { "action": "select", "path": "views/Menu/Main/elements[0]/children[0]" },
+    { "action": "capture" }
+  ]
+}
