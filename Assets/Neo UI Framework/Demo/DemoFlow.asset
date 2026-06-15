@@ -17,15 +17,15 @@ MonoBehaviour:
     back)"
   startNode: Start
   nodes:
-  - rid: 3594297220749328456
-  - rid: 3594297220749328457
-  - rid: 3594297220749328458
+  - rid: 3594297271374315585
+  - rid: 3594297271374315586
+  - rid: 3594297271374315587
   editorPan: {x: 0, y: 0}
   editorZoom: 1
   references:
     version: 2
     RefIds:
-    - rid: 3594297220749328456
+    - rid: 3594297271374315585
       type: {class: StartNode, ns: Neo.UI, asm: Neo.UI}
       data:
         name: Start
@@ -39,8 +39,9 @@ MonoBehaviour:
             category: 
             name: 
             timerDuration: 1
+            customKind: 
           weight: 100
-    - rid: 3594297220749328457
+    - rid: 3594297271374315586
       type: {class: UINode, ns: Neo.UI, asm: Neo.UI}
       data:
         name: MainMenu
@@ -54,13 +55,14 @@ MonoBehaviour:
             category: Action
             name: Settings
             timerDuration: 1
+            customKind: 
           weight: 100
         showViews:
         - category: Menu
           viewName: Main
         hideViews: []
         hideShownViewsOnExit: 1
-    - rid: 3594297220749328458
+    - rid: 3594297271374315587
       type: {class: UINode, ns: Neo.UI, asm: Neo.UI}
       data:
         name: Settings
@@ -74,6 +76,7 @@ MonoBehaviour:
             category: 
             name: 
             timerDuration: 1
+            customKind: 
           weight: 100
         showViews:
         - category: Menu

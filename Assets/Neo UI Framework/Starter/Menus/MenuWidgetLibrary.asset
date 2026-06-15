@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf81d83183be4af469fb93c2690a3715, type: 3}
+  m_Name: MenuWidgetLibrary
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.Menus.MenuWidgetLibrary
+  toggleRow: {fileID: 1048572610202930348, guid: b2a134d1a61b8964bb6f605656108b78, type: 3}
+  switchRow: {fileID: 4988413269417701572, guid: 7653fc7e9fe8cfa41b694ccb7b3d50c4, type: 3}
+  sliderRow: {fileID: 3346454907134513762, guid: d1152b83267b336429f83077f13f6f3d, type: 3}
+  stepperRow: {fileID: 6912264554605331549, guid: 1211ac1588c16464f997426b98748f4f, type: 3}
+  dropdownRow: {fileID: 2497127047694248555, guid: 96fb9e0a0de8f8945a5fbce18caaeca9, type: 3}
+  buttonRow: {fileID: 7371037468758770102, guid: 794d32f85683970488ff9e5815f7c1f8, type: 3}
+  labelRow: {fileID: 4828661182042209211, guid: f1bc5bc3cf409434db16d00950448094, type: 3}
+  keyRebindRow: {fileID: 6481531937023819420, guid: 037212a018495af4ab773e1619739ddd, type: 3}
+  categoryTab: {fileID: 4281099163562707309, guid: d43bebb9174f51e498d161f72db6d223, type: 3}
+  categoryPanel: {fileID: 0}

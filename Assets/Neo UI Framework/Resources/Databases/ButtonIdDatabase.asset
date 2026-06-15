@@ -190,6 +190,9 @@ MonoBehaviour:
     - Button
     - Continue
     - Rematch
+  - category: WhatHappensWithAVeryLongCategoryName
+    names:
+    - None
   - category: World
     names:
     - FinishRace

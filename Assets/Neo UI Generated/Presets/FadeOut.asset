@@ -179,7 +179,7 @@ MonoBehaviour:
       settings:
         playMode: 0
         easeMode: 0
-        ease: 8
+        ease: 4
         curve:
           serializedVersion: 2
           m_Curve:

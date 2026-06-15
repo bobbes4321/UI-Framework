@@ -253,26 +253,6 @@
   ],
   "views": [
     {
-      "id": "Menu/Main",
-      "category": "Menu",
-      "name": "Main"
-    },
-    {
-      "id": "Menu/Settings",
-      "category": "Menu",
-      "name": "Settings"
-    },
-    {
-      "id": "Menu/Options",
-      "category": "Menu",
-      "name": "Options"
-    },
-    {
-      "id": "Menu/Cheats",
-      "category": "Menu",
-      "name": "Cheats"
-    },
-    {
       "id": "Game/HUD",
       "category": "Game",
       "name": "HUD"
@@ -283,14 +263,34 @@
       "name": "Inventory"
     },
     {
-      "id": "Shop/Store",
-      "category": "Shop",
-      "name": "Store"
+      "id": "Menu/Cheats",
+      "category": "Menu",
+      "name": "Cheats"
+    },
+    {
+      "id": "Menu/Main",
+      "category": "Menu",
+      "name": "Main"
+    },
+    {
+      "id": "Menu/Options",
+      "category": "Menu",
+      "name": "Options"
+    },
+    {
+      "id": "Menu/Settings",
+      "category": "Menu",
+      "name": "Settings"
     },
     {
       "id": "Race/Victory",
       "category": "Race",
       "name": "Victory"
+    },
+    {
+      "id": "Shop/Store",
+      "category": "Shop",
+      "name": "Store"
     }
   ]
 }

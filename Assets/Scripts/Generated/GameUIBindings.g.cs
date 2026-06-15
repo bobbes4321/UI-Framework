@@ -17,14 +17,14 @@ namespace Game.UI
     public partial class GameUIBindings
     {
         // ---- View ids ----
-        public const string ViewMenuMain = "Menu/Main";
-        public const string ViewMenuSettings = "Menu/Settings";
-        public const string ViewMenuOptions = "Menu/Options";
-        public const string ViewMenuCheats = "Menu/Cheats";
         public const string ViewGameHUD = "Game/HUD";
         public const string ViewGameInventory = "Game/Inventory";
-        public const string ViewShopStore = "Shop/Store";
+        public const string ViewMenuCheats = "Menu/Cheats";
+        public const string ViewMenuMain = "Menu/Main";
+        public const string ViewMenuOptions = "Menu/Options";
+        public const string ViewMenuSettings = "Menu/Settings";
         public const string ViewRaceVictory = "Race/Victory";
+        public const string ViewShopStore = "Shop/Store";
 
         // ---- Signal ids ----
         // standard stream for all UIButton widgets (ButtonSignalData, standard stream)
