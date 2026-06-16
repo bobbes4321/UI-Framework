@@ -103,7 +103,7 @@ namespace Game.UI
 
         // --------------------------------------------- boundary: scalar output → fetch by view-id const
 
-        private void RefreshCoins()
+        private void RefreshCoins() 
         {
             if (_coinCounter == null)
             {

@@ -35,6 +35,23 @@ MonoBehaviour:
   - category: Bundle
     names:
     - Go
+  - category: Buttons
+    names:
+    - DangerLg
+    - DangerMd
+    - DangerSm
+    - GhostLg
+    - GhostMd
+    - GhostSm
+    - Play
+    - PrimaryLg
+    - PrimaryMd
+    - PrimarySm
+    - SecondaryLg
+    - SecondaryMd
+    - SecondarySm
+    - Settings
+    - Shop
   - category: Cheats
     names:
     - Close
@@ -138,9 +155,16 @@ MonoBehaviour:
     names:
     - ConfirmBench
     - GetPack
+  - category: Popups
+    names:
+    - OpenPlain
+    - OpenRich
   - category: Prev
     names:
     - Go
+  - category: RewardClaim
+    names:
+    - Claim
   - category: Round
     names:
     - Play

@@ -24,6 +24,11 @@ MonoBehaviour:
     names:
     - Home
     - Shop
+  - category: DemoTabs
+    names:
+    - About
+    - Overview
+    - Stats
   - category: Gameplay
     names:
     - ScreenShake
@@ -85,6 +90,10 @@ MonoBehaviour:
     names:
     - Home
     - Options
+  - category: Switches
+    names:
+    - Fullscreen
+    - VSync
   - category: Tab
     names:
     - Tab1
@@ -97,6 +106,11 @@ MonoBehaviour:
   - category: Toggle
     names:
     - New
+  - category: Toggles
+    names:
+    - Autosave
+    - Muted
+    - Notifications
   - category: Typo
     names:
     - Music

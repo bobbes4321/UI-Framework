@@ -57,6 +57,17 @@ namespace Neo.UI.Editor.Composer
         private string _filter = "";   // search box: when set, the tree shows matches + their ancestors
         private bool _filtering;
 
+        // drag-to-reparent (the left pane's equivalent of the canvas drop-onto-a-container): a press on an
+        // element row arms a candidate; dragging past a threshold starts a DragAndDrop carrying the source
+        // path; a drop on another row reparents (INTO a container) or reorders (BEFORE/AFTER a sibling).
+        private const string TreeDragKey = "Neo.Composer.TreeReparent";
+        private const float DragThreshold = 4f;
+        private string _pressPath;            // element row pressed this frame (drag source candidate)
+        private Vector2 _pressPos;
+        private string _dropPath;             // row the drag is currently over (for the drop affordance)
+        private TreeDrag.Zone _dropZone;
+        private ElementSpec _pendingSelect;   // reparented element to re-select once rows rebuild
+
         public SpecNode Selected { get; private set; }
         public string SelectedPath { get; private set; }
         public event Action SelectionChanged;
@@ -133,6 +144,15 @@ namespace Neo.UI.Editor.Composer
             AddRow(new SpecNode { kind = SpecNodeKind.Flow, label = spec.flow != null ? $"Flow: {spec.flow.name}" : "Flow (none)", path = "flow", depth = 0, accent = NeoColors.Flow });
 
             ApplyFilter();
+
+            // a just-reparented element moved to a new path — follow it by reference so selection
+            // (and the inspector/preview highlight) lands on the element the user dragged, not its old slot
+            if (_pendingSelect != null)
+            {
+                foreach (SpecNode node in _rows)
+                    if (ReferenceEquals(node.element, _pendingSelect)) { SelectedPath = node.path; break; }
+                _pendingSelect = null;
+            }
 
             // resolve selection against the new rows
             Selected = null;
@@ -280,12 +300,41 @@ namespace Neo.UI.Editor.Composer
             DrawSearch(new Rect(rect.x + 2f, rect.y + 2f, rect.width - 4f, SearchHeight - 4f));
             RebuildIfNeeded();
 
+            Event e = Event.current;
+            // forget the previous drop affordance each move so only the row actually under the pointer shows it
+            if (e.type == EventType.DragUpdated) _dropPath = null;
+
             var listRect = new Rect(rect.x, rect.y + SearchHeight, rect.width, rect.height - SearchHeight);
             var viewRect = new Rect(0, 0, listRect.width - 16f, _rows.Count * RowHeight);
             _scroll = GUI.BeginScrollView(listRect, _scroll, viewRect);
             for (int i = 0; i < _rows.Count; i++)
                 DrawRow(new Rect(0, i * RowHeight, viewRect.width, RowHeight), _rows[i]);
+
+            // a press on an element row that travels past the threshold begins a reparent drag.
+            // PrepareStartDrag clears any stale generic data from a previous drag, so the arming signal is
+            // purely _pressPath — gating on GetGenericData here would deadlock (the data is only ever
+            // cleared inside this block, so it could never be re-entered after the first drag).
+            if (e.type == EventType.MouseDrag && _pressPath != null &&
+                (e.mousePosition - _pressPos).magnitude > DragThreshold)
+            {
+                DragAndDrop.PrepareStartDrag();
+                DragAndDrop.SetGenericData(TreeDragKey, _pressPath);
+                DragAndDrop.objectReferences = new UnityEngine.Object[0];
+                DragAndDrop.StartDrag("Move element");
+                _pressPath = null;        // consumed — the drag session now owns the gesture
+                e.Use();
+            }
             GUI.EndScrollView();
+
+            // a drag ends with DragExited (whether it dropped or was aborted) — release our arming +
+            // affordance state and drop the generic-data payload so a later unrelated drag (palette, an
+            // external asset) can't be mistaken for a tree reparent still in progress.
+            if (e.type == EventType.MouseUp || e.type == EventType.DragExited)
+            {
+                _pressPath = null;
+                _dropPath = null;
+                if (e.type == EventType.DragExited) DragAndDrop.SetGenericData(TreeDragKey, null);
+            }
             if (_filtering && _rows.Count == 0)
                 GUI.Label(new Rect(listRect.x + 6f, listRect.y + 4f, listRect.width - 8f, 18f),
                     $"No match for “{_filter}”", EditorStyles.miniLabel);
@@ -312,6 +361,7 @@ namespace Neo.UI.Editor.Composer
                 if (selected) EditorGUI.DrawRect(rect, NeoColors.RowSelected);
                 else if (rect.Contains(e.mousePosition)) EditorGUI.DrawRect(rect, NeoColors.RowHover);
                 EditorGUI.DrawRect(new Rect(rect.x, rect.y, 2f, rect.height), node.accent.WithAlpha(0.7f));
+                if (node.path == _dropPath) DrawDropAffordance(rect);
             }
 
             float x = 6f + node.depth * Indent;
@@ -331,6 +381,7 @@ namespace Neo.UI.Editor.Composer
             GUI.Label(labelRect, node.label, selected ? EditorStyles.whiteLabel : EditorStyles.label);
 
             HandlePaletteRowDrop(rect, node);
+            HandleTreeReparentDrop(rect, node);
 
             if (e.type == EventType.MouseDown && rect.Contains(e.mousePosition) && !foldoutRect.Contains(e.mousePosition))
             {
@@ -343,10 +394,118 @@ namespace Neo.UI.Editor.Composer
                 {
                     SelectedPath = node.path;
                     Selected = node;
+                    // arm a reparent drag — only element rows are draggable sources (views/popups/headers
+                    // keep their place); the actual DragAndDrop starts in OnGUI once the press travels
+                    _pressPath = node.kind == SpecNodeKind.Element ? node.path : null;
+                    _pressPos = e.mousePosition;
                     SelectionChanged?.Invoke();
                     e.Use();
                 }
             }
+        }
+
+        /// <summary>
+        /// Drag-to-reparent in the tree (the left-pane counterpart of the canvas drop-onto-a-container).
+        /// A row being hovered by a tree drag resolves the pointer's vertical band into a <see cref="TreeDrag.Zone"/>:
+        /// the middle reparents the dragged element INTO this row's container (view/popup/container element),
+        /// the top/bottom insert it BEFORE/AFTER this row as a sibling. Invalid drops (a non-container "into"
+        /// target — e.g. dropping onto a radial progress — or a cycle) reject visibly rather than silently
+        /// snapping back. The move routes through <see cref="SpecDocument.ApplyEdit"/> like every mutation.
+        /// </summary>
+        private void HandleTreeReparentDrop(Rect rect, SpecNode node)
+        {
+            Event e = Event.current;
+            if (e.type != EventType.DragUpdated && e.type != EventType.DragPerform) return;
+            if (!rect.Contains(e.mousePosition)) return;
+            if (!(DragAndDrop.GetGenericData(TreeDragKey) is string srcPath)) return;
+
+            SpecNode src = FindRow(srcPath);
+            if (src?.element == null || !ResolveDrop(src, node, ZoneAt(rect, e.mousePosition), out _, out _))
+            {
+                DragAndDrop.visualMode = DragAndDropVisualMode.Rejected;
+                if (e.type == EventType.DragUpdated) e.Use();
+                return;
+            }
+
+            _dropPath = node.path;
+            _dropZone = ZoneAt(rect, e.mousePosition);
+            DragAndDrop.visualMode = DragAndDropVisualMode.Move;
+            if (e.type == EventType.DragPerform)
+            {
+                DragAndDrop.AcceptDrag();
+                PerformReparent(src, node, _dropZone);
+                DragAndDrop.SetGenericData(TreeDragKey, null); // released here too — don't rely on DragExited ordering
+                _dropPath = null;
+                _pressPath = null;
+            }
+            e.Use();
+        }
+
+        private static TreeDrag.Zone ZoneAt(Rect rect, Vector2 mouse) =>
+            TreeDrag.ZoneFor((mouse.y - rect.y) / rect.height);
+
+        /// <summary> Resolves a (source, target, zone) into the destination list + insert index, returning
+        /// false for an invalid drop: dropping INTO something that can't host children, or anywhere inside
+        /// the dragged element's own subtree (a cycle). Pure decision — the mutation happens in
+        /// <see cref="PerformReparent"/> so list creation stays inside the <see cref="SpecDocument.ApplyEdit"/>. </summary>
+        private bool ResolveDrop(SpecNode src, SpecNode target, TreeDrag.Zone zone,
+            out List<ElementSpec> destination, out int insertIndex)
+        {
+            destination = null;
+            insertIndex = 0;
+            if (zone == TreeDrag.Zone.Into)
+            {
+                switch (target.kind)
+                {
+                    case SpecNodeKind.View: destination = target.view?.elements; break;
+                    case SpecNodeKind.Popup: destination = target.popup?.elements; break;
+                    case SpecNodeKind.Element:
+                        if (target.element != null && ComposerCanvas.IsContainerKind(target.element.kind))
+                            destination = target.element.children;
+                        break;
+                }
+                if (destination == null) return false;
+                if (TreeDrag.IsAncestorOrSelf(src.element, target.element)) return false; // cycle (null target.element = view/popup root, never an ancestor)
+                insertIndex = destination.Count;
+                return true;
+            }
+
+            // sibling insert — only next to an element row that carries its sibling list
+            if (target.kind != SpecNodeKind.Element || target.siblings == null) return false;
+            if (TreeDrag.IsAncestorOrSelf(src.element, target.element)) return false;
+            destination = target.siblings;
+            insertIndex = zone == TreeDrag.Zone.Before ? target.index : target.index + 1;
+            return true;
+        }
+
+        private void PerformReparent(SpecNode src, SpecNode target, TreeDrag.Zone zone)
+        {
+            _document.ApplyEdit(() =>
+            {
+                if (!ResolveDrop(src, target, zone, out List<ElementSpec> destination, out int insertIndex)) return;
+                TreeDrag.Move(src.siblings, src.element, destination, insertIndex);
+            }, "Reparent Element");
+            if (target.kind == SpecNodeKind.Element && zone == TreeDrag.Zone.Into) _expanded.Add(target.path);
+            _pendingSelect = src.element; // re-select by reference after the rows rebuild at the new path
+        }
+
+        private void DrawDropAffordance(Rect rect)
+        {
+            Color tint = NeoColors.Interactive;
+            if (_dropZone == TreeDrag.Zone.Into)
+            {
+                EditorGUI.DrawRect(rect, tint.WithAlpha(0.18f));
+                return;
+            }
+            float y = _dropZone == TreeDrag.Zone.Before ? rect.y : rect.yMax - 2f;
+            EditorGUI.DrawRect(new Rect(rect.x + 2f, y, rect.width - 4f, 2f), tint);
+        }
+
+        private SpecNode FindRow(string path)
+        {
+            foreach (SpecNode node in _rows)
+                if (node.path == path) return node;
+            return null;
         }
 
         // ------------------------------------------------------------------ context menu

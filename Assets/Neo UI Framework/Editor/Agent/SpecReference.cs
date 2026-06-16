@@ -21,7 +21,7 @@ namespace Neo.UI.Editor
         public const string DefaultPath = "Assets/docs/spec-reference.md";
         public const string DefaultSchemaPath = "Assets/docs/neo-spec.schema.json";
 
-        [MenuItem("Tools/Neo UI/Generate Spec Reference", priority = 80)]
+        [MenuItem("Tools/Neo UI/Advanced/Generate Spec Reference", priority = 18)]
         public static void GenerateToDefaultPath()
         {
             string md = Write(DefaultPath);

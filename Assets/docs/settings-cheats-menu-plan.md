@@ -313,7 +313,7 @@ service state — catching "renders fine but does nothing" regressions end to en
 
 ## 10. Demo scene (final deliverable)
 
-A `buildScene`-generated playable scene from a `settings-cheats-demo.json` spec showcasing:
+A `buildScene`-generated playable scene from a `Assets/Showcases/Specs/settings-menu.json` spec showcasing:
 - **Settings menu** — tabbed Audio / Video / Controls with slider (master volume, live preview +
   commit), dropdown (quality), toggles (vsync, fullscreen), and a Reset Defaults button. A tiny demo
   listener (`Signals.On`) shows values applying live (e.g., a label echoing volume, a theme-variant
@@ -353,7 +353,7 @@ generator (idempotent, no Assets-scan fallback); exporter byte-identical; valida
 **P6 — Input rebinding.** `InputRebindService`, `UIRebindControl`, `KeyRebind` catalog/spec support,
 JSON override persistence. *Accept:* PlayMode rebind test green (rebind → persist → reload → reset).
 
-**P7 — Demo scene & pipeline net.** `settings-cheats-demo.json`, `buildScene`, extended
+**P7 — Demo scene & pipeline net.** `Assets/Showcases/Specs/settings-menu.json`, `buildScene`, extended
 `GeneratedFlowPlaythroughTests`. *Accept:* generated scene is interactive; pipeline test clicks
 through settings + cheats asserting service state.
 

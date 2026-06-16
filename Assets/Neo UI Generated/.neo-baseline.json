@@ -1,79 +1,79 @@
 {
   "theme": {
     "tokens": {
-      "Primary": "#3A86FF",
-      "Background": "#14213D",
+      "Primary": "#3B82F6",
+      "Background": "#0B0D10",
       "Accent": "#FCA311",
-      "TextDefault": "#FFFFFF",
+      "TextDefault": "#C6CCD6",
       "Panel": "#1D2D50",
-      "Surface": "#FFFFFF",
-      "SurfaceElevated": "#E9E4F6",
-      "Outline": "#FFFFFF",
-      "PrimaryHover": "#FFC34D",
-      "PrimaryPressed": "#E09A1F",
+      "Surface": "#16191E",
+      "SurfaceElevated": "#21252C",
+      "Outline": "#343A44",
+      "PrimaryHover": "#5D98F8",
+      "PrimaryPressed": "#0F66F4",
       "TextOnPrimary": "#FFFFFF",
-      "TextStrong": "#FFFFFF",
-      "TextMuted": "#D9D2F0",
-      "Success": "#7ED957",
+      "TextStrong": "#F5F7FA",
+      "TextMuted": "#8E96A4",
+      "Success": "#22C55E",
       "Warning": "#F59E0B",
       "Error": "#EF4444",
-      "Shadow": "#3A3160",
-      "SuccessHover": "#93E66F",
-      "SuccessPressed": "#65C040",
-      "Danger": "#F0596A",
-      "DangerHover": "#FF7585",
-      "DangerPressed": "#D63E50",
+      "Shadow": "#00000080",
+      "SuccessHover": "#30DB6F",
+      "SuccessPressed": "#1B9E4B",
+      "Danger": "#EF4444",
+      "DangerHover": "#F26565",
+      "DangerPressed": "#EB1A1A",
       "TextDark": "#6B6390"
     },
     "variants": {
       "Light": {
-        "Primary": "#2667CC",
-        "Background": "#D8DEE9",
-        "Accent": "#FB8500",
-        "TextDefault": "#14213D",
-        "Panel": "#FFFFFF",
-        "Surface": "#FFFFFF",
-        "SurfaceElevated": "#E9E4F6",
-        "Outline": "#FFFFFF",
-        "PrimaryHover": "#FFC34D",
-        "PrimaryPressed": "#E09A1F",
+        "Primary": "#2563EB",
+        "Background": "#F4F6F8",
+        "Accent": "#FCA311",
+        "TextDefault": "#303A49",
+        "Panel": "#1D2D50",
+        "Surface": "#16191E",
+        "SurfaceElevated": "#EAEEF3",
+        "Outline": "#D3DAE3",
+        "PrimaryHover": "#467AEE",
+        "PrimaryPressed": "#134ECF",
         "TextOnPrimary": "#FFFFFF",
-        "TextStrong": "#FFFFFF",
-        "TextMuted": "#D9D2F0",
-        "Success": "#7ED957",
-        "Warning": "#F59E0B",
-        "Error": "#EF4444",
-        "Shadow": "#3A3160",
-        "SuccessHover": "#93E66F",
-        "SuccessPressed": "#65C040",
-        "Danger": "#F0596A",
-        "DangerHover": "#FF7585",
-        "DangerPressed": "#D63E50",
+        "TextStrong": "#111827",
+        "TextMuted": "#5D6675",
+        "Success": "#15803D",
+        "Warning": "#B45309",
+        "Error": "#DC2626",
+        "Shadow": "#00000038",
+        "SuccessHover": "#1A9F4C",
+        "SuccessPressed": "#0F592A",
+        "Danger": "#DC2626",
+        "DangerHover": "#E14545",
+        "DangerPressed": "#B71D1D",
         "TextDark": "#6B6390"
       },
       "Dark": {
-        "Primary": "#3A86FF",
-        "Background": "#14213D",
+        "Primary": "#3B82F6",
+        "Background": "#0B0D10",
         "Accent": "#FCA311",
-        "TextDefault": "#FFFFFF",
+        "TextDefault": "#C6CCD6",
         "Panel": "#1D2D50",
-        "Surface": "#FFFFFF",
-        "SurfaceElevated": "#E9E4F6",
-        "Outline": "#FFFFFF",
-        "PrimaryHover": "#FFC34D",
-        "PrimaryPressed": "#E09A1F",
+        "Surface": "#16191E",
+        "SurfaceElevated": "#21252C",
+        "Outline": "#343A44",
+        "PrimaryHover": "#5D98F8",
+        "PrimaryPressed": "#0F66F4",
         "TextOnPrimary": "#FFFFFF",
-        "TextStrong": "#FFFFFF",
-        "TextMuted": "#D9D2F0",
-        "Success": "#7ED957",
+        "TextStrong": "#F5F7FA",
+        "TextMuted": "#8E96A4",
+        "Success": "#22C55E",
         "Warning": "#F59E0B",
         "Error": "#EF4444",
-        "Shadow": "#3A3160",
-        "SuccessHover": "#93E66F",
-        "SuccessPressed": "#65C040",
-        "Danger": "#F0596A",
-        "DangerHover": "#FF7585",
-        "DangerPressed": "#D63E50",
+        "Shadow": "#00000080",
+        "SuccessHover": "#30DB6F",
+        "SuccessPressed": "#1B9E4B",
+        "Danger": "#EF4444",
+        "DangerHover": "#F26565",
+        "DangerPressed": "#EB1A1A",
         "TextDark": "#6B6390"
       }
     }
@@ -205,6 +205,42 @@
         "to": 0,
         "duration": 0.20000000298023224,
         "ease": "InQuad"
+      }
+    },
+    {
+      "name": "ShowDefault",
+      "type": "Show",
+      "duration": 0.18000000715255737,
+      "ease": "OutCubic",
+      "scale": {
+        "from": "0.96,0.96,1",
+        "to": "1,1,1",
+        "duration": 0.18000000715255737,
+        "ease": "OutCubic"
+      },
+      "fade": {
+        "from": 0,
+        "to": 1,
+        "duration": 0.18000000715255737,
+        "ease": "OutCubic"
+      }
+    },
+    {
+      "name": "HideDefault",
+      "type": "Hide",
+      "duration": 0.18000000715255737,
+      "ease": "OutCubic",
+      "scale": {
+        "from": "1,1,1",
+        "to": "0.96,0.96,1",
+        "duration": 0.18000000715255737,
+        "ease": "OutCubic"
+      },
+      "fade": {
+        "from": 1,
+        "to": 0,
+        "duration": 0.18000000715255737,
+        "ease": "OutCubic"
       }
     }
   ],
@@ -488,16 +524,19 @@
               {
                 "counter": {
                   "label": "0",
-                  "labelColor": "TextStrong",
-                  "anchor": "Bottom",
-                  "size": [
-                    220,
-                    72
-                  ],
-                  "position": [
-                    0,
-                    330
-                  ],
+                  "labelColor": "Danger",
+                  "layout": {
+                    "h": "left",
+                    "v": "top",
+                    "offset": {
+                      "left": 849.99993896484375,
+                      "top": 529.12347412109375
+                    },
+                    "size": {
+                      "w": 220.00006103515625,
+                      "h": 220.87652587890625
+                    }
+                  },
                   "value": 247,
                   "textStyle": "Title"
                 }

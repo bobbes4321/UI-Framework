@@ -421,8 +421,24 @@ namespace Neo.UI.Editor
             }
             else
             {
-                CreateLabel(rect, label, contentToken, textStyle: labelStyle);
-                WithLayoutSize(go, -1f, height);
+                // a text-only button must HUG its label: give it an internal HorizontalLayoutGroup
+                // (so the label lives inside a width-controlling group and never wraps a glyph per
+                // line) plus a horizontal-fit ContentSizeFitter so the button reports a real
+                // preferred width upward — without this a layout-group parent gives it width 0 and
+                // the label collapses to one character per line (the icon+label path already gets a
+                // preferred width from its own layout group; this brings the plain path to parity).
+                var row = go.AddComponent<HorizontalLayoutGroup>();
+                row.padding = new RectOffset(20, 20, 0, 0);
+                row.childAlignment = TextAnchor.MiddleCenter;
+                row.childControlWidth = true;
+                row.childControlHeight = true;
+                row.childForceExpandWidth = false;
+                row.childForceExpandHeight = false;
+                var fitter = go.AddComponent<ContentSizeFitter>();
+                fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+                TextMeshProUGUI buttonLabel = CreateLabel(rect, label, contentToken, textStyle: labelStyle);
+                buttonLabel.enableWordWrapping = false;
+                WithLayoutSize(go, -1f, height, flexibleHeight: 0f);
             }
             return go;
         }
@@ -1273,8 +1289,12 @@ namespace Neo.UI.Editor
         public const string ResetButtonName = "Reset";
         public const string RebindButtonName = "Rebind";
 
-        /// <summary> Fixed control-column width: every row's control shares the same left/right edges. </summary>
-        public const float RowControlWidth = 480f;
+        /// <summary>
+        /// Fixed control-column width: every row's control shares the same left/right edges. Sized as a
+        /// CONTROL column, not the whole row — the flexible label takes the remaining width. Must stay
+        /// well under a row's width or the label is starved and word-wraps ("Master\nVolume").
+        /// </summary>
+        public const float RowControlWidth = 200f;
 
         /// <summary>
         /// A settings/cheats row: a flexible left label + the control in a FIXED-width right column.
@@ -1297,6 +1317,12 @@ namespace Neo.UI.Editor
 
             TextMeshProUGUI labelText = CreateLabel((RectTransform)go.transform, label, TokenTextDefault,
                 fontSize: 22f, name: LabelName, alignment: TextAlignmentOptions.MidlineLeft, textStyle: TextStyleBody);
+            // single-line: a row label must never break a word ("Master\nVolume") when the panel is
+            // narrow — it stays on one line and the flexible width gives it whatever space is left of
+            // the fixed control column. Ellipsis (not Overflow) keeps a too-narrow label from spilling
+            // over its control.
+            labelText.enableWordWrapping = false;
+            labelText.overflowMode = TextOverflowModes.Ellipsis;
             var labelLayout = labelText.gameObject.AddComponent<LayoutElement>();
             labelLayout.flexibleWidth = 1f;
             labelText.raycastTarget = false;

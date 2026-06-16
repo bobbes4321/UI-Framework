@@ -23,6 +23,11 @@ MonoBehaviour:
     - Player
     - Test
     - World
+  - category: DemoPanels
+    names:
+    - About
+    - Overview
+    - Stats
   - category: HUD
     names:
     - Minimap
@@ -63,3 +68,7 @@ MonoBehaviour:
     - Display
     - Game
     - Video
+  - category: TogglesPanel
+    names:
+    - Switches
+    - Toggles

@@ -100,25 +100,37 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   `NeoTestScratchRoot` (EditMode) and `SettingsCheatsDemoPlayTest` (PlayMode, via reflection) point it
   at a throwaway `Assets/NeoUITestScratch` for the duration of a run, so every
   `AssetDatabase.DeleteAsset(GeneratedRoot)` in test teardown only ever hits scratch — the committed,
-  GUID-referenced demo under `Assets/Neo UI Generated` survives. Production code must never reassign
-  `GeneratedRoot`.
-- **To (re)generate the committed demo itself**: headless `AgentBridge.RunBatch` with
-  `[{"action":"generate","spec":"Assets/Mockups/ColorACube/color-a-cube.json"},{"action":"buildScene","flow":"ColorACube"}]`
-  (the generated views/popups/flow + the `NeoUIGeneratedDemo` scene; name the `flow` since the
-  showcase's `GameUI` flow may share `GeneratedRoot`). Other generated/bootstrapped
-  assets (Starter kit, settings, fonts) live OUTSIDE `GeneratedRoot` and survive test runs.
-- Settings/databases are created via `Tools → Neo UI → Create or Repair Settings`; the themed
-  widget prefab library + Dark/Light palette + type scale via `Tools → Neo UI → Create or
+  GUID-referenced demo under `Assets/Neo UI Generated` survives. Production code reassigns
+  `GeneratedRoot` ONLY via `NeoWorkspace.Scoped(showcase)` (a `readonly struct IDisposable` that
+  save-restores the root even on exception and THROWS if handed `UISpecGenerator.DefaultGeneratedRoot`,
+  so a scope can never target/delete the committed demo); tests still use the scratch redirect.
+- **Showcases (the Hub front door)**: each self-contained demo lives under `Assets/Showcases/{id}/`
+  with its OWN `Generated/` (views/popups/flow/presets + `.neo-baseline.json`) and committed
+  `{id}.unity` scene — distinct ids derive distinct roots, so two showcases can never collide in one
+  bucket (the "N flows share one root" throw becomes structurally impossible). Specs live in
+  `Assets/Showcases/Specs/*.json`. `ShowcaseRegistry` is the extensibility seam: code-seeded built-ins
+  (`ShowcaseRegistryDefaults`) PLUS lazy discovery of every `ShowcaseDefinition` asset (a consuming
+  project adds a showcase by dropping one SO — no fork, no C#). Open one from `Tools → Neo UI → Hub`:
+  `ShowcaseRunner.Open` is the safe one-click (generates ONLY when nothing exists — never clobbers
+  human edits — else fast-path `OpenScene`); `ShowcaseRunner.Regenerate` routes through
+  `SpecBaseline.Sync` (merges human drift, refuses on off-spec edits). The `game-ui` showcase's
+  `postBuild` attaches the HUD director + bindings (`ShowcaseAugment.AttachGameUIDirector`). Other
+  generated/bootstrapped assets (Starter kit, settings, fonts) live OUTSIDE any showcase root and
+  survive test runs. Retired: the hand-built `DemoSceneBuilder` and the `ShowcaseSceneBuilder` (its
+  director attach moved to the `game-ui` postBuild); the `Create Demo Scene` / `Build Scene From
+  Generated UI` / `Build Showcase Scene` menu items folded into the Hub.
+- Settings/databases are created via `Tools → Neo UI → Setup → Create or Repair Settings`; the themed
+  widget prefab library + Dark/Light palette + type scale via `Tools → Neo UI → Setup → Create or
   Repair Starter Kit`. TMP SDF font assets (Inter + the Lucide icon font, committed under
-  `Neo UI Framework/Fonts`) regenerate via `Tools → Neo UI → Create or Repair Fonts`
+  `Neo UI Framework/Fonts`) regenerate via `Tools → Neo UI → Setup → Create or Repair Fonts`
   (`FontAssetBootstrap` — also wires `NeoUISettings.iconFont`). Curated theme bundles
   (CleanSlate/NeonArcade/SoftFantasy — complete token/type/shape/motion systems) apply via
-  `Tools → Neo UI → Apply Theme Bundle` or spec `"theme": { "bundle": "..." }`
+  `Tools → Neo UI → Setup → Apply Theme Bundle` or spec `"theme": { "bundle": "..." }`
   (`Editor/ThemeBundles.cs`); the acceptance render (demo spec × every bundle) is
   `-executeMethod Neo.UI.Editor.BeautificationAcceptance.Run` (needs graphics).
 - Build UI hierarchies in editor code through `UIWidgetFactory` (Editor/Agent) — it is the single
   source of widget structure; the spec generator AND exporter both rely on its child names.
-- Agent workflow with the editor OPEN: toggle `Tools → Neo UI → Agent Bridge` once, then
+- Agent workflow with the editor OPEN: toggle `Tools → Neo UI → Advanced → Agent Bridge` once, then
   write `Temp/neo-request.json` and read `Temp/neo-result.json`. With the editor CLOSED, run the
   same requests headlessly: `Unity.exe -batchmode -projectPath . -executeMethod
   Neo.UI.Editor.AgentBridge.RunBatch -neoRequest req.json -neoResult res.json` (req.json =
@@ -146,13 +158,18 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   resolution matrix IN-MEMORY — commits no prefabs/assets; the agent render-and-critique loop;
   `UISpecPreview`/`UIScreenshotter.CaptureLive`) · `{"action":"specReference"}` (writes
   `Assets/docs/spec-reference.md` + `neo-spec.schema.json`) ·
-  `{"action":"buildScene","flow":"<name>"}` (playable scene from generated assets; also
-  `Tools → Neo UI → Build Scene From Generated UI`. `GeneratedRoot` is a SHARED bucket — every spec
-  generated since the last wipe accumulates there. The build is therefore flow-scoped: it builds ONE
-  flow (= one app) and instances ONLY the views that flow references. `"flow"` is optional when a
-  single flow exists; with several it is REQUIRED — `GeneratedSceneBuilder.SelectFlowGraph` throws
-  rather than silently picking one, so a second spec's screens can't leak into the scene. Showcase →
-  `GameUI` (`ShowcaseSceneBuilder.ShowcaseFlow`); the committed ColorACube demo → `ColorACube`.
+  `{"action":"buildScene","flow":"<name>","scene":"path.unity","showcase":"<id>"}` (playable scene
+  from generated assets; opening a showcase is normally done from the Hub, not this action).
+  `GeneratedRoot` is a SHARED bucket — every spec generated since the last wipe accumulates there.
+  The build is therefore flow-scoped: it builds ONE flow (= one app) and instances ONLY the views
+  that flow references. `"flow"` is optional when a single flow exists; with several it is REQUIRED —
+  `GeneratedSceneBuilder.SelectFlowGraph` throws rather than silently picking one, so a second spec's
+  screens can't leak into the scene. Optional `"scene"` = explicit scene output path (defaults to the
+  legacy `GeneratedSceneBuilder.ScenePath`). Optional `"showcase"` = build a registered showcase by id:
+  it generates from the showcase's spec when nothing is there yet and builds inside the showcase's
+  isolated `Generated/` root + `{id}.unity` scene (`NeoWorkspace.Scoped`), so a showcase build never
+  collides with the shared default root; an explicit `"flow"`/`"scene"` override the showcase's derived
+  values. The committed ColorACube demo → flow `ColorACube`; the GameUI demo → flow `GameUI`.
   Regression: `Tests/EditMode/SceneBuilderFlowScopingTests.cs`) ·
   `{"action":"importSprites","folder":"Assets/..."}` (imports every texture under the folder as a
   Single sprite — run it BEFORE generating a spec whose image `src` points there; `textureType`
@@ -162,8 +179,8 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   cheats / views — from the spec, then emits a `// <auto-generated>` partial-class C# stub the developer
   fills in. `spec` optional → falls back to the exported project; all of `out`/`stub`/`namespace`
   optional, `"manifestOnly":true` skips the stub; the manifest JSON is always inlined in the result. The
-  stub lands OUTSIDE `GeneratedRoot` (default `Assets/Scripts/Generated`, also `Tools → Neo UI → Generate
-  Binding Stub`) so a UI regenerate never wipes it, and regenerates idempotently — greppable `const` ids
+  stub lands OUTSIDE `GeneratedRoot` (default `Assets/Scripts/Generated`, also `Tools → Neo UI → Advanced
+  → Generate Binding Stub`) so a UI regenerate never wipes it, and regenerates idempotently — greppable `const` ids
   for every view/signal/data source/setting, a `Wire()` of `Signals.On(…)`/`UserSettingsService.Bind(…)`
   calls into empty `partial void` hooks, and a `Populate…` helper per data source. Implement the hooks in
   your own SIBLING partial (`<Flow>UIBindings.Handlers.cs`); the generator never touches it.
@@ -208,13 +225,13 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   The baseline is a hidden `{GeneratedRoot}/.neo-baseline.json` (`NeoBaseline`, raw read/write) — the
   exact spec the committed assets were last generated from. It is rewritten by every successful
   `generate` (to the exported project, so drift reads zero right after), by `sync`, and by the Drift
-  window's "Fold Edits". Human entry point: `Tools → Neo UI → Check For Drift` (`DriftWindow`) — green
+  window's "Fold Edits". Human entry point: `Tools → Neo UI → Advanced → Check For Drift` (`DriftWindow`) — green
   = round-trips, red = will be lost; "Fold Edits Into Spec" re-captures the baseline. The **policy
   layer** on top (`SpecBaseline`, the `sync` action) enforces the invariant that the live, merged spec
   — not whatever the agent last wrote — is always the canonical input to the next generate; agents
-  call `sync` rather than `generate`. Human sync entry points: `Tools → Neo UI → Sync With Spec…`
+  call `sync` rather than `generate`. Human sync entry points: `Tools → Neo UI → Advanced → Sync With Spec…`
   (merge an agent's incoming spec, surfacing conflicts/off-spec in a window) and `Tools → Neo UI →
-  Capture My Edits` (fold the current project into the baseline, no regenerate). Tests: `SpecDiffTests`,
+  Advanced → Capture My Edits` (fold the current project into the baseline, no regenerate). Tests: `SpecDiffTests`,
   `SpecMergeTests`, `OffSpecLintTests`, `RoundTripSafetyTests`, `SyncProtocolTests`, `BaselineTests`.
 - Spec element kinds: button, toggle, switch, tab, slider, progress, tabbar, list/scroll, vstack,
   hstack, grid, panel (a `UIPanel : UIContainer` content surface a tab shows/hides — see tab
@@ -250,7 +267,7 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   `UIResponsiveRoot` that applies the matching breakpoint's pre-resolved layout on resize/orientation,
   only on change (base bakes = WYSIWYG). All round-trip byte-identical; merge via the single new
   `SpecPath` breakpoints-by-name key. Seams: `LayoutConstraints`/`LayoutSizingModes`/
-  `BreakpointConditions` registries. Opt-in `Tools → Neo UI → Migrate Spec To Layout Model` rewrites
+  `BreakpointConditions` registries. Opt-in `Tools → Neo UI → Advanced → Migrate Spec To Layout Model` rewrites
   legacy → `layout` (never automatic). Tests: `LayoutSpecParseTests`, `ConstraintLayoutRoundTripTests`,
   `ConstraintResponsivenessTests`, `SpecMigrationTests`, `BreakpointRoundTripTests`,
   `BreakpointCascadeTests`, `ResponsiveDriverTests` (PlayMode), `PaddingRoundTripTests`.
@@ -265,6 +282,24 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   deterministic export. NEVER let
   the exporter fall back to scanning all of Assets when a generated subfolder is missing
   (`UISpecExporter.FindGenerated`) — it would hijack committed demo/starter popups.
+- **Shape effects + UI particles** (element MODIFIERS, not new kinds — they ride alongside any element):
+  `"effect": { "id": "...", "params": {...} }` and `"particles": { ...scalars..., "modules":[…],
+  "signal":{…} }`. Both are OPEN bags dispatched through editor descriptor registries so the spec
+  pipeline carries NO per-effect switch — the extension seams are `ShapeEffectRegistry`
+  (`IShapeEffectDescriptor`) and `ParticleEffectRegistry` (`IParticleModuleDescriptor`); a project adds
+  an effect/module by registering one descriptor. **Tier-1 effects** (glowPulse/sheenSweep/gradientCycle)
+  only animate fields `OnPopulateMesh` already reads, so they stay on the shared NeoShape batch
+  (`descriptor.BatchSafe == true`); a **Tier-2** `variant` effect swaps the material for a custom
+  shader (`ShapeEffectDefinition`/`NeoShapeVariant`, `BatchSafe == false`) — a deliberate batch split.
+  Particles render as POOLED `NeoShape` instances inside the canvas (one GameObject per live particle,
+  sharing the one material — `NeoParticleEmitter`), so they inherit masking/sort/scaling for free;
+  burst-only by default, `rate > 0` enables continuous emission, an optional `signal` adds
+  `NeoParticleBurstOnSignal`. The published per-vertex channel layout a Tier-2 shader authors against
+  is `Assets/docs/neoshape-channel-layout.md` (proof shader `NeoShapeDissolve.shader`). Round-trip via
+  `UISpecGenerator`/`UISpecExporter` (`ShapeEffectRoundTripTests`, `ParticleRoundTripTests`); the
+  particle test guards the emitter's `FindProperty` field names against drift. Cost-honesty surfaces in
+  `AgentValidation.ValidateDesign` (`designWarnings`): a Tier-2 variant warns it breaks the batch, a
+  continuous/high-capacity emitter warns about per-frame cost.
 - The **Composer** (`Tools → Neo UI → Composer`, `Editor/Composer/NeoComposerWindow.cs`) is the
   from-scratch, no-agent authoring surface: it edits a `UISpec` in memory and regenerates the prefab
   as a live preview, so everything round-trips losslessly by construction (the spec stays the single

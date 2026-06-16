@@ -1,0 +1,134 @@
+{
+  "theme": { "bundle": "CleanSlate" },
+  "views": [
+    {
+      "id": "Showcase/TogglesSwitches",
+      "background": "Background",
+      "elements": [
+        {
+          "safearea": {
+            "children": [
+              {
+                "vstack": {
+                  "anchor": "Stretch",
+                  "padding": 48,
+                  "spacing": 24,
+                  "children": [
+                    {
+                      "text": {
+                        "label": "Toggles & Switches",
+                        "color": "TextStrong",
+                        "textStyle": "Title",
+                        "align": "left"
+                      }
+                    },
+                    {
+                      "text": {
+                        "label": "Boolean controls — checkbox-style toggles and sliding switches. One toggle publishes a typed domain signal (Audio/Muted).",
+                        "color": "TextMuted",
+                        "textStyle": "Caption",
+                        "align": "left"
+                      }
+                    },
+
+                    {
+                      "panel": {
+                        "id": "TogglesPanel/Toggles",
+                        "style": "Panel",
+                        "spacing": 16,
+                        "children": [
+                          {
+                            "text": {
+                              "label": "TOGGLES",
+                              "color": "TextMuted",
+                              "textStyle": "Caption",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "toggle": {
+                              "id": "Toggles/Notifications",
+                              "label": "Notifications",
+                              "value": 1
+                            }
+                          },
+                          {
+                            "toggle": {
+                              "id": "Toggles/Autosave",
+                              "label": "Auto-save",
+                              "value": 0
+                            }
+                          },
+                          {
+                            "toggle": {
+                              "id": "Toggles/Muted",
+                              "label": "Mute audio (emits Audio/Muted)",
+                              "value": 0,
+                              "signal": { "category": "Audio", "name": "Muted" }
+                            }
+                          }
+                        ]
+                      }
+                    },
+
+                    {
+                      "panel": {
+                        "id": "TogglesPanel/Switches",
+                        "style": "Panel",
+                        "spacing": 16,
+                        "children": [
+                          {
+                            "text": {
+                              "label": "SWITCHES",
+                              "color": "TextMuted",
+                              "textStyle": "Caption",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "hstack": {
+                              "spacing": 16,
+                              "children": [
+                                {
+                                  "text": {
+                                    "label": "V-Sync",
+                                    "color": "TextDefault",
+                                    "size": [600, 48],
+                                    "textStyle": "Body",
+                                    "align": "left"
+                                  }
+                                },
+                                { "switch": { "id": "Switches/VSync", "value": 1 } }
+                              ]
+                            }
+                          },
+                          {
+                            "hstack": {
+                              "spacing": 16,
+                              "children": [
+                                {
+                                  "text": {
+                                    "label": "Fullscreen",
+                                    "color": "TextDefault",
+                                    "size": [600, 48],
+                                    "textStyle": "Body",
+                                    "align": "left"
+                                  }
+                                },
+                                { "switch": { "id": "Switches/Fullscreen", "value": 0 } }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

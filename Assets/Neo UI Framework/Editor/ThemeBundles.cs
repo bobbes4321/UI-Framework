@@ -362,7 +362,7 @@ namespace Neo.UI.Editor
         // bundle shows up here automatically (no per-bundle fork point). [MenuItem] is attribute-driven
         // and can't enumerate at compile time, so we open a NeoSearchablePopup (EditorUI kit, non-modal)
         // over ThemeBundleRegistry.Names.
-        [MenuItem("Tools/Neo UI/Apply Theme Bundle…", priority = 110)]
+        [MenuItem("Tools/Neo UI/Setup/Apply Theme Bundle…", priority = 110)]
         public static void ApplyThemeBundleMenu()
         {
             var names = ThemeBundleRegistry.Names.ToList();

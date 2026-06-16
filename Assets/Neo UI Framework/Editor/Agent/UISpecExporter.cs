@@ -15,7 +15,7 @@ namespace Neo.UI.Editor
     /// </summary>
     public static class UISpecExporter
     {
-        [MenuItem("Tools/Neo UI/Export Spec…", priority = 2)]
+        [MenuItem("Tools/Neo UI/Advanced/Export Spec…", priority = 11)]
         public static void ExportToFileDialog()
         {
             string path = EditorUtility.SaveFilePanel("Export UI spec (JSON)", Application.dataPath, "ui-spec", "json");
@@ -384,8 +384,59 @@ namespace Neo.UI.Editor
             ElementSpec element = ExportElementBody(go, inLayout);
             if (element == null) return null;
             ExportGeometry(element, (RectTransform)go.transform, inLayout);
+            element.effect = ExportEffect(go);
+            element.particles = ExportParticles(go);
+            ApplyPresetDelta(go, element);
             if (s_elementSink != null) s_elementSink[go] = element;
             return element;
+        }
+
+        /// <summary>
+        /// If the widget was generated from a <see cref="NeoWidgetPreset"/> (it carries a
+        /// <see cref="WidgetPresetTag"/>), write the preset name back and strip every field that equals the
+        /// preset's value — so the spec keeps the LINK plus only the override delta, not a flattened copy.
+        /// A missing preset is non-fatal and loud: the link is kept but the fields stay inline (nothing to
+        /// diff against), so no data is ever silently dropped.
+        /// </summary>
+        private static void ApplyPresetDelta(GameObject go, ElementSpec element)
+        {
+            WidgetPresetTag tag = go.GetComponent<WidgetPresetTag>();
+            if (tag == null || string.IsNullOrEmpty(tag.presetName)) return;
+            element.preset = tag.presetName;
+
+            if (!NeoWidgetPresets.TryGet(tag.presetName, out NeoWidgetPreset p))
+            {
+                Debug.LogWarning($"[Neo.UI] Exported element '{element.id ?? element.kind}' references missing " +
+                                 $"preset '{tag.presetName}' — keeping the link but exporting its fields inline.");
+                return;
+            }
+
+            if (element.variant == p.variant) element.variant = null;
+            if (element.sizeVariant == p.sizeVariant) element.sizeVariant = null;
+            if (element.textStyle == p.textStyle) element.textStyle = null;
+            if (element.style == p.shapeStyle) element.style = null;
+            if (element.background == p.background) element.background = null;
+            if (element.labelColor == p.labelColor) element.labelColor = null;
+            if (element.icon == p.icon) element.icon = null;
+            if (NullableFloatEq(element.radius, p.RadiusOrNull)) element.radius = null;
+            if (NullableFloatEq(element.padding, p.PaddingOrNull)) element.padding = null;
+            if (FloatArrayEq(element.padding4, p.Padding4OrNull)) element.padding4 = null;
+            if (NullableFloatEq(element.spacing, p.SpacingOrNull)) element.spacing = null;
+        }
+
+        private static bool NullableFloatEq(float? a, float? b)
+        {
+            if (!a.HasValue || !b.HasValue) return a.HasValue == b.HasValue;
+            return Mathf.Approximately(a.Value, b.Value);
+        }
+
+        private static bool FloatArrayEq(float[] a, float[] b)
+        {
+            if (a == null || b == null) return a == null && b == null;
+            if (a.Length != b.Length) return false;
+            for (int i = 0; i < a.Length; i++)
+                if (!Mathf.Approximately(a[i], b[i])) return false;
+            return true;
         }
 
         private static ElementSpec ExportElementBody(GameObject go, bool inLayout)
@@ -828,6 +879,77 @@ namespace Neo.UI.Editor
                 angle = gradient.angle
             };
         }
+
+        /// <summary>
+        /// Reads an attached shape effect back to spec form by walking <see cref="ShapeEffectRegistry.All"/>
+        /// — the first descriptor whose <see cref="IShapeEffectDescriptor.TryExport"/> succeeds wins
+        /// (deterministic detection order, no per-effect switch). Returns null when no effect is attached.
+        /// </summary>
+        private static EffectSpec ExportEffect(GameObject go)
+        {
+            foreach (IShapeEffectDescriptor descriptor in ShapeEffectRegistry.All)
+                if (descriptor != null && descriptor.TryExport(go, out var parameters))
+                    return new EffectSpec
+                    {
+                        id = descriptor.Id,
+                        parameters = parameters as Dictionary<string, object>
+                                     ?? (parameters != null ? new Dictionary<string, object>(parameters) : null)
+                    };
+            return null;
+        }
+
+        /// <summary>
+        /// Reconstructs a <see cref="NeoParticleEmitter"/> back to spec form: emitter scalars (read via
+        /// SerializedObject since they are private serialized fields), the module list via
+        /// <see cref="ParticleEffectRegistry"/>, and an optional <see cref="NeoParticleBurstOnSignal"/>
+        /// trigger. Returns null when no emitter is attached. Deterministic; never scans all Assets.
+        /// </summary>
+        private static ParticleSpec ExportParticles(GameObject go)
+        {
+            var emitter = go.GetComponent<NeoParticleEmitter>();
+            if (emitter == null) return null;
+
+            var so = new SerializedObject(emitter);
+            var spec = new ParticleSpec
+            {
+                capacity = so.FindProperty("capacity").intValue,
+                burstCount = so.FindProperty("burstCount").intValue,
+                rate = so.FindProperty("rate").floatValue,
+                emitOnEnable = so.FindProperty("emitOnEnable").boolValue,
+                particleShape = ((ShapeType)so.FindProperty("particleShape").enumValueIndex).ToString(),
+                cornerRadiusPercent = so.FindProperty("cornerRadiusPercent").floatValue,
+                sizeRange = Vec2ToArray(so.FindProperty("sizeRange").vector2Value),
+                lifetimeRange = Vec2ToArray(so.FindProperty("lifetimeRange").vector2Value),
+                speedRange = Vec2ToArray(so.FindProperty("speedRange").vector2Value),
+                emitAngle = so.FindProperty("emitAngle").floatValue,
+                emitSpread = so.FindProperty("emitSpread").floatValue,
+                angularVelocityRange = Vec2ToArray(so.FindProperty("angularVelocityRange").vector2Value)
+            };
+
+            SerializedProperty list = so.FindProperty("moduleConfigs");
+            for (int i = 0; i < list.arraySize; i++)
+            {
+                var config = list.GetArrayElementAtIndex(i).managedReferenceValue as ParticleModuleConfig;
+                IParticleModuleDescriptor descriptor = ParticleEffectRegistry.GetForConfig(config);
+                if (descriptor == null) continue; // unregistered config type → skip (warned at generate)
+                spec.modules.Add(new ParticleModuleSpec
+                {
+                    id = descriptor.Id,
+                    parameters = descriptor.Export(config) as Dictionary<string, object>
+                });
+            }
+
+            var burst = go.GetComponent<NeoParticleBurstOnSignal>();
+            if (burst != null)
+            {
+                spec.signal = new SignalRefSpec { category = burst.Category, name = burst.SignalName };
+                int count = new SerializedObject(burst).FindProperty("count").intValue;
+                if (count != 0) spec.signalCount = count;
+            }
+            return spec;
+        }
+
+        private static float[] Vec2ToArray(Vector2 v) => new[] { v.x, v.y };
 
         /// <summary>
         /// Card decor on a container's layout host (the generator adds an NeoShape when a stack/grid/

@@ -1,0 +1,146 @@
+{
+  "theme": { "bundle": "CleanSlate" },
+  "views": [
+    {
+      "id": "Showcase/TabsPanels",
+      "background": "Background",
+      "elements": [
+        {
+          "safearea": {
+            "children": [
+              {
+                "vstack": {
+                  "anchor": "Stretch",
+                  "padding": 48,
+                  "spacing": 24,
+                  "children": [
+                    {
+                      "text": {
+                        "label": "Tabs & Panels",
+                        "color": "TextStrong",
+                        "textStyle": "Title",
+                        "align": "left"
+                      }
+                    },
+                    {
+                      "text": {
+                        "label": "Each tab controls a sibling panel — selecting one shows its panel and hides the rest. The first tab is baked selected.",
+                        "color": "TextMuted",
+                        "textStyle": "Caption",
+                        "align": "left"
+                      }
+                    },
+
+                    {
+                      "tabbar": {
+                        "id": "DemoTabs/TabBar",
+                        "children": [
+                          {
+                            "tab": {
+                              "id": "DemoTabs/Overview",
+                              "label": "Overview",
+                              "icon": "house",
+                              "value": 1,
+                              "controls": "DemoPanels/Overview"
+                            }
+                          },
+                          {
+                            "tab": {
+                              "id": "DemoTabs/Stats",
+                              "label": "Stats",
+                              "icon": "list",
+                              "controls": "DemoPanels/Stats"
+                            }
+                          },
+                          {
+                            "tab": {
+                              "id": "DemoTabs/About",
+                              "label": "About",
+                              "icon": "info",
+                              "controls": "DemoPanels/About"
+                            }
+                          }
+                        ]
+                      }
+                    },
+
+                    {
+                      "panel": {
+                        "id": "DemoPanels/Overview",
+                        "style": "Panel",
+                        "spacing": 12,
+                        "children": [
+                          {
+                            "text": {
+                              "label": "Overview",
+                              "color": "TextDefault",
+                              "textStyle": "Heading",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "This panel is shown because the Overview tab is selected.",
+                              "color": "TextMuted",
+                              "textStyle": "Body",
+                              "align": "left"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "panel": {
+                        "id": "DemoPanels/Stats",
+                        "style": "Panel",
+                        "spacing": 12,
+                        "children": [
+                          {
+                            "text": {
+                              "label": "Stats",
+                              "color": "TextDefault",
+                              "textStyle": "Heading",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "progress": { "min": 0, "max": 100, "value": 64 }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "panel": {
+                        "id": "DemoPanels/About",
+                        "style": "Panel",
+                        "spacing": 12,
+                        "children": [
+                          {
+                            "text": {
+                              "label": "About",
+                              "color": "TextDefault",
+                              "textStyle": "Heading",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "Tab-to-panel wiring is pure spec — no scripts.",
+                              "color": "TextMuted",
+                              "textStyle": "Body",
+                              "align": "left"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -15,7 +15,7 @@ namespace Neo.UI.Editor
         public const string DatabasesFolder = ResourcesFolder + "/Databases";
         public const string SettingsAssetPath = ResourcesFolder + "/" + NeoUISettings.ResourcesPath + ".asset";
 
-        [MenuItem("Tools/Neo UI/Create or Repair Settings", priority = 100)]
+        [MenuItem("Tools/Neo UI/Setup/Create or Repair Settings", priority = 100)]
         public static NeoUISettings EnsureSettings()
         {
             EnsureFolder(ResourcesFolder);

@@ -1,0 +1,128 @@
+{
+  "theme": { "bundle": "CleanSlate" },
+  "views": [
+    {
+      "id": "Showcase/Popups",
+      "background": "Background",
+      "elements": [
+        {
+          "safearea": {
+            "children": [
+              {
+                "vstack": {
+                  "anchor": "Center",
+                  "size": [520, 360],
+                  "spacing": 16,
+                  "children": [
+                    {
+                      "text": {
+                        "label": "Popups",
+                        "color": "TextStrong",
+                        "textStyle": "Title"
+                      }
+                    },
+                    {
+                      "text": {
+                        "label": "A plain confirm card and a rich popup with custom content.",
+                        "color": "TextMuted",
+                        "textStyle": "Caption"
+                      }
+                    },
+                    {
+                      "button": {
+                        "id": "Popups/OpenPlain",
+                        "label": "Open confirm",
+                        "icon": "circle-help",
+                        "variant": "primary",
+                        "onClick": { "popup": "ConfirmDelete" }
+                      }
+                    },
+                    {
+                      "button": {
+                        "id": "Popups/OpenRich",
+                        "label": "Open reward",
+                        "icon": "gift",
+                        "variant": "secondary",
+                        "onClick": { "popup": "RewardClaim" }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "popups": [
+    {
+      "name": "ConfirmDelete",
+      "title": "Delete save?",
+      "message": "This permanently removes your progress. This cannot be undone."
+    },
+    {
+      "name": "RewardClaim",
+      "size": [560, 460],
+      "close": true,
+      "elements": [
+        {
+          "vstack": {
+            "anchor": "Stretch",
+            "padding": 32,
+            "spacing": 16,
+            "children": [
+              {
+                "icon": {
+                  "name": "trophy",
+                  "color": "Primary",
+                  "size": [72, 72]
+                }
+              },
+              {
+                "text": {
+                  "label": "Daily Reward",
+                  "color": "TextStrong",
+                  "textStyle": "Heading"
+                }
+              },
+              {
+                "text": {
+                  "label": "You earned 500 coins for logging in today.",
+                  "color": "TextMuted",
+                  "textStyle": "Body"
+                }
+              },
+              {
+                "hstack": {
+                  "spacing": 8,
+                  "align": "center",
+                  "children": [
+                    { "icon": { "name": "coins", "color": "Primary", "size": [36, 36] } },
+                    {
+                      "counter": {
+                        "label": "#,0",
+                        "size": [160, 48],
+                        "value": 500,
+                        "textStyle": "Title"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "button": {
+                  "id": "RewardClaim/Claim",
+                  "label": "CLAIM",
+                  "icon": "check",
+                  "variant": "primary",
+                  "onClick": { "close": true }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

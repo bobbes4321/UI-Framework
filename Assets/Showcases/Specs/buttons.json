@@ -1,0 +1,144 @@
+{
+  "theme": { "bundle": "CleanSlate" },
+  "views": [
+    {
+      "id": "Showcase/Buttons",
+      "background": "Background",
+      "elements": [
+        {
+          "safearea": {
+            "children": [
+              {
+                "scroll": {
+                  "anchor": "Stretch",
+                  "children": [
+                    {
+                      "vstack": {
+                        "anchor": "Stretch",
+                        "padding": 48,
+                        "spacing": 24,
+                        "children": [
+                          {
+                            "text": {
+                              "label": "Buttons",
+                              "color": "TextStrong",
+                              "textStyle": "Title",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "Every variant at three sizes, plus icon and badge slots.",
+                              "color": "TextMuted",
+                              "textStyle": "Caption",
+                              "align": "left"
+                            }
+                          },
+
+                          {
+                            "text": {
+                              "label": "PRIMARY",
+                              "color": "TextMuted",
+                              "textStyle": "Caption",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "hstack": {
+                              "spacing": 16,
+                              "children": [
+                                { "button": { "id": "Buttons/PrimarySm", "label": "Small", "variant": "primary", "size": "sm" } },
+                                { "button": { "id": "Buttons/PrimaryMd", "label": "Medium", "variant": "primary", "size": "md" } },
+                                { "button": { "id": "Buttons/PrimaryLg", "label": "Large", "variant": "primary", "size": "lg" } }
+                              ]
+                            }
+                          },
+
+                          {
+                            "text": {
+                              "label": "SECONDARY",
+                              "color": "TextMuted",
+                              "textStyle": "Caption",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "hstack": {
+                              "spacing": 16,
+                              "children": [
+                                { "button": { "id": "Buttons/SecondarySm", "label": "Small", "variant": "secondary", "size": "sm" } },
+                                { "button": { "id": "Buttons/SecondaryMd", "label": "Medium", "variant": "secondary", "size": "md" } },
+                                { "button": { "id": "Buttons/SecondaryLg", "label": "Large", "variant": "secondary", "size": "lg" } }
+                              ]
+                            }
+                          },
+
+                          {
+                            "text": {
+                              "label": "GHOST",
+                              "color": "TextMuted",
+                              "textStyle": "Caption",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "hstack": {
+                              "spacing": 16,
+                              "children": [
+                                { "button": { "id": "Buttons/GhostSm", "label": "Small", "variant": "ghost", "size": "sm" } },
+                                { "button": { "id": "Buttons/GhostMd", "label": "Medium", "variant": "ghost", "size": "md" } },
+                                { "button": { "id": "Buttons/GhostLg", "label": "Large", "variant": "ghost", "size": "lg" } }
+                              ]
+                            }
+                          },
+
+                          {
+                            "text": {
+                              "label": "DANGER",
+                              "color": "TextMuted",
+                              "textStyle": "Caption",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "hstack": {
+                              "spacing": 16,
+                              "children": [
+                                { "button": { "id": "Buttons/DangerSm", "label": "Small", "variant": "danger", "size": "sm" } },
+                                { "button": { "id": "Buttons/DangerMd", "label": "Medium", "variant": "danger", "size": "md" } },
+                                { "button": { "id": "Buttons/DangerLg", "label": "Large", "variant": "danger", "size": "lg" } }
+                              ]
+                            }
+                          },
+
+                          {
+                            "text": {
+                              "label": "ICON + BADGE",
+                              "color": "TextMuted",
+                              "textStyle": "Caption",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "hstack": {
+                              "spacing": 16,
+                              "children": [
+                                { "button": { "id": "Buttons/Play", "label": "Play", "icon": "play", "variant": "primary", "size": "lg" } },
+                                { "button": { "id": "Buttons/Shop", "label": "Shop", "icon": "shopping-bag", "variant": "secondary", "badge": 3 } },
+                                { "button": { "id": "Buttons/Settings", "icon": "settings", "variant": "ghost" } }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

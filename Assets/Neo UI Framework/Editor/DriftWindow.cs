@@ -25,7 +25,7 @@ namespace Neo.UI.Editor
         private bool _scanned;
         private Vector2 _scroll;
 
-        [MenuItem("Tools/Neo UI/Check For Drift", priority = 5)]
+        [MenuItem("Tools/Neo UI/Advanced/Check For Drift", priority = 15)]
         public static void Open()
         {
             DriftWindow window = GetWindow<DriftWindow>(false, "Neo UI Drift");

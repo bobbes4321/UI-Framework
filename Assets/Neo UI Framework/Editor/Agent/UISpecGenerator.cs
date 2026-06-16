@@ -83,7 +83,7 @@ namespace Neo.UI.Editor
         /// empty ⇒ no responsive baking (legacy specs and override-less views stay untouched). </summary>
         internal static List<BreakpointSpec> s_activeBreakpoints;
 
-        [MenuItem("Tools/Neo UI/Generate From Spec…", priority = 1)]
+        [MenuItem("Tools/Neo UI/Advanced/Generate From Spec…", priority = 10)]
         public static void GenerateFromSpecFileDialog()
         {
             string path = EditorUtility.OpenFilePanel("Select UI spec (JSON)", Application.dataPath, "json");
@@ -644,6 +644,13 @@ namespace Neo.UI.Editor
         private static GameObject BuildElementTree(ElementSpec element, int index, RectTransform parent,
             NeoUISettings settings, GenerateReport report, bool inLayout, ViewBuild build)
         {
+            // Linked widget preset: resolve it as the BASE, then let the element's own fields override.
+            // The whole method reads off `element`, so swapping in the merged effective spec flows the
+            // preset's styling to every widget kind. The original preset name rides through (clone copies
+            // it) and is stamped on the built root below for the exporter's override-delta round-trip.
+            string presetName = element.preset;
+            element = ResolvePresetAndOverrides(element, report);
+
             string category = null, name = null;
             if (!string.IsNullOrEmpty(element.id)) CategoryNameId.Parse(element.id, out category, out name);
 
@@ -1045,11 +1052,182 @@ namespace Neo.UI.Editor
                     BuildElementTree(element.children[i], i, childHost, settings, report,
                         inLayout: childrenInLayout, build: build);
 
+            // Open-bag shape effect + UI particles: dispatched through the editor descriptor
+            // registries (no per-effect switch here — adding a future effect/module is one registration).
+            if (go != null) ApplyEffectsAndParticles(element, go, settings, report);
+
             if (ElementObjectSink != null && go != null) ElementObjectSink[element] = go;
             // Pillar B: record elements carrying breakpoint overrides for the post-build resolve pass.
             if (go != null && build != null && element.overrides != null && element.overrides.Count > 0)
                 build.responsiveTargets.Add((element, go));
+
+            // Stamp the preset link so the exporter can write it back + only the override delta.
+            if (go != null && !string.IsNullOrEmpty(presetName))
+            {
+                WidgetPresetTag presetTag = go.GetComponent<WidgetPresetTag>();
+                if (presetTag == null) presetTag = go.AddComponent<WidgetPresetTag>();
+                presetTag.presetName = presetName;
+            }
             return go;
+        }
+
+        /// <summary>
+        /// Resolves an element's linked <see cref="NeoWidgetPreset"/> (if any) into an "effective" element:
+        /// the preset's fields as the base, with any field the element already sets winning. A missing
+        /// preset is non-fatal and LOUD (per the no-silent-failures rule) — the element builds from its own
+        /// fields. Returns the original element unchanged when no preset is referenced.
+        /// </summary>
+        private static ElementSpec ResolvePresetAndOverrides(ElementSpec element, GenerateReport report)
+        {
+            if (element == null || string.IsNullOrEmpty(element.preset)) return element;
+            if (!NeoWidgetPresets.TryGet(element.preset, out NeoWidgetPreset p))
+            {
+                string msg = $"Element '{element.id ?? element.kind}' references missing preset " +
+                             $"'{element.preset}' — building from its own fields.";
+                report?.warnings.Add(msg);
+                Debug.LogWarning("[Neo.UI] " + msg);
+                return element;
+            }
+
+            ElementSpec e = element.ShallowClone();
+            if (string.IsNullOrEmpty(e.variant)) e.variant = p.variant;
+            if (string.IsNullOrEmpty(e.sizeVariant)) e.sizeVariant = p.sizeVariant;
+            if (string.IsNullOrEmpty(e.textStyle)) e.textStyle = p.textStyle;
+            if (string.IsNullOrEmpty(e.style)) e.style = p.shapeStyle;
+            if (string.IsNullOrEmpty(e.background)) e.background = p.background;
+            if (string.IsNullOrEmpty(e.labelColor)) e.labelColor = p.labelColor;
+            if (string.IsNullOrEmpty(e.icon)) e.icon = p.icon;
+            if (!e.radius.HasValue) e.radius = p.RadiusOrNull;
+            if (!e.padding.HasValue) e.padding = p.PaddingOrNull;
+            if (e.padding4 == null) e.padding4 = p.Padding4OrNull;
+            if (!e.spacing.HasValue) e.spacing = p.SpacingOrNull;
+            return e;
+        }
+
+        /// <summary>
+        /// Bakes the element's open-bag shape effect and/or UI particle emitter. Both dispatch through
+        /// the editor descriptor registries (<see cref="ShapeEffectRegistry"/>/
+        /// <see cref="ParticleEffectRegistry"/>) so the generator carries no per-effect switch — adding
+        /// a future effect or module is a single registration with zero edits here.
+        /// </summary>
+        private static void ApplyEffectsAndParticles(ElementSpec element, GameObject go,
+            NeoUISettings settings, GenerateReport report)
+        {
+            if (element.effect != null)
+            {
+                IShapeEffectDescriptor descriptor = ShapeEffectRegistry.Get(element.effect.id);
+                if (descriptor != null) descriptor.Apply(go, element.effect.parameters);
+                else report.issues.Add($"Element '{element.id ?? element.kind}': unknown shape effect '{element.effect.id}'");
+            }
+
+            if (element.particles != null)
+                ApplyParticles(element.particles, go, settings, report);
+        }
+
+        /// <summary> Adds + configures a <see cref="NeoParticleEmitter"/> from the spec (modules via the registry). </summary>
+        private static void ApplyParticles(ParticleSpec spec, GameObject go, NeoUISettings settings,
+            GenerateReport report)
+        {
+            var emitter = go.GetComponent<NeoParticleEmitter>();
+            if (emitter == null) emitter = go.AddComponent<NeoParticleEmitter>();
+
+            // Optional named preset seeds the emitter first; inline fields then override.
+            if (!string.IsNullOrEmpty(spec.preset))
+            {
+                NeoParticleEmitterPreset preset = ResolveParticlePreset(spec.preset);
+                if (preset != null) emitter.ApplyPreset(preset);
+                else report.issues.Add($"Particle preset '{spec.preset}' could not be resolved");
+            }
+
+            // Private serialized scalars are written through SerializedObject (the established pattern —
+            // see the tab containerReference wiring); BurstCount/Rate also have public setters but we set
+            // them via the same SerializedObject pass for one consistent serialize point.
+            var so = new SerializedObject(emitter);
+            SetIntProp(so, "capacity", spec.capacity);
+            SetIntProp(so, "burstCount", spec.burstCount);
+            SetFloatProp(so, "rate", spec.rate);
+            if (spec.emitOnEnable) so.FindProperty("emitOnEnable").boolValue = true;
+            if (!string.IsNullOrEmpty(spec.particleShape)
+                && Enum.TryParse(spec.particleShape, ignoreCase: true, out ShapeType shapeType))
+                so.FindProperty("particleShape").enumValueIndex = (int)shapeType;
+            SetFloatProp(so, "cornerRadiusPercent", spec.cornerRadiusPercent);
+            SetVector2Prop(so, "sizeRange", spec.sizeRange);
+            SetVector2Prop(so, "lifetimeRange", spec.lifetimeRange);
+            SetVector2Prop(so, "speedRange", spec.speedRange);
+            SetFloatProp(so, "emitAngle", spec.emitAngle);
+            SetFloatProp(so, "emitSpread", spec.emitSpread);
+            SetVector2Prop(so, "angularVelocityRange", spec.angularVelocityRange);
+
+            // Modules: build each config via the registry (no switch) and write the [SerializeReference] list.
+            if (spec.modules != null && spec.modules.Count > 0)
+            {
+                SerializedProperty list = so.FindProperty("moduleConfigs");
+                list.arraySize = spec.modules.Count;
+                int written = 0;
+                for (int i = 0; i < spec.modules.Count; i++)
+                {
+                    ParticleModuleSpec moduleSpec = spec.modules[i];
+                    IParticleModuleDescriptor descriptor = ParticleEffectRegistry.Get(moduleSpec.id);
+                    if (descriptor == null)
+                    {
+                        report.issues.Add($"Unknown particle module '{moduleSpec.id}'");
+                        continue;
+                    }
+                    ParticleModuleConfig config = descriptor.Build(moduleSpec.parameters);
+                    list.GetArrayElementAtIndex(written).managedReferenceValue = config;
+                    written++;
+                }
+                if (written != list.arraySize) list.arraySize = written;
+            }
+
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            // Optional signal-driven burst.
+            if (spec.signal != null && !string.IsNullOrEmpty(spec.signal.category)
+                && !string.IsNullOrEmpty(spec.signal.name))
+            {
+                var burst = go.GetComponent<NeoParticleBurstOnSignal>();
+                if (burst == null) burst = go.AddComponent<NeoParticleBurstOnSignal>();
+                burst.Category = spec.signal.category;
+                burst.SignalName = spec.signal.name;
+                if (spec.signalCount.HasValue)
+                {
+                    var burstSo = new SerializedObject(burst);
+                    burstSo.FindProperty("count").intValue = spec.signalCount.Value;
+                    burstSo.ApplyModifiedPropertiesWithoutUndo();
+                }
+                RegisterId(settings.streamIds, spec.signal.category, spec.signal.name);
+            }
+        }
+
+        private static void SetIntProp(SerializedObject so, string name, int? value)
+        {
+            if (value.HasValue) so.FindProperty(name).intValue = value.Value;
+        }
+
+        private static void SetFloatProp(SerializedObject so, string name, float? value)
+        {
+            if (value.HasValue) so.FindProperty(name).floatValue = value.Value;
+        }
+
+        private static void SetVector2Prop(SerializedObject so, string name, float[] value)
+        {
+            if (value != null && value.Length >= 2)
+                so.FindProperty(name).vector2Value = new Vector2(value[0], value[1]);
+        }
+
+        /// <summary> Resolves a <see cref="NeoParticleEmitterPreset"/> by its "Category/Name" (agent-first, never a GUID). </summary>
+        private static NeoParticleEmitterPreset ResolveParticlePreset(string fullName)
+        {
+            if (string.IsNullOrEmpty(fullName)) return null;
+            // Scoped to the asset TYPE — a ScriptableObject lookup, NOT the forbidden all-Assets prefab scan.
+            foreach (string guid in AssetDatabase.FindAssets("t:NeoParticleEmitterPreset"))
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                var preset = AssetDatabase.LoadAssetAtPath<NeoParticleEmitterPreset>(path);
+                if (preset != null && preset.fullName == fullName) return preset;
+            }
+            return null;
         }
 
         private static void ApplyCommonOverrides(ElementSpec element, GameObject go, int index, bool inLayout)
@@ -1269,6 +1447,46 @@ namespace Neo.UI.Editor
 
             (created ? report.created : report.updated).Add(
                 $"{(isCheat ? "Cheat" : "Settings")} catalog '{catalog.Id}' ({catalog.items.Count} items) → {path}");
+        }
+
+        /// <summary>
+        /// Populates the in-memory catalog registry from a spec's settings/cheats WITHOUT writing any
+        /// asset — so an in-memory render (the agent <c>preview</c> path, which never commits prefabs or
+        /// catalog SOs) can still resolve a view's embedded <c>settings</c>/<c>cheats</c> elements and
+        /// show real menu rows. Mirrors <see cref="GenerateMenuCatalog"/>'s catalog population exactly;
+        /// the only difference is no <c>AssetDatabase.CreateAsset</c>. Clears the registry first so a
+        /// preview never reads a stale catalog left by an earlier generate.
+        /// </summary>
+        public static void PrepareCatalogsInMemory(UISpec spec, NeoUISettings settings)
+        {
+            s_catalogs.Clear();
+            s_catalogInputAssets.Clear();
+            if (spec == null) return;
+            var report = new GenerateReport();
+            if (spec.settings != null)
+                foreach (MenuCatalogSpec catalog in spec.settings) BuildCatalogInMemory(catalog, settings, report);
+            if (spec.cheats != null)
+                foreach (MenuCatalogSpec catalog in spec.cheats) BuildCatalogInMemory(catalog, settings, report);
+        }
+
+        private static void BuildCatalogInMemory(MenuCatalogSpec spec, NeoUISettings settings, GenerateReport report)
+        {
+            bool isCheat = spec.kind == MenuCatalogSpec.CheatKind;
+            var catalog = (MenuCatalog)ScriptableObject.CreateInstance(isCheat ? typeof(CheatCatalog) : typeof(SettingsCatalog));
+            catalog.category = spec.category;
+            catalog.menuName = spec.menuName;
+            catalog.groups = new List<string>(spec.groups);
+            catalog.startGroup = spec.start;
+            catalog.inputActionAssetPath = spec.inputActionAsset;
+            if (catalog is CheatCatalog cheatCatalog) cheatCatalog.favouritesEnabled = spec.favourites;
+            catalog.items.Clear();
+            foreach (MenuItemSpec item in spec.items) catalog.items.Add(ToDefinition(item));
+            s_catalogs[catalog.Id] = catalog;
+            if (!string.IsNullOrEmpty(spec.inputActionAsset))
+            {
+                var asset = AssetDatabase.LoadAssetAtPath<InputActionAsset>(spec.inputActionAsset);
+                if (asset != null) s_catalogInputAssets[catalog.Id] = asset;
+            }
         }
 
         private static MenuItemDefinition ToDefinition(MenuItemSpec item) => new MenuItemDefinition

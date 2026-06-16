@@ -1,0 +1,438 @@
+{
+  "theme": {
+    "tokens": {
+      "Primary": "#3B82F6",
+      "Background": "#0B0D10",
+      "Accent": "#FCA311",
+      "TextDefault": "#C6CCD6",
+      "Panel": "#1D2D50",
+      "Surface": "#16191E",
+      "SurfaceElevated": "#21252C",
+      "Outline": "#343A44",
+      "PrimaryHover": "#5D98F8",
+      "PrimaryPressed": "#0F66F4",
+      "TextOnPrimary": "#FFFFFF",
+      "TextStrong": "#F5F7FA",
+      "TextMuted": "#8E96A4",
+      "Success": "#22C55E",
+      "Warning": "#F59E0B",
+      "Error": "#EF4444",
+      "Shadow": "#00000080",
+      "SuccessHover": "#30DB6F",
+      "SuccessPressed": "#1B9E4B",
+      "Danger": "#EF4444",
+      "DangerHover": "#F26565",
+      "DangerPressed": "#EB1A1A",
+      "TextDark": "#6B6390"
+    },
+    "variants": {
+      "Light": {
+        "Primary": "#3B82F6",
+        "Background": "#0B0D10",
+        "Accent": "#FCA311",
+        "TextDefault": "#C6CCD6",
+        "Panel": "#1D2D50",
+        "Surface": "#16191E",
+        "SurfaceElevated": "#21252C",
+        "Outline": "#343A44",
+        "PrimaryHover": "#5D98F8",
+        "PrimaryPressed": "#0F66F4",
+        "TextOnPrimary": "#FFFFFF",
+        "TextStrong": "#F5F7FA",
+        "TextMuted": "#8E96A4",
+        "Success": "#22C55E",
+        "Warning": "#F59E0B",
+        "Error": "#EF4444",
+        "Shadow": "#00000080",
+        "SuccessHover": "#30DB6F",
+        "SuccessPressed": "#1B9E4B",
+        "Danger": "#EF4444",
+        "DangerHover": "#F26565",
+        "DangerPressed": "#EB1A1A",
+        "TextDark": "#6B6390"
+      },
+      "Dark": {
+        "Primary": "#3B82F6",
+        "Background": "#0B0D10",
+        "Accent": "#FCA311",
+        "TextDefault": "#C6CCD6",
+        "Panel": "#1D2D50",
+        "Surface": "#16191E",
+        "SurfaceElevated": "#21252C",
+        "Outline": "#343A44",
+        "PrimaryHover": "#5D98F8",
+        "PrimaryPressed": "#0F66F4",
+        "TextOnPrimary": "#FFFFFF",
+        "TextStrong": "#F5F7FA",
+        "TextMuted": "#8E96A4",
+        "Success": "#22C55E",
+        "Warning": "#F59E0B",
+        "Error": "#EF4444",
+        "Shadow": "#00000080",
+        "SuccessHover": "#30DB6F",
+        "SuccessPressed": "#1B9E4B",
+        "Danger": "#EF4444",
+        "DangerHover": "#F26565",
+        "DangerPressed": "#EB1A1A",
+        "TextDark": "#6B6390"
+      }
+    }
+  },
+  "presets": [
+    {
+      "name": "MenuIn",
+      "type": "Show",
+      "duration": 0.25,
+      "ease": "OutCubic",
+      "move": {
+        "from": "Bottom",
+        "duration": 0.25,
+        "ease": "OutCubic"
+      },
+      "fade": {
+        "from": 0,
+        "to": 1,
+        "duration": 0.25,
+        "ease": "OutCubic"
+      }
+    },
+    {
+      "name": "MenuOut",
+      "type": "Hide",
+      "duration": 0.20000000298023224,
+      "ease": "OutCubic",
+      "fade": {
+        "from": 1,
+        "to": 0,
+        "duration": 0.20000000298023224,
+        "ease": "InCubic"
+      }
+    },
+    {
+      "name": "ShowDefault",
+      "type": "Show",
+      "duration": 0.18000000715255737,
+      "ease": "OutCubic",
+      "scale": {
+        "from": "0.96,0.96,1",
+        "to": "1,1,1",
+        "duration": 0.18000000715255737,
+        "ease": "OutCubic"
+      },
+      "fade": {
+        "from": 0,
+        "to": 1,
+        "duration": 0.18000000715255737,
+        "ease": "OutCubic"
+      }
+    },
+    {
+      "name": "HideDefault",
+      "type": "Hide",
+      "duration": 0.18000000715255737,
+      "ease": "OutCubic",
+      "scale": {
+        "from": "1,1,1",
+        "to": "0.96,0.96,1",
+        "duration": 0.18000000715255737,
+        "ease": "OutCubic"
+      },
+      "fade": {
+        "from": 1,
+        "to": 0,
+        "duration": 0.18000000715255737,
+        "ease": "OutCubic"
+      }
+    },
+    {
+      "name": "SlideInLeft",
+      "type": "Show",
+      "duration": 0.34999999403953552,
+      "ease": "OutCubic",
+      "move": {
+        "from": "Left",
+        "duration": 0.34999999403953552,
+        "ease": "OutCubic"
+      },
+      "fade": {
+        "from": 0,
+        "to": 1,
+        "duration": 0.34999999403953552,
+        "ease": "OutCubic"
+      }
+    },
+    {
+      "name": "SlideOutLeft",
+      "type": "Hide",
+      "duration": 0.25,
+      "ease": "InCubic",
+      "move": {
+        "to": "Left",
+        "duration": 0.25,
+        "ease": "InCubic"
+      },
+      "fade": {
+        "from": 1,
+        "to": 0,
+        "duration": 0.25,
+        "ease": "InCubic"
+      }
+    },
+    {
+      "name": "SlideUpIn",
+      "type": "Show",
+      "duration": 0.40000000596046448,
+      "ease": "OutCubic",
+      "move": {
+        "from": "Bottom",
+        "duration": 0.40000000596046448,
+        "ease": "OutCubic"
+      },
+      "fade": {
+        "from": 0,
+        "to": 1,
+        "duration": 0.40000000596046448,
+        "ease": "OutCubic"
+      }
+    },
+    {
+      "name": "SlideDownOut",
+      "type": "Hide",
+      "duration": 0.30000001192092896,
+      "ease": "InCubic",
+      "move": {
+        "to": "Bottom",
+        "duration": 0.30000001192092896,
+        "ease": "InCubic"
+      },
+      "fade": {
+        "from": 1,
+        "to": 0,
+        "duration": 0.30000001192092896,
+        "ease": "InCubic"
+      }
+    },
+    {
+      "name": "PopIn",
+      "type": "Show",
+      "duration": 0.34999999403953552,
+      "ease": "OutCubic",
+      "scale": {
+        "from": "0.85,0.85,1",
+        "to": "1,1,1",
+        "duration": 0.34999999403953552,
+        "ease": "OutBack"
+      },
+      "fade": {
+        "from": 0,
+        "to": 1,
+        "duration": 0.34999999403953552,
+        "ease": "OutBack"
+      }
+    },
+    {
+      "name": "PopOut",
+      "type": "Hide",
+      "duration": 0.20000000298023224,
+      "ease": "OutCubic",
+      "scale": {
+        "from": "1,1,1",
+        "to": "0.9,0.9,1",
+        "duration": 0.20000000298023224,
+        "ease": "InQuad"
+      },
+      "fade": {
+        "from": 1,
+        "to": 0,
+        "duration": 0.20000000298023224,
+        "ease": "InQuad"
+      }
+    },
+    {
+      "name": "FadeIn",
+      "type": "Show",
+      "duration": 0.25,
+      "ease": "OutCubic",
+      "fade": {
+        "from": 0,
+        "to": 1,
+        "duration": 0.25,
+        "ease": "OutCubic"
+      }
+    },
+    {
+      "name": "FadeOut",
+      "type": "Hide",
+      "duration": 0.20000000298023224,
+      "ease": "OutCubic",
+      "fade": {
+        "from": 1,
+        "to": 0,
+        "duration": 0.20000000298023224,
+        "ease": "OutCubic"
+      }
+    }
+  ],
+  "views": [
+    {
+      "id": "Showcase/TabsPanels",
+      "background": "Background",
+      "elements": [
+        {
+          "safearea": {
+            "anchor": "Stretch",
+            "children": [
+              {
+                "vstack": {
+                  "anchor": "Stretch",
+                  "padding": 48,
+                  "spacing": 24,
+                  "children": [
+                    {
+                      "text": {
+                        "label": "Tabs & Panels",
+                        "color": "TextStrong",
+                        "textStyle": "Title",
+                        "align": "left"
+                      }
+                    },
+                    {
+                      "text": {
+                        "label": "Each tab controls a sibling panel — selecting one shows its panel and hides the rest. The first tab is baked selected.",
+                        "color": "TextMuted",
+                        "textStyle": "Caption",
+                        "align": "left"
+                      }
+                    },
+                    {
+                      "tabbar": {
+                        "id": "DemoTabs/TabBar",
+                        "size": [
+                          0,
+                          56
+                        ],
+                        "children": [
+                          {
+                            "tab": {
+                              "id": "DemoTabs/Overview",
+                              "label": "Overview",
+                              "icon": "house",
+                              "textStyle": "ButtonLabel",
+                              "controls": "DemoPanels/Overview"
+                            }
+                          },
+                          {
+                            "tab": {
+                              "id": "DemoTabs/Stats",
+                              "label": "Stats",
+                              "icon": "list",
+                              "textStyle": "ButtonLabel",
+                              "controls": "DemoPanels/Stats"
+                            }
+                          },
+                          {
+                            "tab": {
+                              "id": "DemoTabs/About",
+                              "label": "About",
+                              "icon": "info",
+                              "textStyle": "ButtonLabel",
+                              "controls": "DemoPanels/About"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "panel": {
+                        "id": "DemoPanels/Overview",
+                        "style": "Panel",
+                        "radius": 12,
+                        "padding": 0,
+                        "spacing": 12,
+                        "children": [
+                          {
+                            "text": {
+                              "label": "Overview",
+                              "color": "TextDefault",
+                              "textStyle": "Heading",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "This panel is shown because the Overview tab is selected.",
+                              "color": "TextMuted",
+                              "textStyle": "Body",
+                              "align": "left"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "panel": {
+                        "id": "DemoPanels/Stats",
+                        "style": "Panel",
+                        "radius": 12,
+                        "padding": 0,
+                        "spacing": 12,
+                        "children": [
+                          {
+                            "text": {
+                              "label": "Stats",
+                              "color": "TextDefault",
+                              "textStyle": "Heading",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "progress": {
+                              "size": [
+                                0,
+                                14
+                              ],
+                              "min": 0,
+                              "max": 100,
+                              "value": 64
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "panel": {
+                        "id": "DemoPanels/About",
+                        "style": "Panel",
+                        "radius": 12,
+                        "padding": 0,
+                        "spacing": 12,
+                        "children": [
+                          {
+                            "text": {
+                              "label": "About",
+                              "color": "TextDefault",
+                              "textStyle": "Heading",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "Tab-to-panel wiring is pure spec — no scripts.",
+                              "color": "TextMuted",
+                              "textStyle": "Body",
+                              "align": "left"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

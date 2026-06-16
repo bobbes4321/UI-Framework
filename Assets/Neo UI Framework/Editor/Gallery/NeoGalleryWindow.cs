@@ -59,7 +59,9 @@ namespace Neo.UI.Editor
         private GUIStyle _placeholder;
         private GUIStyle _wrap;
 
-        [MenuItem("Tools/Neo UI/Gallery", priority = 5)]
+        // The Gallery's standalone menu item was folded into the Hub (Tools → Neo UI → Hub), which
+        // hosts the showcase gallery. The window class is kept (still openable via this Open()) so the
+        // thumbnail/validation machinery stays reusable, but it no longer adds its own menu entry.
         public static void Open()
         {
             var window = GetWindow<NeoGalleryWindow>("Neo UI Gallery");

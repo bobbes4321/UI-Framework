@@ -17,6 +17,9 @@ MonoBehaviour:
     names:
     - OpenDiscord
     - Quit
+  - category: Audio
+    names:
+    - Muted
   - category: Dialog
     names:
     - Cancel

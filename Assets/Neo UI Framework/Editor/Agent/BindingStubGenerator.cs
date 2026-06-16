@@ -38,7 +38,7 @@ namespace Neo.UI.Editor
         public static string DefaultPath(BindingManifest manifest) =>
             $"{DefaultDirectory}/{ClassName(manifest)}.g.cs";
 
-        [MenuItem("Tools/Neo UI/Generate Binding Stub", priority = 8)]
+        [MenuItem("Tools/Neo UI/Advanced/Generate Binding Stub", priority = 16)]
         public static void GenerateBindingStubMenu()
         {
             // derive from the live project (the prefabs materialize the spec); the spec stays the truth

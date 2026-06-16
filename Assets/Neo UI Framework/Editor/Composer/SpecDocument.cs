@@ -194,6 +194,26 @@ namespace Neo.UI.Editor.Composer
         public bool SavesThroughSync => Origin == DocumentOrigin.Project;
 
         /// <summary>
+        /// Optional isolated generated-asset root this document saves into (a showcase's
+        /// <c>Assets/Showcases/{id}/Generated</c>). When set, <see cref="GenerateSave"/> and
+        /// <see cref="SyncSave"/> run inside <see cref="NeoWorkspace.Scoped(string,string)"/> so the
+        /// generate/sync — and the <c>.neo-baseline.json</c> that follows
+        /// <see cref="UISpecGenerator.GeneratedRoot"/> — land in the showcase folder instead of the
+        /// default root. Null ⇒ default root (plain Composer use). Independent of <see cref="Load"/>,
+        /// so it survives the in-document reload <see cref="SyncSave"/> does on success; the window
+        /// clears it when the user opens a different (non-showcase) document.
+        /// </summary>
+        public string WorkspaceRoot { get; private set; }
+
+        /// <summary> Points this document's saves at an isolated showcase root (null ⇒ default root). </summary>
+        public void SetWorkspaceRoot(string root) => WorkspaceRoot = root;
+
+        /// <summary> Scopes generate/sync to <see cref="WorkspaceRoot"/> when set; a no-op otherwise
+        /// (boxes the NeoWorkspace struct to IDisposable — fine for a one-off save). </summary>
+        private IDisposable BeginWorkspace() =>
+            string.IsNullOrEmpty(WorkspaceRoot) ? null : NeoWorkspace.Scoped(WorkspaceRoot);
+
+        /// <summary>
         /// Standalone save (New/File documents): the doc IS the whole intended spec, so serialize it to
         /// <see cref="FilePath"/> and generate the committed assets from it directly. Returns the
         /// generator report, or null with <paramref name="error"/> set when the write failed.
@@ -202,7 +222,9 @@ namespace Neo.UI.Editor.Composer
         {
             error = null;
             if (!WriteSpecFile(Spec, out error)) return null;
-            GenerateReport report = UISpecGenerator.Generate(Spec);
+            GenerateReport report;
+            using (BeginWorkspace())
+                report = UISpecGenerator.Generate(Spec);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             Dirty = false;
@@ -224,7 +246,11 @@ namespace Neo.UI.Editor.Composer
         {
             error = null;
             SyncResult result;
-            try { result = SpecBaseline.Sync(Spec, ConflictPolicy.PreferTheirs, force); }
+            try
+            {
+                using (BeginWorkspace())
+                    result = SpecBaseline.Sync(Spec, ConflictPolicy.PreferTheirs, force);
+            }
             catch (Exception e) { error = e.Message; return null; }
 
             if (result.refused) return result; // nothing written — the window offers Force

@@ -55,7 +55,7 @@ namespace Neo.UI.Editor
     {
         public const string RequestPath = "Temp/neo-request.json";
         public const string ResultPath = "Temp/neo-result.json";
-        private const string MenuPath = "Tools/Neo UI/Agent Bridge";
+        private const string MenuPath = "Tools/Neo UI/Advanced/Agent Bridge";
         private const string PrefsKey = "Neo.UI.AgentBridge";
 
         private static int s_pollCountdown;
@@ -66,7 +66,7 @@ namespace Neo.UI.Editor
             if (EditorPrefs.GetBool(PrefsKey, false)) EditorApplication.update += Poll;
         }
 
-        [MenuItem(MenuPath, priority = 4)]
+        [MenuItem(MenuPath, priority = 20)]
         private static void Toggle()
         {
             bool enable = !EditorPrefs.GetBool(PrefsKey, false);
@@ -526,7 +526,44 @@ namespace Neo.UI.Editor
             // optional "flow": which generated app to build when the generated folder holds several
             // flows. Omit it when only one exists; the builder throws (listing them) if it's ambiguous.
             string flowName = JsonReader.GetString(request, "flow");
-            string path = GeneratedSceneBuilder.Build(flowName);
+            // optional "scene": explicit scene output path (defaults to the legacy GeneratedSceneBuilder.ScenePath).
+            string scenePath = JsonReader.GetString(request, "scene");
+            // optional "showcase": build a registered showcase. Generates from its spec when nothing is
+            // there yet and builds inside the showcase's isolated root + scene (NeoWorkspace.Scoped), so
+            // a showcase build never collides with the shared default root. An explicit "flow"/"scene"
+            // override the showcase's derived values when given.
+            string showcaseId = JsonReader.GetString(request, "showcase");
+            if (!string.IsNullOrEmpty(showcaseId))
+            {
+                if (!ShowcaseRegistry.TryGet(showcaseId, out Showcase showcase))
+                    throw new InvalidOperationException(
+                        $"No showcase '{showcaseId}' registered (known: {string.Join(", ", ShowcaseRegistry.Ids)})");
+                string showcaseScene = !string.IsNullOrEmpty(scenePath) ? scenePath : showcase.ScenePath;
+                string showcaseFlow = !string.IsNullOrEmpty(flowName) ? flowName : showcase.flowName;
+                string built;
+                using (NeoWorkspace.Scoped(showcase))
+                {
+                    if (!UnityEditor.AssetDatabase.IsValidFolder($"{showcase.GeneratedRoot}/Views"))
+                    {
+                        if (string.IsNullOrEmpty(showcase.specPath))
+                            throw new InvalidOperationException(
+                                $"Showcase '{showcaseId}' has no spec to generate from.");
+                        GenerateReport report = UISpecGenerator.Generate(
+                            UISpec.FromJson(File.ReadAllText(showcase.specPath)));
+                        if (report.hasProblems)
+                            throw new InvalidOperationException(
+                                $"Showcase '{showcaseId}' generation failed:\n{report}");
+                    }
+                    built = GeneratedSceneBuilder.Build(showcaseFlow, showcaseScene);
+                }
+                result["ok"] = true;
+                result["path"] = built;
+                return;
+            }
+
+            string path = !string.IsNullOrEmpty(scenePath)
+                ? GeneratedSceneBuilder.Build(flowName, scenePath)
+                : GeneratedSceneBuilder.Build(flowName);
             result["ok"] = true;
             result["path"] = path;
         }

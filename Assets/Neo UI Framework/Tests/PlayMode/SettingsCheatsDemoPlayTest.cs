@@ -66,7 +66,7 @@ namespace Neo.UI.Tests
             SetGeneratorRoot(GeneratedRoot); // redirect to scratch BEFORE generating
 
             string specPath = Path.Combine(
-                Path.GetDirectoryName(Application.dataPath) ?? ".", "settings-cheats-demo.json");
+                Application.dataPath, "Showcases", "Specs", "settings-menu.json");
             Assert.IsTrue(File.Exists(specPath), $"demo spec missing at {specPath}");
 
             object report = InvokeGenerator("GenerateFromSpecFile", specPath);

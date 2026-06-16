@@ -32,7 +32,7 @@ namespace Neo.UI.Editor
             " ¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿×÷" +
             "–—‘’‚“”„†‡•…‰‹›−€™";
 
-        [MenuItem("Tools/Neo UI/Create or Repair Fonts", priority = 102)]
+        [MenuItem("Tools/Neo UI/Setup/Create or Repair Fonts", priority = 102)]
         public static void CreateOrRepairMenu()
         {
             TMP_FontAsset regular = EnsureFontAsset($"{FontsFolder}/Inter-Regular.ttf", InterRegularAssetPath);

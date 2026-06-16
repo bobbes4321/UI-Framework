@@ -81,6 +81,12 @@ MonoBehaviour:
     names:
     - Root
     - Store
+  - category: Showcase
+    names:
+    - Buttons
+    - Popups
+    - TabsPanels
+    - TogglesSwitches
   - category: Spec
     names:
     - Bound

@@ -20,7 +20,7 @@ namespace Neo.UI.Editor.Composer
     /// </summary>
     public static class SpecMigration
     {
-        [MenuItem("Tools/Neo UI/Migrate Spec To Layout Model", priority = 81)]
+        [MenuItem("Tools/Neo UI/Advanced/Migrate Spec To Layout Model", priority = 17)]
         public static void MigrateSpecFileDialog()
         {
             string path = EditorUtility.OpenFilePanel("Select UI spec to migrate (JSON)", Application.dataPath, "json");

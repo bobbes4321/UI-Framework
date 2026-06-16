@@ -1,0 +1,3138 @@
+{
+  "theme": {
+    "tokens": {
+      "Primary": "#3B82F6",
+      "Background": "#0B0D10",
+      "Accent": "#FCA311",
+      "TextDefault": "#C6CCD6",
+      "Panel": "#1D2D50",
+      "Surface": "#16191E",
+      "SurfaceElevated": "#21252C",
+      "Outline": "#343A44",
+      "PrimaryHover": "#5D98F8",
+      "PrimaryPressed": "#0F66F4",
+      "TextOnPrimary": "#FFFFFF",
+      "TextStrong": "#F5F7FA",
+      "TextMuted": "#8E96A4",
+      "Success": "#22C55E",
+      "Warning": "#F59E0B",
+      "Error": "#EF4444",
+      "Shadow": "#00000080",
+      "SuccessHover": "#30DB6F",
+      "SuccessPressed": "#1B9E4B",
+      "Danger": "#EF4444",
+      "DangerHover": "#F26565",
+      "DangerPressed": "#EB1A1A",
+      "TextDark": "#6B6390"
+    },
+    "variants": {
+      "Light": {
+        "Primary": "#3B82F6",
+        "Background": "#0B0D10",
+        "Accent": "#FCA311",
+        "TextDefault": "#C6CCD6",
+        "Panel": "#1D2D50",
+        "Surface": "#16191E",
+        "SurfaceElevated": "#21252C",
+        "Outline": "#343A44",
+        "PrimaryHover": "#5D98F8",
+        "PrimaryPressed": "#0F66F4",
+        "TextOnPrimary": "#FFFFFF",
+        "TextStrong": "#F5F7FA",
+        "TextMuted": "#8E96A4",
+        "Success": "#22C55E",
+        "Warning": "#F59E0B",
+        "Error": "#EF4444",
+        "Shadow": "#00000080",
+        "SuccessHover": "#30DB6F",
+        "SuccessPressed": "#1B9E4B",
+        "Danger": "#EF4444",
+        "DangerHover": "#F26565",
+        "DangerPressed": "#EB1A1A",
+        "TextDark": "#6B6390"
+      },
+      "Dark": {
+        "Primary": "#3B82F6",
+        "Background": "#0B0D10",
+        "Accent": "#FCA311",
+        "TextDefault": "#C6CCD6",
+        "Panel": "#1D2D50",
+        "Surface": "#16191E",
+        "SurfaceElevated": "#21252C",
+        "Outline": "#343A44",
+        "PrimaryHover": "#5D98F8",
+        "PrimaryPressed": "#0F66F4",
+        "TextOnPrimary": "#FFFFFF",
+        "TextStrong": "#F5F7FA",
+        "TextMuted": "#8E96A4",
+        "Success": "#22C55E",
+        "Warning": "#F59E0B",
+        "Error": "#EF4444",
+        "Shadow": "#00000080",
+        "SuccessHover": "#30DB6F",
+        "SuccessPressed": "#1B9E4B",
+        "Danger": "#EF4444",
+        "DangerHover": "#F26565",
+        "DangerPressed": "#EB1A1A",
+        "TextDark": "#6B6390"
+      }
+    }
+  },
+  "presets": [
+    {
+      "name": "ShowDefault",
+      "type": "Show",
+      "duration": 0.18000000715255737,
+      "ease": "OutCubic",
+      "scale": {
+        "from": "0.96,0.96,1",
+        "to": "1,1,1",
+        "duration": 0.18000000715255737,
+        "ease": "OutCubic"
+      },
+      "fade": {
+        "from": 0,
+        "to": 1,
+        "duration": 0.18000000715255737,
+        "ease": "OutCubic"
+      }
+    },
+    {
+      "name": "HideDefault",
+      "type": "Hide",
+      "duration": 0.18000000715255737,
+      "ease": "OutCubic",
+      "scale": {
+        "from": "1,1,1",
+        "to": "0.96,0.96,1",
+        "duration": 0.18000000715255737,
+        "ease": "OutCubic"
+      },
+      "fade": {
+        "from": 1,
+        "to": 0,
+        "duration": 0.18000000715255737,
+        "ease": "OutCubic"
+      }
+    },
+    {
+      "name": "SlideInLeft",
+      "type": "Show",
+      "duration": 0.34999999403953552,
+      "ease": "OutCubic",
+      "move": {
+        "from": "Left",
+        "duration": 0.34999999403953552,
+        "ease": "OutCubic"
+      },
+      "fade": {
+        "from": 0,
+        "to": 1,
+        "duration": 0.34999999403953552,
+        "ease": "OutCubic"
+      }
+    },
+    {
+      "name": "SlideOutLeft",
+      "type": "Hide",
+      "duration": 0.25,
+      "ease": "InCubic",
+      "move": {
+        "to": "Left",
+        "duration": 0.25,
+        "ease": "InCubic"
+      },
+      "fade": {
+        "from": 1,
+        "to": 0,
+        "duration": 0.25,
+        "ease": "InCubic"
+      }
+    },
+    {
+      "name": "SlideUpIn",
+      "type": "Show",
+      "duration": 0.40000000596046448,
+      "ease": "OutCubic",
+      "move": {
+        "from": "Bottom",
+        "duration": 0.40000000596046448,
+        "ease": "OutCubic"
+      },
+      "fade": {
+        "from": 0,
+        "to": 1,
+        "duration": 0.40000000596046448,
+        "ease": "OutCubic"
+      }
+    },
+    {
+      "name": "SlideDownOut",
+      "type": "Hide",
+      "duration": 0.30000001192092896,
+      "ease": "InCubic",
+      "move": {
+        "to": "Bottom",
+        "duration": 0.30000001192092896,
+        "ease": "InCubic"
+      },
+      "fade": {
+        "from": 1,
+        "to": 0,
+        "duration": 0.30000001192092896,
+        "ease": "InCubic"
+      }
+    },
+    {
+      "name": "FadeIn",
+      "type": "Show",
+      "duration": 0.20000000298023224,
+      "ease": "OutCubic",
+      "fade": {
+        "from": 0,
+        "to": 1,
+        "duration": 0.20000000298023224,
+        "ease": "OutQuad"
+      }
+    },
+    {
+      "name": "FadeOut",
+      "type": "Hide",
+      "duration": 0.20000000298023224,
+      "ease": "OutCubic",
+      "fade": {
+        "from": 1,
+        "to": 0,
+        "duration": 0.20000000298023224,
+        "ease": "InQuad"
+      }
+    },
+    {
+      "name": "PopIn",
+      "type": "Show",
+      "duration": 0.34999999403953552,
+      "ease": "OutCubic",
+      "scale": {
+        "from": "0.85,0.85,1",
+        "to": "1,1,1",
+        "duration": 0.34999999403953552,
+        "ease": "OutBack"
+      },
+      "fade": {
+        "from": 0,
+        "to": 1,
+        "duration": 0.34999999403953552,
+        "ease": "OutBack"
+      }
+    },
+    {
+      "name": "PopOut",
+      "type": "Hide",
+      "duration": 0.20000000298023224,
+      "ease": "OutCubic",
+      "scale": {
+        "from": "1,1,1",
+        "to": "0.9,0.9,1",
+        "duration": 0.20000000298023224,
+        "ease": "InQuad"
+      },
+      "fade": {
+        "from": 1,
+        "to": 0,
+        "duration": 0.20000000298023224,
+        "ease": "InQuad"
+      }
+    }
+  ],
+  "views": [
+    {
+      "id": "Game/HUD",
+      "showAnimation": "FadeIn",
+      "hideAnimation": "FadeOut",
+      "elements": [
+        {
+          "safearea": {
+            "anchor": "Stretch",
+            "children": [
+              {
+                "text": {
+                  "label": "HEALTH",
+                  "color": "TextMuted",
+                  "anchor": "TopLeft",
+                  "size": [
+                    200,
+                    32
+                  ],
+                  "position": [
+                    48,
+                    -48
+                  ],
+                  "textStyle": "Caption",
+                  "align": "left"
+                }
+              },
+              {
+                "progress": {
+                  "anchor": "TopLeft",
+                  "size": [
+                    340,
+                    16
+                  ],
+                  "position": [
+                    48,
+                    -88
+                  ],
+                  "min": 0,
+                  "max": 100,
+                  "value": 72
+                }
+              },
+              {
+                "text": {
+                  "label": "BOOST",
+                  "color": "TextMuted",
+                  "anchor": "TopLeft",
+                  "size": [
+                    200,
+                    32
+                  ],
+                  "position": [
+                    48,
+                    -120
+                  ],
+                  "textStyle": "Caption",
+                  "align": "left"
+                }
+              },
+              {
+                "progress": {
+                  "anchor": "TopLeft",
+                  "size": [
+                    340,
+                    16
+                  ],
+                  "position": [
+                    48,
+                    -160
+                  ],
+                  "min": 0,
+                  "max": 100,
+                  "value": 45
+                }
+              },
+              {
+                "counter": {
+                  "label": "#,0",
+                  "labelColor": "TextStrong",
+                  "anchor": "TopRight",
+                  "size": [
+                    320,
+                    64
+                  ],
+                  "position": [
+                    -48,
+                    -48
+                  ],
+                  "value": 124500,
+                  "textStyle": "Title"
+                }
+              },
+              {
+                "text": {
+                  "label": "SCORE",
+                  "color": "TextMuted",
+                  "anchor": "TopRight",
+                  "size": [
+                    320,
+                    28
+                  ],
+                  "position": [
+                    -48,
+                    -108
+                  ],
+                  "textStyle": "Caption"
+                }
+              },
+              {
+                "hstack": {
+                  "anchor": "TopRight",
+                  "size": [
+                    320,
+                    48
+                  ],
+                  "position": [
+                    -48,
+                    -156
+                  ],
+                  "padding": 0,
+                  "spacing": 8,
+                  "align": "right",
+                  "children": [
+                    {
+                      "icon": {
+                        "name": "coins",
+                        "color": "Primary",
+                        "size": [
+                          32,
+                          32
+                        ]
+                      }
+                    },
+                    {
+                      "counter": {
+                        "label": "#,0",
+                        "labelColor": "TextStrong",
+                        "size": [
+                          120,
+                          40
+                        ],
+                        "value": 2450,
+                        "textStyle": "Heading"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "button": {
+                  "id": "HUD/Pause",
+                  "icon": "pause",
+                  "anchor": "TopRight",
+                  "size": [
+                    64,
+                    64
+                  ],
+                  "position": [
+                    -48,
+                    -232
+                  ]
+                }
+              },
+              {
+                "progress": {
+                  "style": "radial",
+                  "anchor": "BottomRight",
+                  "size": [
+                    96,
+                    96
+                  ],
+                  "position": [
+                    -48,
+                    560
+                  ],
+                  "min": 0,
+                  "max": 100,
+                  "value": 100
+                }
+              },
+              {
+                "icon": {
+                  "name": "zap",
+                  "color": "TextStrong",
+                  "anchor": "BottomRight",
+                  "size": [
+                    40,
+                    40
+                  ],
+                  "position": [
+                    -76,
+                    588
+                  ]
+                }
+              },
+              {
+                "progress": {
+                  "style": "radial",
+                  "anchor": "BottomRight",
+                  "size": [
+                    96,
+                    96
+                  ],
+                  "position": [
+                    -48,
+                    440
+                  ],
+                  "min": 0,
+                  "max": 100,
+                  "value": 62
+                }
+              },
+              {
+                "icon": {
+                  "name": "shield",
+                  "color": "TextStrong",
+                  "anchor": "BottomRight",
+                  "size": [
+                    40,
+                    40
+                  ],
+                  "position": [
+                    -76,
+                    468
+                  ]
+                }
+              },
+              {
+                "progress": {
+                  "style": "radial",
+                  "anchor": "BottomRight",
+                  "size": [
+                    96,
+                    96
+                  ],
+                  "position": [
+                    -48,
+                    320
+                  ],
+                  "min": 0,
+                  "max": 100,
+                  "value": 25
+                }
+              },
+              {
+                "icon": {
+                  "name": "rocket",
+                  "color": "TextStrong",
+                  "anchor": "BottomRight",
+                  "size": [
+                    40,
+                    40
+                  ],
+                  "position": [
+                    -76,
+                    348
+                  ]
+                }
+              },
+              {
+                "progress": {
+                  "style": "radial",
+                  "anchor": "Bottom",
+                  "size": [
+                    220,
+                    220
+                  ],
+                  "position": [
+                    0,
+                    330
+                  ],
+                  "min": 0,
+                  "max": 100,
+                  "value": 78
+                }
+              },
+              {
+                "counter": {
+                  "label": "0",
+                  "labelColor": "TextStrong",
+                  "anchor": "Bottom",
+                  "size": [
+                    220,
+                    72
+                  ],
+                  "position": [
+                    0,
+                    330
+                  ],
+                  "value": 247,
+                  "textStyle": "Title"
+                }
+              },
+              {
+                "text": {
+                  "label": "KM/H",
+                  "color": "TextMuted",
+                  "anchor": "Bottom",
+                  "size": [
+                    220,
+                    28
+                  ],
+                  "position": [
+                    0,
+                    282
+                  ],
+                  "textStyle": "Caption"
+                }
+              },
+              {
+                "vstack": {
+                  "background": "Surface",
+                  "style": "Card",
+                  "radius": 12,
+                  "anchor": "BottomLeft",
+                  "size": [
+                    380,
+                    220
+                  ],
+                  "position": [
+                    48,
+                    200
+                  ],
+                  "padding": 24,
+                  "spacing": 8,
+                  "children": [
+                    {
+                      "text": {
+                        "label": "OBJECTIVES",
+                        "color": "TextMuted",
+                        "textStyle": "Caption",
+                        "align": "left"
+                      }
+                    },
+                    {
+                      "hstack": {
+                        "padding": 0,
+                        "spacing": 8,
+                        "children": [
+                          {
+                            "icon": {
+                              "name": "circle-check",
+                              "color": "Success",
+                              "size": [
+                                28,
+                                28
+                              ]
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "Win 3 races",
+                              "color": "TextDefault",
+                              "size": [
+                                260,
+                                32
+                              ],
+                              "textStyle": "Body",
+                              "align": "left"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "hstack": {
+                        "padding": 0,
+                        "spacing": 8,
+                        "children": [
+                          {
+                            "icon": {
+                              "name": "circle-check",
+                              "color": "Success",
+                              "size": [
+                                28,
+                                28
+                              ]
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "Drift 500 m",
+                              "color": "TextDefault",
+                              "size": [
+                                260,
+                                32
+                              ],
+                              "textStyle": "Body",
+                              "align": "left"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "hstack": {
+                        "padding": 0,
+                        "spacing": 8,
+                        "children": [
+                          {
+                            "icon": {
+                              "name": "target",
+                              "color": "TextMuted",
+                              "size": [
+                                28,
+                                28
+                              ]
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "Beat 1:40.00",
+                              "color": "TextMuted",
+                              "size": [
+                                260,
+                                32
+                              ],
+                              "textStyle": "Body",
+                              "align": "left"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "button": {
+                  "id": "HUD/Finish",
+                  "label": "FINISH",
+                  "icon": "flag",
+                  "labelColor": "TextStrong",
+                  "variant": "secondary",
+                  "anchor": "BottomRight",
+                  "size": [
+                    220,
+                    64
+                  ],
+                  "position": [
+                    -48,
+                    80
+                  ],
+                  "textStyle": "ButtonLabel"
+                }
+              },
+              {
+                "button": {
+                  "id": "HUD/Inventory",
+                  "label": "INVENTORY",
+                  "icon": "backpack",
+                  "labelColor": "TextOnPrimary",
+                  "anchor": "Bottom",
+                  "size": [
+                    300,
+                    64
+                  ],
+                  "position": [
+                    0,
+                    56
+                  ],
+                  "textStyle": "ButtonLabel",
+                  "badge": 3
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "Game/Inventory",
+      "showAnimation": "ShowDefault",
+      "hideAnimation": "HideDefault",
+      "background": "Shadow",
+      "elements": [
+        {
+          "safearea": {
+            "anchor": "Stretch",
+            "children": [
+              {
+                "vstack": {
+                  "anchor": "Stretch",
+                  "padding": 64,
+                  "spacing": 24,
+                  "children": [
+                    {
+                      "hstack": {
+                        "padding": 0,
+                        "spacing": 12,
+                        "children": [
+                          {
+                            "icon": {
+                              "name": "backpack",
+                              "color": "TextStrong",
+                              "size": [
+                                44,
+                                44
+                              ]
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "Inventory",
+                              "color": "TextStrong",
+                              "size": [
+                                400,
+                                56
+                              ],
+                              "textStyle": "Title",
+                              "align": "left"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "text": {
+                        "label": "Pure spec: cards from shapes, icons and rarity gradients.",
+                        "color": "TextMuted",
+                        "textStyle": "Caption",
+                        "align": "left"
+                      }
+                    },
+                    {
+                      "grid": {
+                        "padding": 0,
+                        "spacing": 16,
+                        "columns": 4,
+                        "cellSize": [
+                          210,
+                          200
+                        ],
+                        "align": "center",
+                        "cascade": true,
+                        "children": [
+                          {
+                            "vstack": {
+                              "background": "Surface",
+                              "style": "Card",
+                              "radius": 12,
+                              "padding": 16,
+                              "spacing": 8,
+                              "children": [
+                                {
+                                  "icon": {
+                                    "name": "sword",
+                                    "color": "TextDefault",
+                                    "size": [
+                                      56,
+                                      56
+                                    ]
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "Blade",
+                                    "color": "TextDefault",
+                                    "textStyle": "Body"
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "Common",
+                                    "color": "TextMuted",
+                                    "textStyle": "Caption"
+                                  }
+                                },
+                                {
+                                  "shape": {
+                                    "background": "Outline",
+                                    "shape": "Pill",
+                                    "size": [
+                                      120,
+                                      8
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "vstack": {
+                              "background": "Surface",
+                              "style": "Card",
+                              "radius": 12,
+                              "padding": 16,
+                              "spacing": 8,
+                              "children": [
+                                {
+                                  "icon": {
+                                    "name": "shield",
+                                    "color": "Primary",
+                                    "size": [
+                                      56,
+                                      56
+                                    ]
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "Aegis",
+                                    "color": "TextDefault",
+                                    "textStyle": "Body"
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "Rare",
+                                    "color": "TextMuted",
+                                    "textStyle": "Caption"
+                                  }
+                                },
+                                {
+                                  "shape": {
+                                    "shape": "Pill",
+                                    "gradient": {
+                                      "from": "Primary",
+                                      "to": "PrimaryHover",
+                                      "angle": 0
+                                    },
+                                    "size": [
+                                      120,
+                                      8
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "vstack": {
+                              "background": "Surface",
+                              "style": "Card",
+                              "radius": 12,
+                              "padding": 16,
+                              "spacing": 8,
+                              "children": [
+                                {
+                                  "icon": {
+                                    "name": "gem",
+                                    "color": "Primary",
+                                    "size": [
+                                      56,
+                                      56
+                                    ]
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "Prism",
+                                    "color": "TextDefault",
+                                    "textStyle": "Body"
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "Epic",
+                                    "color": "TextMuted",
+                                    "textStyle": "Caption"
+                                  }
+                                },
+                                {
+                                  "shape": {
+                                    "shape": "Pill",
+                                    "gradient": {
+                                      "from": "PrimaryPressed",
+                                      "to": "Primary",
+                                      "angle": 0
+                                    },
+                                    "size": [
+                                      120,
+                                      8
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "vstack": {
+                              "background": "Surface",
+                              "style": "Card",
+                              "radius": 12,
+                              "padding": 16,
+                              "spacing": 8,
+                              "children": [
+                                {
+                                  "icon": {
+                                    "name": "crown",
+                                    "color": "Success",
+                                    "size": [
+                                      56,
+                                      56
+                                    ]
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "Regalia",
+                                    "color": "TextDefault",
+                                    "textStyle": "Body"
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "Legendary",
+                                    "color": "TextMuted",
+                                    "textStyle": "Caption"
+                                  }
+                                },
+                                {
+                                  "shape": {
+                                    "shape": "Pill",
+                                    "gradient": {
+                                      "from": "Success",
+                                      "to": "SuccessHover",
+                                      "angle": 0
+                                    },
+                                    "size": [
+                                      120,
+                                      8
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "vstack": {
+                              "background": "Surface",
+                              "style": "Card",
+                              "radius": 12,
+                              "padding": 16,
+                              "spacing": 8,
+                              "children": [
+                                {
+                                  "icon": {
+                                    "name": "flame",
+                                    "color": "Danger",
+                                    "size": [
+                                      56,
+                                      56
+                                    ]
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "Ember",
+                                    "color": "TextDefault",
+                                    "textStyle": "Body"
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "Epic",
+                                    "color": "TextMuted",
+                                    "textStyle": "Caption"
+                                  }
+                                },
+                                {
+                                  "shape": {
+                                    "shape": "Pill",
+                                    "gradient": {
+                                      "from": "Danger",
+                                      "to": "DangerHover",
+                                      "angle": 0
+                                    },
+                                    "size": [
+                                      120,
+                                      8
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "vstack": {
+                              "background": "Surface",
+                              "style": "Card",
+                              "radius": 12,
+                              "padding": 16,
+                              "spacing": 8,
+                              "children": [
+                                {
+                                  "icon": {
+                                    "name": "snowflake",
+                                    "color": "Primary",
+                                    "size": [
+                                      56,
+                                      56
+                                    ]
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "Frost",
+                                    "color": "TextDefault",
+                                    "textStyle": "Body"
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "Rare",
+                                    "color": "TextMuted",
+                                    "textStyle": "Caption"
+                                  }
+                                },
+                                {
+                                  "shape": {
+                                    "shape": "Pill",
+                                    "gradient": {
+                                      "from": "Primary",
+                                      "to": "PrimaryHover",
+                                      "angle": 0
+                                    },
+                                    "size": [
+                                      120,
+                                      8
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "vstack": {
+                              "background": "Surface",
+                              "style": "Card",
+                              "radius": 12,
+                              "padding": 16,
+                              "spacing": 8,
+                              "children": [
+                                {
+                                  "icon": {
+                                    "name": "key",
+                                    "color": "TextDefault",
+                                    "size": [
+                                      56,
+                                      56
+                                    ]
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "Skeleton Key",
+                                    "color": "TextDefault",
+                                    "textStyle": "Body"
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "Common",
+                                    "color": "TextMuted",
+                                    "textStyle": "Caption"
+                                  }
+                                },
+                                {
+                                  "shape": {
+                                    "background": "Outline",
+                                    "shape": "Pill",
+                                    "size": [
+                                      120,
+                                      8
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "vstack": {
+                              "background": "Surface",
+                              "style": "Card",
+                              "radius": 12,
+                              "padding": 16,
+                              "spacing": 8,
+                              "children": [
+                                {
+                                  "icon": {
+                                    "name": "heart",
+                                    "color": "Danger",
+                                    "size": [
+                                      56,
+                                      56
+                                    ]
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "Vitality",
+                                    "color": "TextDefault",
+                                    "textStyle": "Body"
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "Rare",
+                                    "color": "TextMuted",
+                                    "textStyle": "Caption"
+                                  }
+                                },
+                                {
+                                  "shape": {
+                                    "shape": "Pill",
+                                    "gradient": {
+                                      "from": "Primary",
+                                      "to": "PrimaryHover",
+                                      "angle": 0
+                                    },
+                                    "size": [
+                                      120,
+                                      8
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "spacer": {
+                        "flex": 1
+                      }
+                    },
+                    {
+                      "button": {
+                        "id": "Inventory/Close",
+                        "label": "CLOSE",
+                        "icon": "x",
+                        "labelColor": "TextStrong",
+                        "variant": "secondary",
+                        "size": [
+                          0,
+                          56
+                        ],
+                        "textStyle": "ButtonLabel"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "Menu/Cheats",
+      "showAnimation": "ShowDefault",
+      "hideAnimation": "HideDefault",
+      "background": "Shadow",
+      "elements": [
+        {
+          "safearea": {
+            "anchor": "Stretch",
+            "children": [
+              {
+                "vstack": {
+                  "anchor": "Stretch",
+                  "padding": 48,
+                  "spacing": 16,
+                  "children": [
+                    {
+                      "spacer": {
+                        "flex": 1
+                      }
+                    },
+                    {
+                      "vstack": {
+                        "background": "SurfaceElevated",
+                        "style": "Card",
+                        "radius": 12,
+                        "padding": 32,
+                        "spacing": 16,
+                        "children": [
+                          {
+                            "hstack": {
+                              "padding": 0,
+                              "spacing": 12,
+                              "children": [
+                                {
+                                  "icon": {
+                                    "name": "wand-sparkles",
+                                    "color": "Danger",
+                                    "size": [
+                                      40,
+                                      40
+                                    ]
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "Cheats",
+                                    "color": "TextStrong",
+                                    "size": [
+                                      300,
+                                      56
+                                    ],
+                                    "textStyle": "Title",
+                                    "align": "left"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "Data-driven cheat menu — every row emits a signal your game code hooks with one line.",
+                              "color": "TextMuted",
+                              "textStyle": "Caption",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "cheats": {
+                              "catalog": "Debug/Cheats"
+                            }
+                          },
+                          {
+                            "button": {
+                              "id": "Cheats/Close",
+                              "label": "CLOSE",
+                              "icon": "x",
+                              "labelColor": "TextStrong",
+                              "variant": "secondary",
+                              "size": [
+                                0,
+                                56
+                              ],
+                              "textStyle": "ButtonLabel"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "spacer": {
+                        "flex": 1
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "Menu/Main",
+      "showAnimation": "SlideInLeft",
+      "hideAnimation": "SlideOutLeft",
+      "background": "Background",
+      "elements": [
+        {
+          "safearea": {
+            "anchor": "Stretch",
+            "children": [
+              {
+                "shape": {
+                  "background": "Outline",
+                  "shape": "Ring",
+                  "thickness": 3,
+                  "anchor": "TopRight",
+                  "size": [
+                    360,
+                    360
+                  ],
+                  "position": [
+                    -40,
+                    -80
+                  ]
+                }
+              },
+              {
+                "shape": {
+                  "shape": "Ring",
+                  "gradient": {
+                    "from": "Primary",
+                    "to": "PrimaryHover",
+                    "angle": 45
+                  },
+                  "thickness": 12,
+                  "anchor": "TopRight",
+                  "size": [
+                    200,
+                    200
+                  ],
+                  "position": [
+                    -160,
+                    -260
+                  ]
+                }
+              },
+              {
+                "shape": {
+                  "background": "Outline",
+                  "shape": "Arc",
+                  "thickness": 6,
+                  "arcStart": 300,
+                  "arcSweep": 200,
+                  "anchor": "BottomLeft",
+                  "size": [
+                    420,
+                    420
+                  ],
+                  "position": [
+                    40,
+                    60
+                  ]
+                }
+              },
+              {
+                "shape": {
+                  "background": "Primary",
+                  "shape": "Circle",
+                  "anchor": "BottomLeft",
+                  "size": [
+                    16,
+                    16
+                  ],
+                  "position": [
+                    140,
+                    320
+                  ]
+                }
+              },
+              {
+                "shape": {
+                  "background": "Outline",
+                  "shape": "Circle",
+                  "anchor": "TopLeft",
+                  "size": [
+                    10,
+                    10
+                  ],
+                  "position": [
+                    140,
+                    -340
+                  ]
+                }
+              },
+              {
+                "vstack": {
+                  "anchor": "Stretch",
+                  "padding": 64,
+                  "spacing": 16,
+                  "cascade": true,
+                  "children": [
+                    {
+                      "spacer": {
+                        "flex": 1
+                      }
+                    },
+                    {
+                      "icon": {
+                        "name": "zap",
+                        "color": "Primary",
+                        "size": [
+                          96,
+                          96
+                        ]
+                      }
+                    },
+                    {
+                      "text": {
+                        "label": "NEON DRIFT",
+                        "color": "TextStrong",
+                        "textStyle": "Display"
+                      }
+                    },
+                    {
+                      "text": {
+                        "label": "arcade racing — every screen built from one JSON spec",
+                        "color": "TextMuted",
+                        "textStyle": "Body"
+                      }
+                    },
+                    {
+                      "spacer": {
+                        "flex": 1
+                      }
+                    },
+                    {
+                      "button": {
+                        "id": "Menu/Play",
+                        "label": "PLAY",
+                        "icon": "play",
+                        "labelColor": "TextOnPrimary",
+                        "size": "lg",
+                        "textStyle": "ButtonLabelLarge"
+                      }
+                    },
+                    {
+                      "button": {
+                        "id": "Menu/Garage",
+                        "label": "GARAGE",
+                        "icon": "shopping-bag",
+                        "labelColor": "TextStrong",
+                        "variant": "secondary",
+                        "size": [
+                          0,
+                          56
+                        ],
+                        "textStyle": "ButtonLabel",
+                        "badge": 2
+                      }
+                    },
+                    {
+                      "button": {
+                        "id": "Menu/Settings",
+                        "label": "SETTINGS",
+                        "icon": "settings",
+                        "labelColor": "TextStrong",
+                        "variant": "secondary",
+                        "size": [
+                          0,
+                          56
+                        ],
+                        "textStyle": "ButtonLabel"
+                      }
+                    },
+                    {
+                      "button": {
+                        "id": "Menu/Options",
+                        "label": "OPTIONS",
+                        "icon": "sliders-horizontal",
+                        "labelColor": "TextStrong",
+                        "variant": "secondary",
+                        "size": [
+                          0,
+                          56
+                        ],
+                        "textStyle": "ButtonLabel"
+                      }
+                    },
+                    {
+                      "button": {
+                        "id": "Menu/Cheats",
+                        "label": "CHEATS",
+                        "icon": "wand-sparkles",
+                        "labelColor": "Primary",
+                        "variant": "ghost",
+                        "size": [
+                          0,
+                          56
+                        ],
+                        "textStyle": "ButtonLabel"
+                      }
+                    },
+                    {
+                      "button": {
+                        "id": "Menu/Quit",
+                        "label": "QUIT",
+                        "labelColor": "Primary",
+                        "variant": "ghost",
+                        "size": [
+                          0,
+                          56
+                        ],
+                        "textStyle": "ButtonLabel",
+                        "onClick": {
+                          "popup": "QuitConfirm"
+                        }
+                      }
+                    },
+                    {
+                      "spacer": {
+                        "flex": 1
+                      }
+                    },
+                    {
+                      "text": {
+                        "label": "Neo UI · theming · flow graphs · signals · live data",
+                        "color": "TextMuted",
+                        "textStyle": "Caption"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "Menu/Options",
+      "showAnimation": "SlideUpIn",
+      "hideAnimation": "SlideDownOut",
+      "background": "Background",
+      "elements": [
+        {
+          "safearea": {
+            "anchor": "Stretch",
+            "children": [
+              {
+                "vstack": {
+                  "anchor": "Stretch",
+                  "padding": 48,
+                  "spacing": 16,
+                  "children": [
+                    {
+                      "hstack": {
+                        "padding": 0,
+                        "spacing": 12,
+                        "children": [
+                          {
+                            "icon": {
+                              "name": "sliders-horizontal",
+                              "color": "TextStrong",
+                              "size": [
+                                40,
+                                40
+                              ]
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "Options",
+                              "color": "TextStrong",
+                              "size": [
+                                300,
+                                56
+                              ],
+                              "textStyle": "Title",
+                              "align": "left"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "text": {
+                        "label": "This whole menu is ONE spec element bound to a settings catalog — groups, defaults, persistence, change signals and input rebinding included.",
+                        "color": "TextMuted",
+                        "textStyle": "Caption",
+                        "align": "left"
+                      }
+                    },
+                    {
+                      "settings": {
+                        "catalog": "Menu/GameOptions"
+                      }
+                    },
+                    {
+                      "spacer": {
+                        "flex": 1
+                      }
+                    },
+                    {
+                      "button": {
+                        "id": "Options/Back",
+                        "label": "BACK",
+                        "icon": "arrow-left",
+                        "labelColor": "TextStrong",
+                        "variant": "secondary",
+                        "size": [
+                          0,
+                          56
+                        ],
+                        "textStyle": "ButtonLabel"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "Menu/Settings",
+      "showAnimation": "SlideUpIn",
+      "hideAnimation": "SlideDownOut",
+      "background": "Background",
+      "elements": [
+        {
+          "safearea": {
+            "anchor": "Stretch",
+            "children": [
+              {
+                "vstack": {
+                  "anchor": "Stretch",
+                  "padding": 48,
+                  "spacing": 64,
+                  "children": [
+                    {
+                      "hstack": {
+                        "padding": 0,
+                        "spacing": 12,
+                        "children": [
+                          {
+                            "icon": {
+                              "name": "settings",
+                              "color": "TextStrong",
+                              "size": [
+                                40,
+                                40
+                              ]
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "Settings",
+                              "color": "TextStrong",
+                              "size": [
+                                300,
+                                56
+                              ],
+                              "textStyle": "Title",
+                              "align": "left"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "text": {
+                        "label": "Hand-laid layout — each tab controls a sibling panel.",
+                        "color": "TextMuted",
+                        "textStyle": "Caption",
+                        "align": "left"
+                      }
+                    },
+                    {
+                      "panel": {
+                        "id": "SettingsPanels/Audio",
+                        "style": "Panel",
+                        "radius": 12,
+                        "padding": 0,
+                        "spacing": 32,
+                        "children": [
+                          {
+                            "text": {
+                              "label": "Master Volume",
+                              "color": "TextDefault",
+                              "textStyle": "Heading",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "slider": {
+                              "id": "Settings/Volume",
+                              "size": [
+                                0,
+                                32
+                              ],
+                              "min": 0,
+                              "max": 100,
+                              "value": 80
+                            }
+                          },
+                          {
+                            "toggle": {
+                              "id": "Settings/Music",
+                              "label": "Music and balls",
+                              "size": [
+                                0,
+                                40
+                              ],
+                              "value": 1,
+                              "textStyle": "ButtonLabelLarge"
+                            }
+                          },
+                          {
+                            "toggle": {
+                              "id": "Settings/Sfx",
+                              "label": "Sound Effects",
+                              "size": [
+                                0,
+                                40
+                              ],
+                              "value": 1,
+                              "textStyle": "Body"
+                            }
+                          },
+                          {
+                            "hstack": {
+                              "padding": 0,
+                              "spacing": 16,
+                              "children": [
+                                {
+                                  "text": {
+                                    "label": "Mute in background",
+                                    "color": "TextDefault",
+                                    "size": [
+                                      870,
+                                      48
+                                    ],
+                                    "textStyle": "Body",
+                                    "align": "left"
+                                  }
+                                },
+                                {
+                                  "switch": {
+                                    "id": "Settings/MuteBg",
+                                    "size": [
+                                      64,
+                                      32
+                                    ],
+                                    "value": 1
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "panel": {
+                        "id": "SettingsPanels/Video",
+                        "padding": 0,
+                        "spacing": 12,
+                        "children": [
+                          {
+                            "toggle": {
+                              "id": "Settings/Fullscreen",
+                              "label": "Fullscreen",
+                              "size": [
+                                0,
+                                40
+                              ],
+                              "value": 1,
+                              "textStyle": "Body"
+                            }
+                          },
+                          {
+                            "hstack": {
+                              "padding": 0,
+                              "spacing": 16,
+                              "children": [
+                                {
+                                  "text": {
+                                    "label": "V-Sync",
+                                    "color": "TextDefault",
+                                    "size": [
+                                      870,
+                                      48
+                                    ],
+                                    "textStyle": "Body",
+                                    "align": "left"
+                                  }
+                                },
+                                {
+                                  "switch": {
+                                    "id": "Settings/VSync",
+                                    "size": [
+                                      64,
+                                      32
+                                    ],
+                                    "value": 1
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "Quality",
+                              "color": "TextDefault",
+                              "textStyle": "Heading",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "dropdown": {
+                              "id": "Settings/Quality",
+                              "size": [
+                                0,
+                                48
+                              ],
+                              "value": 2,
+                              "options": [
+                                "Low",
+                                "Medium",
+                                "High",
+                                "Ultra"
+                              ]
+                            }
+                          },
+                          {
+                            "hstack": {
+                              "padding": 0,
+                              "spacing": 16,
+                              "children": [
+                                {
+                                  "text": {
+                                    "label": "FPS Cap",
+                                    "color": "TextDefault",
+                                    "size": [
+                                      690,
+                                      48
+                                    ],
+                                    "textStyle": "Body",
+                                    "align": "left"
+                                  }
+                                },
+                                {
+                                  "stepper": {
+                                    "id": "Settings/FpsCap",
+                                    "size": [
+                                      240,
+                                      48
+                                    ],
+                                    "min": 30,
+                                    "max": 240,
+                                    "value": 120,
+                                    "step": 30
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "tabbar": {
+                        "id": "SettingsTabs/TabBar",
+                        "size": [
+                          0,
+                          56
+                        ],
+                        "children": [
+                          {
+                            "tab": {
+                              "id": "SettingsTabs/Audio",
+                              "label": "Audio",
+                              "icon": "volume-2",
+                              "textStyle": "ButtonLabel",
+                              "controls": "SettingsPanels/Audio"
+                            }
+                          },
+                          {
+                            "tab": {
+                              "id": "SettingsTabs/Video",
+                              "label": "Video",
+                              "icon": "video",
+                              "textStyle": "ButtonLabel",
+                              "controls": "SettingsPanels/Video"
+                            }
+                          },
+                          {
+                            "tab": {
+                              "id": "SettingsTabs/Game",
+                              "label": "Game",
+                              "icon": "gamepad-2",
+                              "textStyle": "ButtonLabel",
+                              "controls": "SettingsPanels/Game"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "panel": {
+                        "id": "SettingsPanels/Game",
+                        "padding": 0,
+                        "spacing": 12,
+                        "children": [
+                          {
+                            "hstack": {
+                              "padding": 0,
+                              "spacing": 16,
+                              "children": [
+                                {
+                                  "text": {
+                                    "label": "Difficulty",
+                                    "color": "TextDefault",
+                                    "size": [
+                                      690,
+                                      48
+                                    ],
+                                    "textStyle": "Body",
+                                    "align": "left"
+                                  }
+                                },
+                                {
+                                  "stepper": {
+                                    "id": "Settings/Difficulty",
+                                    "size": [
+                                      240,
+                                      48
+                                    ],
+                                    "min": 1,
+                                    "max": 5,
+                                    "value": 2,
+                                    "step": 1
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "Language",
+                              "color": "TextDefault",
+                              "textStyle": "Heading",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "dropdown": {
+                              "id": "Settings/Language",
+                              "size": [
+                                0,
+                                48
+                              ],
+                              "value": 0,
+                              "options": [
+                                "English",
+                                "Nederlands",
+                                "Deutsch",
+                                "Français",
+                                "Español"
+                              ]
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "Player Name",
+                              "color": "TextDefault",
+                              "textStyle": "Heading",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "input": {
+                              "label": "Enter player name...",
+                              "size": [
+                                0,
+                                48
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "spacer": {
+                        "flex": 1
+                      }
+                    },
+                    {
+                      "button": {
+                        "id": "Settings/Back",
+                        "label": "BACK and balls",
+                        "icon": "circle-user",
+                        "labelColor": "Danger",
+                        "background": "TextStrong",
+                        "variant": "secondary",
+                        "size": [
+                          0,
+                          56
+                        ],
+                        "textStyle": "Heading"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "Race/Victory",
+      "showAnimation": "ShowDefault",
+      "hideAnimation": "FadeOut",
+      "background": "Background",
+      "elements": [
+        {
+          "safearea": {
+            "anchor": "Stretch",
+            "children": [
+              {
+                "shape": {
+                  "background": "Outline",
+                  "shape": "Ring",
+                  "thickness": 3,
+                  "anchor": "TopLeft",
+                  "size": [
+                    220,
+                    220
+                  ],
+                  "position": [
+                    -60,
+                    70
+                  ]
+                }
+              },
+              {
+                "shape": {
+                  "shape": "Arc",
+                  "gradient": {
+                    "from": "Primary",
+                    "to": "PrimaryHover",
+                    "angle": 90
+                  },
+                  "thickness": 8,
+                  "arcStart": 140,
+                  "arcSweep": 160,
+                  "anchor": "TopRight",
+                  "size": [
+                    320,
+                    320
+                  ],
+                  "position": [
+                    40,
+                    60
+                  ]
+                }
+              },
+              {
+                "shape": {
+                  "background": "Primary",
+                  "shape": "Circle",
+                  "anchor": "BottomRight",
+                  "size": [
+                    12,
+                    12
+                  ],
+                  "position": [
+                    -160,
+                    260
+                  ]
+                }
+              },
+              {
+                "vstack": {
+                  "anchor": "Stretch",
+                  "padding": 64,
+                  "spacing": 16,
+                  "cascade": true,
+                  "children": [
+                    {
+                      "spacer": {
+                        "flex": 1
+                      }
+                    },
+                    {
+                      "icon": {
+                        "name": "trophy",
+                        "color": "Success",
+                        "size": [
+                          96,
+                          96
+                        ]
+                      }
+                    },
+                    {
+                      "text": {
+                        "label": "RACE COMPLETE",
+                        "color": "TextStrong",
+                        "textStyle": "Display"
+                      }
+                    },
+                    {
+                      "hstack": {
+                        "padding": 0,
+                        "spacing": 8,
+                        "align": "center",
+                        "children": [
+                          {
+                            "icon": {
+                              "name": "star",
+                              "color": "Primary",
+                              "size": [
+                                56,
+                                56
+                              ]
+                            }
+                          },
+                          {
+                            "icon": {
+                              "name": "star",
+                              "color": "Primary",
+                              "size": [
+                                56,
+                                56
+                              ]
+                            }
+                          },
+                          {
+                            "icon": {
+                              "name": "star",
+                              "color": "Primary",
+                              "size": [
+                                56,
+                                56
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "hstack": {
+                        "padding": 0,
+                        "spacing": 16,
+                        "align": "center",
+                        "children": [
+                          {
+                            "vstack": {
+                              "size": [
+                                280,
+                                110
+                              ],
+                              "padding": 0,
+                              "spacing": 4,
+                              "children": [
+                                {
+                                  "text": {
+                                    "label": "TIME",
+                                    "color": "TextMuted",
+                                    "textStyle": "Caption"
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "1:42.07",
+                                    "color": "TextStrong",
+                                    "textStyle": "Heading"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "vstack": {
+                              "size": [
+                                280,
+                                110
+                              ],
+                              "padding": 0,
+                              "spacing": 4,
+                              "children": [
+                                {
+                                  "text": {
+                                    "label": "TOP SPEED",
+                                    "color": "TextMuted",
+                                    "textStyle": "Caption"
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "312 km/h",
+                                    "color": "TextStrong",
+                                    "textStyle": "Heading"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "vstack": {
+                              "size": [
+                                280,
+                                110
+                              ],
+                              "padding": 0,
+                              "spacing": 4,
+                              "children": [
+                                {
+                                  "text": {
+                                    "label": "DRIFT SCORE",
+                                    "color": "TextMuted",
+                                    "textStyle": "Caption"
+                                  }
+                                },
+                                {
+                                  "counter": {
+                                    "label": "#,0",
+                                    "labelColor": "TextStrong",
+                                    "value": 18750,
+                                    "textStyle": "Heading"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "text": {
+                        "label": "LEVEL 12",
+                        "color": "TextMuted",
+                        "textStyle": "Caption"
+                      }
+                    },
+                    {
+                      "progress": {
+                        "size": [
+                          0,
+                          14
+                        ],
+                        "min": 0,
+                        "max": 100,
+                        "value": 78
+                      }
+                    },
+                    {
+                      "spacer": {
+                        "flex": 1
+                      }
+                    },
+                    {
+                      "button": {
+                        "id": "Victory/Rematch",
+                        "label": "REMATCH",
+                        "icon": "rotate-ccw",
+                        "labelColor": "TextOnPrimary",
+                        "size": "lg",
+                        "textStyle": "ButtonLabelLarge"
+                      }
+                    },
+                    {
+                      "button": {
+                        "id": "Victory/Continue",
+                        "label": "CONTINUE",
+                        "labelColor": "TextStrong",
+                        "variant": "secondary",
+                        "size": [
+                          0,
+                          56
+                        ],
+                        "textStyle": "ButtonLabel"
+                      }
+                    },
+                    {
+                      "text": {
+                        "label": "auto-continues in 10 s — a flow timer trigger",
+                        "color": "TextMuted",
+                        "textStyle": "Caption"
+                      }
+                    },
+                    {
+                      "spacer": {
+                        "flex": 1
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "Shop/Store",
+      "showAnimation": "SlideUpIn",
+      "hideAnimation": "SlideDownOut",
+      "background": "Background",
+      "elements": [
+        {
+          "safearea": {
+            "anchor": "Stretch",
+            "children": [
+              {
+                "vstack": {
+                  "anchor": "Stretch",
+                  "padding": 48,
+                  "spacing": 16,
+                  "children": [
+                    {
+                      "hstack": {
+                        "padding": 0,
+                        "spacing": 12,
+                        "children": [
+                          {
+                            "icon": {
+                              "name": "shopping-bag",
+                              "color": "TextStrong",
+                              "size": [
+                                44,
+                                44
+                              ]
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "Garage",
+                              "color": "TextStrong",
+                              "size": [
+                                690,
+                                56
+                              ],
+                              "textStyle": "Title",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "icon": {
+                              "name": "coins",
+                              "color": "Primary",
+                              "size": [
+                                36,
+                                36
+                              ]
+                            }
+                          },
+                          {
+                            "counter": {
+                              "label": "#,0",
+                              "labelColor": "TextStrong",
+                              "size": [
+                                140,
+                                44
+                              ],
+                              "value": 2450,
+                              "textStyle": "Heading"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "text": {
+                        "label": "FEATURED",
+                        "color": "TextMuted",
+                        "textStyle": "Caption",
+                        "align": "left"
+                      }
+                    },
+                    {
+                      "vstack": {
+                        "background": "SurfaceElevated",
+                        "style": "Card",
+                        "radius": 12,
+                        "padding": 24,
+                        "spacing": 8,
+                        "children": [
+                          {
+                            "hstack": {
+                              "padding": 0,
+                              "spacing": 16,
+                              "children": [
+                                {
+                                  "icon": {
+                                    "name": "rocket",
+                                    "color": "Primary",
+                                    "size": [
+                                      72,
+                                      72
+                                    ]
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "Hyperion GT",
+                                    "color": "TextStrong",
+                                    "size": [
+                                      400,
+                                      48
+                                    ],
+                                    "textStyle": "Heading",
+                                    "align": "left"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "412 km/h top speed · AWD · Legendary class",
+                              "color": "TextMuted",
+                              "textStyle": "Caption",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "shape": {
+                              "shape": "Pill",
+                              "gradient": {
+                                "from": "Primary",
+                                "to": "PrimaryHover",
+                                "angle": 0
+                              },
+                              "size": [
+                                320,
+                                8
+                              ]
+                            }
+                          },
+                          {
+                            "hstack": {
+                              "padding": 0,
+                              "spacing": 16,
+                              "children": [
+                                {
+                                  "button": {
+                                    "id": "Shop/BuyFeatured",
+                                    "label": "BUY · 9,800",
+                                    "icon": "coins",
+                                    "labelColor": "TextOnPrimary",
+                                    "size": [
+                                      320,
+                                      56
+                                    ],
+                                    "textStyle": "ButtonLabel",
+                                    "onClick": {
+                                      "signal": {
+                                        "category": "Shop",
+                                        "name": "Buy"
+                                      },
+                                      "popup": "PurchaseConfirm"
+                                    }
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "limited offer",
+                                    "color": "Danger",
+                                    "size": [
+                                      240,
+                                      32
+                                    ],
+                                    "textStyle": "Caption",
+                                    "align": "left"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "text": {
+                        "label": "DAILY DEALS — rows stream in from UIData at runtime",
+                        "color": "TextMuted",
+                        "textStyle": "Caption",
+                        "align": "left"
+                      }
+                    },
+                    {
+                      "list": {
+                        "size": [
+                          0,
+                          420
+                        ],
+                        "spacing": 8,
+                        "bind": "Shop/Deals",
+                        "item": {
+                          "hstack": {
+                            "style": "Control",
+                            "radius": 10,
+                            "size": [
+                              0,
+                              96
+                            ],
+                            "padding": 12,
+                            "spacing": 16,
+                            "children": [
+                              {
+                                "icon": {
+                                  "name": "gem",
+                                  "color": "Primary",
+                                  "size": [
+                                    48,
+                                    48
+                                  ]
+                                }
+                              },
+                              {
+                                "vstack": {
+                                  "size": [
+                                    420,
+                                    72
+                                  ],
+                                  "padding": 0,
+                                  "spacing": 4,
+                                  "children": [
+                                    {
+                                      "text": {
+                                        "label": "{name}",
+                                        "color": "TextDefault",
+                                        "textStyle": "Body",
+                                        "align": "left"
+                                      }
+                                    },
+                                    {
+                                      "text": {
+                                        "label": "{tag}",
+                                        "color": "TextMuted",
+                                        "textStyle": "Caption",
+                                        "align": "left"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "spacer": {
+                                  "flex": 1
+                                }
+                              },
+                              {
+                                "text": {
+                                  "label": "{price}",
+                                  "color": "TextStrong",
+                                  "size": [
+                                    150,
+                                    40
+                                  ],
+                                  "textStyle": "Heading",
+                                  "align": "right"
+                                }
+                              },
+                              {
+                                "button": {
+                                  "id": "Shop/BuyRow",
+                                  "label": "BUY",
+                                  "labelColor": "TextStrong",
+                                  "variant": "secondary",
+                                  "size": [
+                                    120,
+                                    48
+                                  ],
+                                  "textStyle": "ButtonLabel",
+                                  "onClick": {
+                                    "signal": {
+                                      "category": "Shop",
+                                      "name": "Buy"
+                                    }
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "spacer": {
+                        "flex": 1
+                      }
+                    },
+                    {
+                      "button": {
+                        "id": "Shop/Back",
+                        "label": "BACK",
+                        "icon": "arrow-left",
+                        "labelColor": "TextStrong",
+                        "variant": "secondary",
+                        "size": [
+                          0,
+                          56
+                        ],
+                        "textStyle": "ButtonLabel"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "id": "Menu/GameOptions",
+      "groups": [
+        "Gameplay",
+        "Graphics",
+        "Audio",
+        "Controls",
+        "Yippie"
+      ],
+      "inputActionAsset": "Assets/InputSystem_Actions.inputactions",
+      "items": [
+        {
+          "dropdown": {
+            "id": "Gameplay/Difficulty",
+            "group": "Gameplay",
+            "label": "Difficulty",
+            "value": 1,
+            "options": [
+              "Casual",
+              "Normal",
+              "Hard",
+              "Nightmare"
+            ]
+          }
+        },
+        {
+          "toggle": {
+            "id": "Gameplay/ScreenShake",
+            "group": "Gameplay",
+            "label": "Screen Shake",
+            "tooltip": "Camera impulse on impacts",
+            "value": true
+          }
+        },
+        {
+          "toggle": {
+            "id": "Gameplay/Subtitles",
+            "group": "Gameplay",
+            "label": "Subtitles",
+            "value": true
+          }
+        },
+        {
+          "slider": {
+            "id": "Gameplay/FieldOfView",
+            "group": "Gameplay",
+            "label": "Field of View",
+            "min": 60,
+            "max": 120,
+            "wholeNumbers": true,
+            "value": 90
+          }
+        },
+        {
+          "dropdown": {
+            "id": "Graphics/Quality",
+            "group": "Graphics",
+            "label": "Quality Preset",
+            "value": 2,
+            "options": [
+              "Low",
+              "Medium",
+              "High",
+              "Ultra"
+            ]
+          }
+        },
+        {
+          "switch": {
+            "id": "Graphics/VSync",
+            "group": "Graphics",
+            "label": "V-Sync",
+            "value": true
+          }
+        },
+        {
+          "slider": {
+            "id": "Graphics/RenderScale",
+            "group": "Graphics",
+            "label": "Render Scale",
+            "min": 0.5,
+            "max": 2,
+            "value": 1
+          }
+        },
+        {
+          "toggle": {
+            "id": "Graphics/MotionBlur",
+            "group": "Graphics",
+            "label": "Motion Blur",
+            "value": false
+          }
+        },
+        {
+          "slider": {
+            "id": "Audio/Master",
+            "group": "Audio",
+            "label": "Master Volume",
+            "min": 0,
+            "max": 1,
+            "value": 0.8
+          }
+        },
+        {
+          "slider": {
+            "id": "Audio/Music",
+            "group": "Audio",
+            "label": "Music",
+            "min": 0,
+            "max": 1,
+            "value": 0.6
+          }
+        },
+        {
+          "slider": {
+            "id": "Audio/Effects",
+            "group": "Audio",
+            "label": "Effects",
+            "min": 0,
+            "max": 1,
+            "value": 1
+          }
+        },
+        {
+          "toggle": {
+            "id": "Audio/MuteInBackground",
+            "group": "Audio",
+            "label": "Mute in Background",
+            "value": true
+          }
+        },
+        {
+          "slider": {
+            "id": "Controls/Sensitivity",
+            "group": "Controls",
+            "label": "Look Sensitivity",
+            "min": 1,
+            "max": 10,
+            "wholeNumbers": true,
+            "value": 5
+          }
+        },
+        {
+          "toggle": {
+            "id": "Controls/InvertY",
+            "group": "Controls",
+            "label": "Invert Y Axis",
+            "value": false
+          }
+        },
+        {
+          "rebind": {
+            "id": "Controls/Jump",
+            "group": "Controls",
+            "label": "Jump",
+            "action": "Player/Jump"
+          }
+        },
+        {
+          "rebind": {
+            "id": "Controls/Attack",
+            "group": "Controls",
+            "label": "Attack",
+            "action": "Player/Attack"
+          }
+        },
+        {
+          "rebind": {
+            "id": "Controls/Sprint",
+            "group": "Controls",
+            "label": "Sprint",
+            "action": "Player/Sprint"
+          }
+        },
+        {
+          "button": {
+            "id": "Controls/Reset",
+            "group": "Controls",
+            "label": "Reset to Defaults"
+          }
+        },
+        {
+          "button": {
+            "id": "Gameplay/PunchBalls",
+            "group": "Gameplay",
+            "label": "Punch Balls"
+          }
+        }
+      ]
+    },
+    {
+      "id": "Settings/Catalog2"
+    }
+  ],
+  "cheats": [
+    {
+      "id": "Cheats/Catalog2"
+    },
+    {
+      "id": "Debug/Cheats",
+      "groups": [
+        "Player",
+        "Economy",
+        "World"
+      ],
+      "items": [
+        {
+          "toggle": {
+            "id": "Player/GodMode",
+            "group": "Player",
+            "label": "God Mode",
+            "tooltip": "Invulnerable to damage",
+            "persisted": false,
+            "value": false
+          }
+        },
+        {
+          "toggle": {
+            "id": "Player/InfiniteBoost",
+            "group": "Player",
+            "label": "Infinite Boost",
+            "persisted": false,
+            "value": false
+          }
+        },
+        {
+          "button": {
+            "id": "Player/HealFull",
+            "group": "Player",
+            "label": "Heal to Full"
+          }
+        },
+        {
+          "stepper": {
+            "id": "Player/XpMultiplier",
+            "group": "Player",
+            "label": "XP Multiplier",
+            "persisted": false,
+            "min": 1,
+            "max": 10,
+            "step": 1,
+            "value": 1
+          }
+        },
+        {
+          "button": {
+            "id": "Economy/Give1k",
+            "group": "Economy",
+            "label": "+1,000 Coins"
+          }
+        },
+        {
+          "button": {
+            "id": "Economy/Give10k",
+            "group": "Economy",
+            "label": "+10,000 Coins"
+          }
+        },
+        {
+          "button": {
+            "id": "Economy/UnlockAll",
+            "group": "Economy",
+            "label": "Unlock All Cars"
+          }
+        },
+        {
+          "slider": {
+            "id": "World/TimeScale",
+            "group": "World",
+            "label": "Time Scale",
+            "persisted": false,
+            "min": 0,
+            "max": 3,
+            "value": 1
+          }
+        },
+        {
+          "dropdown": {
+            "id": "World/Weather",
+            "group": "World",
+            "label": "Weather",
+            "persisted": false,
+            "value": 0,
+            "options": [
+              "Clear",
+              "Rain",
+              "Fog",
+              "Storm"
+            ]
+          }
+        },
+        {
+          "button": {
+            "id": "World/FinishRace",
+            "group": "World",
+            "label": "Finish Race Instantly"
+          }
+        },
+        {
+          "button": {
+            "id": "World/Twerk It",
+            "group": "World",
+            "label": "Finish Race Instantly"
+          }
+        }
+      ]
+    }
+  ],
+  "popups": [
+    {
+      "name": "PurchaseConfirm",
+      "title": "Purchase",
+      "message": "Buy the Hyperion GT for 9,800 coins?"
+    },
+    {
+      "name": "QuitConfirm",
+      "title": "Quit?",
+      "message": "Progress since the last checkpoint will be lost."
+    }
+  ],
+  "flow": {
+    "name": "GameUI",
+    "start": "MainMenu",
+    "nodes": [
+      {
+        "name": "MainMenu",
+        "view": "Menu/Main",
+        "next": [
+          {
+            "to": "Playing",
+            "on": {
+              "button": "Menu/Play"
+            }
+          },
+          {
+            "to": "Settings",
+            "on": {
+              "button": "Menu/Settings"
+            }
+          },
+          {
+            "to": "Shop",
+            "on": {
+              "button": "Menu/Garage"
+            }
+          },
+          {
+            "to": "Options",
+            "on": {
+              "button": "Menu/Options"
+            }
+          },
+          {
+            "to": "Cheats",
+            "on": {
+              "button": "Menu/Cheats"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Settings",
+        "view": "Menu/Settings",
+        "next": [
+          {
+            "to": "MainMenu",
+            "on": {
+              "button": "Settings/Back"
+            }
+          },
+          {
+            "to": "MainMenu",
+            "on": {
+              "back": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Options",
+        "view": "Menu/Options",
+        "next": [
+          {
+            "to": "MainMenu",
+            "on": {
+              "button": "Options/Back"
+            }
+          },
+          {
+            "to": "MainMenu",
+            "on": {
+              "back": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Cheats",
+        "views": [
+          "Menu/Main",
+          "Menu/Cheats"
+        ],
+        "next": [
+          {
+            "to": "MainMenu",
+            "on": {
+              "button": "Cheats/Close"
+            }
+          },
+          {
+            "to": "MainMenu",
+            "on": {
+              "back": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Playing",
+        "view": "Game/HUD",
+        "next": [
+          {
+            "to": "Inventory",
+            "on": {
+              "button": "HUD/Inventory"
+            }
+          },
+          {
+            "to": "MainMenu",
+            "on": {
+              "button": "HUD/Pause"
+            }
+          },
+          {
+            "to": "Victory",
+            "on": {
+              "button": "HUD/Finish"
+            }
+          },
+          {
+            "to": "MainMenu",
+            "on": {
+              "back": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Inventory",
+        "views": [
+          "Game/HUD",
+          "Game/Inventory"
+        ],
+        "next": [
+          {
+            "to": "Playing",
+            "on": {
+              "button": "Inventory/Close"
+            }
+          },
+          {
+            "to": "Playing",
+            "on": {
+              "back": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Shop",
+        "view": "Shop/Store",
+        "next": [
+          {
+            "to": "MainMenu",
+            "on": {
+              "button": "Shop/Back"
+            }
+          },
+          {
+            "to": "MainMenu",
+            "on": {
+              "back": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "Victory",
+        "view": "Race/Victory",
+        "next": [
+          {
+            "to": "Playing",
+            "on": {
+              "button": "Victory/Rematch"
+            }
+          },
+          {
+            "to": "MainMenu",
+            "on": {
+              "button": "Victory/Continue"
+            }
+          },
+          {
+            "to": "MainMenu",
+            "on": {
+              "timer": 10
+            }
+          },
+          {
+            "to": "MainMenu",
+            "on": {
+              "back": true
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

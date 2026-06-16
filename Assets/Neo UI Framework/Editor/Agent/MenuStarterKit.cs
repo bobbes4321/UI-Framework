@@ -16,7 +16,7 @@ namespace Neo.UI.Editor
     {
         private const string Folder = "Assets/Neo UI Framework/Starter/Menus";
 
-        [MenuItem("Tools/Neo UI/Create or Repair Menu Widget Library", priority = 22)]
+        [MenuItem("Tools/Neo UI/Setup/Create or Repair Menu Widget Library", priority = 103)]
         public static void CreateOrRepair()
         {
             MenuWidgetLibrary library = Build();

@@ -1,0 +1,15 @@
+{
+  "name": "child-leaf-onto-leaf",
+  "_note": "Controlled repro of the 'can't child onto a non-container' case. A progress (like the HUD radial fill) is NOT a container kind, so dragging a text onto it cannot reparent — watch the filmstrip: the text free-moves and snaps over the progress but stays a SIBLING (the tree depth is unchanged). The canvas now shows no drop-target highlight on the progress, and the drag is a plain move. Contrast with child-leaf-into-overlay.json.",
+  "open": "new",
+  "width": 1080,
+  "height": 1920,
+  "steps": [
+    { "action": "addWidget", "kind": "progress" },
+    { "action": "addWidget", "kind": "text" },
+    { "action": "select", "path": "views/Menu/Main/elements[1]" },
+    { "action": "settle" },
+    { "action": "drag", "path": "views/Menu/Main/elements[1]", "dx": 0, "dy": 0 },
+    { "action": "capture" }
+  ]
+}

@@ -31,7 +31,7 @@ namespace Neo.UI.Tests
         public void GenerateDemo()
         {
             string specPath = Path.Combine(
-                Path.GetDirectoryName(Application.dataPath) ?? ".", "neo-demo-game-ui.json");
+                Application.dataPath, "Showcases", "Specs", "game-ui.json");
             Assert.IsTrue(File.Exists(specPath), $"demo spec missing at {specPath}");
             GenerateReport report = UISpecGenerator.GenerateFromSpecFile(specPath);
             Assert.IsEmpty(report.collisions, report.ToString());

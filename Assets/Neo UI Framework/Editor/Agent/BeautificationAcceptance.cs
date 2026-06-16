@@ -16,7 +16,7 @@ namespace Neo.UI.Editor
     /// </summary>
     public static class BeautificationAcceptance
     {
-        private const string SpecFile = "neo-demo-game-ui.json";
+        private const string SpecFile = "Assets/Showcases/Specs/game-ui.json";
         private const string OutputRoot = "neo-screenshots/beautification";
 
         /// <summary>
@@ -45,8 +45,12 @@ namespace Neo.UI.Editor
                 if (!report.hasProblems)
                 {
                     // name the flow — a second spec sharing GeneratedRoot would otherwise make the
-                    // build ambiguous (SpecFile is the GameUI demo)
-                    string scenePath = GeneratedSceneBuilder.Build(ShowcaseSceneBuilder.ShowcaseFlow);
+                    // build ambiguous (SpecFile is the GameUI demo). Resolve the showcase by id so the
+                    // flow name comes from the registry (Phase C seeds 'game-ui'); fall back to "GameUI"
+                    // so this batch entry still works before the showcase is seeded.
+                    string flow = ShowcaseRegistry.TryGet("game-ui", out Showcase gameUi)
+                        ? gameUi.flowName : "GameUI";
+                    string scenePath = GeneratedSceneBuilder.Build(flow);
                     Debug.Log($"[Neo.UI] Scene ready: {scenePath}");
                     ok = true;
                 }

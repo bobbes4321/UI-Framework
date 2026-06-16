@@ -28,7 +28,9 @@ namespace Neo.UI.Editor
         /// </summary>
         private const float ViewLayoutGap = 200f;
 
-        [MenuItem("Tools/Neo UI/Build Scene From Generated UI", priority = 51)]
+        // The standalone "Build Scene From Generated UI" menu item was folded into the Hub
+        // (Tools → Neo UI → Hub → Open a showcase), which scopes the build per-showcase. This method is
+        // kept as a programmatic entry point for the legacy/default shared root.
         public static void BuildAndOpen()
         {
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
@@ -48,7 +50,15 @@ namespace Neo.UI.Editor
         /// (matching the "no silent failures" / no-blind-glob invariant in CLAUDE.md).
         /// </para>
         /// </summary>
-        public static string Build(string flowName = null)
+        public static string Build(string flowName = null) => Build(flowName, ScenePath);
+
+        /// <summary>
+        /// Builds and saves the scene to <paramref name="scenePath"/> (creating its parent folder tree
+        /// as needed); returns that path. The <paramref name="flowName"/>-overloaded behaviour is
+        /// unchanged — this overload only lets a caller target a per-showcase scene path instead of the
+        /// legacy <see cref="ScenePath"/> default.
+        /// </summary>
+        public static string Build(string flowName, string scenePath)
         {
             string viewsFolder = $"{UISpecGenerator.GeneratedRoot}/Views";
             if (!AssetDatabase.IsValidFolder(viewsFolder)
@@ -149,11 +159,38 @@ namespace Neo.UI.Editor
                 Debug.LogWarning($"[Neo.UI] {summary}");
             }
 
-            if (!AssetDatabase.IsValidFolder("Assets/Scenes"))
-                AssetDatabase.CreateFolder("Assets", "Scenes");
-            EditorSceneManager.SaveScene(scene, ScenePath);
-            Debug.Log($"[Neo.UI] Built {ScenePath}: {summary}.");
-            return ScenePath;
+            EnsureFolderTree(scenePath);
+            EditorSceneManager.SaveScene(scene, scenePath);
+            Debug.Log($"[Neo.UI] Built {scenePath}: {summary}.");
+            return scenePath;
+        }
+
+        /// <summary>
+        /// Ensures every parent folder of <paramref name="assetPath"/> exists, creating each missing
+        /// level via <see cref="AssetDatabase.CreateFolder"/> (which only accepts an existing parent +
+        /// a single new leaf). Handles nested paths like
+        /// <c>Assets/Showcases/{id}/{id}.unity</c> — the folder of the file, not the file itself.
+        /// </summary>
+        internal static void EnsureFolderTree(string assetPath)
+        {
+            if (string.IsNullOrEmpty(assetPath)) return;
+            // strip the file leaf: we only create the directories
+            string dir = assetPath.Replace('\\', '/');
+            int lastSlash = dir.LastIndexOf('/');
+            if (lastSlash < 0) return;
+            dir = dir.Substring(0, lastSlash);
+
+            string[] parts = dir.Split('/');
+            // paths are "Assets/…"; "Assets" always exists, so start building from the second segment
+            string accumulated = parts[0];
+            for (int i = 1; i < parts.Length; i++)
+            {
+                if (string.IsNullOrEmpty(parts[i])) continue;
+                string next = $"{accumulated}/{parts[i]}";
+                if (!AssetDatabase.IsValidFolder(next))
+                    AssetDatabase.CreateFolder(accumulated, parts[i]);
+                accumulated = next;
+            }
         }
 
         /// <summary>

@@ -12,7 +12,7 @@
 Goal: agent-generated UI that looks professionally designed — web-app-grade polish first, then
 game-grade "juice." Companion to `neo-ui-package-feature-spec.md` and
 `editor-ux-analysis.md`. Written 2026-06-11, after the agent loop e2e test (see
-`neo-demo-game-ui.json` + `neo-screenshots/`): layout/widgets/flow all work; what's missing is
+`Assets/Showcases/Specs/game-ui.json` + `neo-screenshots/`): layout/widgets/flow all work; what's missing is
 the curated design system the way Tailwind/shadcn give it to web LLMs.
 
 **Core principle: don't make agents better designers — give them a designer-made system to lean
@@ -24,7 +24,7 @@ on.** Beauty comes from curated tokens/styles/motion an agent *selects*, never v
 - One shared NeoShape material stays sacred; new rendering features ride vertex channels.
 - No editor-side animation; new serializable types get EditorUI drawers (searchable dropdowns for
   any style/token name reference).
-- Each phase ends with: tests green + regenerate `neo-demo-game-ui.json` + screenshot comparison.
+- Each phase ends with: tests green + regenerate `Assets/Showcases/Specs/game-ui.json` + screenshot comparison.
 
 ---
 
@@ -120,7 +120,7 @@ Acceptance: main-menu CTA with subtle gradient + elevation; a radial cooldown de
    tokens vs surface tokens; warnings for raw fontSize where a textStyle exists and for off-scale
    spacing/radius values (scale: 4/8/12/16/24/32/48/64).
 
-Acceptance: the SAME `neo-demo-game-ui.json` rendered under each bundle — three distinct,
+Acceptance: the SAME `Assets/Showcases/Specs/game-ui.json` rendered under each bundle — three distinct,
 professional looks from one spec. This pair of before/after screenshots is the proof the whole
 plan works.
 

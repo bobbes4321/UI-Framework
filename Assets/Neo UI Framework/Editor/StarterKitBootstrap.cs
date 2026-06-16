@@ -20,7 +20,7 @@ namespace Neo.UI.Editor
         public const string DarkVariant = "Dark";
         public const string LightVariant = "Light";
 
-        [MenuItem("Tools/Neo UI/Create or Repair Starter Kit", priority = 101)]
+        [MenuItem("Tools/Neo UI/Setup/Create or Repair Starter Kit", priority = 101)]
         public static void CreateOrRepairMenu()
         {
             GenerateReport report = CreateOrRepair();

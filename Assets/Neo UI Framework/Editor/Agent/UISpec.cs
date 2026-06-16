@@ -417,6 +417,177 @@ namespace Neo.UI.Editor
     }
 
     /// <summary>
+    /// An OPEN-bag shape effect on an element: <c>"effect": { "id": "glowPulse", "params": { ... } }</c>.
+    /// The <see cref="id"/> selects a descriptor from <c>ShapeEffectRegistry</c> (the editor-side seam
+    /// that owns parse/bake/export); <see cref="parameters"/> is the descriptor's flat param bag,
+    /// carried verbatim as the project's JSON object model so the core spec never grows a per-effect
+    /// switch. Built-in ids: glowPulse / sheenSweep / gradientCycle (Tier-1) and variant (Tier-2).
+    /// </summary>
+    [Serializable]
+    public class EffectSpec
+    {
+        public string id;
+        public Dictionary<string, object> parameters; // descriptor-owned, opaque to the core spec
+
+        public static EffectSpec Parse(Dictionary<string, object> obj)
+        {
+            if (obj == null) return null;
+            return new EffectSpec
+            {
+                id = JsonReader.GetString(obj, "id"),
+                parameters = JsonReader.GetObject(obj, "params")
+            };
+        }
+
+        public Dictionary<string, object> ToJsonObject()
+        {
+            var result = new Dictionary<string, object>();
+            if (!string.IsNullOrEmpty(id)) result["id"] = id;
+            if (parameters != null && parameters.Count > 0) result["params"] = parameters;
+            return result;
+        }
+    }
+
+    /// <summary> One particle module in a <see cref="ParticleSpec"/>: an open-bag id + params pair. </summary>
+    [Serializable]
+    public class ParticleModuleSpec
+    {
+        public string id;
+        public Dictionary<string, object> parameters; // descriptor-owned (ParticleEffectRegistry)
+
+        public static ParticleModuleSpec Parse(Dictionary<string, object> obj)
+        {
+            if (obj == null) return null;
+            return new ParticleModuleSpec
+            {
+                id = JsonReader.GetString(obj, "id"),
+                parameters = JsonReader.GetObject(obj, "params")
+            };
+        }
+
+        public Dictionary<string, object> ToJsonObject()
+        {
+            var result = new Dictionary<string, object>();
+            if (!string.IsNullOrEmpty(id)) result["id"] = id;
+            if (parameters != null && parameters.Count > 0) result["params"] = parameters;
+            return result;
+        }
+    }
+
+    /// <summary>
+    /// A UI particle emitter on an element: <c>"particles": { ...scalars..., "modules": [ {id,params} ],
+    /// "signal": {category,name,count}, "preset": "Category/Name" }</c>. The emitter scalars round-trip
+    /// directly here; the OPEN <see cref="modules"/> list rides <c>ParticleEffectRegistry</c> so the
+    /// module set stays extensible without a switch. An optional <see cref="preset"/> seeds the emitter
+    /// from a named <c>NeoParticleEmitterPreset</c> before the inline fields apply; an optional
+    /// <see cref="signal"/> adds a <c>NeoParticleBurstOnSignal</c>.
+    /// </summary>
+    [Serializable]
+    public class ParticleSpec
+    {
+        public int? capacity;
+        public int? burstCount;
+        public float? rate;
+        public bool emitOnEnable;
+        public string particleShape;        // ShapeType name (Circle, RoundedRect, …)
+        public float? cornerRadiusPercent;
+        public float[] sizeRange;           // [min,max]
+        public float[] lifetimeRange;       // [min,max]
+        public float[] speedRange;          // [min,max]
+        public float? emitAngle;
+        public float? emitSpread;
+        public float[] angularVelocityRange; // [min,max]
+        public string preset;               // optional "Category/Name" of a NeoParticleEmitterPreset
+        public List<ParticleModuleSpec> modules = new List<ParticleModuleSpec>();
+        public SignalRefSpec signal;        // optional NeoParticleBurstOnSignal trigger
+        public int? signalCount;            // burst count on the signal (<=0 = emitter default)
+
+        public static ParticleSpec Parse(Dictionary<string, object> obj)
+        {
+            if (obj == null) return null;
+            var spec = new ParticleSpec
+            {
+                rate = obj.ContainsKey("rate") ? (float?)JsonReader.GetFloat(obj, "rate") : null,
+                emitOnEnable = JsonReader.GetBool(obj, "emitOnEnable"),
+                particleShape = JsonReader.GetString(obj, "particleShape"),
+                cornerRadiusPercent = obj.ContainsKey("cornerRadiusPercent") ? (float?)JsonReader.GetFloat(obj, "cornerRadiusPercent") : null,
+                sizeRange = GetFloatArray(obj, "sizeRange"),
+                lifetimeRange = GetFloatArray(obj, "lifetimeRange"),
+                speedRange = GetFloatArray(obj, "speedRange"),
+                emitAngle = obj.ContainsKey("emitAngle") ? (float?)JsonReader.GetFloat(obj, "emitAngle") : null,
+                emitSpread = obj.ContainsKey("emitSpread") ? (float?)JsonReader.GetFloat(obj, "emitSpread") : null,
+                angularVelocityRange = GetFloatArray(obj, "angularVelocityRange"),
+                preset = JsonReader.GetString(obj, "preset")
+            };
+            if (obj.TryGetValue("capacity", out object cap) && cap is double cd) spec.capacity = (int)cd;
+            if (obj.TryGetValue("burstCount", out object bc) && bc is double bd) spec.burstCount = (int)bd;
+
+            List<object> moduleArray = JsonReader.GetArray(obj, "modules");
+            if (moduleArray != null)
+                foreach (object m in moduleArray)
+                {
+                    ParticleModuleSpec module = ParticleModuleSpec.Parse(m as Dictionary<string, object>);
+                    if (module != null) spec.modules.Add(module);
+                }
+
+            Dictionary<string, object> signalObj = JsonReader.GetObject(obj, "signal");
+            if (signalObj != null)
+            {
+                spec.signal = SignalRefSpec.Parse(signalObj, "particles.signal");
+                if (signalObj.TryGetValue("count", out object sc) && sc is double scd) spec.signalCount = (int)scd;
+            }
+            return spec;
+        }
+
+        public Dictionary<string, object> ToJsonObject()
+        {
+            // Deterministic, fixed key order so export stays byte-identical.
+            var result = new Dictionary<string, object>();
+            if (capacity.HasValue) result["capacity"] = (double)capacity.Value;
+            if (burstCount.HasValue) result["burstCount"] = (double)burstCount.Value;
+            if (rate.HasValue) result["rate"] = (double)rate.Value;
+            if (emitOnEnable) result["emitOnEnable"] = true;
+            if (!string.IsNullOrEmpty(particleShape)) result["particleShape"] = particleShape;
+            if (cornerRadiusPercent.HasValue) result["cornerRadiusPercent"] = (double)cornerRadiusPercent.Value;
+            if (sizeRange != null) result["sizeRange"] = ToJsonArray(sizeRange);
+            if (lifetimeRange != null) result["lifetimeRange"] = ToJsonArray(lifetimeRange);
+            if (speedRange != null) result["speedRange"] = ToJsonArray(speedRange);
+            if (emitAngle.HasValue) result["emitAngle"] = (double)emitAngle.Value;
+            if (emitSpread.HasValue) result["emitSpread"] = (double)emitSpread.Value;
+            if (angularVelocityRange != null) result["angularVelocityRange"] = ToJsonArray(angularVelocityRange);
+            if (!string.IsNullOrEmpty(preset)) result["preset"] = preset;
+            if (modules != null && modules.Count > 0)
+            {
+                var array = new List<object>();
+                foreach (ParticleModuleSpec module in modules) array.Add(module.ToJsonObject());
+                result["modules"] = array;
+            }
+            if (signal != null)
+            {
+                var signalObj = signal.ToJsonObject();
+                if (signalCount.HasValue) signalObj["count"] = (double)signalCount.Value;
+                result["signal"] = signalObj;
+            }
+            return result;
+        }
+
+        private static float[] GetFloatArray(Dictionary<string, object> obj, string key)
+        {
+            if (!obj.TryGetValue(key, out object value) || !(value is List<object> list)) return null;
+            var result = new float[list.Count];
+            for (int i = 0; i < list.Count; i++) result[i] = list[i] is double d ? (float)d : 0f;
+            return result;
+        }
+
+        private static List<object> ToJsonArray(float[] values)
+        {
+            var array = new List<object>(values.Length);
+            foreach (float value in values) array.Add((double)value);
+            return array;
+        }
+    }
+
+    /// <summary>
     /// The Figma-style constraint+offset placement model — the additive, preferred alternative to
     /// the legacy <c>anchor</c>/<c>position</c>/<c>size</c>/<c>flex</c> fields. When present on an
     /// element it WINS; when absent the legacy fields drive generation exactly as before (zero
@@ -699,6 +870,8 @@ namespace Neo.UI.Editor
         public string style;       // theme shape style name (NeoShape surfaces)
         public string shape;       // for kind "shape": roundedRect / circle / pill / checkmark / chevron / cross / ring / arc
         public GradientSpec gradient; // shape/image: theme-riding two-stop gradient
+        public EffectSpec effect;     // open-bag shape effect (ShapeEffectRegistry owns parse/bake/export)
+        public ParticleSpec particles; // UI particle emitter (modules ride ParticleEffectRegistry)
         public float? thickness;   // ring/arc band width px
         public float? arcStart;    // arc start angle, degrees cw from 12 o'clock
         public float? arcSweep;    // arc sweep, degrees
@@ -709,6 +882,9 @@ namespace Neo.UI.Editor
                                    // (preserves art aspect); absent = stretch
         public string variant;     // button: primary / secondary / ghost / danger
         public string sizeVariant; // button: sm / md / lg (JSON key "size" — string form)
+        public string preset;      // reusable widget style this element references by name (NeoWidgetPreset).
+                                   // Resolved at generate as the BASE; element-level fields override. Exports
+                                   // as preset name + only the override delta (the link survives round-trip).
         public bool cascade;       // vstack/hstack/grid: staggered child entrance on show
         public float? badge;       // button/tab: notification badge count (0 = hidden)
         public float? radius;      // corner radius override (px)
@@ -774,6 +950,7 @@ namespace Neo.UI.Editor
                     style = JsonReader.GetString(body, "style"),
                     shape = JsonReader.GetString(body, "shape"),
                     variant = JsonReader.GetString(body, "variant"),
+                    preset = JsonReader.GetString(body, "preset"),
                     anchor = JsonReader.GetString(body, "anchor"),
                     layout = LayoutSpec.Parse(JsonReader.GetObject(body, "layout")),
                     radius = GetNullableFloat(body, "radius"),
@@ -801,6 +978,8 @@ namespace Neo.UI.Editor
                     bind = JsonReader.GetString(body, "bind"),
                     catalog = JsonReader.GetString(body, "catalog"),
                     gradient = GradientSpec.Parse(JsonReader.GetObject(body, "gradient")),
+                    effect = EffectSpec.Parse(JsonReader.GetObject(body, "effect")),
+                    particles = ParticleSpec.Parse(JsonReader.GetObject(body, "particles")),
                     thickness = GetNullableFloat(body, "thickness"),
                     arcStart = GetNullableFloat(body, "arcStart"),
                     arcSweep = GetNullableFloat(body, "arcSweep")
@@ -887,10 +1066,13 @@ namespace Neo.UI.Editor
             if (!string.IsNullOrEmpty(style)) body["style"] = style;
             if (!string.IsNullOrEmpty(shape)) body["shape"] = shape;
             if (gradient != null) body["gradient"] = gradient.ToJsonObject();
+            if (effect != null) body["effect"] = effect.ToJsonObject();
+            if (particles != null) body["particles"] = particles.ToJsonObject();
             if (thickness.HasValue) body["thickness"] = (double)thickness.Value;
             if (arcStart.HasValue) body["arcStart"] = (double)arcStart.Value;
             if (arcSweep.HasValue) body["arcSweep"] = (double)arcSweep.Value;
             if (!string.IsNullOrEmpty(variant)) body["variant"] = variant;
+            if (!string.IsNullOrEmpty(preset)) body["preset"] = preset;
             if (radius.HasValue) body["radius"] = (double)radius.Value;
             if (!string.IsNullOrEmpty(anchor)) body["anchor"] = anchor;
             if (layout != null && !layout.IsEmpty) body["layout"] = layout.ToJsonObject();
@@ -963,6 +1145,14 @@ namespace Neo.UI.Editor
             }
             return new Dictionary<string, object> { [kind] = body };
         }
+
+        /// <summary>
+        /// A member-wise copy used when resolving a preset into an "effective" element: the generator
+        /// clones, then overlays preset values onto the fields the element leaves unset. MemberwiseClone
+        /// copies every field automatically (so new fields stay covered); list/child references are shared
+        /// (the generate pass never mutates them).
+        /// </summary>
+        public ElementSpec ShallowClone() => (ElementSpec)MemberwiseClone();
 
         private static float? GetNullableFloat(Dictionary<string, object> obj, string key) =>
             obj.TryGetValue(key, out object value) && value is double d ? (float?)(float)d : null;

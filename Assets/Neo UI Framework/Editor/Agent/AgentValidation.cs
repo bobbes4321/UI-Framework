@@ -14,7 +14,7 @@ namespace Neo.UI.Editor
     /// </summary>
     public static class AgentValidation
     {
-        [MenuItem("Tools/Neo UI/Validate", priority = 3)]
+        [MenuItem("Tools/Neo UI/Advanced/Validate", priority = 12)]
         public static void ValidateMenu()
         {
             List<string> issues = ValidateAll();
@@ -96,6 +96,10 @@ namespace Neo.UI.Editor
             float[] scale = SpacingScale(settings);
             bool OnScale(float value) => scale.Any(s => Mathf.Approximately(s, value));
 
+            // Cost honesty for shape effects / UI particles: one warning per DISTINCT Tier-2 variant
+            // (each is its own shared material = one extra batch break, not per instance).
+            var warnedVariants = new HashSet<string>();
+
             foreach (GameObject prefab in LoadGeneratedPrefabs())
             {
                 if (prefab.GetComponent<UIView>() == null) continue;
@@ -157,6 +161,31 @@ namespace Neo.UI.Editor
                                          "is below the 44px mobile minimum");
                     }
                 }
+
+                // Tier-2 material variants break the shared NeoShape batch — warn once per distinct
+                // variant (BatchSafe==false is the deliberate, named split, shared per definition).
+                foreach (NeoShapeVariant variant in prefab.GetComponentsInChildren<NeoShapeVariant>(true))
+                {
+                    string effectId = variant.EffectId;
+                    if (string.IsNullOrEmpty(effectId)) effectId = variant.name;
+                    if (warnedVariants.Add(effectId))
+                        warnings.Add($"Tier-2 shape effect variant '{effectId}' uses its own shared " +
+                                     "material — it breaks the single-NeoShape batch (one extra draw call per variant)");
+                }
+
+                // Continuous (rate>0) or high-capacity emitters do per-frame work — flag the cost.
+                foreach (NeoParticleEmitter emitter in prefab.GetComponentsInChildren<NeoParticleEmitter>(true))
+                {
+                    var so = new SerializedObject(emitter);
+                    float rate = so.FindProperty("rate").floatValue;
+                    int capacity = so.FindProperty("capacity").intValue;
+                    if (rate > 0f)
+                        warnings.Add($"'{prefab.name}/{emitter.name}' particle emitter is continuous " +
+                                     $"(rate {rate:0.#}/s) — it does per-frame work; prefer a one-shot burst for UI");
+                    else if (capacity > ParticleCapacityWarn)
+                        warnings.Add($"'{prefab.name}/{emitter.name}' particle capacity {capacity} is high " +
+                                     $"(> {ParticleCapacityWarn}) — each live particle is a pooled NeoShape GameObject");
+                }
             }
 
             ValidateWidgetContrast(settings, warnings);
@@ -170,6 +199,9 @@ namespace Neo.UI.Editor
         }
 
         // ── Design-lint config seam (read from NeoUISettings; the project's single source of truth) ─
+
+        /// <summary> Emitter capacity above which a burst is flagged as costly (each particle is a pooled GameObject). </summary>
+        private const int ParticleCapacityWarn = 128;
 
         /// <summary> Package-default contrast pairs (used when settings.contrastPairs is empty). </summary>
         private static readonly (string text, string surface, float minimum)[] DefaultContrastPairs =

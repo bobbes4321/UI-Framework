@@ -196,7 +196,7 @@ namespace Neo.UI.Editor
 
         // ------------------------------------------------------------------ menu
 
-        [MenuItem("Tools/Neo UI/Screenshot Selected Prefab", priority = 3)]
+        [MenuItem("Tools/Neo UI/Advanced/Screenshot Selected Prefab", priority = 19)]
         public static void CaptureSelected()
         {
             foreach (GameObject prefab in Selection.gameObjects)
@@ -206,7 +206,7 @@ namespace Neo.UI.Editor
             }
         }
 
-        [MenuItem("Tools/Neo UI/Screenshot Selected Prefab", validate = true)]
+        [MenuItem("Tools/Neo UI/Advanced/Screenshot Selected Prefab", validate = true)]
         private static bool CaptureSelectedValidate() => Selection.gameObjects.Length > 0;
 
         // ------------------------------------------------------------------ batch mode

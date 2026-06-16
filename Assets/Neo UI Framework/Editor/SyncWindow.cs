@@ -26,7 +26,7 @@ namespace Neo.UI.Editor
         private ConflictPolicy _policy = ConflictPolicy.PreferTheirs;
         private Vector2 _scroll;
 
-        [MenuItem("Tools/Neo UI/Sync With Spec…", priority = 6)]
+        [MenuItem("Tools/Neo UI/Advanced/Sync With Spec…", priority = 13)]
         public static void SyncWithSpec()
         {
             string path = EditorUtility.OpenFilePanel("Select the incoming UI spec (JSON)", Application.dataPath, "json");
@@ -37,7 +37,7 @@ namespace Neo.UI.Editor
             window.RunSync(force: false);
         }
 
-        [MenuItem("Tools/Neo UI/Capture My Edits", priority = 7)]
+        [MenuItem("Tools/Neo UI/Advanced/Capture My Edits", priority = 14)]
         public static void CaptureMyEdits()
         {
             SyncResult sr = SpecBaseline.CaptureEdits();
@@ -55,7 +55,7 @@ namespace Neo.UI.Editor
             Show(sr, null);
         }
 
-        private static void Show(SyncResult result, string incomingPath)
+        internal static void Show(SyncResult result, string incomingPath)
         {
             SyncWindow window = GetWindow<SyncWindow>(false, "Neo UI Sync");
             window.minSize = new Vector2(460f, 360f);

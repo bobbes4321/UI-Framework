@@ -69,6 +69,10 @@ namespace Neo.UI.Editor
             // make sure factory tokens/text styles exist so the build resolves, but never save
             StarterKitBootstrap.EnsureFactoryTokens(settings.theme);
             StarterKitBootstrap.EnsureTextStyles(settings.theme);
+            // build the spec's settings/cheats catalogs in memory so views that embed a "settings"/
+            // "cheats" element render real rows — preview commits no catalog SOs, so without this the
+            // menu element finds no catalog and shows nothing.
+            UISpecGenerator.PrepareCatalogsInMemory(spec, settings);
 
             var roots = new List<GameObject>();
             foreach (ViewSpec view in spec.views)
@@ -93,6 +97,7 @@ namespace Neo.UI.Editor
             NeoUISettings settings = NeoUISettingsBootstrap.GetOrCreateSettings();
             StarterKitBootstrap.EnsureFactoryTokens(settings.theme);
             StarterKitBootstrap.EnsureTextStyles(settings.theme);
+            UISpecGenerator.PrepareCatalogsInMemory(spec, settings);
 
             foreach (ViewSpec view in spec.views)
             {

@@ -37,6 +37,39 @@ namespace Neo.UI.Editor.Composer
         [MenuItem("Tools/Neo UI/Composer", priority = 11)]
         public static void Open() => GetWindow<NeoComposerWindow>("Neo Composer");
 
+        /// <summary>
+        /// Opens the Composer on a specific spec file. Loads the spec into the live document; an
+        /// empty/missing path just opens an empty Composer. Saves target the default
+        /// <see cref="UISpecGenerator.GeneratedRoot"/> — use <see cref="Open(Showcase)"/> to scope
+        /// saves to a showcase's isolated folder.
+        /// </summary>
+        public static NeoComposerWindow Open(string specPath)
+        {
+            var window = GetWindow<NeoComposerWindow>("Neo Composer");
+            if (!string.IsNullOrEmpty(specPath) && File.Exists(specPath) && window._document != null)
+            {
+                try { window._document.LoadFromFile(specPath); }
+                catch (System.Exception e)
+                {
+                    Debug.LogError($"[Neo.UI] Composer could not open spec '{specPath}': {e.Message}");
+                }
+            }
+            return window;
+        }
+
+        /// <summary>
+        /// Opens the Composer on a showcase: loads its spec AND scopes the document's Save into the
+        /// showcase's isolated <see cref="Showcase.GeneratedRoot"/>, so "Edit in Composer" → Save
+        /// regenerates that showcase's own folder (and its baseline), never the default root.
+        /// </summary>
+        public static NeoComposerWindow Open(Showcase showcase)
+        {
+            NeoComposerWindow window = Open(showcase?.specPath);
+            if (showcase != null && window != null && window._document != null)
+                window._document.SetWorkspaceRoot(showcase.GeneratedRoot);
+            return window;
+        }
+
         private void OnEnable()
         {
             if (_document == null) _document = new SpecDocument();
@@ -334,7 +367,8 @@ namespace Neo.UI.Editor.Composer
             if (_statusLabel == null) return;
             string file = string.IsNullOrEmpty(_document.FilePath) ? "(unsaved — no file)" : _document.FilePath;
             string mode = _document.SavesThroughSync ? "   ·   Project — Save merges safely into the live UI" : "";
-            _statusLabel.text = (_document.Dirty ? "● " : "") + file + mode;
+            string scope = string.IsNullOrEmpty(_document.WorkspaceRoot) ? "" : $"   ·   → {_document.WorkspaceRoot}";
+            _statusLabel.text = (_document.Dirty ? "● " : "") + file + mode + scope;
         }
 
         // ------------------------------------------------------------------ commands
@@ -343,6 +377,7 @@ namespace Neo.UI.Editor.Composer
         {
             if (!ConfirmDiscard()) return;
             _document.Load(SpecDocument.NewEmptySpec(), null);
+            _document.SetWorkspaceRoot(null); // a fresh doc isn't a showcase — back to the default root
         }
 
         private void OpenFile()
@@ -350,7 +385,7 @@ namespace Neo.UI.Editor.Composer
             if (!ConfirmDiscard()) return;
             string path = EditorUtility.OpenFilePanel("Open UI Spec", Application.dataPath, "json");
             if (string.IsNullOrEmpty(path)) return;
-            try { _document.LoadFromFile(path); }
+            try { _document.LoadFromFile(path); _document.SetWorkspaceRoot(null); }
             catch (System.Exception e) { EditorUtility.DisplayDialog("Open Failed", e.Message, "OK"); }
         }
 
@@ -358,6 +393,7 @@ namespace Neo.UI.Editor.Composer
         {
             if (!ConfirmDiscard()) return;
             _document.LoadCurrentProject();
+            _document.SetWorkspaceRoot(null); // the live project saves through sync to the default root
         }
 
         private void Save()
