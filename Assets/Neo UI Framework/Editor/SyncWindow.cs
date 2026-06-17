@@ -26,6 +26,12 @@ namespace Neo.UI.Editor
         private ConflictPolicy _policy = ConflictPolicy.PreferTheirs;
         private Vector2 _scroll;
 
+        // When launched from the Hub for a specific showcase, every sync/force re-run must execute
+        // inside that showcase's isolated root (NeoWorkspace.Scoped) — otherwise "Re-run Sync" /
+        // "Force sync" runs against the DEFAULT root and can never resolve the showcase. Null for the
+        // standalone "Sync With Spec…" menu, which intentionally operates on the default root.
+        private Showcase _showcase;
+
         [MenuItem("Tools/Neo UI/Advanced/Sync With Spec…", priority = 13)]
         public static void SyncWithSpec()
         {
@@ -55,12 +61,13 @@ namespace Neo.UI.Editor
             Show(sr, null);
         }
 
-        internal static void Show(SyncResult result, string incomingPath)
+        internal static void Show(SyncResult result, string incomingPath, Showcase showcase = null)
         {
             SyncWindow window = GetWindow<SyncWindow>(false, "Neo UI Sync");
             window.minSize = new Vector2(460f, 360f);
             window._result = result;
             window._incomingPath = incomingPath;
+            window._showcase = showcase; // null = standalone menu (default root); set = scope re-runs
             window.Repaint();
         }
 
@@ -77,13 +84,25 @@ namespace Neo.UI.Editor
                 return;
             }
 
+            // Scope to the showcase's isolated root when launched from the Hub; the standalone menu
+            // (no showcase) runs on the default root exactly as before.
+            if (_showcase != null)
+                using (NeoWorkspace.Scoped(_showcase)) Sync(incoming, force);
+            else
+                Sync(incoming, force);
+            Repaint();
+        }
+
+        // Runs the sync (and the explicit, never-silent force override on a refusal). The caller wraps
+        // this in NeoWorkspace.Scoped when a showcase context is present, so both calls share that scope.
+        private void Sync(UISpec incoming, bool force)
+        {
             _result = SpecBaseline.Sync(incoming, _policy, force);
             // off-spec edits block the destructive regenerate — offer the explicit, never-silent override
             if (_result.refused
                 && EditorUtility.DisplayDialog("Off-spec edits present", _result.note,
                     "Force sync (drop them)", "Cancel"))
                 _result = SpecBaseline.Sync(incoming, _policy, force: true);
-            Repaint();
         }
 
         private void OnGUI()

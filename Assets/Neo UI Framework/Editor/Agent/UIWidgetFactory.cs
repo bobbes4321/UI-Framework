@@ -199,8 +199,19 @@ namespace Neo.UI.Editor
             return aeShape;
         }
 
+        /// <summary>
+        /// Binds a Graphic's color to a fill value via <see cref="ThemeColorTarget"/>. The single
+        /// place fills are bound, so the hex-vs-token branch lives here for shape, image and
+        /// container card fills alike: a "#RRGGBB"/"#RRGGBBAA" value bakes a LITERAL color (alpha
+        /// preserved — translucent stays translucent), anything else is a theme token name.
+        /// An unparseable "#…" value warns loudly at bake time rather than silently rendering white.
+        /// </summary>
         public static ThemeColorTarget AddColorToken(GameObject go, string token)
         {
+            // Validate hex literals at bake time — ThemeColorTarget bakes the actual color when it
+            // applies, but a bad value should surface here (with the element named) not silently.
+            if (!string.IsNullOrEmpty(token) && token.StartsWith("#") && !ColorUtils.TryParseHex(token, out _))
+                Debug.LogWarning($"AddColorToken on '{go.name}': could not parse hex color '{token}' — fill left unset.");
             var target = go.AddComponent<ThemeColorTarget>();
             target.token = token;
             return target;

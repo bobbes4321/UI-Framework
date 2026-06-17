@@ -232,12 +232,74 @@ namespace Neo.UI.Editor
             ApplyShapeStyles(bundle, theme);
             ApplyTextStyles(bundle, theme);
             ApplyMotion(bundle, settings, report);
+            ApplyPresets(bundle, report);
 
             EditorUtility.SetDirty(theme);
             EditorUtility.SetDirty(settings);
             AssetDatabase.SaveAssets();
             report.updated.Add($"Theme bundle '{bundle.name}' applied " +
                                $"({bundle.palettes.Count} variant(s), radius {bundle.cardRadius:0})");
+        }
+
+        // ------------------------------------------------------------------ widget presets
+
+        /// <summary>
+        /// Seeds the built-in widget-preset library (so applying a bundle on a fresh project also
+        /// installs the component layer) and overlays the bundle's PERSONALITY onto the relevant presets.
+        /// A <see cref="NeoWidgetPreset"/> references tokens/styles BY NAME, and the token/shape/motion
+        /// passes above already rewrote those — so the SAME "Primary Button" preset recolors under each
+        /// bundle for free. The only personality the names don't carry is corner-radius and default
+        /// motion, which is what we map here from the bundle's existing fields. Idempotent: each preset is
+        /// loaded by name, its fields set, and dirtied; missing presets are skipped (never a throw), and
+        /// re-applying the same bundle is a no-op writeback.
+        /// </summary>
+        private static void ApplyPresets(Bundle bundle, GenerateReport report)
+        {
+            // idempotent — installs the component library on a fresh project, repairs it otherwise
+            GenerateReport presetReport = PresetLibraryBootstrap.CreateOrRepair();
+            report.created.AddRange(presetReport.created);
+
+            // The bundle's Show preset is the surface/view default motion; reuse the name ApplyMotion registers.
+            const string showMotion = "ShowDefault";
+
+            // Controls take the control radius; the FAB keeps its intentionally-pill radius (set in the library).
+            SetRadius("Primary Button", bundle.controlRadius);
+            SetRadius("Secondary Button", bundle.controlRadius);
+            SetRadius("Ghost Button", bundle.controlRadius);
+            SetRadius("Danger Button", bundle.controlRadius);
+            SetRadius("Primary Button Large", bundle.controlRadius);
+            SetRadius("Primary Button Small", bundle.controlRadius);
+            SetRadius("Icon Button", bundle.controlRadius);
+            SetRadius("Link Button", bundle.controlRadius);
+            SetRadius("Default Dropdown", bundle.controlRadius);
+            SetRadius("Text Input", bundle.controlRadius);
+            SetRadius("Default Tab", bundle.controlRadius);
+            SetRadius("Filled Tab", bundle.controlRadius);
+
+            // Surfaces take their own radius personality + the bundle's default show motion.
+            SetRadius("Card", bundle.cardRadius);
+            SetRadius("Panel", bundle.panelRadius);
+            SetMotion("Card", showMotion);
+            SetMotion("Panel", showMotion);
+
+            AssetDatabase.SaveAssets();
+            NeoWidgetPresets.InvalidateDiscovery();
+        }
+
+        /// <summary> Sets a preset's corner radius if it exists; skips silently otherwise (graceful). </summary>
+        private static void SetRadius(string presetName, float radius)
+        {
+            if (!NeoWidgetPresets.TryGet(presetName, out NeoWidgetPreset preset)) return;
+            preset.radius = radius;
+            EditorUtility.SetDirty(preset);
+        }
+
+        /// <summary> Sets a preset's default motion (animation-preset name) if it exists; skips silently otherwise. </summary>
+        private static void SetMotion(string presetName, string motion)
+        {
+            if (!NeoWidgetPresets.TryGet(presetName, out NeoWidgetPreset preset)) return;
+            preset.motion = motion;
+            EditorUtility.SetDirty(preset);
         }
 
         private static void ApplyShapeStyles(Bundle bundle, Theme theme)

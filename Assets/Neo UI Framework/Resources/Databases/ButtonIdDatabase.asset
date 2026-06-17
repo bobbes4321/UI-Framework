@@ -19,7 +19,10 @@ MonoBehaviour:
     - Play
   - category: Action
     names:
+    - Back
     - Button
+    - Cancel
+    - Confirm
     - Credits
     - Play
     - Quit
@@ -79,6 +82,9 @@ MonoBehaviour:
     - Give10k
     - Give1k
     - UnlockAll
+  - category: Effects
+    names:
+    - GlowButton
   - category: Game
     names:
     - Hint
@@ -88,6 +94,8 @@ MonoBehaviour:
     - SaveLeave
   - category: Gameplay
     names:
+    - Difficulty_Minus
+    - Difficulty_Plus
     - PunchBalls
   - category: Gap
     names:
@@ -101,6 +109,9 @@ MonoBehaviour:
     - Finish
     - Inventory
     - Pause
+  - category: IProv
+    names:
+    - Custom
   - category: Inventory
     names:
     - Close
@@ -114,6 +125,9 @@ MonoBehaviour:
     - Go
     - IconOnly
     - Labeled
+  - category: LintLayout
+    names:
+    - FullWidth
   - category: Menu
     names:
     - Cheats
@@ -143,6 +157,11 @@ MonoBehaviour:
     names:
     - Next
     - Prev
+  - category: Particles
+    names:
+    - Buy
+    - Firework
+    - Win
   - category: Player
     names:
     - GiveGold
@@ -159,9 +178,18 @@ MonoBehaviour:
     names:
     - OpenPlain
     - OpenRich
+  - category: Pre
+    names:
+    - Ghosted
+    - Override
+    - Plain
   - category: Prev
     names:
     - Go
+  - category: Reg
+    names:
+    - Del
+    - Save
   - category: RewardClaim
     names:
     - Claim
@@ -171,6 +199,9 @@ MonoBehaviour:
   - category: Row
     names:
     - Pick
+  - category: Run
+    names:
+    - Play
   - category: Settings
     names:
     - Back
@@ -195,6 +226,9 @@ MonoBehaviour:
     - Sword
   - category: Spec
     names:
+    - A
+    - B
+    - Fill
     - Go
   - category: Stepper
     names:

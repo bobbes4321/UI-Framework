@@ -12,8 +12,14 @@ namespace Neo.UI
     {
         private readonly float _drag;
 
-        /// <summary> Creates a drag module. <paramref name="drag"/> is the fraction of velocity shed per second (0 = none). </summary>
-        public DragModule(float drag) => _drag = Mathf.Max(0f, drag);
+        /// <summary>
+        /// Creates a drag module. <paramref name="drag"/> is the fraction of velocity shed per second.
+        /// It is clamped to [0, 0.999]: a fraction &gt;= 1 would make the per-second base
+        /// <c>(1 - drag)</c> zero or negative, which <c>Pow(...)^dt</c> turns into an instant freeze
+        /// (velocity zeroed on the first frame). Clamping degrades an out-of-range value to "very
+        /// heavy drag" instead of a stuck particle.
+        /// </summary>
+        public DragModule(float drag) => _drag = Mathf.Clamp(drag, 0f, 0.999f);
 
         /// <inheritdoc/>
         public string Id => "Drag";
@@ -24,8 +30,10 @@ namespace Neo.UI
         /// <inheritdoc/>
         public void OnUpdate(ref NeoParticle p, float dt, NeoParticleEmitter e)
         {
-            // Frame-rate independent exponential damping: v *= (1 - drag)^dt.
-            float factor = Mathf.Pow(Mathf.Max(0f, 1f - _drag), dt);
+            // Frame-rate independent exponential damping: v *= (1 - drag)^dt. _drag is clamped to
+            // [0, 0.999] in the ctor, so the base stays in (0, 1] and a single frame can never zero
+            // the velocity (no instant freeze even for an out-of-range spec value).
+            float factor = Mathf.Pow(1f - _drag, dt);
             p.velocity *= factor;
             p.angularVelocity *= factor;
         }

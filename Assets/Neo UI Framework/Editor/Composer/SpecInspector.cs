@@ -127,6 +127,8 @@ namespace Neo.UI.Editor.Composer
 
             NeoGUI.Splitter();
 
+            DrawPresetSection(element);
+
             bool buttonWithVariant = element.kind == "button" && !string.IsNullOrEmpty(element.sizeVariant);
             ParentInfo parent = FindParent(node);
 
@@ -171,6 +173,85 @@ namespace Neo.UI.Editor.Composer
 
             EditorGUILayout.Space(4f);
             DrawAddChildRow(element.children, node.path);
+        }
+
+        // ------------------------------------------------------------------ preset
+
+        /// <summary>
+        /// Links the element to a reusable <see cref="NeoWidgetPreset"/> (resolved at generate as the base,
+        /// element fields overriding) and offers the Figma-style create/update/reset workflow. The picker is
+        /// kind-scoped; "(none)" unlinks. Create/Update write the external preset asset (Unity's own undo);
+        /// only element mutations go through the document's undo via <see cref="Apply"/>.
+        /// </summary>
+        private void DrawPresetSection(ElementSpec element)
+        {
+            DrawSection("neo.composer.sec.preset", "Preset", NeoColors.Theming, true, () =>
+            {
+                DrawPopupRow("Preset", element.preset ?? NonePreset,
+                    () => { var l = new List<string> { NonePreset }; l.AddRange(ComposerOptions.PresetsForKind(element.kind)); return l; },
+                    v => Apply(() => element.preset = v == NonePreset ? null : Empty(v), "Set Preset"));
+
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    if (GUILayout.Button("Create From This…")) CreatePresetFromElement(element);
+                    using (new EditorGUI.DisabledScope(string.IsNullOrEmpty(element.preset)))
+                    {
+                        if (GUILayout.Button("Update Preset")) UpdatePresetFromElement(element);
+                        if (GUILayout.Button("Reset To Preset")) ResetElementToPreset(element);
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(element.preset) && !NeoWidgetPresets.TryGet(element.preset, out _))
+                    EditorGUILayout.HelpBox($"Preset “{element.preset}” not found — it may have been deleted. " +
+                        "The element keeps its own field values.", MessageType.Warning);
+            });
+        }
+
+        private const string NonePreset = "(none)";
+
+        private void CreatePresetFromElement(ElementSpec element)
+        {
+            string path = EditorUtility.SaveFilePanelInProject("Create Widget Preset",
+                $"{element.kind}Preset", "asset", "Save the reusable preset asset", NeoWidgetPresets.PresetsRoot);
+            if (string.IsNullOrEmpty(path)) return;
+
+            var preset = ScriptableObject.CreateInstance<NeoWidgetPreset>();
+            preset.presetName = System.IO.Path.GetFileNameWithoutExtension(path);
+            preset.targetKind = element.kind;
+            CapturePreset(preset, element);
+            AssetDatabase.CreateAsset(preset, path);
+            AssetDatabase.SaveAssets();
+            NeoWidgetPresets.InvalidateDiscovery();
+            PresetThumbnailCache.Invalidate();
+            Apply(() => element.preset = preset.presetName, "Link Preset");
+        }
+
+        private void UpdatePresetFromElement(ElementSpec element)
+        {
+            if (!NeoWidgetPresets.TryGet(element.preset, out NeoWidgetPreset preset)) return;
+            if (!EditorUtility.DisplayDialog("Update Preset",
+                    $"Push this widget's styling into the preset “{element.preset}”? Every widget using it updates on the next regenerate.",
+                    "Update", "Cancel")) return;
+            CapturePreset(preset, element);
+            EditorUtility.SetDirty(preset);
+            AssetDatabase.SaveAssets();
+            NeoWidgetPresets.InvalidateDiscovery();
+            PresetThumbnailCache.Invalidate();
+        }
+
+        private void ResetElementToPreset(ElementSpec element) => Apply(() =>
+        {
+            element.variant = null; element.sizeVariant = null; element.textStyle = null; element.style = null;
+            element.background = null; element.labelColor = null; element.icon = null;
+            element.radius = null; element.padding = null; element.spacing = null; element.padding4 = null;
+        }, "Reset To Preset");
+
+        /// <summary> Copies the element's preset-governed styling fields onto a preset asset. </summary>
+        private static void CapturePreset(NeoWidgetPreset p, ElementSpec e)
+        {
+            p.variant = e.variant; p.sizeVariant = e.sizeVariant; p.textStyle = e.textStyle; p.shapeStyle = e.style;
+            p.background = e.background; p.labelColor = e.labelColor; p.icon = e.icon; p.padding4 = e.padding4;
+            p.radius = e.radius ?? -1f; p.padding = e.padding ?? -1f; p.spacing = e.spacing ?? -1f;
         }
 
         // ------------------------------------------------------------------ sections

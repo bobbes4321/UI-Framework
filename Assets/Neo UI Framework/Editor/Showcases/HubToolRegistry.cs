@@ -113,6 +113,9 @@ namespace Neo.UI.Editor
                 "Apply a curated theme bundle (CleanSlate / NeonArcade / SoftFantasy) — full token/" +
                 "type/shape/motion system.",
                 "Tools/Neo UI/Setup/Apply Theme Bundle…");
+            yield return Menu("setup-effects", "Create or Repair Effect Assets", Setup,
+                "Bake the procedural noise/ramp textures + the dissolve material and ShapeEffectDefinition used by Tier-2 shape effects.",
+                "Tools/Neo UI/Setup/Create or Repair Effect Assets");
 
             // --- Advanced: spec / round-trip / agent power tools (Tools/Neo UI/Advanced/*) -------
             yield return Menu("adv-generate", "Generate From Spec…", Advanced,

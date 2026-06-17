@@ -18,6 +18,7 @@ MonoBehaviour:
     - Effects
     - Master
     - Music
+    - Volume
   - category: Controls
     names:
     - Reset

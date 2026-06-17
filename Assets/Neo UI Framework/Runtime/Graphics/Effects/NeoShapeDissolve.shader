@@ -21,6 +21,11 @@
 //   _EdgeColor       glow color at the dissolve edge
 //   _EdgeWidth       width of the dissolve glow band (uv units)
 //   _ScanlineStrength / _ScanlineCount  optional scanline overlay
+//   _NoiseTex        OPTIONAL art-directed dissolve mask (NoiseAssetBootstrap bakes Resources/Effects/
+//                    NeoNoise.png and binds it on the shared NeoDissolve.mat). Defaults to "white";
+//                    when left unbound the fragment FALLS BACK to the in-shader hash21 procedural
+//                    noise so the shader still works with no texture (current behavior preserved).
+//   _NoiseScale      tiling of _NoiseTex across the shape's uv (only used when a noise texture is bound)
 // ===========================================================================================
 Shader "Neo/UI/ShapeDissolve"
 {
@@ -34,6 +39,10 @@ Shader "Neo/UI/ShapeDissolve"
         _EdgeWidth ("Dissolve Edge Width", Range(0,0.3)) = 0.08
         _ScanlineStrength ("Scanline Strength", Range(0,1)) = 0.15
         _ScanlineCount ("Scanline Count", Float) = 80
+
+        // Optional baked dissolve mask. Default "white" ⇒ unbound ⇒ fall back to procedural hash21.
+        _NoiseTex ("Dissolve Noise (optional)", 2D) = "white" {}
+        _NoiseScale ("Dissolve Noise Scale", Float) = 4
 
         _StencilComp ("Stencil Comparison", Float) = 8
         _Stencil ("Stencil ID", Float) = 0
@@ -120,6 +129,10 @@ Shader "Neo/UI/ShapeDissolve"
             float _ScanlineStrength;
             float _ScanlineCount;
 
+            sampler2D _NoiseTex;
+            float4 _NoiseTex_TexelSize;   // .zw = texture dimensions in texels (0,0 when no texture bound)
+            float _NoiseScale;
+
             // signed distance to a rect of half-size b with per-corner radii r (x=TR y=BR z=TL w=BL)
             float sdRoundedRect(float2 p, float2 b, float4 r)
             {
@@ -171,7 +184,14 @@ Shader "Neo/UI/ShapeDissolve"
                 float2 uv = p / (halfSize * 2.0) + 0.5;
 
                 // ---- dissolve: clip where noise < amount, glow on the receding edge ----
-                float n = hash21(floor(uv * 64.0));
+                // Prefer the baked art-directed mask when one is bound; the built-in "white" default
+                // is a 1×1 texture (TexelSize.z <= 1), in which case fall back to the procedural hash
+                // so the shader keeps working with no texture assigned (current behavior preserved).
+                float n;
+                if (_NoiseTex_TexelSize.z > 1.5)
+                    n = tex2D(_NoiseTex, uv * _NoiseScale).r;
+                else
+                    n = hash21(floor(uv * 64.0));
                 float erosion = n - _DissolveAmount;          // < 0 ⇒ dissolved away
                 float edgeBand = smoothstep(0.0, _EdgeWidth, erosion); // 0 at edge → 1 inside
                 coverage *= step(0.0, erosion);

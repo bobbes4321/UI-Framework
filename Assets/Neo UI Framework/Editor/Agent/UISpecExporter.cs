@@ -383,6 +383,14 @@ namespace Neo.UI.Editor
         {
             ElementSpec element = ExportElementBody(go, inLayout);
             if (element == null) return null;
+            // Non-widget elements (shape/text/image/container/progress/…) have no NeoId — recover their
+            // authored id from the NeoElementId marker the generator stamped, so every spec-addressable
+            // element round-trips its id. Widgets already set element.id from their own NeoId above.
+            if (string.IsNullOrEmpty(element.id))
+            {
+                var idTag = go.GetComponent<NeoElementId>();
+                if (idTag != null && !string.IsNullOrEmpty(idTag.id)) element.id = idTag.id;
+            }
             ExportGeometry(element, (RectTransform)go.transform, inLayout);
             element.effect = ExportEffect(go);
             element.particles = ExportParticles(go);

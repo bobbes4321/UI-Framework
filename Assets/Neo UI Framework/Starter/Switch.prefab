@@ -816,6 +816,9 @@ MonoBehaviour:
   id:
     category: Starter
     name: Switch
+  domainSignal:
+    category: None
+    name: None
   isOnValue: 0
   groupReference: {fileID: 0}
   onValueChanged:

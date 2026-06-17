@@ -28,10 +28,55 @@ namespace Neo.UI.Editor.Composer
         private static readonly List<string> _shapeNames =
             new List<string> { "roundedRect", "circle", "pill", "checkmark", "chevron", "cross", "ring", "arc" };
 
-        public static string[] ButtonVariants => _buttonVariants.ToArray();
-        public static string[] ButtonSizes => _buttonSizes.ToArray();
+        // Variants/sizes merge the code seed + code registrations + the project-authored attributes on
+        // NeoUISettings — so a ButtonVariantAsset/ButtonSizeAsset shows up in the picker with NO separate
+        // RegisterVariant/RegisterSize call (single source of truth: settings). De-duped case-insensitively,
+        // seed order first. Fetched only when a dropdown opens, so the per-open merge is cheap.
+        public static string[] ButtonVariants => WithSettingsNames(_buttonVariants, SettingsVariantNames());
+        public static string[] ButtonSizes => WithSettingsNames(_buttonSizes, SettingsSizeNames());
         public static string[] Aligns => _aligns.ToArray();
         public static string[] ShapeNames => _shapeNames.ToArray();
+
+        private static string[] WithSettingsNames(List<string> seed, IEnumerable<string> extra)
+        {
+            var list = new List<string>(seed);
+            foreach (string e in extra) RegisterInto(list, e);
+            return list.ToArray();
+        }
+
+        private static IEnumerable<string> SettingsVariantNames()
+        {
+            NeoUISettings settings = NeoUISettings.instance;
+            if (settings == null || settings.buttonVariants == null) yield break;
+            foreach (ButtonVariantAsset v in settings.buttonVariants)
+                if (v != null && !string.IsNullOrEmpty(v.name)) yield return v.name;
+        }
+
+        private static IEnumerable<string> SettingsSizeNames()
+        {
+            NeoUISettings settings = NeoUISettings.instance;
+            if (settings == null || settings.buttonSizes == null) yield break;
+            foreach (ButtonSizeAsset s in settings.buttonSizes)
+                if (s != null && !string.IsNullOrEmpty(s.name)) yield return s.name;
+        }
+
+        /// <summary> All widget-preset names (sorted), for the inspector preset picker. </summary>
+        public static List<string> PresetNames()
+        {
+            var list = new List<string>(NeoWidgetPresets.Names);
+            list.Sort(System.StringComparer.Ordinal);
+            return list;
+        }
+
+        /// <summary> Preset names whose target kind matches (sorted), for a kind-scoped picker. </summary>
+        public static List<string> PresetsForKind(string kind)
+        {
+            var list = new List<string>();
+            foreach (NeoWidgetPreset p in NeoWidgetPresets.ForKind(kind))
+                if (!string.IsNullOrEmpty(p.presetName)) list.Add(p.presetName);
+            list.Sort(System.StringComparer.Ordinal);
+            return list;
+        }
 
         /// <summary> Registers a button variant id for the Composer picker (append if new,
         /// case-insensitive no-op if already present). Author the variant's colors as a

@@ -12,16 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 202bf77ffb876604f87ad7176569404e, type: 3}
   m_Name: AnimationPresetDatabase
   m_EditorClassIdentifier: Neo.UI::Neo.UI.AnimationPresetDatabase
-  presets:
-  - {fileID: 11400000, guid: 05b957233b5c8084a91e669c1e890206, type: 2}
-  - {fileID: 11400000, guid: 449b621def91ed140b4372e04a0eca26, type: 2}
-  - {fileID: 11400000, guid: cc0d90cbc198b9a45b1810eb12a510da, type: 2}
-  - {fileID: 11400000, guid: c5612c51f1a5daa47b22ba854b5a01b0, type: 2}
-  - {fileID: 11400000, guid: 7ad5a13dae719cf4aa817ac3a1fac565, type: 2}
-  - {fileID: 11400000, guid: adf3fc18f8e72e340ade58eff2818b04, type: 2}
-  - {fileID: 11400000, guid: 54b506ab18075e54e8c6cd966e0ab89a, type: 2}
-  - {fileID: 11400000, guid: a0d56e348c149e5478e1c019b6d473b1, type: 2}
-  - {fileID: 11400000, guid: f0d66354e138c574fb5db9b997e99631, type: 2}
-  - {fileID: 11400000, guid: 856673a81c1012243b7c6da0d3ac3004, type: 2}
-  - {fileID: 11400000, guid: d9b2aea1a76a136438e9de28afd710fb, type: 2}
-  - {fileID: 11400000, guid: 4363ac5b0c539014ca76a49cc95c14cc, type: 2}
+  presets: []

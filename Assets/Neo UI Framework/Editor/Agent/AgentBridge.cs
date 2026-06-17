@@ -36,6 +36,10 @@ namespace Neo.UI.Editor
     ///   conflicts / offSpecWarnings / dropped / merged.
     /// - <c>{"action":"buildScene"}</c> — builds the playable scene from generated assets
     ///   (refuses while the open scene has unsaved changes)
+    /// - <c>{"action":"regenerateShowcase","showcase":"&lt;id&gt;"}</c> — the GUID-safe, scoped,
+    ///   baseline-aware regen of a registered showcase into its OWN isolated Generated/ root (routes
+    ///   through ShowcaseRunner.Regenerate → SpecBaseline.Sync; auto-rebuilds factory-owned widget
+    ///   internals when there's no spec-level human drift). Returns the same shape as "sync".
     /// - <c>{"action":"specReference","out":"path.md"}</c> — writes the code-generated spec
     ///   authoring reference ("out" optional, defaults to Assets/docs/spec-reference.md)
     /// - <c>{"action":"importSprites","folder":"Assets/..."}</c> — imports every texture under the
@@ -110,6 +114,7 @@ namespace Neo.UI.Editor
                 // diff/merge build reference widget subtrees in memory (like preview), so the same
                 // play-mode hazard applies (AddComponent fires Awake/OnEnable mid-construction)
                 bool mutatesAssets = action == "generate" || action == "buildScene"
+                                     || action == "regenerateShowcase"
                                      || action == "screenshot" || action == "preview"
                                      || action == "diff" || action == "merge" || action == "sync"
                                      || action == "bindings" || action == "composerSession";
@@ -130,6 +135,7 @@ namespace Neo.UI.Editor
                     case "merge": HandleMerge(request, result); break;
                     case "sync": HandleSync(request, result); break;
                     case "buildScene": HandleBuildScene(request, result); break;
+                    case "regenerateShowcase": HandleRegenerateShowcase(request, result); break;
                     case "specReference": HandleSpecReference(request, result); break;
                     case "preview": HandlePreview(request, result); break;
                     case "importSprites": HandleImportSprites(request, result); break;
@@ -137,7 +143,7 @@ namespace Neo.UI.Editor
                     case "composerSession": HandleComposerSession(request, result); break;
                     default:
                         result["ok"] = false;
-                        result["error"] = $"Unknown action '{action}' (screenshot | generate | export | validate | diff | merge | sync | buildScene | specReference | preview | importSprites | bindings | composerSession)";
+                        result["error"] = $"Unknown action '{action}' (screenshot | generate | export | validate | diff | merge | sync | buildScene | regenerateShowcase | specReference | preview | importSprites | bindings | composerSession)";
                         break;
                 }
             }
@@ -566,6 +572,53 @@ namespace Neo.UI.Editor
                 : GeneratedSceneBuilder.Build(flowName);
             result["ok"] = true;
             result["path"] = path;
+        }
+
+        /// <summary>
+        /// The GUID-safe, scoped, baseline-aware regen of a registered showcase. Routes through
+        /// <see cref="ShowcaseRunner.Regenerate"/> (already <c>NeoWorkspace.Scoped</c> to the showcase's
+        /// isolated <c>Generated/</c> root) → <see cref="SpecBaseline.Sync"/>, so the only agent-facing
+        /// way to regenerate an EXISTING showcase from its changed spec without clobbering the default
+        /// root or losing human edits. Output shape mirrors <see cref="HandleSync"/> exactly.
+        /// </summary>
+        private static void HandleRegenerateShowcase(Dictionary<string, object> request, Dictionary<string, object> result)
+        {
+            string showcaseId = JsonReader.GetString(request, "showcase");
+            if (string.IsNullOrEmpty(showcaseId))
+                throw new ArgumentException("regenerateShowcase needs \"showcase\": the id of a registered showcase");
+            if (!ShowcaseRegistry.TryGet(showcaseId, out Showcase showcase))
+                throw new InvalidOperationException(
+                    $"No showcase '{showcaseId}' registered (known: {string.Join(", ", ShowcaseRegistry.Ids)})");
+
+            // ShowcaseRunner.Regenerate is already scoped to the showcase's isolated Generated/ root and
+            // auto-rebuilds factory-owned internals when there's no spec-level human drift. It returns
+            // null only for a null / spec-less showcase.
+            SyncResult sync = ShowcaseRunner.Regenerate(showcase);
+            if (sync == null)
+            {
+                result["ok"] = false;
+                result["error"] = $"Showcase '{showcaseId}' has no readable spec to regenerate from.";
+                return;
+            }
+
+            result["ok"] = sync.ok;
+            result["refused"] = sync.refused;
+            result["regenerated"] = sync.regenerated;
+            result["baselineUpdated"] = sync.baselineUpdated;
+            result["humanChanges"] = ChangeList(sync.humanChanges);
+            result["applied"] = ChangeList(sync.applied);
+            result["conflicts"] = ChangeList(sync.conflicts);
+            result["offSpecWarnings"] = FindingList(sync.offSpecWarnings);
+            result["dropped"] = FindingList(sync.dropped);
+            if (sync.merged != null) result["merged"] = sync.merged.ToJson();
+            if (sync.generateReport != null)
+            {
+                result["created"] = new List<object>(sync.generateReport.created);
+                result["updated"] = new List<object>(sync.generateReport.updated);
+                result["collisions"] = new List<object>(sync.generateReport.collisions);
+                result["issues"] = new List<object>(sync.generateReport.issues);
+            }
+            if (!string.IsNullOrEmpty(sync.note)) result["note"] = sync.note;
         }
     }
 }

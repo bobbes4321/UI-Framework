@@ -15,8 +15,10 @@ MonoBehaviour:
   categories:
   - category: Audio
     names:
+    - Music
     - Mute
     - MuteInBackground
+    - Sfx
   - category: Controls
     names:
     - InvertY
@@ -43,6 +45,9 @@ MonoBehaviour:
   - category: Lint
     names:
     - Mute
+  - category: Particles
+    names:
+    - SparkleToggle
   - category: Player
     names:
     - God

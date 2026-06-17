@@ -296,6 +296,10 @@
             "Title"
           ]
         },
+        "preset": {
+          "type": "string",
+          "description": "name of a reusable NeoWidgetPreset; resolved at generate as the base, element fields override"
+        },
         "icon": {
           "enum": [
             "play",

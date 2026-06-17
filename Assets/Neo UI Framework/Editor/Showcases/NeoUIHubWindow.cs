@@ -396,8 +396,9 @@ namespace Neo.UI.Editor
 
             if (result.refused || result.conflicts.Count > 0 || result.offSpecWarnings.Count > 0)
             {
-                // surface the conflict / off-spec detail in the existing Sync window rather than a toast
-                SyncWindow.Show(result, s.specPath);
+                // surface the conflict / off-spec detail in the existing Sync window rather than a toast;
+                // pass the showcase so its "Re-run Sync" / "Force sync" run scoped to its isolated root
+                SyncWindow.Show(result, s.specPath, s);
                 Debug.LogWarning($"[Neo.UI] Showcase '{s.id}' regenerate needs review — {result.note}");
             }
             else

@@ -1,0 +1,661 @@
+{
+  "theme": {
+    "tokens": {
+      "Primary": "#3B82F6",
+      "Background": "#0F1115",
+      "Accent": "#FCA311",
+      "TextDefault": "#C9CED6",
+      "Panel": "#1D2D50",
+      "Surface": "#1A1D24",
+      "SurfaceElevated": "#252A34",
+      "Outline": "#39404E",
+      "PrimaryHover": "#639AF8",
+      "PrimaryPressed": "#2563D4",
+      "TextOnPrimary": "#FFFFFF",
+      "TextStrong": "#F2F4F8",
+      "TextMuted": "#8A919E",
+      "Success": "#51CF66",
+      "Warning": "#FFD43B",
+      "Error": "#FF6B6B",
+      "Shadow": "#00000080",
+      "SuccessHover": "#6DD77F",
+      "SuccessPressed": "#34BE4B",
+      "Danger": "#FF6B6B",
+      "DangerHover": "#FF8F8F",
+      "DangerPressed": "#FF3D3D",
+      "TextDark": "#6B6390"
+    },
+    "variants": {
+      "Light": {
+        "Primary": "#1B6FD4",
+        "Background": "#F2F4F7",
+        "Accent": "#FCA311",
+        "TextDefault": "#2A313C",
+        "Panel": "#1D2D50",
+        "Surface": "#FFFFFF",
+        "SurfaceElevated": "#E9EDF2",
+        "Outline": "#D4DAE3",
+        "PrimaryHover": "#3D87E0",
+        "PrimaryPressed": "#1259AE",
+        "TextOnPrimary": "#FFFFFF",
+        "TextStrong": "#14181F",
+        "TextMuted": "#6A7280",
+        "Success": "#2E933C",
+        "Warning": "#B35C00",
+        "Error": "#C73E3E",
+        "Shadow": "#00000040",
+        "SuccessHover": "#37AE47",
+        "SuccessPressed": "#23702E",
+        "Danger": "#C73E3E",
+        "DangerHover": "#CF5A5A",
+        "DangerPressed": "#A73030",
+        "TextDark": "#6B6390"
+      },
+      "Dark": {
+        "Primary": "#3B82F6",
+        "Background": "#0F1115",
+        "Accent": "#FCA311",
+        "TextDefault": "#C9CED6",
+        "Panel": "#1D2D50",
+        "Surface": "#1A1D24",
+        "SurfaceElevated": "#252A34",
+        "Outline": "#39404E",
+        "PrimaryHover": "#639AF8",
+        "PrimaryPressed": "#2563D4",
+        "TextOnPrimary": "#FFFFFF",
+        "TextStrong": "#F2F4F8",
+        "TextMuted": "#8A919E",
+        "Success": "#51CF66",
+        "Warning": "#FFD43B",
+        "Error": "#FF6B6B",
+        "Shadow": "#00000080",
+        "SuccessHover": "#6DD77F",
+        "SuccessPressed": "#34BE4B",
+        "Danger": "#FF6B6B",
+        "DangerHover": "#FF8F8F",
+        "DangerPressed": "#FF3D3D",
+        "TextDark": "#6B6390"
+      }
+    }
+  },
+  "views": [
+    {
+      "id": "Showcase/Particles",
+      "background": "Background",
+      "elements": [
+        {
+          "safearea": {
+            "anchor": "Stretch",
+            "children": [
+              {
+                "list": {
+                  "anchor": "Stretch",
+                  "spacing": 8,
+                  "children": [
+                    {
+                      "vstack": {
+                        "padding": 40,
+                        "spacing": 18,
+                        "children": [
+                          {
+                            "text": {
+                              "label": "UI Particles",
+                              "color": "TextStrong",
+                              "textStyle": "Title",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "Pooled NeoShape particles rendered INSIDE the UGUI canvas batch — masked, sorted and theme-colored like every other widget, no separate ParticleSystem. Each emitter rides its own trigger, so bursts originate from the control you press. Open the scene and play with it.",
+                              "color": "TextMuted",
+                              "textStyle": "Caption",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "panel": {
+                              "id": "ParticlesPanel/CoinFountain",
+                              "style": "Panel",
+                              "radius": 14,
+                              "padding": 0,
+                              "spacing": 12,
+                              "children": [
+                                {
+                                  "text": {
+                                    "label": "COIN FOUNTAIN ON PURCHASE",
+                                    "color": "TextStrong",
+                                    "textStyle": "ButtonLabel",
+                                    "align": "left"
+                                  }
+                                },
+                                {
+                                  "button": {
+                                    "id": "Particles/Buy",
+                                    "label": "Buy  •  500",
+                                    "icon": "shopping-bag",
+                                    "labelColor": "TextOnPrimary",
+                                    "particles": {
+                                      "capacity": 64,
+                                      "burstCount": 32,
+                                      "rate": 0,
+                                      "particleShape": "Circle",
+                                      "cornerRadiusPercent": 100,
+                                      "sizeRange": [
+                                        8,
+                                        16
+                                      ],
+                                      "lifetimeRange": [
+                                        0.699999988079071,
+                                        1.2999999523162842
+                                      ],
+                                      "speedRange": [
+                                        320,
+                                        620
+                                      ],
+                                      "emitAngle": 90,
+                                      "emitSpread": 55,
+                                      "angularVelocityRange": [
+                                        -220,
+                                        220
+                                      ],
+                                      "modules": [
+                                        {
+                                          "id": "gravity",
+                                          "params": {
+                                            "acceleration": [
+                                              0,
+                                              -1100
+                                            ]
+                                          }
+                                        },
+                                        {
+                                          "id": "drag",
+                                          "params": {
+                                            "drag": 0.25
+                                          }
+                                        },
+                                        {
+                                          "id": "colorOverLife",
+                                          "params": {
+                                            "start": "Warning",
+                                            "end": "#FFE08A00",
+                                            "ease": "InQuad"
+                                          }
+                                        },
+                                        {
+                                          "id": "sizeOverLife",
+                                          "params": {
+                                            "startScale": 1,
+                                            "endScale": 0.40000000596046448,
+                                            "ease": "OutQuad"
+                                          }
+                                        }
+                                      ],
+                                      "signal": {
+                                        "category": "Shop",
+                                        "name": "Purchase",
+                                        "count": 32
+                                      }
+                                    },
+                                    "size": "lg",
+                                    "textStyle": "ButtonLabelLarge",
+                                    "onClick": {
+                                      "signal": {
+                                        "category": "Shop",
+                                        "name": "Purchase"
+                                      }
+                                    }
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "Coins erupt upward then arc back down under gravity — a tight cone, heavy fall, fading to transparent gold. Signal-driven (Shop/Purchase), zero UnityEvents.",
+                                    "color": "TextMuted",
+                                    "textStyle": "Caption",
+                                    "align": "left"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "panel": {
+                              "id": "ParticlesPanel/ConfettiCannon",
+                              "style": "Panel",
+                              "radius": 14,
+                              "padding": 0,
+                              "spacing": 12,
+                              "children": [
+                                {
+                                  "text": {
+                                    "label": "CONFETTI CANNON ON VICTORY",
+                                    "color": "TextStrong",
+                                    "textStyle": "ButtonLabel",
+                                    "align": "left"
+                                  }
+                                },
+                                {
+                                  "button": {
+                                    "id": "Particles/Win",
+                                    "label": "Win!",
+                                    "icon": "circle-help",
+                                    "labelColor": "TextOnPrimary",
+                                    "particles": {
+                                      "capacity": 160,
+                                      "burstCount": 96,
+                                      "rate": 0,
+                                      "particleShape": "RoundedRect",
+                                      "cornerRadiusPercent": 25,
+                                      "sizeRange": [
+                                        7,
+                                        15
+                                      ],
+                                      "lifetimeRange": [
+                                        1.1000000238418579,
+                                        2.2000000476837158
+                                      ],
+                                      "speedRange": [
+                                        260,
+                                        720
+                                      ],
+                                      "emitAngle": 90,
+                                      "emitSpread": 150,
+                                      "angularVelocityRange": [
+                                        -540,
+                                        540
+                                      ],
+                                      "modules": [
+                                        {
+                                          "id": "gravity",
+                                          "params": {
+                                            "acceleration": [
+                                              0,
+                                              -780
+                                            ]
+                                          }
+                                        },
+                                        {
+                                          "id": "drag",
+                                          "params": {
+                                            "drag": 0.60000002384185791
+                                          }
+                                        },
+                                        {
+                                          "id": "colorOverLife",
+                                          "params": {
+                                            "start": "Success",
+                                            "end": "#39D98A00",
+                                            "ease": "Linear"
+                                          }
+                                        }
+                                      ],
+                                      "signal": {
+                                        "category": "Game",
+                                        "name": "Victory",
+                                        "count": 96
+                                      }
+                                    },
+                                    "size": "lg",
+                                    "textStyle": "ButtonLabelLarge",
+                                    "onClick": {
+                                      "signal": {
+                                        "category": "Game",
+                                        "name": "Victory"
+                                      }
+                                    }
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "A wide 150° fan of 96 tumbling confetti rects, drag-slowed so they flutter and drift instead of dropping like stones. Long lifetimes keep the celebration on screen.",
+                                    "color": "TextMuted",
+                                    "textStyle": "Caption",
+                                    "align": "left"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "panel": {
+                              "id": "ParticlesPanel/Fireworks",
+                              "style": "Panel",
+                              "radius": 14,
+                              "padding": 0,
+                              "spacing": 12,
+                              "children": [
+                                {
+                                  "text": {
+                                    "label": "FIREWORK BURST",
+                                    "color": "TextStrong",
+                                    "textStyle": "ButtonLabel",
+                                    "align": "left"
+                                  }
+                                },
+                                {
+                                  "button": {
+                                    "id": "Particles/Firework",
+                                    "label": "Launch",
+                                    "icon": "sparkles",
+                                    "labelColor": "TextStrong",
+                                    "particles": {
+                                      "capacity": 140,
+                                      "burstCount": 80,
+                                      "rate": 0,
+                                      "particleShape": "Circle",
+                                      "cornerRadiusPercent": 100,
+                                      "sizeRange": [
+                                        5,
+                                        10
+                                      ],
+                                      "lifetimeRange": [
+                                        0.89999997615814209,
+                                        1.6000000238418579
+                                      ],
+                                      "speedRange": [
+                                        380,
+                                        480
+                                      ],
+                                      "emitAngle": 90,
+                                      "emitSpread": 360,
+                                      "angularVelocityRange": [
+                                        0,
+                                        0
+                                      ],
+                                      "modules": [
+                                        {
+                                          "id": "gravity",
+                                          "params": {
+                                            "acceleration": [
+                                              0,
+                                              -240
+                                            ]
+                                          }
+                                        },
+                                        {
+                                          "id": "drag",
+                                          "params": {
+                                            "drag": 0.800000011920929
+                                          }
+                                        },
+                                        {
+                                          "id": "colorOverLife",
+                                          "params": {
+                                            "start": "Primary",
+                                            "end": "#FFFFFF00",
+                                            "ease": "OutQuad"
+                                          }
+                                        },
+                                        {
+                                          "id": "sizeOverLife",
+                                          "params": {
+                                            "startScale": 1.2000000476837158,
+                                            "endScale": 0,
+                                            "ease": "InQuad"
+                                          }
+                                        }
+                                      ],
+                                      "signal": {
+                                        "category": "FX",
+                                        "name": "Firework",
+                                        "count": 80
+                                      }
+                                    },
+                                    "variant": "secondary",
+                                    "size": "lg",
+                                    "textStyle": "ButtonLabelLarge",
+                                    "onClick": {
+                                      "signal": {
+                                        "category": "FX",
+                                        "name": "Firework"
+                                      }
+                                    }
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "A perfectly even 360° ring of sparks with near-uniform speed — the classic firework shell. Strong drag stalls them into the signature hang, then they twinkle out.",
+                                    "color": "TextMuted",
+                                    "textStyle": "Caption",
+                                    "align": "left"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "panel": {
+                              "id": "ParticlesPanel/Sparkle",
+                              "style": "Panel",
+                              "radius": 14,
+                              "padding": 0,
+                              "spacing": 12,
+                              "children": [
+                                {
+                                  "text": {
+                                    "label": "TOGGLE-ON SPARKLE TRAIL",
+                                    "color": "TextStrong",
+                                    "textStyle": "ButtonLabel",
+                                    "align": "left"
+                                  }
+                                },
+                                {
+                                  "toggle": {
+                                    "id": "Particles/SparkleToggle",
+                                    "label": "Enchanted",
+                                    "particles": {
+                                      "capacity": 56,
+                                      "burstCount": 22,
+                                      "rate": 0,
+                                      "particleShape": "Circle",
+                                      "cornerRadiusPercent": 100,
+                                      "sizeRange": [
+                                        4,
+                                        10
+                                      ],
+                                      "lifetimeRange": [
+                                        0.5,
+                                        1
+                                      ],
+                                      "speedRange": [
+                                        140,
+                                        300
+                                      ],
+                                      "emitAngle": 90,
+                                      "emitSpread": 360,
+                                      "angularVelocityRange": [
+                                        -120,
+                                        120
+                                      ],
+                                      "modules": [
+                                        {
+                                          "id": "drag",
+                                          "params": {
+                                            "drag": 0.85000002384185791
+                                          }
+                                        },
+                                        {
+                                          "id": "colorOverLife",
+                                          "params": {
+                                            "start": "Success",
+                                            "end": "#FFFFFF00",
+                                            "ease": "OutQuad"
+                                          }
+                                        },
+                                        {
+                                          "id": "sizeOverLife",
+                                          "params": {
+                                            "startScale": 1,
+                                            "endScale": 0,
+                                            "ease": "OutQuad"
+                                          }
+                                        }
+                                      ],
+                                      "signal": {
+                                        "category": "FX",
+                                        "name": "Sparkle",
+                                        "count": 22
+                                      }
+                                    },
+                                    "size": [
+                                      0,
+                                      40
+                                    ],
+                                    "textStyle": "Body",
+                                    "signal": {
+                                      "category": "FX",
+                                      "name": "Sparkle"
+                                    }
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "The toggle publishes its bool to FX/Sparkle AND bursts a soft radial puff of sparkles on every flip — drag pulls them in for a glittery settle.",
+                                    "color": "TextMuted",
+                                    "textStyle": "Caption",
+                                    "align": "left"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "panel": {
+                              "id": "ParticlesPanel/Legendary",
+                              "style": "Panel",
+                              "radius": 14,
+                              "padding": 0,
+                              "spacing": 12,
+                              "children": [
+                                {
+                                  "text": {
+                                    "label": "LEGENDARY CARD  •  continuous embers (visible at rest)",
+                                    "color": "TextStrong",
+                                    "textStyle": "ButtonLabel",
+                                    "align": "left"
+                                  }
+                                },
+                                {
+                                  "hstack": {
+                                    "padding": 0,
+                                    "spacing": 12,
+                                    "children": [
+                                      {
+                                        "overlay": {
+                                          "size": [
+                                            240,
+                                            96
+                                          ],
+                                          "children": [
+                                            {
+                                              "shape": {
+                                                "id": "Particles/LegendaryCard",
+                                                "background": "Primary",
+                                                "shape": "RoundedRect",
+                                                "particles": {
+                                                  "capacity": 48,
+                                                  "burstCount": 16,
+                                                  "rate": 14,
+                                                  "emitOnEnable": true,
+                                                  "particleShape": "Circle",
+                                                  "cornerRadiusPercent": 100,
+                                                  "sizeRange": [
+                                                    3,
+                                                    8
+                                                  ],
+                                                  "lifetimeRange": [
+                                                    1,
+                                                    2
+                                                  ],
+                                                  "speedRange": [
+                                                    30,
+                                                    80
+                                                  ],
+                                                  "emitAngle": 90,
+                                                  "emitSpread": 50,
+                                                  "angularVelocityRange": [
+                                                    -30,
+                                                    30
+                                                  ],
+                                                  "modules": [
+                                                    {
+                                                      "id": "gravity",
+                                                      "params": {
+                                                        "acceleration": [
+                                                          0,
+                                                          60
+                                                        ]
+                                                      }
+                                                    },
+                                                    {
+                                                      "id": "drag",
+                                                      "params": {
+                                                        "drag": 0.40000000596046448
+                                                      }
+                                                    },
+                                                    {
+                                                      "id": "colorOverLife",
+                                                      "params": {
+                                                        "start": "Warning",
+                                                        "end": "#FFE08A00",
+                                                        "ease": "InQuad"
+                                                      }
+                                                    },
+                                                    {
+                                                      "id": "sizeOverLife",
+                                                      "params": {
+                                                        "startScale": 1,
+                                                        "endScale": 0,
+                                                        "ease": "Linear"
+                                                      }
+                                                    }
+                                                  ]
+                                                },
+                                                "radius": 12,
+                                                "anchor": "Stretch"
+                                              }
+                                            },
+                                            {
+                                              "text": {
+                                                "label": "LEGENDARY",
+                                                "color": "TextOnPrimary",
+                                                "anchor": "Stretch",
+                                                "textStyle": "ButtonLabel"
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      {
+                                        "spacer": {
+                                          "flex": 1
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "A continuous emitter (rate>0, emitOnEnable) lifts warm embers off the card forever — now that drag is clamped they actually rise and drift instead of freezing. Intentionally trips the cost-lint to show the honest-cost story.",
+                                    "color": "TextMuted",
+                                    "textStyle": "Caption",
+                                    "align": "left"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

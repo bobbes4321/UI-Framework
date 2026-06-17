@@ -16,13 +16,23 @@ MonoBehaviour:
   - category: A
     names:
     - Main
+  - category: Audio
+    names:
+    - Panel
   - category: B
     names:
     - Main
   - category: Base
     names:
     - Main
+  - category: Bp
+    names:
+    - Legacy
+    - Main
   - category: Bundle
+    names:
+    - Screen
+  - category: Col
     names:
     - Screen
   - category: Deco
@@ -34,6 +44,13 @@ MonoBehaviour:
   - category: Dialog
     names:
     - Confirm
+  - category: Fx
+    names:
+    - Particles
+    - Screen
+  - category: Fx2
+    names:
+    - Screen
   - category: Game
     names:
     - HUD
@@ -45,7 +62,11 @@ MonoBehaviour:
     - Form
   - category: HUD
     names:
+    - Main
     - Root
+  - category: IProv
+    names:
+    - View
   - category: Juice
     names:
     - Screen
@@ -54,6 +75,10 @@ MonoBehaviour:
     names:
     - Screen
     - View
+  - category: LintLayout
+    names:
+    - Aspect
+    - Stomp
   - category: Menu
     names:
     - Cheats
@@ -62,16 +87,34 @@ MonoBehaviour:
     - Main
     - News
     - Options
+    - Pause
     - Settings
     - Shop
+  - category: Mig
+    names:
+    - View
   - category: Mock
     names:
     - Broken
     - Card
+  - category: Pre
+    names:
+    - Screen
+  - category: Probe
+    names:
+    - Unknown
+    - View
   - category: Race
     names:
     - Victory
+  - category: Reg
+    names:
+    - Danger
+    - Screen
   - category: Round
+    names:
+    - Main
+  - category: Run
     names:
     - Main
   - category: Settings
@@ -84,14 +127,25 @@ MonoBehaviour:
   - category: Showcase
     names:
     - Buttons
+    - Effects
+    - Particles
     - Popups
     - TabsPanels
     - TogglesSwitches
   - category: Spec
     names:
     - Bound
+    - Cstr
     - Layout
+    - LayoutModel
+    - Legacy
+    - Padding4
+    - PaddingNone
+    - PaddingUniform
+    - PaddingUniform4
     - Settings
+    - Sizing
+    - VFix
   - category: Starter
     names:
     - Showcase

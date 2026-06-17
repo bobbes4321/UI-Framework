@@ -986,6 +986,14 @@ namespace Neo.UI.Editor
                 : $"{element.kind}_{index}";
             go.name = elementName;
 
+            // Round-trip seam: elements with no id-bearing widget (shapes, text, images, containers,
+            // progress, …) carry their authored id on a lightweight NeoElementId the exporter reads back,
+            // so every spec-addressable element survives generate ↔ export (the spec is the source of
+            // truth — an authored id must not be silently dropped). Interactive widgets already round-trip
+            // their id through their own NeoId, so skip them and keep the widget prefab lean.
+            if (!string.IsNullOrEmpty(element.id) && !ElementCarriesOwnId(go))
+                go.AddComponent<NeoElementId>().id = element.id;
+
             // a container with visual fields gets an NeoShape on its layout host (card/sheet look) —
             // without this, "style"/"background" on a stack would silently render nothing
             if (IsPlainContainer(element.kind)
@@ -1908,6 +1916,17 @@ namespace Neo.UI.Editor
                 value = value.Replace(invalid, '_');
             return value;
         }
+
+        /// <summary>
+        /// True when the element already exposes its id through an interactive widget's own NeoId, so the
+        /// exporter reads it back without a <see cref="NeoElementId"/> marker. Mirrors the id-bearing
+        /// component branches in <c>UISpecExporter.ExportElementBody</c>.
+        /// </summary>
+        private static bool ElementCarriesOwnId(GameObject go) =>
+            go.GetComponent<UIButton>() != null || go.GetComponent<UIToggle>() != null
+            || go.GetComponent<UITab>() != null || go.GetComponent<UISlider>() != null
+            || go.GetComponent<UIDropdown>() != null || go.GetComponent<UIToggleGroup>() != null
+            || go.GetComponent<UIPanel>() != null || go.GetComponent<UIStepper>() != null;
 
         private static void EnsureFolder(string path)
         {

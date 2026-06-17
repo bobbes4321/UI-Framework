@@ -27,6 +27,9 @@ Per-element JSON keys (an element is `{ "<kind>": { ...fields } }`). Fields appl
 | `children` | element[] |
 | `columns` | int |
 | `controls` | string |
+| `effect` | EffectSpec |
+| `fit` | string |
+| `flex` | number |
 | `fontSize` | number |
 | `gradient` | { from, to, angle } |
 | `group` | string |
@@ -35,6 +38,7 @@ Per-element JSON keys (an element is `{ "<kind>": { ...fields } }`). Fields appl
 | `item` | ElementSpec |
 | `label` | string |
 | `labelColor` | string |
+| `layout` | LayoutSpec |
 | `max` | number |
 | `min` | number |
 | `onClickClose` | bool |
@@ -43,10 +47,18 @@ Per-element JSON keys (an element is `{ "<kind>": { ...fields } }`). Fields appl
 | `onClickShowView` | string |
 | `onClickSignal` | { category, name } |
 | `options` | List`1 |
+| `outlineColor` | string |
+| `outlineWidth` | number |
+| `overrides` | Dictionary`2 |
 | `padding` | number |
+| `padding4` | number[] |
+| `particles` | ParticleSpec |
 | `position` | number[] |
+| `preset` | string |
 | `radius` | number |
+| `rotation` | number |
 | `shape` | string |
+| `signal` | { category, name } |
 | `size` | number[] |
 | `sizeVariant` | string |
 | `spacing` | number |

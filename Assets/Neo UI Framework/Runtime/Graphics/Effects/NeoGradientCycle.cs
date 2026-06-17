@@ -34,14 +34,16 @@ namespace Neo.UI
         [Tooltip("Interpolate the gradient stops between two color pairs over the timeline.")]
         [SerializeField] private bool cycleColors;
 
+        // Vivid, theme-friendly endpoint defaults so a `cycleColors:true` with no authored colors bakes
+        // a colorful resting frame (phase 0 = fromColorA/fromColorB) rather than the old white→gray wash.
         [Tooltip("Stop A at phase 0.")]
-        [SerializeField] private ThemeColorRef fromColorA = new ThemeColorRef(Color.white);
+        [SerializeField] private ThemeColorRef fromColorA = new ThemeColorRef(new Color(0.36f, 0.42f, 0.96f)); // indigo
         [Tooltip("Stop B at phase 0.")]
-        [SerializeField] private ThemeColorRef fromColorB = new ThemeColorRef(new Color(0.7f, 0.7f, 0.7f));
+        [SerializeField] private ThemeColorRef fromColorB = new ThemeColorRef(new Color(0.92f, 0.28f, 0.60f)); // magenta
         [Tooltip("Stop A at phase 1.")]
-        [SerializeField] private ThemeColorRef toColorA = new ThemeColorRef(new Color(0.7f, 0.7f, 0.7f));
+        [SerializeField] private ThemeColorRef toColorA = new ThemeColorRef(new Color(0.20f, 0.78f, 0.85f)); // cyan
         [Tooltip("Stop B at phase 1.")]
-        [SerializeField] private ThemeColorRef toColorB = new ThemeColorRef(Color.white);
+        [SerializeField] private ThemeColorRef toColorB = new ThemeColorRef(new Color(0.99f, 0.70f, 0.24f)); // amber
 
         [System.NonSerialized] private NeoGradient _gradient;
 
@@ -49,6 +51,15 @@ namespace Neo.UI
         public bool CycleAngle { get => cycleAngle; set => cycleAngle = value; }
         /// <summary> Whether the gradient stop colors animate. </summary>
         public bool CycleColors { get => cycleColors; set => cycleColors = value; }
+
+        /// <summary> Stop A at phase 0 (theme token or raw color). </summary>
+        public ThemeColorRef FromColorA { get => fromColorA; set => fromColorA = value; }
+        /// <summary> Stop B at phase 0 (theme token or raw color). </summary>
+        public ThemeColorRef FromColorB { get => fromColorB; set => fromColorB = value; }
+        /// <summary> Stop A at phase 1 (theme token or raw color). </summary>
+        public ThemeColorRef ToColorA { get => toColorA; set => toColorA = value; }
+        /// <summary> Stop B at phase 1 (theme token or raw color). </summary>
+        public ThemeColorRef ToColorB { get => toColorB; set => toColorB = value; }
 
         /// <summary> The sibling gradient this effect drives (cached). </summary>
         public NeoGradient Gradient => _gradient != null ? _gradient : (_gradient = GetComponent<NeoGradient>());

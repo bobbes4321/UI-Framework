@@ -26,13 +26,17 @@ namespace Neo.UI.Tests
         [Test]
         public void Register_AppendsNovelId_ThenResolvableViaTryGet()
         {
+            // An id that is NOT a code-seeded built-in, so registering it genuinely appends (rather than
+            // replacing in place). Guarded so a future built-in of this id can't silently weaken the test.
+            const string novelId = "novel-probe-id";
+            Assert.IsFalse(ShowcaseRegistry.Ids.Contains(novelId), "precondition: the probe id must be novel");
             int before = ShowcaseRegistry.All.Count;
 
-            ShowcaseRegistry.Register(Probe("buttons", "Buttons"));
+            ShowcaseRegistry.Register(Probe(novelId, "Buttons"));
 
             Assert.AreEqual(before + 1, ShowcaseRegistry.All.Count, "a novel id appends");
-            Assert.Contains("buttons", ShowcaseRegistry.Ids.ToList());
-            Assert.IsTrue(ShowcaseRegistry.TryGet("buttons", out Showcase got));
+            Assert.Contains(novelId, ShowcaseRegistry.Ids.ToList());
+            Assert.IsTrue(ShowcaseRegistry.TryGet(novelId, out Showcase got));
             Assert.AreEqual("Buttons", got.title);
         }
 

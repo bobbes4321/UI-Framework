@@ -193,6 +193,28 @@ namespace Neo.UI.Editor
                 specPath = SpecsRoot + "/tabs-panels.json",
                 flowName = null,
             };
+
+            // --- Effects: the juice layer (shape effects + particles) ----------------------------
+            yield return new Showcase
+            {
+                id = "effects",
+                title = "Shape Effects",
+                description = "Runtime-animated, batched SDF shape effects — glow pulse, sheen sweep, " +
+                              "gradient cycle — plus a batch-breaking variant-material dissolve.",
+                category = "Effects",
+                specPath = SpecsRoot + "/effects.json",
+                flowName = null,
+            };
+            yield return new Showcase
+            {
+                id = "particles",
+                title = "UI Particles",
+                description = "Pooled NeoShape particle bursts driven by signals — coin bursts, confetti " +
+                              "and sparkles — rendered inside the canvas batch, not Unity's ParticleSystem.",
+                category = "Effects",
+                specPath = SpecsRoot + "/particles.json",
+                flowName = null,
+            };
         }
     }
 

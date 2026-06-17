@@ -91,7 +91,20 @@ namespace Neo.UI.Editor
             return le;
         }
 
-        /// <summary> Fixed: rigid authored extent. min = preferred = size, flexible = 0. </summary>
+        /// <summary> Adds (or reuses) a <see cref="ContentSizeFitter"/> and sets the requested axis to
+        /// <see cref="ContentSizeFitter.FitMode.PreferredSize"/>, leaving the other axis untouched.
+        /// Idempotent — a child sized on both axes ends up with one fitter fitting both. </summary>
+        private static void FitAxisToPreferred(GameObject go, bool horizontal)
+        {
+            var fitter = go.GetComponent<ContentSizeFitter>();
+            if (fitter == null) fitter = go.AddComponent<ContentSizeFitter>();
+            if (horizontal) fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+            else fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        }
+
+        /// <summary> Fixed: rigid authored extent. min = preferred = size, flexible = 0, plus a
+        /// <see cref="ContentSizeFitter"/> on the axis so the child honors its size even inside a
+        /// force-expanding parent group (the same trick a button uses to keep its width). </summary>
         private sealed class FixedSizing : ILayoutSizingMode
         {
             public string Id => Fixed;
@@ -111,6 +124,11 @@ namespace Neo.UI.Editor
                     if (s > 0f) { le.minHeight = s; le.preferredHeight = s; }
                     le.flexibleHeight = 0f;
                 }
+
+                // A LayoutElement alone is ignored by a force-expanding parent group (childForceExpandWidth
+                // stretches the child regardless). PreferredSize fitting pins the rect to the authored
+                // min=preferred extent, overriding the parent's force-expand — exactly how a button escapes.
+                FitAxisToPreferred(go, horizontal);
             }
 
             public bool TryDetect(GameObject go, bool horizontal)
@@ -134,10 +152,7 @@ namespace Neo.UI.Editor
                 if (horizontal) { le.minWidth = -1f; le.preferredWidth = -1f; le.flexibleWidth = 0f; }
                 else { le.minHeight = -1f; le.preferredHeight = -1f; le.flexibleHeight = 0f; }
 
-                var fitter = go.GetComponent<ContentSizeFitter>();
-                if (fitter == null) fitter = go.AddComponent<ContentSizeFitter>();
-                if (horizontal) fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
-                else fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+                FitAxisToPreferred(go, horizontal);
             }
 
             public bool TryDetect(GameObject go, bool horizontal)

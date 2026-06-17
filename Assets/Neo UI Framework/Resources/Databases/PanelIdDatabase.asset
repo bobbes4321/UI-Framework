@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: PanelIdDatabase
   m_EditorClassIdentifier: Neo.UI::Neo.UI.PanelIdDatabase
   categories:
+  - category: Bp
+    names:
+    - Card
+    - Plain
   - category: Cheats
     names:
     - Player
@@ -28,6 +32,13 @@ MonoBehaviour:
     - About
     - Overview
     - Stats
+  - category: EffectsPanel
+    names:
+    - Dissolve
+    - EffectOverArt
+    - GlowPulse
+    - GradientCycle
+    - SheenSweep
   - category: HUD
     names:
     - Minimap
@@ -46,6 +57,7 @@ MonoBehaviour:
     names:
     - Audio
     - General
+    - Panel0
     - Panel3
     - SetAudio
     - SetControls
@@ -53,6 +65,16 @@ MonoBehaviour:
     - SetGeneral
     - SetInterface
     - SetPainting
+  - category: ParticlesPanel
+    names:
+    - Ambient
+    - CoinBurst
+    - CoinFountain
+    - Confetti
+    - ConfettiCannon
+    - Fireworks
+    - Legendary
+    - Sparkle
   - category: Pause
     names:
     - Dim

@@ -16,8 +16,11 @@ namespace Neo.UI.Editor.Composer
     /// </summary>
     public sealed class PalettePane
     {
-        private const float TileHeight = 22f;
-        private const float RowPad = 2f;
+        private const float CardW = 104f;          // 96px thumbnail + 4px padding each side
+        private const float CardThumb = 96f;
+        private const float CardLabel = 18f;
+        private const float CardH = CardThumb + CardLabel + 6f;
+        private const float CardGap = 4f;
         private const float SearchHeight = 20f;
         private const float SectionHeight = 18f;
 
@@ -32,7 +35,7 @@ namespace Neo.UI.Editor.Composer
         private bool _loaded;
 
         // cached styles (built once)
-        private GUIStyle _search, _section, _tile;
+        private GUIStyle _search, _section, _tile, _label;
 
         public PalettePane(System.Action<string> addToView)
         {
@@ -67,8 +70,10 @@ namespace Neo.UI.Editor.Composer
             DrawSearch(searchRect);
 
             var listRect = new Rect(rect.x, rect.y + SearchHeight, rect.width, rect.height - SearchHeight);
-            float contentHeight = MeasureHeight(rect.width - 16f);
-            var viewRect = new Rect(0, 0, listRect.width - 16f, contentHeight);
+            float gridWidth = listRect.width - 16f;
+            int cols = Mathf.Max(1, Mathf.FloorToInt((gridWidth + CardGap) / (CardW + CardGap)));
+            float contentHeight = MeasureHeight(cols);
+            var viewRect = new Rect(0, 0, gridWidth, contentHeight);
             _scroll = GUI.BeginScrollView(listRect, _scroll, viewRect);
 
             string needle = string.IsNullOrEmpty(_filter) ? null : _filter.ToLowerInvariant();
@@ -83,13 +88,15 @@ namespace Neo.UI.Editor.Composer
                     group.category.ToUpperInvariant(), _section);
                 y += SectionHeight;
 
-                foreach (PaletteEntry entry in matches)
+                for (int i = 0; i < matches.Count; i++)
                 {
-                    DrawTile(new Rect(4f, y, viewRect.width - 8f, TileHeight), entry);
-                    y += TileHeight + RowPad;
+                    int col = i % cols;
+                    if (col == 0 && i > 0) y += CardH + CardGap;
+                    var cardRect = new Rect(4f + col * (CardW + CardGap), y, CardW, CardH);
+                    DrawCard(cardRect, matches[i]);
                     shown++;
                 }
-                y += 4f;
+                y += CardH + 8f;
             }
             GUI.EndScrollView();
 
@@ -107,7 +114,7 @@ namespace Neo.UI.Editor.Composer
             if (EditorGUI.EndChangeCheck()) _filter = next ?? "";
         }
 
-        private void DrawTile(Rect rect, PaletteEntry entry)
+        private void DrawCard(Rect rect, PaletteEntry entry)
         {
             Event e = Event.current;
             Color accent = ComposerPalette.AccentFor(entry);
@@ -116,8 +123,17 @@ namespace Neo.UI.Editor.Composer
             {
                 bool hover = rect.Contains(e.mousePosition);
                 EditorGUI.DrawRect(rect, hover ? NeoColors.RowHover : NeoColors.SectionBackground);
-                EditorGUI.DrawRect(new Rect(rect.x, rect.y, 3f, rect.height), accent.WithAlpha(0.85f));
-                _tile.Draw(new Rect(rect.x + 8f, rect.y, rect.width - 10f, rect.height),
+                EditorGUI.DrawRect(new Rect(rect.x, rect.y, rect.width, 2f), accent.WithAlpha(0.85f));
+
+                var thumbRect = new Rect(rect.x + 4f, rect.y + 4f, CardThumb - 4f, CardThumb - 4f);
+                // cached in-memory render of the actual widget; null when headless → fall back to a glyph
+                Texture2D thumb = PresetThumbnailCache.GetOrRenderKind(entry.kind, (int)CardThumb);
+                if (thumb != null)
+                    GUI.DrawTexture(thumbRect, thumb, ScaleMode.ScaleToFit, alphaBlend: true);
+                else
+                    _tile.Draw(thumbRect, new GUIContent(entry.kind), false, false, false, false);
+
+                _label.Draw(new Rect(rect.x + 2f, rect.yMax - CardLabel, rect.width - 4f, CardLabel),
                     new GUIContent(entry.label, entry.kind), false, false, false, false);
             }
 
@@ -162,7 +178,7 @@ namespace Neo.UI.Editor.Composer
             return result;
         }
 
-        private float MeasureHeight(float width)
+        private float MeasureHeight(int cols)
         {
             string needle = string.IsNullOrEmpty(_filter) ? null : _filter.ToLowerInvariant();
             float h = 0f;
@@ -170,7 +186,8 @@ namespace Neo.UI.Editor.Composer
             {
                 List<PaletteEntry> matches = Filtered(group.entries, needle);
                 if (matches.Count == 0) continue;
-                h += SectionHeight + matches.Count * (TileHeight + RowPad) + 4f;
+                int rows = (matches.Count + cols - 1) / cols;
+                h += SectionHeight + rows * (CardH + CardGap) + 8f;
             }
             return h;
         }
@@ -179,10 +196,16 @@ namespace Neo.UI.Editor.Composer
         {
             _search ??= new GUIStyle(GUI.skin.FindStyle("ToolbarSearchTextField") ?? EditorStyles.toolbarTextField);
             _section ??= new GUIStyle(EditorStyles.miniBoldLabel) { fontSize = 9 };
-            _tile ??= new GUIStyle(EditorStyles.label)
+            _tile ??= new GUIStyle(EditorStyles.miniLabel)
             {
-                alignment = TextAnchor.MiddleLeft,
-                fontSize = 11,
+                alignment = TextAnchor.MiddleCenter,
+                fontSize = 10,
+                clipping = TextClipping.Clip
+            };
+            _label ??= new GUIStyle(EditorStyles.miniLabel)
+            {
+                alignment = TextAnchor.MiddleCenter,
+                fontSize = 10,
                 clipping = TextClipping.Clip
             };
         }

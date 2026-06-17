@@ -121,6 +121,20 @@ namespace Neo.UI.Editor
         /// spec. Returns the <see cref="SyncResult"/> so the caller (Hub) can surface a refusal,
         /// conflicts, or off-spec warnings instead of silently overwriting human edits.
         /// Returns null (with a warning) when the showcase has no readable spec.
+        /// <para>
+        /// A showcase prefab is just the materialization of its committed spec — the spec is the single
+        /// source of truth and the user does not hand-edit showcase prefabs. So when <c>Sync</c> refuses
+        /// PURELY on off-spec findings while there is NO spec-level human drift
+        /// (<see cref="SyncResult.humanChanges"/> empty), that divergence is <i>factory-version drift</i>
+        /// — a code change to <see cref="UIWidgetFactory"/> made the current factory's widget internals
+        /// differ from the older internals baked into the committed prefab — NOT a human edit to protect.
+        /// In that case we re-run the sync forced, within the same scope, so a pristine showcase never
+        /// deadlocks on a factory refactor. (When there IS spec-level human drift alongside the off-spec
+        /// findings, we do NOT auto-force — those edits are real and the Hub still surfaces them for
+        /// review.) The auto-force is never silent: it logs how many factory-owned internals were rebuilt.
+        /// This relaxation is deliberately scoped to showcases here; the general
+        /// <see cref="SpecBaseline.Sync"/> gate stays strict for hand-authored projects.
+        /// </para>
         /// </summary>
         public static SyncResult Regenerate(Showcase showcase)
         {
@@ -143,7 +157,23 @@ namespace Neo.UI.Editor
             }
 
             using (NeoWorkspace.Scoped(showcase))
-                return SpecBaseline.Sync(incoming);
+            {
+                SyncResult result = SpecBaseline.Sync(incoming);
+
+                // Refused on off-spec findings but NO spec-level human drift → factory-version drift,
+                // not a human edit. Rebuild from spec rather than deadlock (forced, in the SAME scope).
+                if (result.refused && result.humanChanges.Count == 0)
+                {
+                    Debug.Log($"[Neo.UI] Showcase '{showcase.id}': no spec-level human drift, so the " +
+                              $"{result.offSpecWarnings.Count} off-spec finding(s) are factory-version drift " +
+                              "(a UIWidgetFactory code change vs the older internals baked into the committed " +
+                              "prefab). Rebuilding those factory-owned widget internals from spec — showcase " +
+                              "prefabs are spec-derived, so nothing a human authored is lost.");
+                    result = SpecBaseline.Sync(incoming, ConflictPolicy.PreferTheirs, force: true);
+                }
+
+                return result;
+            }
         }
 
         /// <summary>

@@ -27,28 +27,28 @@
     },
     "variants": {
       "Light": {
-        "Primary": "#2563EB",
-        "Background": "#F4F6F8",
+        "Primary": "#3B82F6",
+        "Background": "#0B0D10",
         "Accent": "#FCA311",
-        "TextDefault": "#303A49",
+        "TextDefault": "#C6CCD6",
         "Panel": "#1D2D50",
-        "Surface": "#FFFFFF",
-        "SurfaceElevated": "#EAEEF3",
-        "Outline": "#D3DAE3",
-        "PrimaryHover": "#467AEE",
-        "PrimaryPressed": "#134ECF",
+        "Surface": "#16191E",
+        "SurfaceElevated": "#21252C",
+        "Outline": "#343A44",
+        "PrimaryHover": "#5D98F8",
+        "PrimaryPressed": "#0F66F4",
         "TextOnPrimary": "#FFFFFF",
-        "TextStrong": "#111827",
-        "TextMuted": "#5D6675",
-        "Success": "#15803D",
-        "Warning": "#B45309",
-        "Error": "#DC2626",
-        "Shadow": "#00000038",
-        "SuccessHover": "#1A9F4C",
-        "SuccessPressed": "#0F592A",
-        "Danger": "#DC2626",
-        "DangerHover": "#E14545",
-        "DangerPressed": "#B71D1D",
+        "TextStrong": "#F5F7FA",
+        "TextMuted": "#8E96A4",
+        "Success": "#22C55E",
+        "Warning": "#F59E0B",
+        "Error": "#EF4444",
+        "Shadow": "#00000080",
+        "SuccessHover": "#30DB6F",
+        "SuccessPressed": "#1B9E4B",
+        "Danger": "#EF4444",
+        "DangerHover": "#F26565",
+        "DangerPressed": "#EB1A1A",
         "TextDark": "#6B6390"
       },
       "Dark": {
@@ -79,35 +79,6 @@
     }
   },
   "presets": [
-    {
-      "name": "MenuIn",
-      "type": "Show",
-      "duration": 0.25,
-      "ease": "OutCubic",
-      "move": {
-        "from": "Bottom",
-        "duration": 0.25,
-        "ease": "OutCubic"
-      },
-      "fade": {
-        "from": 0,
-        "to": 1,
-        "duration": 0.25,
-        "ease": "OutCubic"
-      }
-    },
-    {
-      "name": "MenuOut",
-      "type": "Hide",
-      "duration": 0.20000000298023224,
-      "ease": "OutCubic",
-      "fade": {
-        "from": 1,
-        "to": 0,
-        "duration": 0.20000000298023224,
-        "ease": "InCubic"
-      }
-    },
     {
       "name": "ShowDefault",
       "type": "Show",
@@ -271,13 +242,42 @@
         "duration": 0.20000000298023224,
         "ease": "OutCubic"
       }
+    },
+    {
+      "name": "MenuIn",
+      "type": "Show",
+      "duration": 0.25,
+      "ease": "OutCubic",
+      "move": {
+        "from": "Bottom",
+        "duration": 0.25,
+        "ease": "OutCubic"
+      },
+      "fade": {
+        "from": 0,
+        "to": 1,
+        "duration": 0.25,
+        "ease": "OutCubic"
+      }
+    },
+    {
+      "name": "MenuOut",
+      "type": "Hide",
+      "duration": 0.20000000298023224,
+      "ease": "OutCubic",
+      "fade": {
+        "from": 1,
+        "to": 0,
+        "duration": 0.20000000298023224,
+        "ease": "InCubic"
+      }
     }
   ],
   "views": [
     {
       "id": "Menu/Cheats",
-      "showAnimation": "MenuIn",
-      "hideAnimation": "MenuOut",
+      "showAnimation": "SlideUpIn",
+      "hideAnimation": "FadeOut",
       "background": "Background",
       "elements": [
         {
@@ -331,8 +331,8 @@
     },
     {
       "id": "Menu/Main",
-      "showAnimation": "MenuIn",
-      "hideAnimation": "MenuOut",
+      "showAnimation": "SlideUpIn",
+      "hideAnimation": "FadeOut",
       "background": "Background",
       "elements": [
         {
@@ -401,8 +401,8 @@
     },
     {
       "id": "Menu/Settings",
-      "showAnimation": "MenuIn",
-      "hideAnimation": "MenuOut",
+      "showAnimation": "SlideUpIn",
+      "hideAnimation": "FadeOut",
       "background": "Background",
       "elements": [
         {

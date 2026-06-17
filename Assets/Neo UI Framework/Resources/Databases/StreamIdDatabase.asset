@@ -19,11 +19,16 @@ MonoBehaviour:
     - Quit
   - category: Audio
     names:
+    - MusicVolume
     - Muted
   - category: Dialog
     names:
     - Cancel
     - Confirm
+  - category: FX
+    names:
+    - Firework
+    - Sparkle
   - category: Game
     names:
     - Attack
@@ -31,9 +36,14 @@ MonoBehaviour:
     - Dash
     - Hint
     - Pause
+    - Score
+    - Victory
   - category: Gameplay
     names:
     - StartPainting
+  - category: Graphics
+    names:
+    - Quality
   - category: Inv
     names:
     - Items
@@ -42,10 +52,14 @@ MonoBehaviour:
     names:
     - Next
     - Prev
+  - category: Reward
+    names:
+    - Claimed
   - category: Shop
     names:
     - Buy
     - Deals
+    - Purchase
   - category: UI
     names:
     - CloseSettings

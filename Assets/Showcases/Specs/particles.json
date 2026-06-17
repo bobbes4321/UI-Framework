@@ -1,0 +1,233 @@
+{
+  "theme": { "bundle": "CleanSlate" },
+  "views": [
+    {
+      "id": "Showcase/Particles",
+      "background": "Background",
+      "elements": [
+        {
+          "safearea": {
+            "children": [
+              {
+                "scroll": {
+                  "anchor": "Stretch",
+                  "children": [
+                    {
+                      "vstack": {
+                        "anchor": "Stretch",
+                        "padding": 40,
+                        "spacing": 18,
+                        "children": [
+                          {
+                            "text": {
+                              "label": "UI Particles",
+                              "color": "TextStrong",
+                              "textStyle": "Title",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "Pooled NeoShape particles rendered INSIDE the UGUI canvas batch — masked, sorted and theme-colored like every other widget, no separate ParticleSystem. Each emitter rides its own trigger, so bursts originate from the control you press. Open the scene and play with it.",
+                              "color": "TextMuted",
+                              "textStyle": "Caption",
+                              "align": "left"
+                            }
+                          },
+
+                          {
+                            "panel": {
+                              "id": "ParticlesPanel/CoinFountain",
+                              "style": "Panel",
+                              "spacing": 12,
+                              "children": [
+                                { "text": { "label": "COIN FOUNTAIN ON PURCHASE", "color": "TextStrong", "textStyle": "ButtonLabel", "align": "left" } },
+                                {
+                                  "button": {
+                                    "id": "Particles/Buy",
+                                    "label": "Buy  •  500",
+                                    "variant": "primary",
+                                    "size": "lg",
+                                    "icon": "shopping-bag",
+                                    "onClick": { "signal": { "category": "Shop", "name": "Purchase" } },
+                                    "particles": {
+                                      "capacity": 64, "burstCount": 32, "rate": 0,
+                                      "particleShape": "Circle",
+                                      "sizeRange": [8, 16], "lifetimeRange": [0.7, 1.3], "speedRange": [320, 620],
+                                      "emitAngle": 90, "emitSpread": 55, "angularVelocityRange": [-220, 220],
+                                      "modules": [
+                                        { "id": "gravity", "params": { "acceleration": [0, -1100] } },
+                                        { "id": "drag", "params": { "drag": 0.25 } },
+                                        { "id": "colorOverLife", "params": { "start": "Warning", "end": "#FFE08A00", "ease": "InQuad" } },
+                                        { "id": "sizeOverLife", "params": { "startScale": 1.0, "endScale": 0.4, "ease": "OutQuad" } }
+                                      ],
+                                      "signal": { "category": "Shop", "name": "Purchase", "count": 32 }
+                                    }
+                                  }
+                                },
+                                { "text": { "label": "Coins erupt upward then arc back down under gravity — a tight cone, heavy fall, fading to transparent gold. Signal-driven (Shop/Purchase), zero UnityEvents.", "color": "TextMuted", "textStyle": "Caption", "align": "left" } }
+                              ]
+                            }
+                          },
+
+                          {
+                            "panel": {
+                              "id": "ParticlesPanel/ConfettiCannon",
+                              "style": "Panel",
+                              "spacing": 12,
+                              "children": [
+                                { "text": { "label": "CONFETTI CANNON ON VICTORY", "color": "TextStrong", "textStyle": "ButtonLabel", "align": "left" } },
+                                {
+                                  "button": {
+                                    "id": "Particles/Win",
+                                    "label": "Win!",
+                                    "variant": "primary",
+                                    "size": "lg",
+                                    "icon": "party-popper",
+                                    "onClick": { "signal": { "category": "Game", "name": "Victory" } },
+                                    "particles": {
+                                      "capacity": 160, "burstCount": 96, "rate": 0,
+                                      "particleShape": "RoundedRect", "cornerRadiusPercent": 25,
+                                      "sizeRange": [7, 15], "lifetimeRange": [1.1, 2.2], "speedRange": [260, 720],
+                                      "emitAngle": 90, "emitSpread": 150, "angularVelocityRange": [-540, 540],
+                                      "modules": [
+                                        { "id": "gravity", "params": { "acceleration": [0, -780] } },
+                                        { "id": "drag", "params": { "drag": 0.6 } },
+                                        { "id": "colorOverLife", "params": { "start": "Success", "end": "#39D98A00", "ease": "Linear" } }
+                                      ],
+                                      "signal": { "category": "Game", "name": "Victory", "count": 96 }
+                                    }
+                                  }
+                                },
+                                { "text": { "label": "A wide 150° fan of 96 tumbling confetti rects, drag-slowed so they flutter and drift instead of dropping like stones. Long lifetimes keep the celebration on screen.", "color": "TextMuted", "textStyle": "Caption", "align": "left" } }
+                              ]
+                            }
+                          },
+
+                          {
+                            "panel": {
+                              "id": "ParticlesPanel/Fireworks",
+                              "style": "Panel",
+                              "spacing": 12,
+                              "children": [
+                                { "text": { "label": "FIREWORK BURST", "color": "TextStrong", "textStyle": "ButtonLabel", "align": "left" } },
+                                {
+                                  "button": {
+                                    "id": "Particles/Firework",
+                                    "label": "Launch",
+                                    "variant": "secondary",
+                                    "size": "lg",
+                                    "icon": "sparkles",
+                                    "onClick": { "signal": { "category": "FX", "name": "Firework" } },
+                                    "particles": {
+                                      "capacity": 140, "burstCount": 80, "rate": 0,
+                                      "particleShape": "Circle",
+                                      "sizeRange": [5, 10], "lifetimeRange": [0.9, 1.6], "speedRange": [380, 480],
+                                      "emitAngle": 90, "emitSpread": 360, "angularVelocityRange": [0, 0],
+                                      "modules": [
+                                        { "id": "gravity", "params": { "acceleration": [0, -240] } },
+                                        { "id": "drag", "params": { "drag": 0.8 } },
+                                        { "id": "colorOverLife", "params": { "start": "Primary", "end": "#FFFFFF00", "ease": "OutQuad" } },
+                                        { "id": "sizeOverLife", "params": { "startScale": 1.2, "endScale": 0.0, "ease": "InQuad" } }
+                                      ],
+                                      "signal": { "category": "FX", "name": "Firework", "count": 80 }
+                                    }
+                                  }
+                                },
+                                { "text": { "label": "A perfectly even 360° ring of sparks with near-uniform speed — the classic firework shell. Strong drag stalls them into the signature hang, then they twinkle out.", "color": "TextMuted", "textStyle": "Caption", "align": "left" } }
+                              ]
+                            }
+                          },
+
+                          {
+                            "panel": {
+                              "id": "ParticlesPanel/Sparkle",
+                              "style": "Panel",
+                              "spacing": 12,
+                              "children": [
+                                { "text": { "label": "TOGGLE-ON SPARKLE TRAIL", "color": "TextStrong", "textStyle": "ButtonLabel", "align": "left" } },
+                                {
+                                  "toggle": {
+                                    "id": "Particles/SparkleToggle",
+                                    "label": "Enchanted",
+                                    "value": 0,
+                                    "signal": { "category": "FX", "name": "Sparkle" },
+                                    "particles": {
+                                      "capacity": 56, "burstCount": 22, "rate": 0,
+                                      "particleShape": "Circle",
+                                      "sizeRange": [4, 10], "lifetimeRange": [0.5, 1.0], "speedRange": [140, 300],
+                                      "emitAngle": 90, "emitSpread": 360, "angularVelocityRange": [-120, 120],
+                                      "modules": [
+                                        { "id": "drag", "params": { "drag": 0.85 } },
+                                        { "id": "colorOverLife", "params": { "start": "Success", "end": "#FFFFFF00", "ease": "OutQuad" } },
+                                        { "id": "sizeOverLife", "params": { "startScale": 1.0, "endScale": 0.0, "ease": "OutQuad" } }
+                                      ],
+                                      "signal": { "category": "FX", "name": "Sparkle", "count": 22 }
+                                    }
+                                  }
+                                },
+                                { "text": { "label": "The toggle publishes its bool to FX/Sparkle AND bursts a soft radial puff of sparkles on every flip — drag pulls them in for a glittery settle.", "color": "TextMuted", "textStyle": "Caption", "align": "left" } }
+                              ]
+                            }
+                          },
+
+                          {
+                            "panel": {
+                              "id": "ParticlesPanel/Legendary",
+                              "style": "Panel",
+                              "spacing": 12,
+                              "children": [
+                                { "text": { "label": "LEGENDARY CARD  •  continuous embers (visible at rest)", "color": "TextStrong", "textStyle": "ButtonLabel", "align": "left" } },
+                                {
+                                  "hstack": {
+                                    "spacing": 12,
+                                    "children": [
+                                      {
+                                        "overlay": {
+                                          "size": [240, 96],
+                                          "children": [
+                                            {
+                                              "shape": {
+                                                "id": "Particles/LegendaryCard",
+                                                "shape": "RoundedRect",
+                                                "anchor": "Stretch",
+                                                "background": "Primary",
+                                                "particles": {
+                                                  "capacity": 48, "rate": 14, "emitOnEnable": true,
+                                                  "particleShape": "Circle",
+                                                  "sizeRange": [3, 8], "lifetimeRange": [1.0, 2.0], "speedRange": [30, 80],
+                                                  "emitAngle": 90, "emitSpread": 50, "angularVelocityRange": [-30, 30],
+                                                  "modules": [
+                                                    { "id": "gravity", "params": { "acceleration": [0, 60] } },
+                                                    { "id": "drag", "params": { "drag": 0.4 } },
+                                                    { "id": "colorOverLife", "params": { "start": "Warning", "end": "#FFE08A00", "ease": "InQuad" } },
+                                                    { "id": "sizeOverLife", "params": { "startScale": 1.0, "endScale": 0.0, "ease": "Linear" } }
+                                                  ]
+                                                }
+                                              }
+                                            },
+                                            { "text": { "label": "LEGENDARY", "anchor": "Stretch", "textStyle": "ButtonLabel", "color": "TextOnPrimary" } }
+                                          ]
+                                        }
+                                      },
+                                      { "spacer": { "flex": 1 } }
+                                    ]
+                                  }
+                                },
+                                { "text": { "label": "A continuous emitter (rate>0, emitOnEnable) lifts warm embers off the card forever — now that drag is clamped they actually rise and drift instead of freezing. Intentionally trips the cost-lint to show the honest-cost story.", "color": "TextMuted", "textStyle": "Caption", "align": "left" } }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

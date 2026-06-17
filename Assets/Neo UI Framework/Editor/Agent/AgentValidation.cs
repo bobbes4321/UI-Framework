@@ -186,6 +186,9 @@ namespace Neo.UI.Editor
                         warnings.Add($"'{prefab.name}/{emitter.name}' particle capacity {capacity} is high " +
                                      $"(> {ParticleCapacityWarn}) — each live particle is a pooled NeoShape GameObject");
                 }
+
+                ValidateForceExpandStomp(prefab, warnings);
+                ValidateImageAspect(prefab, warnings);
             }
 
             ValidateWidgetContrast(settings, warnings);
@@ -202,6 +205,13 @@ namespace Neo.UI.Editor
 
         /// <summary> Emitter capacity above which a burst is flagged as costly (each particle is a pooled GameObject). </summary>
         private const int ParticleCapacityWarn = 128;
+
+        /// <summary>
+        /// Width:height (or height:width) ratio above which an image's full-rect sprite fill is
+        /// considered extreme — a square-ish sprite stretches into a smear (fit:stretch) or crops to
+        /// an awkward sliver (fit:cover) at this aspect.
+        /// </summary>
+        private const float ExtremeAspectRatio = 3f;
 
         /// <summary> Package-default contrast pairs (used when settings.contrastPairs is empty). </summary>
         private static readonly (string text, string surface, float minimum)[] DefaultContrastPairs =
@@ -346,6 +356,75 @@ namespace Neo.UI.Editor
         }
 
         /// <summary>
+        /// Layout-stomp lint: an element with an authored fixed extent (a <see cref="UnityEngine.UI.LayoutElement"/>
+        /// carrying a real <c>preferredWidth</c>/<c>preferredHeight</c>) sitting as a direct child of a
+        /// force-expanding layout group on that same axis is silently stretched to fill the group — its
+        /// authored size is ignored, a WYSIWYG break (the layout/aspect defect class that shipped bad
+        /// showcases). The opt-out is a <see cref="UnityEngine.UI.ContentSizeFitter"/> on that axis
+        /// (<c>sizing:"fixed"</c>/<c>hug</c> add one), so an element that carries one has explicitly
+        /// escaped force-expand and is NOT flagged. Both axes are checked symmetrically.
+        /// </summary>
+        private static void ValidateForceExpandStomp(GameObject prefab, List<string> warnings)
+        {
+            foreach (UnityEngine.UI.LayoutElement element in
+                     prefab.GetComponentsInChildren<UnityEngine.UI.LayoutElement>(true))
+            {
+                Transform parent = element.transform.parent;
+                if (parent == null) continue;
+                var group = parent.GetComponent<UnityEngine.UI.HorizontalOrVerticalLayoutGroup>();
+                if (group == null) continue;
+
+                var fitter = element.GetComponent<UnityEngine.UI.ContentSizeFitter>();
+                bool fitsWidth = fitter != null &&
+                                 fitter.horizontalFit != UnityEngine.UI.ContentSizeFitter.FitMode.Unconstrained;
+                bool fitsHeight = fitter != null &&
+                                  fitter.verticalFit != UnityEngine.UI.ContentSizeFitter.FitMode.Unconstrained;
+
+                if (group.childForceExpandWidth && element.preferredWidth > 0f && !fitsWidth)
+                    warnings.Add($"'{prefab.name}/{element.name}' has an authored width " +
+                                 $"({element.preferredWidth:0}px) but its parent '{group.name}' force-expands " +
+                                 "width — the width is ignored; use sizing:\"fixed\"/\"hug\" or a grid/hstack");
+
+                if (group.childForceExpandHeight && element.preferredHeight > 0f && !fitsHeight)
+                    warnings.Add($"'{prefab.name}/{element.name}' has an authored height " +
+                                 $"({element.preferredHeight:0}px) but its parent '{group.name}' force-expands " +
+                                 "height — the height is ignored; use sizing:\"fixed\"/\"hug\" or a grid/vstack");
+            }
+        }
+
+        /// <summary>
+        /// Aspect lint: an <c>image</c> element fills its whole rect with a sprite (an
+        /// <see cref="NeoShape"/> texture fill, or a plain <see cref="UnityEngine.UI.Image"/>), so an
+        /// extreme rect aspect (≳ <see cref="ExtremeAspectRatio"/>:1 either way) stretches the texture
+        /// into a smear or — with <c>fit:"cover"</c> — crops it to an awkward sliver. Flagged from the
+        /// authored RectTransform extents.
+        /// </summary>
+        private static void ValidateImageAspect(GameObject prefab, List<string> warnings)
+        {
+            // image element = an NeoShape with a sprite fill, or a plain Image with a sprite
+            // (mirrors how UISpecExporter recognizes "image" elements).
+            var imageRects = new HashSet<RectTransform>();
+            foreach (NeoShape shape in prefab.GetComponentsInChildren<NeoShape>(true))
+                if (shape.sprite != null && shape.transform is RectTransform shapeRect)
+                    imageRects.Add(shapeRect);
+            foreach (UnityEngine.UI.Image image in prefab.GetComponentsInChildren<UnityEngine.UI.Image>(true))
+                if (image.sprite != null && image.transform is RectTransform imageRect)
+                    imageRects.Add(imageRect);
+
+            foreach (RectTransform rect in imageRects)
+            {
+                float width = Mathf.Abs(rect.rect.width);
+                float height = Mathf.Abs(rect.rect.height);
+                if (width <= 0f || height <= 0f) continue; // size driven by a layout group — extent unknown here
+                float ratio = Mathf.Max(width / height, height / width);
+                if (ratio > ExtremeAspectRatio)
+                    warnings.Add($"'{prefab.name}/{rect.name}' image rect is {width:0}×{height:0}px " +
+                                 $"({ratio:0.#}:1) — the full-rect sprite fill will distort or crop badly; " +
+                                 "match the rect to the sprite's aspect");
+            }
+        }
+
+        /// <summary>
         /// Dead-interaction lint: every clickable thing in a generated view must DO something —
         /// a flow trigger, a signal, a view command, a popup or a wired event. "Renders fine,
         /// does nothing when clicked" is the most common way generated UI disappoints.
@@ -478,6 +557,13 @@ namespace Neo.UI.Editor
                     if (target.themeOverride != null) continue;
                     if (string.IsNullOrEmpty(target.token))
                         issues.Add($"'{prefab.name}/{target.name}' has a ThemeColorTarget with no token");
+                    // A '#'-prefixed value is a literal hex fill (not a theme token) — validate it parses
+                    // rather than reporting it as an unknown token.
+                    else if (target.token[0] == '#')
+                    {
+                        if (!ColorUtils.TryParseHex(target.token, out _))
+                            issues.Add($"'{prefab.name}/{target.name}' has an unparseable hex color '{target.token}'");
+                    }
                     else if (!tokens.Contains(target.token))
                         issues.Add($"'{prefab.name}/{target.name}' references unknown theme token '{target.token}'");
                 }

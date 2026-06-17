@@ -113,20 +113,39 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   project adds a showcase by dropping one SO — no fork, no C#). Open one from `Tools → Neo UI → Hub`:
   `ShowcaseRunner.Open` is the safe one-click (generates ONLY when nothing exists — never clobbers
   human edits — else fast-path `OpenScene`); `ShowcaseRunner.Regenerate` routes through
-  `SpecBaseline.Sync` (merges human drift, refuses on off-spec edits). The `game-ui` showcase's
+  `SpecBaseline.Sync` (merges human drift, refuses on off-spec edits) — but when Sync refuses on PURELY
+  off-spec findings with NO spec-level human drift (`humanChanges` empty), that's factory-version drift
+  from a `UIWidgetFactory` code change (current widget internals ≠ the older internals baked into the
+  committed prefab), not a human edit, so Regenerate auto-rebuilds those factory-owned internals from
+  spec (a pristine showcase never deadlocks; the rebuilt-internals count is logged, never silent); it
+  still surfaces the Sync window when there IS spec-level human drift. The `game-ui` showcase's
   `postBuild` attaches the HUD director + bindings (`ShowcaseAugment.AttachGameUIDirector`). Other
   generated/bootstrapped assets (Starter kit, settings, fonts) live OUTSIDE any showcase root and
   survive test runs. Retired: the hand-built `DemoSceneBuilder` and the `ShowcaseSceneBuilder` (its
   director attach moved to the `game-ui` postBuild); the `Create Demo Scene` / `Build Scene From
   Generated UI` / `Build Showcase Scene` menu items folded into the Hub.
+- **Demo every end-user-facing feature in a showcase**: the showcase scenes are the package's living,
+  browsable catalog of what it can do, so any change an end user can SEE must show up in one — adding a
+  new button `variant`/`size`, a widget kind, a menu row, a theme bundle, a shape/effect, a layout
+  capability, etc. Extend the relevant existing spec when the feature fits it (e.g. a new button
+  variant → add it to `Assets/Showcases/Specs/buttons.json`); add a NEW `Assets/Showcases/Specs/*.json`
+  + a `ShowcaseRegistryDefaults` seed entry when it's a whole new aspect (e.g. a new widget family).
+  Skip this ONLY for purely internal/agent-facing plumbing with no visible surface (exporters, merge,
+  validation, bridge actions). A user-facing feature isn't "done" until its demo renders correctly —
+  verify with the bridge `preview` action across the resolution matrix (it commits nothing).
 - Settings/databases are created via `Tools → Neo UI → Setup → Create or Repair Settings`; the themed
   widget prefab library + Dark/Light palette + type scale via `Tools → Neo UI → Setup → Create or
   Repair Starter Kit`. TMP SDF font assets (Inter + the Lucide icon font, committed under
   `Neo UI Framework/Fonts`) regenerate via `Tools → Neo UI → Setup → Create or Repair Fonts`
-  (`FontAssetBootstrap` — also wires `NeoUISettings.iconFont`). Curated theme bundles
+  (`FontAssetBootstrap` — also wires `NeoUISettings.iconFont`). The reusable **widget-preset** library
+  (named component styles like "Primary Button"/"Section Header" — `NeoWidgetPreset` SOs referenced by
+  an element's `preset`) is seeded via `Tools → Neo UI → Setup → Create or Repair Widget Presets`
+  (`PresetLibraryBootstrap`); the `NeoWidgetPresets` registry is the seam — a project adds one by
+  dropping a `NeoWidgetPreset` asset (lazy discovery, no fork). Curated theme bundles
   (CleanSlate/NeonArcade/SoftFantasy — complete token/type/shape/motion systems) apply via
   `Tools → Neo UI → Setup → Apply Theme Bundle` or spec `"theme": { "bundle": "..." }`
-  (`Editor/ThemeBundles.cs`); the acceptance render (demo spec × every bundle) is
+  (`Editor/ThemeBundles.cs`) and ALSO seed/recolor the preset library to that personality (so a bundle
+  = a full component library); the acceptance render (demo spec × every bundle) is
   `-executeMethod Neo.UI.Editor.BeautificationAcceptance.Run` (needs graphics).
 - Build UI hierarchies in editor code through `UIWidgetFactory` (Editor/Agent) — it is the single
   source of widget structure; the spec generator AND exporter both rely on its child names.
@@ -171,6 +190,12 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   collides with the shared default root; an explicit `"flow"`/`"scene"` override the showcase's derived
   values. The committed ColorACube demo → flow `ColorACube`; the GameUI demo → flow `GameUI`.
   Regression: `Tests/EditMode/SceneBuilderFlowScopingTests.cs`) ·
+  `{"action":"regenerateShowcase","showcase":"<id>"}` (the scoped, baseline-aware regen of a registered
+  showcase from its changed spec INTO its own isolated `Generated/` root — routes through
+  `ShowcaseRunner.Regenerate` → `SpecBaseline.Sync`, auto-rebuilds factory-owned widget internals when
+  there's no spec-level human drift; the agent-first counterpart to the Hub's Regenerate. Returns the same
+  result shape as `sync`. Use this — not `generate` (wrong root) or `buildScene` (only generates when
+  nothing exists yet) — to push spec edits into an existing showcase) ·
   `{"action":"importSprites","folder":"Assets/..."}` (imports every texture under the folder as a
   Single sprite — run it BEFORE generating a spec whose image `src` points there; `textureType`
   alone leaves `spriteImportMode` None and no Sprite sub-asset exists) ·
@@ -242,7 +267,10 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   with free-anchored children). Styling fields: `textStyle` (theme TextStyle by name — owns the
   size, raw `fontSize` is the styleless fallback), button `variant` (primary/secondary/ghost/
   danger) + string-form `size` (sm/md/lg — polymorphic with the `[w,h]` array, read back from
-  `WidgetStyleTag`), `icon` + `badge` on button/tab, `gradient` `{from,to,angle}` on shape/image
+  `WidgetStyleTag`), `preset` (name of a reusable `NeoWidgetPreset` — the Figma-style component layer:
+  resolved at generate as the BASE with element fields overriding; exports as the preset name + only
+  the override delta via `WidgetPresetTag`, so the link survives round-trip — see
+  `widget-presets-plan.md`), `icon` + `badge` on button/tab, `gradient` `{from,to,angle}` on shape/image
   (rides NeoGradient, tokens stay live), `src` on image (sprite asset path — rides an NeoShape
   texture fill so `radius` rounds the corners; full-rect sprites only, the shared material
   survives because the texture binds per CanvasRenderer; missing sprites report an issue),
@@ -291,6 +319,13 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   only animate fields `OnPopulateMesh` already reads, so they stay on the shared NeoShape batch
   (`descriptor.BatchSafe == true`); a **Tier-2** `variant` effect swaps the material for a custom
   shader (`ShapeEffectDefinition`/`NeoShapeVariant`, `BatchSafe == false`) — a deliberate batch split.
+  A Tier-2 `variant` optionally ANIMATES a named material float over the same timeline: add
+  `animate` (the shader property, e.g. `_DissolveAmount`) + `from`/`to` + the shared timeline keys
+  (`duration`/`loop`/`pingPong`/`ease`/`restingPhase`) to its params and the descriptor attaches a
+  `NeoMaterialFloatCycle` (the general Tier-2 material-float driver — `NeoShapeEffect` subclass). At
+  runtime it lazily clones the variant's shared material per-instance and `SetFloat`s the clone
+  (never the committed shared asset); in edit mode it is a material no-op so the baked default stays
+  WYSIWYG. Omit `animate` ⇒ a static variant exactly as before (fully backward compatible).
   Particles render as POOLED `NeoShape` instances inside the canvas (one GameObject per live particle,
   sharing the one material — `NeoParticleEmitter`), so they inherit masking/sort/scaling for free;
   burst-only by default, `rate > 0` enables continuous emission, an optional `signal` adds

@@ -2,6 +2,7 @@ using System.IO;
 using System.Linq;
 using Neo.UI.Editor;
 using NUnit.Framework;
+using TMPro;
 using UnityEditor;
 using UnityEngine;
 
@@ -79,25 +80,60 @@ namespace Neo.UI.Tests
         }
 
         [Test]
-        public void Regenerate_WithOffSpecEdit_Refuses_WithoutWiping()
+        public void Regenerate_WithFactoryDriftButNoSpecDrift_RebuildsFromSpec_NotRefused()
         {
+            // A showcase prefab is the materialization of its committed spec — the user never hand-edits
+            // it. When a UIWidgetFactory code change makes the current factory's widget internals diverge
+            // from the older internals baked into the committed prefab, OffSpecLint flags those internals
+            // even though NO spec-level human edit exists (humanChanges stays empty). Regenerate must
+            // rebuild from spec instead of deadlocking. We simulate that factory-version drift with an
+            // internal child the exporter can't see (a sub-widget-root edit → off-spec, no spec drift).
             Showcase showcase = MakeShowcase();
             showcase.specPath = _specPath;
 
             using (NeoWorkspace.Scoped(showcase))
                 UISpecGenerator.Generate(UISpec.FromJson(File.ReadAllText(_specPath)));
 
-            // plant a factory-internal child the exporter can't see — an off-spec edit
             string viewPath = $"{Root}/Views/Run_Main.prefab";
-            AddInternalChild(viewPath, "HumanExtra");
+            AddInternalChild(viewPath, "FactoryInternal");
 
             SyncResult result = ShowcaseRunner.Regenerate(showcase);
 
             Assert.IsNotNull(result);
-            Assert.IsTrue(result.refused, "an off-spec edit must block the regenerate");
+            Assert.IsFalse(result.refused,
+                "pure factory-version drift (no spec-level human edit) must NOT deadlock the showcase regenerate");
+            Assert.IsTrue(result.regenerated, "the showcase must be rebuilt from spec");
+            Assert.IsEmpty(result.humanChanges, "the simulated drift is below the widget root — no spec-level edit");
+            // never silent: the rebuilt factory-owned internals are recorded, not swallowed
+            Assert.IsNotEmpty(result.dropped,
+                "the auto-forced rebuild must record the factory-owned internals it overwrote");
+            Assert.IsFalse(HasInternalChild(viewPath, "FactoryInternal"),
+                "regenerating from spec rebuilds the factory-owned internals — the planted child is gone");
+        }
+
+        [Test]
+        public void Regenerate_WithSpecLevelHumanDrift_StillRefuses_NoAutoForce()
+        {
+            // The auto-force is strictly for factory-version drift. A genuine spec-level human edit
+            // (here: a changed button label the exporter CAN see → humanChanges > 0) alongside an
+            // off-spec finding must still refuse and surface for review — never silently forced past.
+            Showcase showcase = MakeShowcase();
+            showcase.specPath = _specPath;
+
+            using (NeoWorkspace.Scoped(showcase))
+                UISpecGenerator.Generate(UISpec.FromJson(File.ReadAllText(_specPath)));
+
+            string viewPath = $"{Root}/Views/Run_Main.prefab";
+            SetButtonLabel(viewPath, "Human Renamed");   // a spec-visible human edit → spec-level drift
+            AddInternalChild(viewPath, "FactoryInternal"); // plus an off-spec finding to trip the gate
+
+            SyncResult result = ShowcaseRunner.Regenerate(showcase);
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.refused, "a real spec-level human edit must NOT be auto-forced past");
             Assert.IsFalse(result.regenerated, "a refused regenerate must not rebuild assets");
-            Assert.IsNotEmpty(result.offSpecWarnings, "the refusal must name the off-spec edit");
-            Assert.IsTrue(HasInternalChild(viewPath, "HumanExtra"),
+            Assert.IsNotEmpty(result.humanChanges, "the changed label is real spec-level drift to protect");
+            Assert.IsTrue(HasInternalChild(viewPath, "FactoryInternal"),
                 "the refused regenerate must leave the human's project untouched");
         }
 
@@ -123,6 +159,26 @@ namespace Neo.UI.Tests
                 Assert.IsNotNull(button, "generated view should contain the button");
                 var extra = new GameObject(childName, typeof(RectTransform));
                 extra.transform.SetParent(button.transform, false);
+                PrefabUtility.SaveAsPrefabAsset(contents, prefabPath);
+            }
+            finally { PrefabUtility.UnloadPrefabContents(contents); }
+            AssetDatabase.SaveAssets();
+        }
+
+        // Edit the button's label text — a change the exporter CAN see (FindChildText(go, LabelName)),
+        // so it surfaces as spec-level human drift (humanChanges), unlike a sub-widget-root edit.
+        private static void SetButtonLabel(string prefabPath, string label)
+        {
+            GameObject contents = PrefabUtility.LoadPrefabContents(prefabPath);
+            try
+            {
+                UIButton button = contents.GetComponentInChildren<UIButton>(true);
+                Assert.IsNotNull(button, "generated view should contain the button");
+                Transform labelTf = button.transform.Find(UIWidgetFactory.LabelName);
+                Assert.IsNotNull(labelTf, "button should have a Label child");
+                TMP_Text text = labelTf.GetComponent<TMP_Text>();
+                Assert.IsNotNull(text, "the Label child should carry a TMP_Text");
+                text.text = label;
                 PrefabUtility.SaveAsPrefabAsset(contents, prefabPath);
             }
             finally { PrefabUtility.UnloadPrefabContents(contents); }

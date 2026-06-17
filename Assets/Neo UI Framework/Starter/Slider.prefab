@@ -473,6 +473,9 @@ MonoBehaviour:
   id:
     category: Starter
     name: Slider
+  domainSignal:
+    category: None
+    name: None
   OnValueIncremented:
     m_PersistentCalls:
       m_Calls: []

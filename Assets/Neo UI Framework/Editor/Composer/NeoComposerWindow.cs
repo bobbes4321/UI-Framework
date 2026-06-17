@@ -95,6 +95,7 @@ namespace Neo.UI.Editor.Composer
             if (_tree != null) _tree.SelectionChanged -= OnSelectionChanged;
             EditorApplication.update -= OnUpdate;
             _preview?.Dispose();
+            PresetThumbnailCache.Clear();   // release cached palette thumbnails (textures) on close
             if (_flowGraph != null) { DestroyImmediate(_flowGraph); _flowGraph = null; }
         }
 

@@ -196,7 +196,14 @@ namespace Neo.UI.Editor
             }
         }
 
-        /// <summary> Tier-1 shifting gradient: drives a sibling NeoGradient's angle (and/or colors). </summary>
+        /// <summary>
+        /// Tier-1 shifting gradient: drives a sibling NeoGradient's angle (and/or colors). The cycle's
+        /// four endpoint colors (<c>fromColorA</c>/<c>fromColorB</c>/<c>toColorA</c>/<c>toColorB</c>)
+        /// are OPTIONAL theme-token-or-hex refs — the same color-ref model as <c>colorOverLife</c>/
+        /// variant (<see cref="ParticleEffectRegistry.ParseColorRef"/>). Omitted endpoints keep the
+        /// component's vivid defaults, so a bare <c>cycleColors:true</c> bakes a colorful rest frame
+        /// rather than a gray wash.
+        /// </summary>
         private sealed class GradientCycleDescriptor : IShapeEffectDescriptor
         {
             public string Id => GradientCycle;
@@ -212,6 +219,19 @@ namespace Neo.UI.Editor
                 ApplyBase(e, parameters);
                 e.CycleAngle = GetBool(parameters, "cycleAngle", e.CycleAngle);
                 e.CycleColors = GetBool(parameters, "cycleColors", e.CycleColors);
+
+                // Cycle endpoint colors are OPTIONAL theme-token-or-hex refs (same model as
+                // colorOverLife / variant). Omitted → keep the component's (vivid) defaults so a bare
+                // `cycleColors:true` never bakes a gray wash. Reuses the shared ParseColorRef.
+                string fromA = GetString(parameters, "fromColorA", null);
+                string fromB = GetString(parameters, "fromColorB", null);
+                string toA = GetString(parameters, "toColorA", null);
+                string toB = GetString(parameters, "toColorB", null);
+                if (!string.IsNullOrEmpty(fromA)) e.FromColorA = ParticleEffectRegistry.ParseColorRef(fromA);
+                if (!string.IsNullOrEmpty(fromB)) e.FromColorB = ParticleEffectRegistry.ParseColorRef(fromB);
+                if (!string.IsNullOrEmpty(toA)) e.ToColorA = ParticleEffectRegistry.ParseColorRef(toA);
+                if (!string.IsNullOrEmpty(toB)) e.ToColorB = ParticleEffectRegistry.ParseColorRef(toB);
+
                 e.EvaluateRest();
             }
 
@@ -224,6 +244,12 @@ namespace Neo.UI.Editor
                 WriteBase(e, p);
                 p["cycleAngle"] = e.CycleAngle;
                 p["cycleColors"] = e.CycleColors;
+                // Deterministic key order; always emitted so the round-trip is a fixed point regardless
+                // of whether the colors came from the spec or the component defaults.
+                p["fromColorA"] = ParticleEffectRegistry.ColorRefToString(e.FromColorA);
+                p["fromColorB"] = ParticleEffectRegistry.ColorRefToString(e.FromColorB);
+                p["toColorA"] = ParticleEffectRegistry.ColorRefToString(e.ToColorA);
+                p["toColorB"] = ParticleEffectRegistry.ColorRefToString(e.ToColorB);
                 parameters = p;
                 return true;
             }
@@ -233,6 +259,13 @@ namespace Neo.UI.Editor
         /// Tier-2 material variant: attaches an <see cref="NeoShapeVariant"/> resolving a
         /// <see cref="ShapeEffectDefinition"/> by id. BatchSafe=false — the variant is a deliberate,
         /// named batch split (shared per variant, not per instance).
+        ///
+        /// <para>Optionally animates a NAMED material float over the shared timeline: when the bag
+        /// carries <c>animate</c> (the property name, e.g. <c>_DissolveAmount</c>) plus
+        /// <c>from</c>/<c>to</c> and the usual <c>duration</c>/<c>loop</c>/<c>pingPong</c>/<c>ease</c>/
+        /// <c>restingPhase</c> keys, it also adds a <see cref="NeoMaterialFloatCycle"/> so the variant
+        /// comes alive at runtime (the static material default stays the baked rest frame). Absent
+        /// <c>animate</c> ⇒ behaves exactly as before (a static variant) — fully backward compatible.</para>
         /// </summary>
         private sealed class VariantDescriptor : IShapeEffectDescriptor
         {
@@ -251,6 +284,21 @@ namespace Neo.UI.Editor
                 var variant = host.GetComponent<NeoShapeVariant>();
                 if (variant == null) variant = host.AddComponent<NeoShapeVariant>();
                 variant.Definition = definition; // setter applies the shared material + defaults
+
+                // Optional material-float animation: only when an `animate` property name is supplied.
+                // Reuses the shared NeoShapeEffect timeline parse (ApplyBase) so it stays consistent
+                // with the Tier-1 descriptors.
+                string animate = GetString(parameters, "animate", null);
+                if (!string.IsNullOrEmpty(animate))
+                {
+                    var cycle = host.GetComponent<NeoMaterialFloatCycle>();
+                    if (cycle == null) cycle = host.AddComponent<NeoMaterialFloatCycle>();
+                    ApplyBase(cycle, parameters);
+                    cycle.PropertyName = animate;
+                    cycle.FromValue = GetFloat(parameters, "from", cycle.FromValue);
+                    cycle.ToValue = GetFloat(parameters, "to", cycle.ToValue);
+                    cycle.EvaluateRest();
+                }
             }
 
             public bool TryExport(GameObject host, out IDictionary<string, object> parameters)
@@ -258,7 +306,20 @@ namespace Neo.UI.Editor
                 parameters = null;
                 var variant = host.GetComponent<NeoShapeVariant>();
                 if (variant == null) return false;
-                parameters = new Dictionary<string, object> { ["definition"] = variant.EffectId ?? "" };
+                var p = new Dictionary<string, object> { ["definition"] = variant.EffectId ?? "" };
+
+                // Emit the animation keys (deterministic order) ONLY when a cycle is present, so a
+                // static variant round-trips to exactly the bare { definition } it generated from.
+                var cycle = host.GetComponent<NeoMaterialFloatCycle>();
+                if (cycle != null)
+                {
+                    p["animate"] = cycle.PropertyName ?? "";
+                    p["from"] = (double)cycle.FromValue;
+                    p["to"] = (double)cycle.ToValue;
+                    WriteBase(cycle, p); // shared timeline keys (duration/loop/pingPong/restingPhase/ease)
+                }
+
+                parameters = p;
                 return true;
             }
 

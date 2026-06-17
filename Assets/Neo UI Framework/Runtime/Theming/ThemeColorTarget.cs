@@ -22,6 +22,8 @@ namespace Neo.UI
 
         private Graphic _graphic;
         private SpriteRenderer _spriteRenderer;
+        // last token we warned about, so an unresolved token logs once — not every theme refresh
+        private string _warnedToken;
 
         public Theme theme => themeOverride != null ? themeOverride : ThemeService.activeTheme;
 
@@ -64,9 +66,42 @@ namespace Neo.UI
 
         public void ApplyColor()
         {
-            Theme bound = theme;
-            if (bound == null || string.IsNullOrEmpty(token)) return;
-            if (!bound.TryGetColor(token, out Color color)) return;
+            if (string.IsNullOrEmpty(token)) return;
+
+            Color color;
+            // a "#RRGGBB"/"#RRGGBBAA" token is a literal fill, not a theme name: bake it
+            // directly so hex backgrounds survive (and translucent ones stay translucent)
+            // instead of missing the theme lookup and leaving the Graphic opaque white.
+            if (token.StartsWith("#"))
+            {
+                if (!ColorUtils.TryParseHex(token, out color))
+                {
+                    if (_warnedToken != token)
+                    {
+                        _warnedToken = token;
+                        Debug.LogWarning($"ThemeColorTarget on '{name}': could not parse hex color '{token}'.", this);
+                    }
+                    return;
+                }
+            }
+            else
+            {
+                Theme bound = theme;
+                if (bound == null) return;
+                if (!bound.TryGetColor(token, out color))
+                {
+                    // no silent failure: an unknown token left the Graphic an unexplained white.
+                    // Warn once per distinct token so theme refreshes don't spam the console.
+                    if (_warnedToken != token)
+                    {
+                        _warnedToken = token;
+                        Debug.LogWarning($"ThemeColorTarget on '{name}': theme token '{token}' not found in theme '{(bound.name)}'.", this);
+                    }
+                    return;
+                }
+            }
+
+            _warnedToken = null;
             color *= tint;
             if (_graphic != null) _graphic.color = color;
             else if (_spriteRenderer != null) _spriteRenderer.color = color;

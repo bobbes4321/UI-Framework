@@ -76,7 +76,18 @@
                 "icon": {
                   "name": "trophy",
                   "color": "Primary",
-                  "size": [72, 72]
+                  "size": [72, 72],
+                  "particles": {
+                    "capacity": 36, "rate": 10, "emitOnEnable": true,
+                    "particleShape": "Circle",
+                    "sizeRange": [3, 7], "lifetimeRange": [0.8, 1.6], "speedRange": [25, 70],
+                    "emitAngle": 90, "emitSpread": 360, "angularVelocityRange": [-40, 40],
+                    "modules": [
+                      { "id": "drag", "params": { "drag": 0.6 } },
+                      { "id": "colorOverLife", "params": { "start": "Warning", "end": "#FFE08A00", "ease": "OutQuad" } },
+                      { "id": "sizeOverLife", "params": { "startScale": 1.0, "endScale": 0.0, "ease": "OutQuad" } }
+                    ]
+                  }
                 }
               },
               {
@@ -116,7 +127,20 @@
                   "label": "CLAIM",
                   "icon": "check",
                   "variant": "primary",
-                  "onClick": { "close": true }
+                  "onClick": { "close": true, "signal": { "category": "Reward", "name": "Claimed" } },
+                  "particles": {
+                    "capacity": 64, "burstCount": 36, "rate": 0,
+                    "particleShape": "Circle",
+                    "sizeRange": [7, 14], "lifetimeRange": [0.7, 1.3], "speedRange": [300, 580],
+                    "emitAngle": 90, "emitSpread": 70, "angularVelocityRange": [-220, 220],
+                    "modules": [
+                      { "id": "gravity", "params": { "acceleration": [0, -1000] } },
+                      { "id": "drag", "params": { "drag": 0.25 } },
+                      { "id": "colorOverLife", "params": { "start": "Warning", "end": "#FFE08A00", "ease": "InQuad" } },
+                      { "id": "sizeOverLife", "params": { "startScale": 1.0, "endScale": 0.4, "ease": "OutQuad" } }
+                    ],
+                    "signal": { "category": "Reward", "name": "Claimed", "count": 36 }
+                  }
                 }
               }
             ]

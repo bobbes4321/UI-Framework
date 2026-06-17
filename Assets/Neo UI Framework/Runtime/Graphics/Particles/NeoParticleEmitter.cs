@@ -73,6 +73,7 @@ namespace Neo.UI
         private readonly Stack<NeoParticle> _free = new Stack<NeoParticle>();
         private readonly List<IParticleModule> _modules = new List<IParticleModule>();
         private RectTransform _rectTransform;
+        private RectTransform _container; // particles live here, NOT on transform, so a host layout group ignores them
         private float _emitAccumulator;
         private bool _built;
 
@@ -315,13 +316,46 @@ namespace Neo.UI
         }
 
         /// <summary>
+        /// Lazily creates (once) the full-stretch child the particles are parented to. Emitters ride
+        /// controls whose root carries a layout group (button/toggle rows); parenting particles
+        /// straight to <c>transform</c> let that group reposition the host as particles spawn/retire
+        /// (the label visibly jumped) and clamped particles into the layout cell. A dedicated child
+        /// with <see cref="LayoutElement.ignoreLayout"/> = true is invisible to any parent layout, so
+        /// particles fly freely and never perturb the host. It is stretched over the emitter rect with
+        /// a centered pivot, so a particle at local (0,0) still originates at the control's center —
+        /// identical emit semantics to the old transform-parented path.
+        /// </summary>
+        private RectTransform EnsureContainer()
+        {
+            if (_container != null) return _container;
+
+            var go = new GameObject("Particles", typeof(RectTransform));
+            go.transform.SetParent(transform, worldPositionStays: false);
+
+            var rt = (RectTransform)go.transform;
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+
+            // A parent HorizontalLayoutGroup/VerticalLayoutGroup must never lay this out or size it.
+            var ignore = go.AddComponent<LayoutElement>();
+            ignore.ignoreLayout = true;
+
+            _container = rt;
+            return _container;
+        }
+
+        /// <summary>
         /// Creates a pooled particle: a child GameObject with an NeoShape Graphic. The NeoShape uses
         /// its shared material (we never assign a per-instance material — that would break batching).
+        /// Particles parent to the layout-ignored container, never to <c>transform</c>.
         /// </summary>
         private NeoParticle CreateParticle()
         {
             var go = new GameObject("NeoParticle", typeof(RectTransform));
-            go.transform.SetParent(transform, worldPositionStays: false);
+            go.transform.SetParent(EnsureContainer(), worldPositionStays: false);
             go.SetActive(false);
 
             var rt = (RectTransform)go.transform;

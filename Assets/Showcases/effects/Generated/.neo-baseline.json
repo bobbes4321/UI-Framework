@@ -1,0 +1,558 @@
+{
+  "theme": {
+    "tokens": {
+      "Primary": "#3B82F6",
+      "Background": "#0F1115",
+      "Accent": "#FCA311",
+      "TextDefault": "#C9CED6",
+      "Panel": "#1D2D50",
+      "Surface": "#1A1D24",
+      "SurfaceElevated": "#252A34",
+      "Outline": "#39404E",
+      "PrimaryHover": "#639AF8",
+      "PrimaryPressed": "#2563D4",
+      "TextOnPrimary": "#FFFFFF",
+      "TextStrong": "#F2F4F8",
+      "TextMuted": "#8A919E",
+      "Success": "#51CF66",
+      "Warning": "#FFD43B",
+      "Error": "#FF6B6B",
+      "Shadow": "#00000080",
+      "SuccessHover": "#6DD77F",
+      "SuccessPressed": "#34BE4B",
+      "Danger": "#FF6B6B",
+      "DangerHover": "#FF8F8F",
+      "DangerPressed": "#FF3D3D",
+      "TextDark": "#6B6390"
+    },
+    "variants": {
+      "Light": {
+        "Primary": "#1B6FD4",
+        "Background": "#F2F4F7",
+        "Accent": "#FCA311",
+        "TextDefault": "#2A313C",
+        "Panel": "#1D2D50",
+        "Surface": "#FFFFFF",
+        "SurfaceElevated": "#E9EDF2",
+        "Outline": "#D4DAE3",
+        "PrimaryHover": "#3D87E0",
+        "PrimaryPressed": "#1259AE",
+        "TextOnPrimary": "#FFFFFF",
+        "TextStrong": "#14181F",
+        "TextMuted": "#6A7280",
+        "Success": "#2E933C",
+        "Warning": "#B35C00",
+        "Error": "#C73E3E",
+        "Shadow": "#00000040",
+        "SuccessHover": "#37AE47",
+        "SuccessPressed": "#23702E",
+        "Danger": "#C73E3E",
+        "DangerHover": "#CF5A5A",
+        "DangerPressed": "#A73030",
+        "TextDark": "#6B6390"
+      },
+      "Dark": {
+        "Primary": "#3B82F6",
+        "Background": "#0F1115",
+        "Accent": "#FCA311",
+        "TextDefault": "#C9CED6",
+        "Panel": "#1D2D50",
+        "Surface": "#1A1D24",
+        "SurfaceElevated": "#252A34",
+        "Outline": "#39404E",
+        "PrimaryHover": "#639AF8",
+        "PrimaryPressed": "#2563D4",
+        "TextOnPrimary": "#FFFFFF",
+        "TextStrong": "#F2F4F8",
+        "TextMuted": "#8A919E",
+        "Success": "#51CF66",
+        "Warning": "#FFD43B",
+        "Error": "#FF6B6B",
+        "Shadow": "#00000080",
+        "SuccessHover": "#6DD77F",
+        "SuccessPressed": "#34BE4B",
+        "Danger": "#FF6B6B",
+        "DangerHover": "#FF8F8F",
+        "DangerPressed": "#FF3D3D",
+        "TextDark": "#6B6390"
+      }
+    }
+  },
+  "views": [
+    {
+      "id": "Showcase/Effects",
+      "background": "Background",
+      "elements": [
+        {
+          "safearea": {
+            "anchor": "Stretch",
+            "children": [
+              {
+                "list": {
+                  "anchor": "Stretch",
+                  "spacing": 8,
+                  "children": [
+                    {
+                      "vstack": {
+                        "padding": 40,
+                        "spacing": 18,
+                        "children": [
+                          {
+                            "text": {
+                              "label": "Shape Effects",
+                              "color": "TextStrong",
+                              "textStyle": "Title",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "Runtime-animated SDF effects on a batched UGUI canvas. Glow, sheen and gradient-cycle stay on the ONE shared NeoShape material (Tier-1, zero extra draw calls). Dissolve opts into its own art-directed shader (Tier-2). Open the scene to watch them move.",
+                              "color": "TextMuted",
+                              "textStyle": "Caption",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "grid": {
+                              "padding": 0,
+                              "spacing": 18,
+                              "cellSize": [
+                                440,
+                                220
+                              ],
+                              "cascade": true,
+                              "children": [
+                                {
+                                  "overlay": {
+                                    "children": [
+                                      {
+                                        "shape": {
+                                          "background": "SurfaceElevated",
+                                          "shape": "RoundedRect",
+                                          "radius": 18,
+                                          "anchor": "Stretch"
+                                        }
+                                      },
+                                      {
+                                        "shape": {
+                                          "id": "Effects/GlowChip",
+                                          "background": "Primary",
+                                          "shape": "RoundedRect",
+                                          "effect": {
+                                            "id": "glowPulse",
+                                            "params": {
+                                              "duration": 1.2999999523162842,
+                                              "loop": true,
+                                              "pingPong": true,
+                                              "restingPhase": 0.34999999403953552,
+                                              "ease": "InOutSine",
+                                              "softnessMin": 1.5,
+                                              "softnessMax": 9,
+                                              "pulseAlpha": true,
+                                              "alphaMin": 0.85000002384185791,
+                                              "alphaMax": 1
+                                            }
+                                          },
+                                          "radius": 40,
+                                          "anchor": "Center",
+                                          "size": [
+                                            256,
+                                            80
+                                          ]
+                                        }
+                                      },
+                                      {
+                                        "overlay": {
+                                          "anchor": "Center",
+                                          "size": [
+                                            256,
+                                            80
+                                          ],
+                                          "children": [
+                                            {
+                                              "icon": {
+                                                "name": "play",
+                                                "color": "TextOnPrimary",
+                                                "anchor": "Center",
+                                                "size": [
+                                                  30,
+                                                  30
+                                                ],
+                                                "position": [
+                                                  -58,
+                                                  0
+                                                ]
+                                              }
+                                            },
+                                            {
+                                              "text": {
+                                                "label": "PLAY NOW",
+                                                "color": "TextOnPrimary",
+                                                "anchor": "Center",
+                                                "size": [
+                                                  320,
+                                                  80
+                                                ],
+                                                "position": [
+                                                  16,
+                                                  0
+                                                ],
+                                                "textStyle": "ButtonLabel"
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      {
+                                        "overlay": {
+                                          "anchor": "TopLeft",
+                                          "size": [
+                                            150,
+                                            28
+                                          ],
+                                          "position": [
+                                            14,
+                                            -14
+                                          ],
+                                          "children": [
+                                            {
+                                              "shape": {
+                                                "background": "Shadow",
+                                                "shape": "Pill",
+                                                "anchor": "Stretch"
+                                              }
+                                            },
+                                            {
+                                              "text": {
+                                                "label": "GLOW PULSE",
+                                                "color": "TextStrong",
+                                                "anchor": "Stretch",
+                                                "textStyle": "Caption"
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "overlay": {
+                                    "children": [
+                                      {
+                                        "shape": {
+                                          "id": "Effects/SheenCard",
+                                          "background": "Warning",
+                                          "shape": "RoundedRect",
+                                          "effect": {
+                                            "id": "sheenSweep",
+                                            "params": {
+                                              "duration": 2.2000000476837158,
+                                              "loop": true,
+                                              "pingPong": false,
+                                              "restingPhase": 0,
+                                              "ease": "InOutSine",
+                                              "fromAngle": -60,
+                                              "toAngle": 240
+                                            }
+                                          },
+                                          "radius": 18,
+                                          "anchor": "Stretch"
+                                        }
+                                      },
+                                      {
+                                        "overlay": {
+                                          "anchor": "Center",
+                                          "size": [
+                                            320,
+                                            320
+                                          ],
+                                          "children": [
+                                            {
+                                              "icon": {
+                                                "name": "crown",
+                                                "color": "TextStrong",
+                                                "anchor": "Center",
+                                                "size": [
+                                                  46,
+                                                  46
+                                                ],
+                                                "position": [
+                                                  0,
+                                                  28
+                                                ]
+                                              }
+                                            },
+                                            {
+                                              "text": {
+                                                "label": "PREMIUM",
+                                                "color": "TextStrong",
+                                                "anchor": "Center",
+                                                "size": [
+                                                  320,
+                                                  80
+                                                ],
+                                                "position": [
+                                                  0,
+                                                  -22
+                                                ],
+                                                "textStyle": "Heading"
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      {
+                                        "overlay": {
+                                          "anchor": "TopLeft",
+                                          "size": [
+                                            160,
+                                            28
+                                          ],
+                                          "position": [
+                                            14,
+                                            -14
+                                          ],
+                                          "children": [
+                                            {
+                                              "shape": {
+                                                "background": "Shadow",
+                                                "shape": "Pill",
+                                                "anchor": "Stretch"
+                                              }
+                                            },
+                                            {
+                                              "text": {
+                                                "label": "SHEEN SWEEP",
+                                                "color": "TextStrong",
+                                                "anchor": "Stretch",
+                                                "textStyle": "Caption"
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "overlay": {
+                                    "children": [
+                                      {
+                                        "shape": {
+                                          "id": "Effects/RarityHero",
+                                          "shape": "RoundedRect",
+                                          "gradient": {
+                                            "from": "#3B82F6",
+                                            "to": "#51CF66",
+                                            "angle": 0
+                                          },
+                                          "effect": {
+                                            "id": "gradientCycle",
+                                            "params": {
+                                              "duration": 3.5,
+                                              "loop": true,
+                                              "pingPong": true,
+                                              "restingPhase": 0,
+                                              "ease": "InOutSine",
+                                              "cycleAngle": true,
+                                              "cycleColors": true,
+                                              "fromColorA": "Primary",
+                                              "fromColorB": "Success",
+                                              "toColorA": "Danger",
+                                              "toColorB": "Warning"
+                                            }
+                                          },
+                                          "radius": 18,
+                                          "anchor": "Stretch"
+                                        }
+                                      },
+                                      {
+                                        "overlay": {
+                                          "anchor": "Center",
+                                          "size": [
+                                            320,
+                                            320
+                                          ],
+                                          "children": [
+                                            {
+                                              "icon": {
+                                                "name": "sparkles",
+                                                "color": "TextOnPrimary",
+                                                "anchor": "Center",
+                                                "size": [
+                                                  46,
+                                                  46
+                                                ],
+                                                "position": [
+                                                  0,
+                                                  26
+                                                ]
+                                              }
+                                            },
+                                            {
+                                              "text": {
+                                                "label": "LEGENDARY",
+                                                "color": "TextOnPrimary",
+                                                "anchor": "Center",
+                                                "size": [
+                                                  320,
+                                                  80
+                                                ],
+                                                "position": [
+                                                  0,
+                                                  -24
+                                                ],
+                                                "textStyle": "Heading"
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      {
+                                        "overlay": {
+                                          "anchor": "TopLeft",
+                                          "size": [
+                                            170,
+                                            28
+                                          ],
+                                          "position": [
+                                            14,
+                                            -14
+                                          ],
+                                          "children": [
+                                            {
+                                              "shape": {
+                                                "background": "Shadow",
+                                                "shape": "Pill",
+                                                "anchor": "Stretch"
+                                              }
+                                            },
+                                            {
+                                              "text": {
+                                                "label": "GRADIENT CYCLE",
+                                                "color": "TextStrong",
+                                                "anchor": "Stretch",
+                                                "textStyle": "Caption"
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "overlay": {
+                                    "children": [
+                                      {
+                                        "image": {
+                                          "id": "Effects/DissolveCard",
+                                          "effect": {
+                                            "id": "variant",
+                                            "params": {
+                                              "definition": "dissolve",
+                                              "animate": "_DissolveAmount",
+                                              "from": 0,
+                                              "to": 1,
+                                              "duration": 2.5999999046325684,
+                                              "loop": true,
+                                              "pingPong": true,
+                                              "restingPhase": 0.5,
+                                              "ease": "InOutSine"
+                                            }
+                                          },
+                                          "radius": 18,
+                                          "anchor": "Stretch",
+                                          "src": "Assets/Mockups/ColorACube/Art/model-cyborg.png",
+                                          "fit": "cover"
+                                        }
+                                      },
+                                      {
+                                        "overlay": {
+                                          "anchor": "BottomLeft",
+                                          "size": [
+                                            200,
+                                            30
+                                          ],
+                                          "position": [
+                                            14,
+                                            14
+                                          ],
+                                          "children": [
+                                            {
+                                              "shape": {
+                                                "background": "Shadow",
+                                                "shape": "Pill",
+                                                "anchor": "Stretch"
+                                              }
+                                            },
+                                            {
+                                              "text": {
+                                                "label": "MATERIALIZING…",
+                                                "color": "TextStrong",
+                                                "anchor": "Stretch",
+                                                "textStyle": "Caption"
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      {
+                                        "overlay": {
+                                          "anchor": "TopLeft",
+                                          "size": [
+                                            170,
+                                            28
+                                          ],
+                                          "position": [
+                                            14,
+                                            -14
+                                          ],
+                                          "children": [
+                                            {
+                                              "shape": {
+                                                "background": "Shadow",
+                                                "shape": "Pill",
+                                                "anchor": "Stretch"
+                                              }
+                                            },
+                                            {
+                                              "text": {
+                                                "label": "DISSOLVE · TIER-2",
+                                                "color": "TextStrong",
+                                                "anchor": "Stretch",
+                                                "textStyle": "Caption"
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "Glow / Sheen / Gradient Cycle are Tier-1: they only animate fields the shared SDF shader already reads (edge softness, gradient stops/angle), so every card still batches into one draw call. Dissolve is Tier-2 — its own fragment shader on a per-variant material, a deliberate batch split the cost-lint flags. Run Tools → Neo UI → Setup → Create or Repair Effect Assets once to bake the dissolve material.",
+                              "color": "TextMuted",
+                              "textStyle": "Caption",
+                              "align": "left"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

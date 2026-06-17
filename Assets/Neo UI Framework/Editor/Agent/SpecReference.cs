@@ -81,6 +81,7 @@ namespace Neo.UI.Editor
                     ["variant"] = EnumOf(FactoryConstants("Variant")),
                     ["style"] = EnumOf(FactoryConstants("Style")),
                     ["textStyle"] = EnumOf(FactoryConstants("TextStyle")),
+                    ["preset"] = Typed("string", "name of a reusable NeoWidgetPreset; resolved at generate as the base, element fields override"),
                     ["icon"] = EnumOf(IconMap.Names),
                     ["name"] = EnumOf(IconMap.Names),
                     ["radius"] = Typed("number"),

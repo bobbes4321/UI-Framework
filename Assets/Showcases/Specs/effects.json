@@ -1,0 +1,240 @@
+{
+  "theme": { "bundle": "CleanSlate" },
+  "views": [
+    {
+      "id": "Showcase/Effects",
+      "background": "Background",
+      "elements": [
+        {
+          "safearea": {
+            "children": [
+              {
+                "scroll": {
+                  "anchor": "Stretch",
+                  "children": [
+                    {
+                      "vstack": {
+                        "anchor": "Stretch",
+                        "padding": 40,
+                        "spacing": 18,
+                        "children": [
+                          {
+                            "text": {
+                              "label": "Shape Effects",
+                              "color": "TextStrong",
+                              "textStyle": "Title",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "Runtime-animated SDF effects on a batched UGUI canvas. Glow, sheen and gradient-cycle stay on the ONE shared NeoShape material (Tier-1, zero extra draw calls). Dissolve opts into its own art-directed shader (Tier-2). Open the scene to watch them move.",
+                              "color": "TextMuted",
+                              "textStyle": "Caption",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "grid": {
+                              "cellSize": [440, 220],
+                              "spacing": 18,
+                              "cascade": true,
+                              "children": [
+
+                                {
+                                  "overlay": {
+                                    "children": [
+                                      {
+                                        "shape": {
+                                          "anchor": "Stretch",
+                                          "radius": 18,
+                                          "background": "SurfaceElevated"
+                                        }
+                                      },
+                                      {
+                                        "shape": {
+                                          "id": "Effects/GlowChip",
+                                          "shape": "RoundedRect",
+                                          "anchor": "Center",
+                                          "size": [256, 80],
+                                          "radius": 40,
+                                          "background": "Primary",
+                                          "effect": {
+                                            "id": "glowPulse",
+                                            "params": {
+                                              "duration": 1.3, "loop": true, "pingPong": true, "ease": "InOutSine",
+                                              "restingPhase": 0.35,
+                                              "softnessMin": 1.5, "softnessMax": 9,
+                                              "pulseAlpha": true, "alphaMin": 0.85, "alphaMax": 1
+                                            }
+                                          }
+                                        }
+                                      },
+                                      {
+                                        "overlay": {
+                                          "anchor": "Center", "size": [256, 80],
+                                          "children": [
+                                            { "icon": { "name": "play", "anchor": "Center", "position": [-58, 0], "size": [30, 30], "color": "TextOnPrimary" } },
+                                            { "text": { "label": "PLAY NOW", "anchor": "Center", "position": [16, 0], "textStyle": "ButtonLabel", "color": "TextOnPrimary" } }
+                                          ]
+                                        }
+                                      },
+                                      {
+                                        "overlay": {
+                                          "anchor": "TopLeft", "size": [150, 28], "position": [14, -14],
+                                          "children": [
+                                            { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                            { "text": { "label": "GLOW PULSE", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+
+                                {
+                                  "overlay": {
+                                    "children": [
+                                      {
+                                        "shape": {
+                                          "id": "Effects/SheenCard",
+                                          "anchor": "Stretch",
+                                          "radius": 18,
+                                          "background": "Warning",
+                                          "effect": {
+                                            "id": "sheenSweep",
+                                            "params": { "duration": 2.2, "loop": true, "pingPong": false, "ease": "InOutSine", "fromAngle": -60, "toAngle": 240 }
+                                          }
+                                        }
+                                      },
+                                      {
+                                        "overlay": {
+                                          "anchor": "Center",
+                                          "children": [
+                                            { "icon": { "name": "crown", "anchor": "Center", "position": [0, 28], "size": [46, 46], "color": "TextStrong" } },
+                                            { "text": { "label": "PREMIUM", "anchor": "Center", "position": [0, -22], "textStyle": "Heading", "color": "TextStrong" } }
+                                          ]
+                                        }
+                                      },
+                                      {
+                                        "overlay": {
+                                          "anchor": "TopLeft", "size": [160, 28], "position": [14, -14],
+                                          "children": [
+                                            { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                            { "text": { "label": "SHEEN SWEEP", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+
+                                {
+                                  "overlay": {
+                                    "children": [
+                                      {
+                                        "shape": {
+                                          "id": "Effects/RarityHero",
+                                          "anchor": "Stretch",
+                                          "radius": 18,
+                                          "gradient": { "from": "Primary", "to": "Success", "angle": 0 },
+                                          "effect": {
+                                            "id": "gradientCycle",
+                                            "params": {
+                                              "duration": 3.5, "loop": true, "pingPong": true, "ease": "InOutSine",
+                                              "cycleAngle": true, "cycleColors": true,
+                                              "fromColorA": "Primary", "fromColorB": "Success",
+                                              "toColorA": "Danger", "toColorB": "Warning"
+                                            }
+                                          }
+                                        }
+                                      },
+                                      {
+                                        "overlay": {
+                                          "anchor": "Center",
+                                          "children": [
+                                            { "icon": { "name": "sparkles", "anchor": "Center", "position": [0, 26], "size": [46, 46], "color": "TextOnPrimary" } },
+                                            { "text": { "label": "LEGENDARY", "anchor": "Center", "position": [0, -24], "textStyle": "Heading", "color": "TextOnPrimary" } }
+                                          ]
+                                        }
+                                      },
+                                      {
+                                        "overlay": {
+                                          "anchor": "TopLeft", "size": [170, 28], "position": [14, -14],
+                                          "children": [
+                                            { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                            { "text": { "label": "GRADIENT CYCLE", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+
+                                {
+                                  "overlay": {
+                                    "children": [
+                                      {
+                                        "image": {
+                                          "id": "Effects/DissolveCard",
+                                          "src": "Assets/Mockups/ColorACube/Art/model-cyborg.png",
+                                          "anchor": "Stretch",
+                                          "radius": 18,
+                                          "fit": "cover",
+                                          "effect": {
+                                            "id": "variant",
+                                            "params": {
+                                              "definition": "dissolve",
+                                              "animate": "_DissolveAmount", "from": 0.0, "to": 1.0,
+                                              "duration": 2.6, "loop": true, "pingPong": true,
+                                              "ease": "InOutSine", "restingPhase": 0.5
+                                            }
+                                          }
+                                        }
+                                      },
+                                      {
+                                        "overlay": {
+                                          "anchor": "BottomLeft", "size": [200, 30], "position": [14, 14],
+                                          "children": [
+                                            { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                            { "text": { "label": "MATERIALIZING…", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } }
+                                          ]
+                                        }
+                                      },
+                                      {
+                                        "overlay": {
+                                          "anchor": "TopLeft", "size": [170, 28], "position": [14, -14],
+                                          "children": [
+                                            { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                            { "text": { "label": "DISSOLVE · TIER-2", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+
+                              ]
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "Glow / Sheen / Gradient Cycle are Tier-1: they only animate fields the shared SDF shader already reads (edge softness, gradient stops/angle), so every card still batches into one draw call. Dissolve is Tier-2 — its own fragment shader on a per-variant material, a deliberate batch split the cost-lint flags. Run Tools → Neo UI → Setup → Create or Repair Effect Assets once to bake the dissolve material.",
+                              "color": "TextMuted",
+                              "textStyle": "Caption",
+                              "align": "left"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
