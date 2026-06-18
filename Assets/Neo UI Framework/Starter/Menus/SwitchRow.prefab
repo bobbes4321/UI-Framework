@@ -341,7 +341,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6ae3cf2a1541344f9babda51d2e7252, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Neo.UI::Neo.UI.UIToggleColorAnimator
-  controller: {fileID: 6550789639396342855}
+  controller: {fileID: 0}
   onColor:
     useToken: 1
     token: Primary
@@ -691,7 +691,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6ae3cf2a1541344f9babda51d2e7252, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Neo.UI::Neo.UI.UIToggleColorAnimator
-  controller: {fileID: 6550789639396342855}
+  controller: {fileID: 0}
   onColor:
     useToken: 1
     token: TextOnPrimary
@@ -756,7 +756,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1f73ba54adea4f4ea864f669666211e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Neo.UI::Neo.UI.UIToggleUIAnimator
-  controller: {fileID: 6550789639396342855}
+  controller: {fileID: 0}
   onAnimation:
     purpose: 4
     move:

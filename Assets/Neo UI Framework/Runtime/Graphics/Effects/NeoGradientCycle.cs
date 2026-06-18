@@ -96,5 +96,18 @@ namespace Neo.UI
             if (hostGraphic != null)
                 hostGraphic.SetVerticesDirty();
         }
+
+        /// <inheritdoc/>
+        public override bool TrySetLiveParam(string param, float value)
+        {
+            switch (param)
+            {
+                case "fromAngle": fromAngle = value; CycleAngle = true; return true;
+                case "toAngle": toAngle = value; CycleAngle = true; return true;
+                // Convenience: pin both ends so a slider sets the wash angle directly.
+                case "angle": fromAngle = toAngle = value; CycleAngle = true; return true;
+            }
+            return base.TrySetLiveParam(param, value);
+        }
     }
 }

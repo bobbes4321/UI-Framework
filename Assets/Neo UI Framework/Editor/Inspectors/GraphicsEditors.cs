@@ -57,6 +57,15 @@ namespace Neo.UI.Editor
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("gradientAngle"));
             }
 
+            // texture fill: meaningless for stroke glyphs (the stroke IS the fill)
+            if (!isGlyph)
+            {
+                SerializedProperty fillSpriteProperty = serializedObject.FindProperty("fillSprite");
+                EditorGUILayout.PropertyField(fillSpriteProperty);
+                if (fillSpriteProperty.hasMultipleDifferentValues || fillSpriteProperty.objectReferenceValue != null)
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("textureFit"));
+            }
+
             GUILayout.Space(NeoGUI.Spacing);
             if (isGlyph)
             {

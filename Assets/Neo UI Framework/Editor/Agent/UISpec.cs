@@ -501,6 +501,7 @@ namespace Neo.UI.Editor
         public List<ParticleModuleSpec> modules = new List<ParticleModuleSpec>();
         public SignalRefSpec signal;        // optional NeoParticleBurstOnSignal trigger
         public int? signalCount;            // burst count on the signal (<=0 = emitter default)
+        public bool atPointer;              // burst at the click point on pointer-down (NeoParticlePointerBurst)
 
         public static ParticleSpec Parse(Dictionary<string, object> obj)
         {
@@ -517,7 +518,8 @@ namespace Neo.UI.Editor
                 emitAngle = obj.ContainsKey("emitAngle") ? (float?)JsonReader.GetFloat(obj, "emitAngle") : null,
                 emitSpread = obj.ContainsKey("emitSpread") ? (float?)JsonReader.GetFloat(obj, "emitSpread") : null,
                 angularVelocityRange = GetFloatArray(obj, "angularVelocityRange"),
-                preset = JsonReader.GetString(obj, "preset")
+                preset = JsonReader.GetString(obj, "preset"),
+                atPointer = JsonReader.GetBool(obj, "atPointer")
             };
             if (obj.TryGetValue("capacity", out object cap) && cap is double cd) spec.capacity = (int)cd;
             if (obj.TryGetValue("burstCount", out object bc) && bc is double bd) spec.burstCount = (int)bd;
@@ -568,6 +570,7 @@ namespace Neo.UI.Editor
                 if (signalCount.HasValue) signalObj["count"] = (double)signalCount.Value;
                 result["signal"] = signalObj;
             }
+            if (atPointer) result["atPointer"] = true;
             return result;
         }
 
@@ -584,6 +587,41 @@ namespace Neo.UI.Editor
             var array = new List<object>(values.Length);
             foreach (float value in values) array.Add((double)value);
             return array;
+        }
+    }
+
+    /// <summary>
+    /// A pointer-follow glow on an element: <c>"pointerGlow": { "color": "#FFFFFFAA", "size": 140,
+    /// "softness": 48 }</c>. The generator attaches a <c>NeoPointerReactor</c> that, at runtime, sits a
+    /// soft highlight under the cursor while the element is hovered (the mobile-game "glow exactly where
+    /// my mouse is" feel). Batch-safe — it only moves a child shape on the shared SDF material. All keys
+    /// optional (the reactor ships sensible defaults). Color round-trips as <c>#RRGGBBAA</c>.
+    /// </summary>
+    [Serializable]
+    public class PointerGlowSpec
+    {
+        public string color;     // hex (#RRGGBB / #RRGGBBAA) or theme token "Category/Name"
+        public float? size;      // follower diameter px
+        public float? softness;  // follower edge softness px
+
+        public static PointerGlowSpec Parse(Dictionary<string, object> obj)
+        {
+            if (obj == null) return null;
+            return new PointerGlowSpec
+            {
+                color = JsonReader.GetString(obj, "color"),
+                size = obj.ContainsKey("size") ? (float?)JsonReader.GetFloat(obj, "size") : null,
+                softness = obj.ContainsKey("softness") ? (float?)JsonReader.GetFloat(obj, "softness") : null
+            };
+        }
+
+        public Dictionary<string, object> ToJsonObject()
+        {
+            var result = new Dictionary<string, object>();
+            if (!string.IsNullOrEmpty(color)) result["color"] = color;
+            if (size.HasValue) result["size"] = (double)size.Value;
+            if (softness.HasValue) result["softness"] = (double)softness.Value;
+            return result;
         }
     }
 
@@ -872,6 +910,7 @@ namespace Neo.UI.Editor
         public GradientSpec gradient; // shape/image: theme-riding two-stop gradient
         public EffectSpec effect;     // open-bag shape effect (ShapeEffectRegistry owns parse/bake/export)
         public ParticleSpec particles; // UI particle emitter (modules ride ParticleEffectRegistry)
+        public PointerGlowSpec pointerGlow; // pointer-follow glow (NeoPointerReactor)
         public float? thickness;   // ring/arc band width px
         public float? arcStart;    // arc start angle, degrees cw from 12 o'clock
         public float? arcSweep;    // arc sweep, degrees
@@ -980,6 +1019,7 @@ namespace Neo.UI.Editor
                     gradient = GradientSpec.Parse(JsonReader.GetObject(body, "gradient")),
                     effect = EffectSpec.Parse(JsonReader.GetObject(body, "effect")),
                     particles = ParticleSpec.Parse(JsonReader.GetObject(body, "particles")),
+                    pointerGlow = PointerGlowSpec.Parse(JsonReader.GetObject(body, "pointerGlow")),
                     thickness = GetNullableFloat(body, "thickness"),
                     arcStart = GetNullableFloat(body, "arcStart"),
                     arcSweep = GetNullableFloat(body, "arcSweep")
@@ -1068,6 +1108,7 @@ namespace Neo.UI.Editor
             if (gradient != null) body["gradient"] = gradient.ToJsonObject();
             if (effect != null) body["effect"] = effect.ToJsonObject();
             if (particles != null) body["particles"] = particles.ToJsonObject();
+            if (pointerGlow != null) body["pointerGlow"] = pointerGlow.ToJsonObject();
             if (thickness.HasValue) body["thickness"] = (double)thickness.Value;
             if (arcStart.HasValue) body["arcStart"] = (double)arcStart.Value;
             if (arcSweep.HasValue) body["arcSweep"] = (double)arcSweep.Value;

@@ -71,6 +71,9 @@ MonoBehaviour:
     names:
     - Screen
     - Screen Two
+  - category: Lib
+    names:
+    - Screen
   - category: Lint
     names:
     - Screen

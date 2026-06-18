@@ -62,5 +62,21 @@ namespace Neo.UI
                 shape.color = c;
             }
         }
+
+        /// <inheritdoc/>
+        public override bool TrySetLiveParam(string param, float value)
+        {
+            switch (param)
+            {
+                case "softnessMin": SoftnessMin = value; return true;
+                case "softnessMax": SoftnessMax = value; return true;
+                // Convenience: set both ends so a slider drives the glow as a direct (non-pulsing) value.
+                case "softness": SoftnessMin = value; SoftnessMax = value; return true;
+                case "alphaMin": AlphaMin = value; PulseAlpha = true; return true;
+                case "alphaMax": AlphaMax = value; PulseAlpha = true; return true;
+                case "alpha": AlphaMin = value; AlphaMax = value; PulseAlpha = true; return true;
+            }
+            return base.TrySetLiveParam(param, value);
+        }
     }
 }

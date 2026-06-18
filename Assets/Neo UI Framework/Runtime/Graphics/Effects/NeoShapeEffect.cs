@@ -214,6 +214,23 @@ namespace Neo.UI
         /// </summary>
         public void EvaluateRest() => Sample(restPhase);
 
+        /// <summary>
+        /// Restarts the timeline from zero and enables the effect — the runtime entry point a pointer
+        /// trigger (<see cref="NeoEffectTrigger"/>) calls on hover/press to "play" a one-shot sweep, or
+        /// to (re)start a held effect. Cheap and idempotent.
+        /// </summary>
+        public void Play()
+        {
+            _elapsed = 0f;
+            if (!enabled) enabled = true; // OnEnable re-baks rest; the next Update advances the timeline
+        }
+
+        /// <summary>
+        /// Disables the effect, restoring the resting frame (via <see cref="OnDisable"/>). The companion
+        /// to <see cref="Play"/> for "effect only while hovered/pressed" triggers.
+        /// </summary>
+        public void Stop() => enabled = false;
+
         /// <summary> Maps elapsed seconds → a 0..1 linear phase, honoring loop / ping-pong / one-shot. </summary>
         protected float ComputeLinearPhase(float elapsed)
         {
@@ -247,6 +264,26 @@ namespace Neo.UI
         /// re-applies the current rest frame so themed colors refresh live; override for finer control.
         /// </summary>
         protected virtual void OnThemeChanged(Theme theme) => EvaluateRest();
+
+        /// <summary>
+        /// Sets a named, externally-drivable parameter at runtime (the live-control seam used by
+        /// <see cref="NeoSignalParamBinding"/> so a slider/toggle can steer the effect). The base
+        /// handles the shared timeline params (<c>duration</c>, <c>restingPhase</c>); subclasses
+        /// override to expose their own params (e.g. <c>softnessMax</c>) and call <c>base</c> for the
+        /// shared ones. This is the open seam — a new effect becomes controllable the moment it handles
+        /// its param names here; no central switch. Returns false for an unknown param (the binding then
+        /// no-ops rather than failing silently). Effects re-sample every frame in <see cref="Update"/>,
+        /// so a change applied here is visible on the next frame without an explicit refresh.
+        /// </summary>
+        public virtual bool TrySetLiveParam(string param, float value)
+        {
+            switch (param)
+            {
+                case "duration": duration = value; return true;
+                case "restingPhase": restingPhase = value; return true;
+                default: return false;
+            }
+        }
 
 #if UNITY_EDITOR
         /// <summary> Keeps serialized values sane and re-bakes the rest frame on inspector edits. </summary>

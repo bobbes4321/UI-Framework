@@ -25,6 +25,11 @@ MonoBehaviour:
     names:
     - Cancel
     - Confirm
+  - category: Effects
+    names:
+    - On
+    - Softness
+    - Speed
   - category: FX
     names:
     - Firework

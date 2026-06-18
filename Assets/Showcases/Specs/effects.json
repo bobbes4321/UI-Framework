@@ -15,8 +15,8 @@
                     {
                       "vstack": {
                         "anchor": "Stretch",
-                        "padding": 40,
-                        "spacing": 18,
+                        "padding": 36,
+                        "spacing": 20,
                         "children": [
                           {
                             "text": {
@@ -28,198 +28,335 @@
                           },
                           {
                             "text": {
-                              "label": "Runtime-animated SDF effects on a batched UGUI canvas. Glow, sheen and gradient-cycle stay on the ONE shared NeoShape material (Tier-1, zero extra draw calls). Dissolve opts into its own art-directed shader (Tier-2). Open the scene to watch them move.",
+                              "label": "Runtime-animated SDF effects on a batched UGUI canvas. The Gallery shows the library; the Playground lets you DRIVE an effect live with sliders (signal-bound, zero UnityEvents); Combos puts them on real UI. Tier-1 effects (glow, sheen, gradient, spinner, morph, ring, rainbow, juice) stay on the ONE shared NeoShape material — zero extra draw calls. Tier-2 (dissolve, holo-foil, glitch) opt into their own shader.",
                               "color": "TextMuted",
                               "textStyle": "Caption",
                               "align": "left"
                             }
                           },
+
                           {
-                            "grid": {
-                              "cellSize": [440, 220],
-                              "spacing": 18,
-                              "cascade": true,
+                            "tabbar": {
+                              "id": "FxTabs/Bar",
                               "children": [
-
-                                {
-                                  "overlay": {
-                                    "children": [
-                                      {
-                                        "shape": {
-                                          "anchor": "Stretch",
-                                          "radius": 18,
-                                          "background": "SurfaceElevated"
-                                        }
-                                      },
-                                      {
-                                        "shape": {
-                                          "id": "Effects/GlowChip",
-                                          "shape": "RoundedRect",
-                                          "anchor": "Center",
-                                          "size": [256, 80],
-                                          "radius": 40,
-                                          "background": "Primary",
-                                          "effect": {
-                                            "id": "glowPulse",
-                                            "params": {
-                                              "duration": 1.3, "loop": true, "pingPong": true, "ease": "InOutSine",
-                                              "restingPhase": 0.35,
-                                              "softnessMin": 1.5, "softnessMax": 9,
-                                              "pulseAlpha": true, "alphaMin": 0.85, "alphaMax": 1
-                                            }
-                                          }
-                                        }
-                                      },
-                                      {
-                                        "overlay": {
-                                          "anchor": "Center", "size": [256, 80],
-                                          "children": [
-                                            { "icon": { "name": "play", "anchor": "Center", "position": [-58, 0], "size": [30, 30], "color": "TextOnPrimary" } },
-                                            { "text": { "label": "PLAY NOW", "anchor": "Center", "position": [16, 0], "textStyle": "ButtonLabel", "color": "TextOnPrimary" } }
-                                          ]
-                                        }
-                                      },
-                                      {
-                                        "overlay": {
-                                          "anchor": "TopLeft", "size": [150, 28], "position": [14, -14],
-                                          "children": [
-                                            { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
-                                            { "text": { "label": "GLOW PULSE", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } }
-                                          ]
-                                        }
-                                      }
-                                    ]
-                                  }
-                                },
-
-                                {
-                                  "overlay": {
-                                    "children": [
-                                      {
-                                        "shape": {
-                                          "id": "Effects/SheenCard",
-                                          "anchor": "Stretch",
-                                          "radius": 18,
-                                          "background": "Warning",
-                                          "effect": {
-                                            "id": "sheenSweep",
-                                            "params": { "duration": 2.2, "loop": true, "pingPong": false, "ease": "InOutSine", "fromAngle": -60, "toAngle": 240 }
-                                          }
-                                        }
-                                      },
-                                      {
-                                        "overlay": {
-                                          "anchor": "Center",
-                                          "children": [
-                                            { "icon": { "name": "crown", "anchor": "Center", "position": [0, 28], "size": [46, 46], "color": "TextStrong" } },
-                                            { "text": { "label": "PREMIUM", "anchor": "Center", "position": [0, -22], "textStyle": "Heading", "color": "TextStrong" } }
-                                          ]
-                                        }
-                                      },
-                                      {
-                                        "overlay": {
-                                          "anchor": "TopLeft", "size": [160, 28], "position": [14, -14],
-                                          "children": [
-                                            { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
-                                            { "text": { "label": "SHEEN SWEEP", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } }
-                                          ]
-                                        }
-                                      }
-                                    ]
-                                  }
-                                },
-
-                                {
-                                  "overlay": {
-                                    "children": [
-                                      {
-                                        "shape": {
-                                          "id": "Effects/RarityHero",
-                                          "anchor": "Stretch",
-                                          "radius": 18,
-                                          "gradient": { "from": "Primary", "to": "Success", "angle": 0 },
-                                          "effect": {
-                                            "id": "gradientCycle",
-                                            "params": {
-                                              "duration": 3.5, "loop": true, "pingPong": true, "ease": "InOutSine",
-                                              "cycleAngle": true, "cycleColors": true,
-                                              "fromColorA": "Primary", "fromColorB": "Success",
-                                              "toColorA": "Danger", "toColorB": "Warning"
-                                            }
-                                          }
-                                        }
-                                      },
-                                      {
-                                        "overlay": {
-                                          "anchor": "Center",
-                                          "children": [
-                                            { "icon": { "name": "sparkles", "anchor": "Center", "position": [0, 26], "size": [46, 46], "color": "TextOnPrimary" } },
-                                            { "text": { "label": "LEGENDARY", "anchor": "Center", "position": [0, -24], "textStyle": "Heading", "color": "TextOnPrimary" } }
-                                          ]
-                                        }
-                                      },
-                                      {
-                                        "overlay": {
-                                          "anchor": "TopLeft", "size": [170, 28], "position": [14, -14],
-                                          "children": [
-                                            { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
-                                            { "text": { "label": "GRADIENT CYCLE", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } }
-                                          ]
-                                        }
-                                      }
-                                    ]
-                                  }
-                                },
-
-                                {
-                                  "overlay": {
-                                    "children": [
-                                      {
-                                        "image": {
-                                          "id": "Effects/DissolveCard",
-                                          "src": "Assets/Mockups/ColorACube/Art/model-cyborg.png",
-                                          "anchor": "Stretch",
-                                          "radius": 18,
-                                          "fit": "cover",
-                                          "effect": {
-                                            "id": "variant",
-                                            "params": {
-                                              "definition": "dissolve",
-                                              "animate": "_DissolveAmount", "from": 0.0, "to": 1.0,
-                                              "duration": 2.6, "loop": true, "pingPong": true,
-                                              "ease": "InOutSine", "restingPhase": 0.5
-                                            }
-                                          }
-                                        }
-                                      },
-                                      {
-                                        "overlay": {
-                                          "anchor": "BottomLeft", "size": [200, 30], "position": [14, 14],
-                                          "children": [
-                                            { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
-                                            { "text": { "label": "MATERIALIZING…", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } }
-                                          ]
-                                        }
-                                      },
-                                      {
-                                        "overlay": {
-                                          "anchor": "TopLeft", "size": [170, 28], "position": [14, -14],
-                                          "children": [
-                                            { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
-                                            { "text": { "label": "DISSOLVE · TIER-2", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } }
-                                          ]
-                                        }
-                                      }
-                                    ]
-                                  }
-                                }
-
+                                { "tab": { "id": "FxTabs/Gallery",     "label": "Gallery",     "icon": "grid-3x3",  "value": 1, "controls": "FxPanels/Gallery" } },
+                                { "tab": { "id": "FxTabs/Interactive", "label": "Interactive", "icon": "mouse-pointer-click", "controls": "FxPanels/Interactive" } },
+                                { "tab": { "id": "FxTabs/Playground",  "label": "Playground",  "icon": "sliders-horizontal", "controls": "FxPanels/Playground" } },
+                                { "tab": { "id": "FxTabs/Combos",      "label": "Combos",      "icon": "layers",    "controls": "FxPanels/Combos" } }
                               ]
                             }
                           },
+
+                          {
+                            "panel": {
+                              "id": "FxPanels/Gallery",
+                              "style": "Panel",
+                              "spacing": 14,
+                              "children": [
+                                { "text": { "label": "THE LIBRARY", "color": "TextStrong", "textStyle": "ButtonLabel", "align": "left" } },
+                                {
+                                  "grid": {
+                                    "cellSize": [300, 190],
+                                    "spacing": 18,
+                                    "cascade": true,
+                                    "children": [
+
+                                      { "overlay": { "children": [
+                                        { "shape": { "anchor": "Stretch", "radius": 18, "background": "SurfaceElevated" } },
+                                        { "shape": { "id": "Fx/Glow", "shape": "Pill", "anchor": "Center", "size": [200, 70], "radius": 35, "background": "Primary",
+                                          "effect": { "id": "glowPulse", "params": { "duration": 1.3, "loop": true, "pingPong": true, "ease": "InOutSine", "restingPhase": 0.35, "softnessMin": 1.5, "softnessMax": 11, "pulseAlpha": true, "alphaMin": 0.85, "alphaMax": 1 } } } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [140, 26], "position": [12, -12], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "GLOW PULSE", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } },
+
+                                      { "overlay": { "children": [
+                                        { "shape": { "id": "Fx/Sheen", "anchor": "Stretch", "radius": 18, "background": "Warning",
+                                          "effect": { "id": "sheenSweep", "params": { "duration": 2.2, "loop": true, "pingPong": false, "ease": "InOutSine", "fromAngle": -60, "toAngle": 240 } } } },
+                                        { "text": { "label": "PREMIUM", "anchor": "Center", "textStyle": "Heading", "color": "TextStrong" } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [150, 26], "position": [12, -12], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "SHEEN SWEEP", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } },
+
+                                      { "overlay": { "children": [
+                                        { "shape": { "id": "Fx/Gradient", "anchor": "Stretch", "radius": 18, "gradient": { "from": "Primary", "to": "Success", "angle": 0 },
+                                          "effect": { "id": "gradientCycle", "params": { "duration": 3.5, "loop": true, "pingPong": true, "ease": "InOutSine", "cycleAngle": true, "cycleColors": true, "fromColorA": "Primary", "fromColorB": "Success", "toColorA": "Danger", "toColorB": "Warning" } } } },
+                                        { "text": { "label": "LEGENDARY", "anchor": "Center", "textStyle": "Heading", "color": "TextOnPrimary" } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [170, 26], "position": [12, -12], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "GRADIENT CYCLE", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } },
+
+                                      { "overlay": { "children": [
+                                        { "shape": { "anchor": "Stretch", "radius": 18, "background": "SurfaceElevated" } },
+                                        { "shape": { "id": "Fx/Spinner", "shape": "Arc", "anchor": "Center", "size": [104, 104], "thickness": 12, "arcStart": 0, "arcSweep": 90, "background": "Primary",
+                                          "effect": { "id": "arcSpinner", "params": { "duration": 1.1, "loop": true, "pingPong": false, "ease": "Linear", "spinFrom": 0, "spinTo": 360, "animateSweep": true, "sweepFrom": 40, "sweepTo": 280 } } } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [150, 26], "position": [12, -12], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "ARC SPINNER", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } },
+
+                                      { "overlay": { "children": [
+                                        { "shape": { "anchor": "Stretch", "radius": 18, "background": "SurfaceElevated" } },
+                                        { "shape": { "id": "Fx/Corner", "shape": "RoundedRect", "anchor": "Center", "size": [120, 120], "radius": 12, "background": "Success",
+                                          "effect": { "id": "cornerMorph", "params": { "duration": 1.6, "loop": true, "pingPong": true, "ease": "InOutSine", "radiusMin": 8, "radiusMax": 56 } } } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [160, 26], "position": [12, -12], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "CORNER MORPH", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } },
+
+                                      { "overlay": { "children": [
+                                        { "shape": { "anchor": "Stretch", "radius": 18, "background": "Background" } },
+                                        { "shape": { "id": "Fx/Border", "shape": "RoundedRect", "anchor": "Center", "size": [200, 90], "radius": 16, "background": "Surface",
+                                          "effect": { "id": "borderPulse", "params": { "duration": 1.2, "loop": true, "pingPong": true, "ease": "InOutSine", "borderMin": 1, "borderMax": 6, "pulseAlpha": true, "alphaMin": 0.3, "alphaMax": 1, "outlineColor": "Primary" } } } },
+                                        { "text": { "label": "SELECTED", "anchor": "Center", "textStyle": "Caption", "color": "TextStrong" } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [160, 26], "position": [12, -12], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "BORDER PULSE", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } },
+
+                                      { "overlay": { "children": [
+                                        { "shape": { "anchor": "Stretch", "radius": 18, "background": "SurfaceElevated" } },
+                                        { "shape": { "id": "Fx/Hue", "shape": "RoundedRect", "anchor": "Center", "size": [200, 90], "radius": 16, "background": "Primary",
+                                          "effect": { "id": "hueShift", "params": { "duration": 4.0, "loop": true, "pingPong": false, "ease": "Linear", "hueFrom": 0, "hueTo": 1 } } } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [150, 26], "position": [12, -12], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "HUE SHIFT", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } },
+
+                                      { "overlay": { "children": [
+                                        { "shape": { "anchor": "Stretch", "radius": 18, "background": "SurfaceElevated" } },
+                                        { "shape": { "id": "Fx/Juice", "shape": "Circle", "anchor": "Center", "size": [96, 96], "background": "Primary",
+                                          "effect": { "id": "transformJuice", "params": { "duration": 1.5, "loop": true, "pingPong": true, "ease": "InOutSine", "bob": 14, "rotate": 8 } } } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [170, 26], "position": [12, -12], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "TRANSFORM JUICE", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } },
+
+                                      { "overlay": { "children": [
+                                        { "shape": { "anchor": "Stretch", "radius": 18, "background": "SurfaceElevated" } },
+                                        { "image": { "id": "Fx/Dissolve", "src": "Assets/Mockups/ColorACube/Art/model-cyborg.png", "anchor": "Center", "size": [150, 150], "radius": 14, "fit": "cover",
+                                          "effect": { "id": "variant", "params": { "definition": "dissolve", "animate": "_DissolveAmount", "from": 0.0, "to": 1.0, "duration": 2.6, "loop": true, "pingPong": true, "ease": "InOutSine", "restingPhase": 0.5 } } } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [170, 26], "position": [12, -12], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "DISSOLVE · TIER-2", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } },
+
+                                      { "overlay": { "children": [
+                                        { "shape": { "id": "Fx/HoloFoil", "shape": "RoundedRect", "anchor": "Stretch", "radius": 18, "background": "Primary",
+                                          "effect": { "id": "variant", "params": { "definition": "holoFoil" } } } },
+                                        { "text": { "label": "MYTHIC", "anchor": "Center", "textStyle": "Heading", "color": "TextOnPrimary" } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [180, 26], "position": [12, -12], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "HOLO FOIL · TIER-2", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } },
+
+                                      { "overlay": { "children": [
+                                        { "shape": { "id": "Fx/Glitch", "shape": "RoundedRect", "anchor": "Stretch", "radius": 18, "background": "Danger",
+                                          "effect": { "id": "variant", "params": { "definition": "glitch" } } } },
+                                        { "text": { "label": "ERROR", "anchor": "Center", "textStyle": "Heading", "color": "TextOnPrimary" } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [160, 26], "position": [12, -12], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "GLITCH · TIER-2", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } }
+
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+
+                          {
+                            "panel": {
+                              "id": "FxPanels/Playground",
+                              "style": "Panel",
+                              "spacing": 16,
+                              "children": [
+                                { "text": { "label": "LIVE CONTROL", "color": "TextStrong", "textStyle": "ButtonLabel", "align": "left" } },
+                                { "text": { "label": "Drag the sliders — the glow reacts in real time. Each control publishes its value to a signal stream; a NeoSignalParamBinding on the shape remaps it onto an effect param. No UnityEvents, no glue code — the link round-trips through the spec.", "color": "TextMuted", "textStyle": "Caption", "align": "left" } },
+                                {
+                                  "hstack": {
+                                    "spacing": 22,
+                                    "children": [
+                                      {
+                                        "overlay": {
+                                          "size": [300, 220],
+                                          "children": [
+                                            { "shape": { "anchor": "Stretch", "radius": 18, "background": "SurfaceElevated" } },
+                                            { "shape": { "id": "Playground/Hero", "shape": "RoundedRect", "anchor": "Center", "size": [220, 130], "radius": 28, "background": "Primary",
+                                              "effect": { "id": "glowPulse", "params": {
+                                                "duration": 1.4, "loop": true, "pingPong": true, "ease": "InOutSine", "restingPhase": 0.4,
+                                                "softnessMin": 2, "softnessMax": 12, "pulseAlpha": true, "alphaMin": 0.85, "alphaMax": 1,
+                                                "bindings": [
+                                                  { "signal": "Effects/Softness", "param": "softnessMax", "min": 2, "max": 36 },
+                                                  { "signal": "Effects/Speed", "param": "duration", "min": 4.0, "max": 0.3 },
+                                                  { "signal": "Effects/On", "param": "enabled" }
+                                                ]
+                                              } } } },
+                                            { "text": { "label": "LIVE", "anchor": "Center", "textStyle": "ButtonLabel", "color": "TextOnPrimary" } }
+                                          ]
+                                        }
+                                      },
+                                      {
+                                        "vstack": {
+                                          "size": [340, 220],
+                                          "spacing": 14,
+                                          "padding": 8,
+                                          "children": [
+                                            { "text": { "label": "Glow size", "color": "TextDefault", "textStyle": "Caption", "align": "left" } },
+                                            { "slider": { "id": "Playground/SoftnessCtl", "min": 0, "max": 1, "value": 0.35, "signal": { "category": "Effects", "name": "Softness" } } },
+                                            { "text": { "label": "Pulse speed", "color": "TextDefault", "textStyle": "Caption", "align": "left" } },
+                                            { "slider": { "id": "Playground/SpeedCtl", "min": 0, "max": 1, "value": 0.5, "signal": { "category": "Effects", "name": "Speed" } } },
+                                            { "toggle": { "id": "Playground/OnCtl", "label": "Effect enabled", "value": 1, "signal": { "category": "Effects", "name": "On" } } }
+                                          ]
+                                        }
+                                      },
+                                      { "spacer": { "flex": 1 } }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+
+                          {
+                            "panel": {
+                              "id": "FxPanels/Combos",
+                              "style": "Panel",
+                              "spacing": 14,
+                              "children": [
+                                { "text": { "label": "IN REAL UI", "color": "TextStrong", "textStyle": "ButtonLabel", "align": "left" } },
+                                {
+                                  "grid": {
+                                    "cellSize": [320, 200],
+                                    "spacing": 18,
+                                    "cascade": true,
+                                    "children": [
+
+                                      { "overlay": { "children": [
+                                        { "shape": { "anchor": "Stretch", "radius": 18, "background": "SurfaceElevated" } },
+                                        { "shape": { "id": "Combo/Cta", "shape": "Pill", "anchor": "Center", "size": [220, 64], "radius": 32, "background": "Primary",
+                                          "effect": { "id": "glowPulse", "params": { "duration": 1.1, "loop": true, "pingPong": true, "ease": "InOutSine", "restingPhase": 0.4, "softnessMin": 2, "softnessMax": 13, "pulseAlpha": true, "alphaMin": 0.9, "alphaMax": 1 } } } },
+                                        { "overlay": { "anchor": "Center", "size": [220, 64], "children": [
+                                          { "icon": { "name": "play", "anchor": "Center", "position": [-50, 0], "size": [26, 26], "color": "TextOnPrimary" } },
+                                          { "text": { "label": "PLAY NOW", "anchor": "Center", "position": [18, 0], "textStyle": "ButtonLabel", "color": "TextOnPrimary" } } ] } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [180, 26], "position": [12, -12], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "GLOWING CTA", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } },
+
+                                      { "overlay": { "children": [
+                                        { "shape": { "anchor": "Stretch", "radius": 18, "background": "SurfaceElevated" } },
+                                        { "shape": { "id": "Combo/Loader", "shape": "Arc", "anchor": "Center", "position": [0, 14], "size": [80, 80], "thickness": 9, "arcStart": 0, "arcSweep": 90, "background": "Primary",
+                                          "effect": { "id": "arcSpinner", "params": { "duration": 1.0, "loop": true, "pingPong": false, "ease": "Linear", "spinFrom": 0, "spinTo": 360 } } } },
+                                        { "text": { "label": "Loading…", "anchor": "Center", "position": [0, -56], "textStyle": "Caption", "color": "TextMuted" } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [170, 26], "position": [12, -12], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "LOADING CARD", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } },
+
+                                      { "overlay": { "children": [
+                                        { "shape": { "id": "Combo/Legendary", "shape": "RoundedRect", "anchor": "Stretch", "radius": 18, "background": "Primary",
+                                          "effect": { "id": "variant", "params": { "definition": "holoFoil" } },
+                                          "particles": { "capacity": 40, "rate": 12, "emitOnEnable": true, "particleShape": "Circle", "sizeRange": [3, 7], "lifetimeRange": [1.0, 2.0], "speedRange": [30, 75], "emitAngle": 90, "emitSpread": 50, "angularVelocityRange": [-30, 30],
+                                            "modules": [ { "id": "gravity", "params": { "acceleration": [0, 55] } }, { "id": "drag", "params": { "drag": 0.4 } }, { "id": "colorOverLife", "params": { "start": "Warning", "end": "#FFE08A00", "ease": "InQuad" } }, { "id": "sizeOverLife", "params": { "startScale": 1.0, "endScale": 0.0, "ease": "Linear" } } ] } } },
+                                        { "text": { "label": "LEGENDARY", "anchor": "Center", "textStyle": "Heading", "color": "TextOnPrimary" } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [200, 26], "position": [12, -12], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "FOIL + EMBERS", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } },
+
+                                      { "overlay": { "children": [
+                                        { "shape": { "id": "Combo/Glitch", "shape": "RoundedRect", "anchor": "Stretch", "radius": 18, "background": "Danger",
+                                          "effect": { "id": "variant", "params": { "definition": "glitch" } } } },
+                                        { "overlay": { "anchor": "Center", "children": [
+                                          { "icon": { "name": "wifi-off", "anchor": "Center", "position": [0, 22], "size": [40, 40], "color": "TextOnPrimary" } },
+                                          { "text": { "label": "CONNECTION LOST", "anchor": "Center", "position": [0, -22], "textStyle": "ButtonLabel", "color": "TextOnPrimary" } } ] } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [170, 26], "position": [12, -12], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "GLITCH ALERT", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } }
+
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+
+                          {
+                            "panel": {
+                              "id": "FxPanels/Interactive",
+                              "style": "Panel",
+                              "spacing": 14,
+                              "children": [
+                                { "text": { "label": "POINTER-DRIVEN", "color": "TextStrong", "textStyle": "ButtonLabel", "align": "left" } },
+                                { "text": { "label": "Effects that wake up on input — the mobile-game feel. Hover a card for a sheen or glow, hold to add juice, click to fire sparks from the cursor, or move the mouse to drag a glow with it. Enter Play mode and try them.", "color": "TextMuted", "textStyle": "Caption", "align": "left" } },
+                                {
+                                  "grid": {
+                                    "cellSize": [300, 180],
+                                    "spacing": 18,
+                                    "cascade": true,
+                                    "children": [
+
+                                      { "overlay": { "children": [
+                                        { "shape": { "id": "Ix/HoverSheen", "anchor": "Stretch", "radius": 18, "background": "Warning",
+                                          "effect": { "id": "sheenSweep",
+                                            "params": { "trigger": "hover", "triggerMode": "playOnce", "duration": 0.7, "loop": false, "ease": "InOutSine", "fromAngle": -60, "toAngle": 240 } } } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [180, 26], "position": [12, -12], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "HOVER → SHEEN", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } },
+
+                                      { "overlay": { "children": [
+                                        { "shape": { "id": "Ix/HoverGlow", "shape": "RoundedRect", "anchor": "Stretch", "radius": 18, "background": "Primary",
+                                          "effect": { "id": "glowPulse",
+                                            "params": { "trigger": "hover", "triggerMode": "hold", "duration": 1.0, "loop": true, "pingPong": true, "ease": "InOutSine", "softnessMin": 2, "softnessMax": 16, "pulseAlpha": true, "alphaMin": 0.85, "alphaMax": 1 } } } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [180, 26], "position": [12, -12], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "HOVER → GLOW", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } },
+
+                                      { "overlay": { "children": [
+                                        { "shape": { "id": "Ix/PressJuice", "shape": "RoundedRect", "anchor": "Stretch", "radius": 18, "background": "Success",
+                                          "effect": { "id": "transformJuice",
+                                            "params": { "trigger": "press", "triggerMode": "hold", "duration": 0.45, "loop": true, "pingPong": true, "ease": "InOutSine", "scale": 0.05, "rotate": 3 } } } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [180, 26], "position": [12, -12], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "PRESS → JUICE", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } },
+
+                                      { "overlay": { "children": [
+                                        { "shape": { "id": "Ix/ClickSpark", "shape": "RoundedRect", "anchor": "Stretch", "radius": 18, "background": "Primary",
+                                          "particles": { "capacity": 80, "burstCount": 24, "rate": 0, "atPointer": true,
+                                            "particleShape": "Circle", "sizeRange": [5, 11], "lifetimeRange": [0.5, 1.0], "speedRange": [180, 420],
+                                            "emitAngle": 90, "emitSpread": 360, "angularVelocityRange": [-180, 180],
+                                            "modules": [ { "id": "gravity", "params": { "acceleration": [0, -500] } }, { "id": "drag", "params": { "drag": 0.5 } }, { "id": "colorOverLife", "params": { "start": "Warning", "end": "#FFFFFF00", "ease": "OutQuad" } }, { "id": "sizeOverLife", "params": { "startScale": 1.0, "endScale": 0.0, "ease": "OutQuad" } } ] } } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [180, 26], "position": [12, -12], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "CLICK → SPARKS", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } },
+
+                                      { "overlay": { "children": [
+                                        { "shape": { "id": "Ix/CursorGlow", "anchor": "Stretch", "radius": 18, "background": "SurfaceElevated",
+                                          "pointerGlow": { "color": "#9FC2FFCC", "size": 150, "softness": 60 } } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [180, 26], "position": [12, -12], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "GLOW → CURSOR", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } }
+
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+
                           {
                             "text": {
-                              "label": "Glow / Sheen / Gradient Cycle are Tier-1: they only animate fields the shared SDF shader already reads (edge softness, gradient stops/angle), so every card still batches into one draw call. Dissolve is Tier-2 — its own fragment shader on a per-variant material, a deliberate batch split the cost-lint flags. Run Tools → Neo UI → Setup → Create or Repair Effect Assets once to bake the dissolve material.",
+                              "label": "Glow / Sheen / Gradient Cycle / Arc Spinner / Corner Morph / Border Pulse / Hue Shift / Transform Juice are Tier-1: they only animate fields the shared SDF shader already reads (or the RectTransform), so every card still batches into one draw call. Dissolve / Holo Foil / Glitch are Tier-2 — each its own fragment shader on a per-variant material, a deliberate batch split the cost-lint flags. The Interactive tab adds pointer triggers (hover/press), click-positioned particles and a cursor-follow glow — try them in Play mode. Run Tools → Neo UI → Setup → Create or Repair Effect Assets once to bake the Tier-2 materials.",
                               "color": "TextMuted",
                               "textStyle": "Caption",
                               "align": "left"

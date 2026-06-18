@@ -198,6 +198,11 @@ namespace Neo.UI
 
         // ------------------------------------------------------------------ emission
 
+        // Local spawn origin (relative to the emitter rect centre) for the NEXT spawns. Default zero =
+        // the emitter centre; a click-positioned burst sets it for the burst then restores it, so the
+        // emitter itself never moves (the host stays put).
+        [System.NonSerialized] private Vector2 _spawnOrigin;
+
         /// <summary> Emits the configured <see cref="BurstCount"/> particles at once. </summary>
         public void Burst() => Burst(burstCount);
 
@@ -214,6 +219,19 @@ namespace Neo.UI
                 return;
             }
             for (int i = 0; i < count; i++) Spawn();
+        }
+
+        /// <summary>
+        /// Emits <paramref name="count"/> particles from a specific LOCAL point (relative to the emitter
+        /// rect's centre) — for click-positioned bursts — WITHOUT moving the emitter or its host. The
+        /// origin applies to this burst only, then resets to the emitter centre.
+        /// </summary>
+        public void Burst(int count, Vector2 localOrigin)
+        {
+            Vector2 prev = _spawnOrigin;
+            _spawnOrigin = localOrigin;
+            try { Burst(count); }
+            finally { _spawnOrigin = prev; }
         }
 
         // ------------------------------------------------------------------ simulation
@@ -269,7 +287,7 @@ namespace Neo.UI
 
             p.alive = true;
             p.age = 0f;
-            p.position = Vector2.zero; // emit from the emitter's local origin
+            p.position = _spawnOrigin; // emit from the (optionally click-positioned) local origin
             p.rotation = 0f;
             p.startSize = Random.Range(sizeRange.x, sizeRange.y);
             p.size = p.startSize;

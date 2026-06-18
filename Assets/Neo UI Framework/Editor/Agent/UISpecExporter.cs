@@ -394,6 +394,7 @@ namespace Neo.UI.Editor
             ExportGeometry(element, (RectTransform)go.transform, inLayout);
             element.effect = ExportEffect(go);
             element.particles = ExportParticles(go);
+            element.pointerGlow = ExportPointerGlow(go);
             ApplyPresetDelta(go, element);
             if (s_elementSink != null) s_elementSink[go] = element;
             return element;
@@ -954,7 +955,25 @@ namespace Neo.UI.Editor
                 int count = new SerializedObject(burst).FindProperty("count").intValue;
                 if (count != 0) spec.signalCount = count;
             }
+
+            if (go.GetComponent<NeoParticlePointerBurst>() != null) spec.atPointer = true;
             return spec;
+        }
+
+        /// <summary>
+        /// Reconstructs a <see cref="NeoPointerReactor"/> (pointer-follow glow) to spec form. Color is
+        /// written as <c>#RRGGBBAA</c> so it round-trips deterministically. Null when none attached.
+        /// </summary>
+        private static PointerGlowSpec ExportPointerGlow(GameObject go)
+        {
+            var reactor = go.GetComponent<NeoPointerReactor>();
+            if (reactor == null) return null;
+            return new PointerGlowSpec
+            {
+                color = "#" + ColorUtility.ToHtmlStringRGBA(reactor.GlowColor),
+                size = reactor.GlowSize,
+                softness = reactor.GlowSoftness
+            };
         }
 
         private static float[] Vec2ToArray(Vector2 v) => new[] { v.x, v.y };

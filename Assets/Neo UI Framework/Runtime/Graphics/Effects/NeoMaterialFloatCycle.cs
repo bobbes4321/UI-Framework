@@ -86,6 +86,21 @@ namespace Neo.UI
             mat.SetFloat(propertyName, Mathf.LerpUnclamped(fromValue, toValue, easedPhase01));
         }
 
+        /// <inheritdoc/>
+        public override bool TrySetLiveParam(string param, float value)
+        {
+            switch (param)
+            {
+                case "from": FromValue = value; return true;
+                case "to": ToValue = value; return true;
+                // Convenience: pin both ends so a slider SCRUBS the material float directly (e.g. drag
+                // the dissolve amount) instead of animating it.
+                case "value":
+                case "amount": FromValue = value; ToValue = value; return true;
+            }
+            return base.TrySetLiveParam(param, value);
+        }
+
         /// <summary>
         /// Lazily clones the host's SHARED material into a per-instance copy (once) and assigns it to
         /// the graphic, so SetFloat never touches the shared/committed asset. Runtime-only; returns

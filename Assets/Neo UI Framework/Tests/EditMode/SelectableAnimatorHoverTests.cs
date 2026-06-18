@@ -14,6 +14,8 @@ namespace Neo.UI.Tests
     {
         private const float HoverScale = 1.05f;
         private const float HoverDuration = 0.12f;
+        private const float PressScale = 0.96f;
+        private const float PressDuration = 0.08f;
 
         private GameObject _go;
         private RectTransform _rect;
@@ -38,7 +40,15 @@ namespace Neo.UI.Tests
             hover.toCustomValue = new Vector3(HoverScale, HoverScale, 1f);
             hover.settings.duration = HoverDuration;
             hover.settings.ease = Ease.OutQuad;
-            // Normal stays with no enabled channels — un-hover must return to rest implicitly.
+            // Mirror the press dip too: pressing scales below rest.
+            ScaleAnimation press = _animator.pressedAnimation.scale;
+            press.enabled = true;
+            press.fromReference = ReferenceValue.StartValue;
+            press.toReference = ReferenceValue.CustomValue;
+            press.toCustomValue = new Vector3(PressScale, PressScale, 1f);
+            press.settings.duration = PressDuration;
+            press.settings.ease = Ease.OutQuad;
+            // Normal AND Selected stay with no enabled channels — leaving them must return to rest.
 
             // Capture rest values at scale 1 (Awake does not run for AddComponent in EditMode).
             _animator.BindTarget();
@@ -54,6 +64,10 @@ namespace Neo.UI.Tests
         private static void Tick(float dt) => UITick.Tick(dt);
 
         private void Hover() => _animator.OnSelectionStateChanged(UISelectionState.Highlighted, instant: false);
+
+        private void Press() => _animator.OnSelectionStateChanged(UISelectionState.Pressed, instant: false);
+
+        private void Select() => _animator.OnSelectionStateChanged(UISelectionState.Selected, instant: false);
 
         private void Unhover(bool instant = false) =>
             _animator.OnSelectionStateChanged(UISelectionState.Normal, instant);
@@ -125,6 +139,67 @@ namespace Neo.UI.Tests
                 Tick(HoverDuration * 2f);
                 Assert.That(_rect.localScale.x, Is.EqualTo(1f).Within(1e-3f),
                     $"cycle {i}: button must rest at scale 1 after each hover/un-hover");
+            }
+        }
+
+        [Test]
+        public void ClickSequence_SelectedThenNormal_SettlesAtRest()
+        {
+            // The drift bug: a real click is Highlighted → Pressed → Selected → Normal. Selected has
+            // no channels (settles _current back to rest), and so does Normal. The SECOND no-channel
+            // transition used to re-reverse the already-settled pressed tween — replaying it FORWARD
+            // and stranding the widget at the pressed end scale (0.96). On a full-width button that
+            // reads as "no longer fills its container"; on a tab it reads as a gap.
+            Hover();
+            Tick(HoverDuration * 0.4f);
+            Press();
+            Tick(PressDuration); // press dip completes
+            Assume.That(_rect.localScale.x, Is.LessThan(1f), "precondition: pressed dips below rest");
+
+            Select();
+            Tick(PressDuration * 2f); // first no-channel: settle back toward rest
+            Unhover();                // second no-channel (deselect): MUST stay at rest, not replay forward
+            Tick(PressDuration * 2f);
+
+            Assert.That(_rect.localScale.x, Is.EqualTo(1f).Within(1e-3f),
+                "Selected → Normal (two no-channel states) must leave the widget at rest scale 1");
+            Assert.AreEqual(0, UITick.count, "no tween should remain active once settled at rest");
+        }
+
+        [Test]
+        public void TwoConsecutiveNoChannelStates_AfterHover_StayAtRest()
+        {
+            // Minimal form of the same bug: hover, then two no-channel states back to back.
+            Hover();
+            Tick(HoverDuration);
+            Assume.That(_rect.localScale.x, Is.EqualTo(HoverScale).Within(1e-3f));
+
+            Select();              // first no-channel: reverse highlighted back to rest
+            Tick(HoverDuration * 2f);
+            Unhover();             // second no-channel: must NOT replay highlighted forward
+            Tick(HoverDuration * 2f);
+
+            Assert.That(_rect.localScale.x, Is.EqualTo(1f).Within(1e-3f),
+                "two no-channel states in a row must not re-grow the widget to the hover scale");
+            Assert.AreEqual(0, UITick.count);
+        }
+
+        [Test]
+        public void RepeatedClickCycles_NeverDrift()
+        {
+            // Full interaction loop hammered repeatedly — the symptom only emerged "after a while".
+            for (int i = 0; i < 5; i++)
+            {
+                Hover();
+                Tick(HoverDuration * 0.5f);
+                Press();
+                Tick(PressDuration * 0.5f);
+                Select();
+                Tick(PressDuration);
+                Unhover();
+                Tick(HoverDuration * 2f);
+                Assert.That(_rect.localScale.x, Is.EqualTo(1f).Within(1e-3f),
+                    $"cycle {i}: full hover→press→select→leave must always settle at rest scale 1");
             }
         }
     }

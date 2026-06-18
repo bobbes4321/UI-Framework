@@ -1130,6 +1130,25 @@ namespace Neo.UI.Editor
 
             if (element.particles != null)
                 ApplyParticles(element.particles, go, settings, report);
+
+            if (element.pointerGlow != null)
+                ApplyPointerGlow(element.pointerGlow, go);
+        }
+
+        /// <summary>
+        /// Attaches a <see cref="NeoPointerReactor"/> (the pointer-follow glow) from the spec. The color
+        /// is a theme-token-or-hex ref (same model as the effect/particle colors); size/softness are
+        /// optional and fall back to the reactor's defaults. Play-mode-only at runtime, so the baked
+        /// prefab is unchanged (WYSIWYG).
+        /// </summary>
+        private static void ApplyPointerGlow(PointerGlowSpec spec, GameObject go)
+        {
+            var reactor = go.GetComponent<NeoPointerReactor>();
+            if (reactor == null) reactor = go.AddComponent<NeoPointerReactor>();
+            if (!string.IsNullOrEmpty(spec.color))
+                reactor.GlowColor = ParticleEffectRegistry.ParseColorRef(spec.color).Resolve();
+            if (spec.size.HasValue) reactor.GlowSize = spec.size.Value;
+            if (spec.softness.HasValue) reactor.GlowSoftness = spec.softness.Value;
         }
 
         /// <summary> Adds + configures a <see cref="NeoParticleEmitter"/> from the spec (modules via the registry). </summary>
@@ -1206,6 +1225,10 @@ namespace Neo.UI.Editor
                 }
                 RegisterId(settings.streamIds, spec.signal.category, spec.signal.name);
             }
+
+            // Optional click-positioned burst: spawns particles at the pointer-down point.
+            if (spec.atPointer && go.GetComponent<NeoParticlePointerBurst>() == null)
+                go.AddComponent<NeoParticlePointerBurst>();
         }
 
         private static void SetIntProp(SerializedObject so, string name, int? value)

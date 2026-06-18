@@ -315,10 +315,29 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   "signal":{…} }`. Both are OPEN bags dispatched through editor descriptor registries so the spec
   pipeline carries NO per-effect switch — the extension seams are `ShapeEffectRegistry`
   (`IShapeEffectDescriptor`) and `ParticleEffectRegistry` (`IParticleModuleDescriptor`); a project adds
-  an effect/module by registering one descriptor. **Tier-1 effects** (glowPulse/sheenSweep/gradientCycle)
-  only animate fields `OnPopulateMesh` already reads, so they stay on the shared NeoShape batch
-  (`descriptor.BatchSafe == true`); a **Tier-2** `variant` effect swaps the material for a custom
-  shader (`ShapeEffectDefinition`/`NeoShapeVariant`, `BatchSafe == false`) — a deliberate batch split.
+  an effect/module by registering one descriptor (each Tier-1 descriptor lives in its OWN file under
+  `Editor/Agent/Effects/` — the per-descriptor seam — and is registered from
+  `ShapeEffectRegistry.RegisterBuiltins`). **Tier-1 effects** (glowPulse / sheenSweep / gradientCycle /
+  arcSpinner [Ring/Arc loading spinner — animates arcStart/arcSweep/ringThickness] / cornerMorph
+  [breathing cornerRadius/cornerRadii] / borderPulse [focus-ring border+outline] / hueShift [rainbow
+  fill hue] / transformJuice [RectTransform bob/sway/rotate/scale/squash — batch-safe because it never
+  touches the material]) only animate fields `OnPopulateMesh` already reads (or the transform), so they
+  stay on the shared NeoShape batch (`descriptor.BatchSafe == true`); a **Tier-2** `variant` effect
+  swaps the material for a custom shader (`ShapeEffectDefinition`/`NeoShapeVariant`, `BatchSafe == false`)
+  — a deliberate batch split. Built-in Tier-2 definitions (`dissolve` / `holoFoil` [iridescent foil] /
+  `glitch` [RGB-split + block-tear]) are code-seeded by `NoiseAssetBootstrap`
+  (`Tools → Neo UI → Setup → Create or Repair Effect Assets`).
+  **Live control** — any effect param can be driven at runtime by a domain signal: add
+  `"bindings": [ { "signal":"Category/Name", "param":"softnessMax", "min":2, "max":36 } ]` to an
+  effect's params (the special `"param":"enabled"` consumes a bool signal to toggle the whole effect).
+  A `slider`/`toggle`'s `signal` publishes into the stream; a `NeoSignalParamBinding` remaps it onto
+  the param via the open `NeoShapeEffect.TrySetLiveParam(param, value)` seam (each effect owns its param
+  names — no central switch). **Pointer interactivity** (the mobile-game feel): an effect bag takes
+  `"trigger":"hover"|"press"` + `"triggerMode":"hold"|"playOnce"` (→ `NeoEffectTrigger`, runs the effect
+  only on hover / while pressed); a particle bag takes `"atPointer": true` (→ `NeoParticlePointerBurst`,
+  bursts at the click point); any element takes `"pointerGlow": { "color", "size", "softness" }`
+  (→ `NeoPointerReactor`, a soft glow that follows the cursor). All three are runtime/play-mode only
+  (editor stays WYSIWYG) and round-trip through the spec.
   A Tier-2 `variant` optionally ANIMATES a named material float over the same timeline: add
   `animate` (the shader property, e.g. `_DissolveAmount`) + `from`/`to` + the shared timeline keys
   (`duration`/`loop`/`pingPong`/`ease`/`restingPhase`) to its params and the descriptor attaches a
@@ -330,11 +349,15 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   sharing the one material — `NeoParticleEmitter`), so they inherit masking/sort/scaling for free;
   burst-only by default, `rate > 0` enables continuous emission, an optional `signal` adds
   `NeoParticleBurstOnSignal`. The published per-vertex channel layout a Tier-2 shader authors against
-  is `Assets/docs/neoshape-channel-layout.md` (proof shader `NeoShapeDissolve.shader`). Round-trip via
-  `UISpecGenerator`/`UISpecExporter` (`ShapeEffectRoundTripTests`, `ParticleRoundTripTests`); the
-  particle test guards the emitter's `FindProperty` field names against drift. Cost-honesty surfaces in
-  `AgentValidation.ValidateDesign` (`designWarnings`): a Tier-2 variant warns it breaks the batch, a
-  continuous/high-capacity emitter warns about per-frame cost.
+  is `Assets/docs/neoshape-channel-layout.md` (proof shaders `NeoShapeDissolve.shader` /
+  `NeoShapeHoloFoil.shader` / `NeoShapeGlitch.shader`). Round-trip via
+  `UISpecGenerator`/`UISpecExporter` (`ShapeEffectRoundTripTests`, `ShapeEffectLibraryTests`,
+  `InteractiveEffectsTests`, `ParticleRoundTripTests`); the particle test guards the emitter's
+  `FindProperty` field names against drift. Cost-honesty surfaces in `AgentValidation.ValidateDesign`
+  (`designWarnings`): a Tier-2 variant warns it breaks the batch, a continuous/high-capacity emitter
+  warns about per-frame cost. The `effects` showcase (`Assets/Showcases/Specs/effects.json`) demos the
+  whole surface — Gallery (every effect), Interactive (hover/press/click/cursor triggers), Playground
+  (sliders bound live to a glow), Combos (effects on real UI).
 - The **Composer** (`Tools → Neo UI → Composer`, `Editor/Composer/NeoComposerWindow.cs`) is the
   from-scratch, no-agent authoring surface: it edits a `UISpec` in memory and regenerates the prefab
   as a live preview, so everything round-trips losslessly by construction (the spec stays the single

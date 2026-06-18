@@ -78,5 +78,18 @@ namespace Neo.UI
 
             shape.gradientAngleDegrees = Mathf.LerpUnclamped(fromAngle, toAngle, easedPhase01);
         }
+
+        /// <inheritdoc/>
+        public override bool TrySetLiveParam(string param, float value)
+        {
+            switch (param)
+            {
+                case "fromAngle": FromAngle = value; return true;
+                case "toAngle": ToAngle = value; return true;
+                // Convenience: pin both ends so a slider sets the sheen angle directly.
+                case "angle": FromAngle = value; ToAngle = value; return true;
+            }
+            return base.TrySetLiveParam(param, value);
+        }
     }
 }

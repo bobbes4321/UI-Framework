@@ -32,6 +32,10 @@ MonoBehaviour:
   - category: Lint
     names:
     - Vol
+  - category: Playground
+    names:
+    - SoftnessCtl
+    - SpeedCtl
   - category: Set
     names:
     - CursorSize

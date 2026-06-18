@@ -39,6 +39,12 @@ MonoBehaviour:
     - GlowPulse
     - GradientCycle
     - SheenSweep
+  - category: FxPanels
+    names:
+    - Combos
+    - Gallery
+    - Interactive
+    - Playground
   - category: HUD
     names:
     - Minimap

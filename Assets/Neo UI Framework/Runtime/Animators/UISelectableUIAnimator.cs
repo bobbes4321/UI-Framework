@@ -21,6 +21,12 @@ namespace Neo.UI
 
         private ISelectionStateHost _host;
         private UIAnimation _current;
+        // True once _current has been sent back to rest by a no-channel transition. Guards against a
+        // SECOND consecutive no-channel state re-reversing it: Tween.Reverse() on an idle (already
+        // settled) tween replays it FORWARD, which would park the widget at the animated end value
+        // (e.g. the pressed 0.96 scale) permanently. Click selects a button → Pressed → Selected →
+        // Normal is exactly two no-channel states in a row, so this case is the common one.
+        private bool _currentSettledToRest;
 
         public UIAnimation GetAnimation(UISelectionState state)
         {
@@ -91,14 +97,18 @@ namespace Neo.UI
                     {
                         _current.Stop(silent: true);
                         _current.RestoreStartValues();
+                        _currentSettledToRest = true;
                     }
-                    else
+                    else if (!_currentSettledToRest)
                     {
                         // Reverse smoothly back to rest: flips the in-flight playhead when the
                         // forward play is still running, or replays in reverse from the end when it
-                        // already finished. A no-channel state is always preceded by a channel state
-                        // (which replays _current forward), so _current is never double-reversed.
+                        // already finished. Guarded by _currentSettledToRest so a SECOND consecutive
+                        // no-channel state (Selected → Normal after a click) can't reverse an
+                        // already-settled tween a second time — that would replay it forward and
+                        // strand the widget at the animated end scale (visible gaps / shrunk buttons).
                         _current.Reverse();
+                        _currentSettledToRest = true;
                     }
                 }
                 return;
@@ -107,6 +117,7 @@ namespace Neo.UI
             BindTarget();
             _current?.Stop(silent: true);
             _current = animation;
+            _currentSettledToRest = false;
 
             if (instant) animation.SetProgressAtOne();
             else animation.Play(PlayDirection.Forward);

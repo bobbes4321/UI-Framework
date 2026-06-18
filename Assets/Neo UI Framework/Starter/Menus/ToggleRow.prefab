@@ -265,7 +265,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1f73ba54adea4f4ea864f669666211e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Neo.UI::Neo.UI.UIToggleUIAnimator
-  controller: {fileID: 7339385851538907694}
+  controller: {fileID: 0}
   onAnimation:
     purpose: 4
     move:
@@ -801,7 +801,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6ae3cf2a1541344f9babda51d2e7252, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Neo.UI::Neo.UI.UIToggleColorAnimator
-  controller: {fileID: 7339385851538907694}
+  controller: {fileID: 0}
   onColor:
     useToken: 1
     token: Primary
@@ -1044,7 +1044,7 @@ MonoBehaviour:
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
---- !u!1 &5015189428054705687
+--- !u!1 &6273599525266475701
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1052,11 +1052,11 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 411090633218806596}
-  - component: {fileID: 3616008030988177929}
-  - component: {fileID: 8536211033169210956}
-  - component: {fileID: 8113985829171162591}
-  - component: {fileID: 8596306250361914902}
+  - component: {fileID: 826373929431312453}
+  - component: {fileID: 3912710925689064773}
+  - component: {fileID: 8632118221994121461}
+  - component: {fileID: 7661476667359213253}
+  - component: {fileID: 6956605298568092221}
   m_Layer: 0
   m_Name: Label
   m_TagString: Untagged
@@ -1064,13 +1064,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &411090633218806596
+--- !u!224 &826373929431312453
 RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5015189428054705687}
+  m_GameObject: {fileID: 6273599525266475701}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -1083,21 +1083,21 @@ RectTransform:
   m_AnchoredPosition: {x: 26, y: 0}
   m_SizeDelta: {x: -52, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &3616008030988177929
+--- !u!222 &3912710925689064773
 CanvasRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5015189428054705687}
+  m_GameObject: {fileID: 6273599525266475701}
   m_CullTransparentMesh: 1
---- !u!114 &8536211033169210956
+--- !u!114 &8632118221994121461
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5015189428054705687}
+  m_GameObject: {fileID: 6273599525266475701}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
@@ -1183,13 +1183,13 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &8113985829171162591
+--- !u!114 &7661476667359213253
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5015189428054705687}
+  m_GameObject: {fileID: 6273599525266475701}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 694856ef5d85d304f86b08412f8c495e, type: 3}
@@ -1198,13 +1198,13 @@ MonoBehaviour:
   token: TextDefault
   themeOverride: {fileID: 0}
   tint: {r: 1, g: 1, b: 1, a: 1}
---- !u!114 &8596306250361914902
+--- !u!114 &6956605298568092221
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5015189428054705687}
+  m_GameObject: {fileID: 6273599525266475701}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 64f2314303b057d4488f46f606e1fb36, type: 3}
@@ -1244,7 +1244,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2644347733628335418}
-  - {fileID: 411090633218806596}
+  - {fileID: 826373929431312453}
   m_Father: {fileID: 3407063827551793618}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}

@@ -45,6 +45,32 @@ namespace Neo.UI.Editor
         /// <summary> Shader sampler the baked noise texture is bound to (added in NeoShapeDissolve.shader). </summary>
         public const string NoiseSamplerProperty = "_NoiseTex";
 
+        // ----------------------------------------------------------------- holo foil (Tier-2)
+
+        /// <summary> The ONE shared material for the holo-foil variant (shader Neo/UI/ShapeHoloFoil). </summary>
+        public const string HoloFoilMaterialPath = EffectsFolder + "/NeoHoloFoil.mat";
+        /// <summary> The holo-foil <see cref="ShapeEffectDefinition"/> asset (id "holoFoil"). </summary>
+        public const string HoloFoilDefinitionPath = EffectsFolder + "/HoloFoil.asset";
+        /// <summary> Stable, agent-addressable id of the holo-foil effect definition (never a GUID). </summary>
+        public const string HoloFoilEffectId = "holoFoil";
+        /// <summary> Display name shown in editor dropdowns. </summary>
+        public const string HoloFoilDisplayName = "Holo Foil";
+        /// <summary> Shader the holo-foil material uses (procedural — no texture). </summary>
+        public const string HoloFoilShaderName = "Neo/UI/ShapeHoloFoil";
+
+        // ----------------------------------------------------------------- glitch (Tier-2)
+
+        /// <summary> The ONE shared material for the glitch variant (shader Neo/UI/ShapeGlitch). </summary>
+        public const string GlitchMaterialPath = EffectsFolder + "/NeoGlitch.mat";
+        /// <summary> The glitch <see cref="ShapeEffectDefinition"/> asset (id "glitch"). </summary>
+        public const string GlitchDefinitionPath = EffectsFolder + "/Glitch.asset";
+        /// <summary> Stable, agent-addressable id of the glitch effect definition (never a GUID). </summary>
+        public const string GlitchEffectId = "glitch";
+        /// <summary> Display name shown in editor dropdowns. </summary>
+        public const string GlitchDisplayName = "Glitch";
+        /// <summary> Shader the glitch material uses (procedural — no texture). </summary>
+        public const string GlitchShaderName = "Neo/UI/ShapeGlitch";
+
         // Fixed lattice resolutions (powers of two so the value noise tiles seamlessly).
         private const int NoiseSize = 256;     // 256² mask
         private const int NoiseOctaves = 4;    // a few octaves of value noise
@@ -59,7 +85,9 @@ namespace Neo.UI.Editor
             Debug.Log(
                 "[Neo.UI] Effect assets (run once, same model as Create or Repair Fonts): " +
                 $"noise={NoiseTexturePath}, ramp={RampTexturePath}, material={(material != null)}, " +
-                $"definition='{DissolveEffectId}' → {DefinitionPath}");
+                $"definition='{DissolveEffectId}' → {DefinitionPath}; " +
+                $"holoFoil='{HoloFoilEffectId}' → {HoloFoilDefinitionPath}; " +
+                $"glitch='{GlitchEffectId}' → {GlitchDefinitionPath}");
         }
 
         /// <summary>
@@ -74,6 +102,10 @@ namespace Neo.UI.Editor
             BakeRampTexture();
             Material material = EnsureMaterial(noise);
             EnsureDefinition(material);
+
+            // Tier-2 library: additional self-animating shader variants (procedural — no texture).
+            EnsureHoloFoilDefinition(EnsureHoloFoilMaterial());
+            EnsureGlitchDefinition(EnsureGlitchMaterial());
 
             AssetDatabase.SaveAssets();
             return material;
@@ -252,6 +284,116 @@ namespace Neo.UI.Editor
 
             if (created)
                 AssetDatabase.CreateAsset(definition, DefinitionPath);
+            EditorUtility.SetDirty(definition);
+            return definition;
+        }
+
+        // ----------------------------------------------------------------- holo foil (Tier-2)
+
+        /// <summary>
+        /// Creates or repairs the ONE shared holo-foil material (shader <see cref="HoloFoilShaderName"/>).
+        /// Procedural — no texture is bound; the iridescence is generated in the fragment shader and
+        /// drifts from _Time. Never per-instance (see <see cref="NeoShapeVariant"/>).
+        /// </summary>
+        public static Material EnsureHoloFoilMaterial() =>
+            EnsureVariantMaterial(HoloFoilShaderName, HoloFoilMaterialPath, "NeoHoloFoil");
+
+        /// <summary>
+        /// Creates or repairs the holo-foil <see cref="ShapeEffectDefinition"/> asset (id
+        /// <see cref="HoloFoilEffectId"/>, <c>batchSafe=false</c>) with float-param defaults matching the
+        /// shader properties. Resolved by the <c>variant</c> descriptor by id.
+        /// </summary>
+        public static ShapeEffectDefinition EnsureHoloFoilDefinition(Material material) =>
+            EnsureVariantDefinition(material, HoloFoilDefinitionPath, "HoloFoil", HoloFoilEffectId, HoloFoilDisplayName,
+                new[] { ("_FoilIntensity", 0.6f), ("_FoilScale", 3f), ("_FoilSpeed", 0.4f), ("_Glint", 0.5f), ("_HueOffset", 0f) });
+
+        // ----------------------------------------------------------------- glitch (Tier-2)
+
+        /// <summary>
+        /// Creates or repairs the ONE shared glitch material (shader <see cref="GlitchShaderName"/>).
+        /// Procedural — no texture binding; the glitch animates entirely from _Time. Never per-instance.
+        /// </summary>
+        public static Material EnsureGlitchMaterial() =>
+            EnsureVariantMaterial(GlitchShaderName, GlitchMaterialPath, "NeoGlitch");
+
+        /// <summary>
+        /// Creates or repairs the glitch <see cref="ShapeEffectDefinition"/> asset (id
+        /// <see cref="GlitchEffectId"/>, <c>batchSafe=false</c>) with float-param defaults matching the
+        /// shader's properties, pointing at the shared glitch material.
+        /// </summary>
+        public static ShapeEffectDefinition EnsureGlitchDefinition(Material material) =>
+            EnsureVariantDefinition(material, GlitchDefinitionPath, "Glitch", GlitchEffectId, GlitchDisplayName,
+                new[] { ("_GlitchAmount", 0.3f), ("_RgbSplit", 0.02f), ("_BlockCount", 12f), ("_GlitchSpeed", 8f), ("_Scanline", 0.2f) });
+
+        // ----------------------------------------------------------------- Tier-2 variant plumbing
+
+        /// <summary>
+        /// Shared "create or repair a procedural Tier-2 variant material" helper: finds the shader,
+        /// creates the .mat if missing or repoints its shader if changed. Returns null (with a warning)
+        /// when the shader is absent so the variant falls back to the default NeoShape material.
+        /// </summary>
+        private static Material EnsureVariantMaterial(string shaderName, string materialPath, string materialName)
+        {
+            Shader shader = Shader.Find(shaderName);
+            if (shader == null)
+            {
+                Debug.LogWarning($"[Neo.UI] Shader '{shaderName}' not found — cannot create '{materialPath}'. " +
+                                 "The effect will fall back to the default NeoShape material.");
+                return null;
+            }
+
+            Material material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+            if (material == null)
+            {
+                material = new Material(shader) { name = materialName };
+                AssetDatabase.CreateAsset(material, materialPath);
+            }
+            else if (material.shader != shader)
+            {
+                material.shader = shader;
+            }
+
+            EditorUtility.SetDirty(material);
+            return material;
+        }
+
+        /// <summary>
+        /// Shared "create or repair a <see cref="ShapeEffectDefinition"/>" helper for Tier-2 variants:
+        /// writes id/displayName/sharedMaterial/batchSafe=false plus the given float-param defaults via
+        /// SerializedObject (flat, force-text), exactly like the dissolve definition.
+        /// </summary>
+        private static ShapeEffectDefinition EnsureVariantDefinition(
+            Material material, string definitionPath, string assetName, string id, string displayName,
+            (string name, float value)[] floatParams)
+        {
+            var definition = AssetDatabase.LoadAssetAtPath<ShapeEffectDefinition>(definitionPath);
+            bool created = definition == null;
+            if (created)
+            {
+                definition = ScriptableObject.CreateInstance<ShapeEffectDefinition>();
+                definition.name = assetName;
+            }
+
+            var so = new SerializedObject(definition);
+            so.FindProperty("id").stringValue = id;
+            so.FindProperty("displayName").stringValue = displayName;
+            so.FindProperty("sharedMaterial").objectReferenceValue = material;
+            so.FindProperty("batchSafe").boolValue = false;
+
+            SerializedProperty floats = so.FindProperty("floatParams");
+            floats.ClearArray();
+            for (int i = 0; i < floatParams.Length; i++)
+            {
+                floats.InsertArrayElementAtIndex(i);
+                SerializedProperty el = floats.GetArrayElementAtIndex(i);
+                el.FindPropertyRelative("name").stringValue = floatParams[i].name;
+                el.FindPropertyRelative("value").floatValue = floatParams[i].value;
+            }
+
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            if (created)
+                AssetDatabase.CreateAsset(definition, definitionPath);
             EditorUtility.SetDirty(definition);
             return definition;
         }

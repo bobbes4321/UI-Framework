@@ -31,6 +31,12 @@ MonoBehaviour:
     - About
     - Overview
     - Stats
+  - category: FxTabs
+    names:
+    - Combos
+    - Gallery
+    - Interactive
+    - Playground
   - category: Gameplay
     names:
     - ScreenShake
@@ -53,6 +59,9 @@ MonoBehaviour:
     - God
     - GodMode
     - InfiniteBoost
+  - category: Playground
+    names:
+    - OnCtl
   - category: Set
     names:
     - AutoRotate
