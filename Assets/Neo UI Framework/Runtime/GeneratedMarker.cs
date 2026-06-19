@@ -13,6 +13,11 @@ namespace Neo.UI
         [Tooltip("Spec identifier this object was generated from")]
         public string specSource;
 
+        [Tooltip("Id of the showcase whose spec+baseline owns this object, when generated/captured " +
+                 "inside a scoped showcase workspace. Empty for the default generated root. Used by the " +
+                 "native authoring 'Capture to Spec' flow to route a hand-built view back to its showcase.")]
+        public string showcaseId;
+
         [Tooltip("Generator schema version, for future migrations")]
         public int generatorVersion = 1;
     }

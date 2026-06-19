@@ -73,6 +73,9 @@ MonoBehaviour:
     - Quit
     - Settings
     - Skip
+  - category: DesignSystem
+    names:
+    - PreviewButton
   - category: Dialog
     names:
     - Cancel

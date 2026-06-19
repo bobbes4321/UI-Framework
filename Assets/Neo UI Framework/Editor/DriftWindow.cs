@@ -40,18 +40,10 @@ namespace Neo.UI.Editor
 
         private void Rescan()
         {
-            _baseline = NeoBaseline.Load();
-            if (_baseline == null)
-            {
-                _changes = new List<SpecChange>();
-                _offSpec = new List<OffSpecFinding>();
-            }
-            else
-            {
-                UISpec current = UISpecExporter.ExportProject();
-                _changes = SpecDiff.Compare(_baseline, current);
-                _offSpec = OffSpecLint.ScanProject(_baseline);
-            }
+            DriftStatus status = DriftStatus.Scan();
+            _baseline = status.baseline;
+            _changes = status.changes;
+            _offSpec = status.offSpec;
             _scanned = true;
             Repaint();
         }
@@ -106,14 +98,14 @@ namespace Neo.UI.Editor
             if (_changes.Count > 0)
             {
                 Section("Round-trips safely", NeoColors.Add);
-                foreach (SpecChange change in _changes) ChangeRow(change);
+                foreach (SpecChange change in _changes) DriftStatus.ChangeRow(change);
             }
 
             if (_offSpec.Count > 0)
             {
                 EditorGUILayout.Space();
                 Section("Off-spec — will be LOST on regenerate", NeoColors.Remove);
-                foreach (OffSpecFinding finding in _offSpec) FindingRow(finding);
+                foreach (OffSpecFinding finding in _offSpec) DriftStatus.FindingRow(finding);
             }
 
             EditorGUILayout.EndScrollView();
@@ -127,21 +119,5 @@ namespace Neo.UI.Editor
             GUI.contentColor = previous;
         }
 
-        private static void ChangeRow(SpecChange change)
-        {
-            string detail = change.kind == SpecChangeKind.Modified ? $"{change.before} → {change.after}"
-                : change.kind == SpecChangeKind.Added ? $"added {change.after}"
-                : $"removed {change.before}";
-            EditorGUILayout.LabelField($"• {change.path}", detail, EditorStyles.miniLabel);
-        }
-
-        private static void FindingRow(OffSpecFinding finding)
-        {
-            EditorGUILayout.LabelField($"• {finding.message}", EditorStyles.wordWrappedMiniLabel);
-            Color previous = GUI.contentColor;
-            GUI.contentColor = NeoColors.TextSubtle;
-            EditorGUILayout.LabelField($"    Fix: {finding.fix}", EditorStyles.wordWrappedMiniLabel);
-            GUI.contentColor = previous;
-        }
     }
 }

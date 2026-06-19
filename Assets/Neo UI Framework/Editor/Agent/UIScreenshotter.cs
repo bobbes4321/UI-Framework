@@ -68,7 +68,42 @@ namespace Neo.UI.Editor
             }, options);
         }
 
+        /// <summary>
+        /// Renders an already-built, live GameObject to a <see cref="Texture2D"/> the CALLER owns (e.g. the
+        /// Design System window's live preview). Same rig as <see cref="CaptureLive"/> minus the PNG write.
+        /// The root is moved into the throwaway preview scene and destroyed with it.
+        /// </summary>
+        internal static Texture2D RenderToTexture(GameObject root, int width, int height,
+            RenderOptions options = default)
+        {
+            if (root == null) return null;
+            return RenderInSceneToTexture(width, height, (scene, canvas) =>
+            {
+                SceneManager.MoveGameObjectToScene(root, scene);
+                root.transform.SetParent(canvas, worldPositionStays: false);
+                root.SetActive(true);
+                return root;
+            }, options);
+        }
+
         private static string RenderInScene(int width, int height, string outputPath,
+            Func<Scene, RectTransform, GameObject> produceContent, RenderOptions options = default)
+        {
+            Texture2D pixels = RenderInSceneToTexture(width, height, produceContent, options);
+            try
+            {
+                string directory = Path.GetDirectoryName(outputPath);
+                if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
+                File.WriteAllBytes(outputPath, pixels.EncodeToPNG());
+                return outputPath;
+            }
+            finally { if (pixels != null) UnityEngine.Object.DestroyImmediate(pixels); }
+        }
+
+        // The shared render core: builds a throwaway preview scene + ortho camera + WorldSpace canvas,
+        // renders the produced content and ReadPixels into a CPU Texture2D the caller owns (destroyed only
+        // on failure here). Used by both the PNG path and the in-window live preview.
+        private static Texture2D RenderInSceneToTexture(int width, int height,
             Func<Scene, RectTransform, GameObject> produceContent, RenderOptions options = default)
         {
             if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
@@ -78,6 +113,7 @@ namespace Neo.UI.Editor
             Scene scene = EditorSceneManager.NewPreviewScene();
             RenderTexture renderTexture = null;
             Texture2D pixels = null;
+            bool success = false;
             try
             {
                 var cameraGo = new GameObject("NeoUI Screenshot Camera");
@@ -129,21 +165,18 @@ namespace Neo.UI.Editor
                 pixels.Apply();
                 RenderTexture.active = previous;
                 camera.targetTexture = null;
-
-                string directory = Path.GetDirectoryName(outputPath);
-                if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
-                File.WriteAllBytes(outputPath, pixels.EncodeToPNG());
-                return outputPath;
+                success = true;
+                return pixels;
             }
             finally
             {
-                if (pixels != null) UnityEngine.Object.DestroyImmediate(pixels);
                 if (renderTexture != null)
                 {
                     renderTexture.Release();
                     UnityEngine.Object.DestroyImmediate(renderTexture);
                 }
                 EditorSceneManager.ClosePreviewScene(scene);
+                if (!success && pixels != null) UnityEngine.Object.DestroyImmediate(pixels);
             }
         }
 

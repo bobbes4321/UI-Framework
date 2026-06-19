@@ -300,6 +300,24 @@ namespace Neo.UI.Editor
             $"{((Theme)target).Variants.Count} variant(s) · {((Theme)target).ShapeStyles.Count} shape · " +
             $"{((Theme)target).TextStyles.Count} text style(s)";
         protected override Color Accent => NeoColors.Theming;
+
+        protected override void DrawBody()
+        {
+            if (NeoGUI.BeginFoldoutSection("NeoUI.Theme.Colors", "Color variants", defaultOpen: true))
+            {
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("activeVariantName"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("variants"), true);
+            }
+            NeoGUI.EndFoldoutSection();
+
+            if (NeoGUI.BeginFoldoutSection("NeoUI.Theme.Shape", "Shape styles"))
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("shapeStyles"), true);
+            NeoGUI.EndFoldoutSection();
+
+            if (NeoGUI.BeginFoldoutSection("NeoUI.Theme.Text", "Text styles"))
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("textStyles"), true);
+            NeoGUI.EndFoldoutSection();
+        }
     }
 
     // ------------------------------------------------------------------ settings / data (yellow)

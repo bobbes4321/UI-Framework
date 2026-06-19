@@ -843,6 +843,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Neo.UI::Neo.UI.GeneratedMarker
   specSource: starter:Toggle
+  showcaseId: 
   generatorVersion: 1
 --- !u!1 &6381599814057707075
 GameObject:

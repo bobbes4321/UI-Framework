@@ -67,6 +67,9 @@ MonoBehaviour:
   - category: IProv
     names:
     - View
+  - category: Ix
+    names:
+    - Screen
   - category: Juice
     names:
     - Screen

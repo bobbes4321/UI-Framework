@@ -22,18 +22,37 @@ namespace Neo.UI.Editor
             ThemeBundles.CleanSlate, ThemeBundles.NeonArcade, ThemeBundles.SoftFantasy
         };
 
+        private static bool _discovered;
+
         /// <summary> All registered bundles, built-ins first, in registration order. </summary>
-        public static IReadOnlyList<ThemeBundles.Bundle> All => _bundles;
+        public static IReadOnlyList<ThemeBundles.Bundle> All { get { EnsureDiscovered(); return _bundles; } }
 
         /// <summary> The names of every registered bundle — what the menu and inspector dropdown list. </summary>
-        public static IEnumerable<string> Names => _bundles.Select(b => b.name);
+        public static IEnumerable<string> Names { get { EnsureDiscovered(); return _bundles.Select(b => b.name); } }
 
         /// <summary> Case-insensitive lookup by name. Returns false (and a null bundle) when nothing matches. </summary>
         public static bool TryGet(string name, out ThemeBundles.Bundle bundle)
         {
+            EnsureDiscovered();
             bundle = _bundles.FirstOrDefault(b =>
                 string.Equals(b.name, name, System.StringComparison.OrdinalIgnoreCase));
             return bundle != null;
+        }
+
+        /// <summary> Marks discovered <see cref="ThemeBundleDefinition"/> assets stale (asset post-processor hook). </summary>
+        public static void InvalidateDiscovery() => _discovered = false;
+
+        /// <summary> Lazily folds every <see cref="ThemeBundleDefinition"/> asset into the registry (a
+        /// discovered definition overrides a built-in of the same name via <see cref="Register"/>). </summary>
+        private static void EnsureDiscovered()
+        {
+            if (_discovered) return;
+            _discovered = true; // set first so Register can't recurse into discovery
+            foreach (string guid in AssetDatabase.FindAssets("t:ThemeBundleDefinition"))
+            {
+                var def = AssetDatabase.LoadAssetAtPath<ThemeBundleDefinition>(AssetDatabase.GUIDToAssetPath(guid));
+                if (def != null) Register(def.ToBundle());
+            }
         }
 
         /// <summary>
@@ -61,6 +80,22 @@ namespace Neo.UI.Editor
         internal static bool Remove(string name) =>
             _bundles.RemoveAll(b =>
                 string.Equals(b.name, name, System.StringComparison.OrdinalIgnoreCase)) > 0;
+    }
+
+    /// <summary> Invalidates theme-bundle discovery on any <c>.asset</c> import, so a freshly created/
+    /// edited <see cref="ThemeBundleDefinition"/> surfaces without a domain reload. </summary>
+    internal sealed class ThemeBundleDefinitionPostprocessor : AssetPostprocessor
+    {
+        private static void OnPostprocessAllAssets(
+            string[] imported, string[] deleted, string[] moved, string[] movedFrom)
+        {
+            foreach (string p in imported) if (IsAsset(p)) { ThemeBundleRegistry.InvalidateDiscovery(); return; }
+            foreach (string p in deleted) if (IsAsset(p)) { ThemeBundleRegistry.InvalidateDiscovery(); return; }
+            foreach (string p in moved) if (IsAsset(p)) { ThemeBundleRegistry.InvalidateDiscovery(); return; }
+        }
+
+        private static bool IsAsset(string p) =>
+            p != null && p.EndsWith(".asset", System.StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -101,32 +136,42 @@ namespace Neo.UI.Editor
         /// </summary>
         private static Dictionary<string, Color> Palette(int background, int surface, int surfaceElevated,
             int outline, int primary, int textOnPrimary, int textStrong, int textDefault, int textMuted,
-            int success, int warning, int error, Color shadow)
+            int success, int warning, int error, Color shadow) =>
+            BuildPalette(Hex(background), Hex(surface), Hex(surfaceElevated), Hex(outline), Hex(primary),
+                Hex(textOnPrimary), Hex(textStrong), Hex(textDefault), Hex(textMuted), Hex(success),
+                Hex(warning), Hex(error), shadow);
+
+        /// <summary>
+        /// Expands one variant's base colors into the full factory token set, deriving hover/pressed
+        /// states via <see cref="ColorUtils"/> so a caller authors ONE color per intent. Public so the
+        /// New Project Setup wizard's "custom theme" builder produces a palette identical in structure to
+        /// the built-in bundles (and can save it as a <see cref="ThemeBundleDefinition"/>).
+        /// </summary>
+        public static Dictionary<string, Color> BuildPalette(Color background, Color surface,
+            Color surfaceElevated, Color outline, Color primary, Color textOnPrimary, Color textStrong,
+            Color textDefault, Color textMuted, Color success, Color warning, Color error, Color shadow)
         {
-            Color primaryColor = Hex(primary);
-            Color successColor = Hex(success);
-            Color errorColor = Hex(error);
             return new Dictionary<string, Color>
             {
-                [UIWidgetFactory.TokenBackground] = Hex(background),
-                [UIWidgetFactory.TokenSurface] = Hex(surface),
-                [UIWidgetFactory.TokenSurfaceElevated] = Hex(surfaceElevated),
-                [UIWidgetFactory.TokenOutline] = Hex(outline),
-                [UIWidgetFactory.TokenPrimary] = primaryColor,
-                [UIWidgetFactory.TokenPrimaryHover] = ColorUtils.DeriveHover(primaryColor),
-                [UIWidgetFactory.TokenPrimaryPressed] = ColorUtils.DerivePressed(primaryColor),
-                [UIWidgetFactory.TokenTextOnPrimary] = Hex(textOnPrimary),
-                [UIWidgetFactory.TokenTextStrong] = Hex(textStrong),
-                [UIWidgetFactory.TokenTextDefault] = Hex(textDefault),
-                [UIWidgetFactory.TokenTextMuted] = Hex(textMuted),
-                [UIWidgetFactory.TokenSuccess] = successColor,
-                [UIWidgetFactory.TokenSuccessHover] = ColorUtils.DeriveHover(successColor),
-                [UIWidgetFactory.TokenSuccessPressed] = ColorUtils.DerivePressed(successColor),
-                ["Warning"] = Hex(warning),
-                ["Error"] = errorColor,
-                [UIWidgetFactory.TokenDanger] = errorColor,
-                [UIWidgetFactory.TokenDangerHover] = ColorUtils.DeriveHover(errorColor),
-                [UIWidgetFactory.TokenDangerPressed] = ColorUtils.DerivePressed(errorColor),
+                [UIWidgetFactory.TokenBackground] = background,
+                [UIWidgetFactory.TokenSurface] = surface,
+                [UIWidgetFactory.TokenSurfaceElevated] = surfaceElevated,
+                [UIWidgetFactory.TokenOutline] = outline,
+                [UIWidgetFactory.TokenPrimary] = primary,
+                [UIWidgetFactory.TokenPrimaryHover] = ColorUtils.DeriveHover(primary),
+                [UIWidgetFactory.TokenPrimaryPressed] = ColorUtils.DerivePressed(primary),
+                [UIWidgetFactory.TokenTextOnPrimary] = textOnPrimary,
+                [UIWidgetFactory.TokenTextStrong] = textStrong,
+                [UIWidgetFactory.TokenTextDefault] = textDefault,
+                [UIWidgetFactory.TokenTextMuted] = textMuted,
+                [UIWidgetFactory.TokenSuccess] = success,
+                [UIWidgetFactory.TokenSuccessHover] = ColorUtils.DeriveHover(success),
+                [UIWidgetFactory.TokenSuccessPressed] = ColorUtils.DerivePressed(success),
+                ["Warning"] = warning,
+                ["Error"] = error,
+                [UIWidgetFactory.TokenDanger] = error,
+                [UIWidgetFactory.TokenDangerHover] = ColorUtils.DeriveHover(error),
+                [UIWidgetFactory.TokenDangerPressed] = ColorUtils.DerivePressed(error),
                 [UIWidgetFactory.TokenShadow] = shadow
             };
         }

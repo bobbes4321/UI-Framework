@@ -29,6 +29,11 @@ namespace Neo.UI.Editor
         [Tooltip("The JSON spec this showcase generates from.")]
         public DefaultAsset specJson;
 
+        [Tooltip("Explicit spec path, for when the spec is a .json (which imports as a TextAsset and so " +
+                 "can't sit in the DefaultAsset slot above). Takes effect only when specJson is unset. The " +
+                 "native 'new showcase' flow sets this to the conventional Specs/{id}.json path.")]
+        public string specPathOverride;
+
         [Tooltip("Name of the flow graph to build the scene around.")]
         public string flowName;
 
@@ -44,13 +49,18 @@ namespace Neo.UI.Editor
         {
             string resolvedId = string.IsNullOrWhiteSpace(id) ? name : id.Trim();
             string resolvedTitle = string.IsNullOrWhiteSpace(title) ? resolvedId : title;
+            // Prefer the wired asset; else the explicit override (the way a .json TextAsset spec is named);
+            // else null — never fabricate a path for a definition that genuinely declares no spec.
+            string specPath = specJson != null ? AssetDatabase.GetAssetPath(specJson)
+                : !string.IsNullOrEmpty(specPathOverride) ? specPathOverride
+                : null;
             return new Showcase
             {
                 id = resolvedId,
                 title = resolvedTitle,
                 description = description,
                 category = category,
-                specPath = specJson != null ? AssetDatabase.GetAssetPath(specJson) : null,
+                specPath = specPath,
                 flowName = flowName,
                 thumbnail = thumbnail != null ? AssetDatabase.GetAssetPath(thumbnail) : null
             };

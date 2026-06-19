@@ -34,7 +34,30 @@ MonoBehaviour:
   panelIds: {fileID: 11400000, guid: 8bc78860e6e74d747b379ac8aa66375f, type: 2}
   dropdownIds: {fileID: 0}
   menuWidgets: {fileID: 11400000, guid: d72f57cb1ab5b8d4dbdbac0bf88d9c8e, type: 2}
-  buttonVariants: []
+  buttonVariants:
+  - name: Important
+    colors:
+      normal:
+        useToken: 1
+        token: Primary
+        color: {r: 1, g: 1, b: 1, a: 1}
+      highlighted:
+        useToken: 1
+        token: PrimaryHover
+        color: {r: 1, g: 1, b: 1, a: 1}
+      pressed:
+        useToken: 1
+        token: PrimaryPressed
+        color: {r: 1, g: 1, b: 1, a: 1}
+      selected:
+        useToken: 1
+        token: PrimaryHover
+        color: {r: 1, g: 1, b: 1, a: 1}
+      disabled:
+        useToken: 1
+        token: Outline
+        color: {r: 1, g: 1, b: 1, a: 1}
+    contentToken: TextDefault
   buttonSizes: []
   iconOverlay: {fileID: 0}
   spacingScale:

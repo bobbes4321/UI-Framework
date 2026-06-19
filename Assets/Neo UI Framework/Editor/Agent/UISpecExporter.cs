@@ -379,7 +379,9 @@ namespace Neo.UI.Editor
         /// element. Set/cleared around <see cref="ExportView"/>; null (zero-cost) otherwise. </summary>
         private static Dictionary<GameObject, ElementSpec> s_elementSink;
 
-        private static ElementSpec ExportElement(GameObject go, bool inLayout)
+        // internal: the native-authoring "Apply Preset" flow (NeoSceneAuthoring) captures one live widget's
+        // spec to re-build it under a preset, reusing the exact per-element export the view exporter uses.
+        internal static ElementSpec ExportElement(GameObject go, bool inLayout)
         {
             ElementSpec element = ExportElementBody(go, inLayout);
             if (element == null) return null;

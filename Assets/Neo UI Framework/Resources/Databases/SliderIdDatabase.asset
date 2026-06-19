@@ -45,6 +45,9 @@ MonoBehaviour:
     - MasterVolume
     - Sensitivity
     - Volume
+  - category: Slider
+    names:
+    - New
   - category: Spec
     names:
     - Volume

@@ -97,6 +97,10 @@ namespace Neo.UI.Editor
             };
 
             // --- Setup: bootstrap / one-shot creation wizards (Tools/Neo UI/Setup/*) -------------
+            yield return Menu("setup-wizard", "New Project Setup…", Setup,
+                "Guided first run: pick a theme bundle and what to include, then set up the whole " +
+                "project in one click (orchestrates the create-or-repair steps below).",
+                "Tools/Neo UI/Setup/New Project Setup…");
             yield return Menu("setup-settings", "Create or Repair Settings", Setup,
                 "Create the single NeoUISettings asset and its id databases, or repair a broken one.",
                 "Tools/Neo UI/Setup/Create or Repair Settings");
@@ -106,6 +110,10 @@ namespace Neo.UI.Editor
             yield return Menu("setup-fonts", "Create or Repair Fonts", Setup,
                 "Regenerate the Inter + Lucide icon TMP SDF font assets and wire the icon font.",
                 "Tools/Neo UI/Setup/Create or Repair Fonts");
+            yield return Menu("setup-animations", "Create or Repair Animation Library", Setup,
+                "Seed the curated default animation presets (fades, four-way slides, scale-pop, button " +
+                "press, loop pulse) — auto-discovered, referenced by name from specs.",
+                "Tools/Neo UI/Setup/Create or Repair Animation Library");
             yield return Menu("setup-menu-lib", "Create or Repair Menu Widget Library", Setup,
                 "Create or repair the menu widget prefab library.",
                 "Tools/Neo UI/Setup/Create or Repair Menu Widget Library");

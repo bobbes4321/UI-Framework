@@ -104,6 +104,9 @@ MonoBehaviour:
     names:
     - Home
     - Options
+  - category: Switch
+    names:
+    - New
   - category: Switches
     names:
     - Fullscreen

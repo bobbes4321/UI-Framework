@@ -133,6 +133,25 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   Skip this ONLY for purely internal/agent-facing plumbing with no visible surface (exporters, merge,
   validation, bridge actions). A user-facing feature isn't "done" until its demo renders correctly —
   verify with the bridge `preview` action across the resolution matrix (it commits nothing).
+- **New Project Setup wizard** (`Tools → Neo UI → Setup → New Project Setup…`, `Editor/NeoSetupWizard.cs`)
+  is the guided front door for a fresh project: pick a starting look — a theme bundle (includes discovered
+  `ThemeBundleDefinition`s) OR **custom colors** (one color per intent; hover/pressed derived via
+  `ThemeBundles.BuildPalette`; optionally saved as a reusable `ThemeBundleDefinition`) — and tick what to
+  include (Starter Kit / Fonts / Widget Presets / **Animation Library** / Effect Assets), then one click
+  orchestrates the existing idempotent bootstraps in order and applies the look last. Surfaced in the Hub
+  Tools tab; covered by `HubToolCoverageTests` (every Setup/Advanced menu item must have a Hub tool).
+- **Design System editor** (`Tools → Neo UI → Design System`, `Editor/NeoDesignSystemWindow.cs`) is the
+  ongoing authoring window over the live `NeoUISettings` + `Theme`: tabs for **Colors** (variant tokens +
+  derive hover/pressed), **Buttons** (`ButtonVariantAsset` per-state colors + `contentToken` + sizes),
+  **Shapes** (`ShapeStyle` radius/outline/softness), **Presets** (create/select `NeoWidgetPreset`s incl. a
+  one-click "Primary Button"). The Buttons tab shows a REAL rendered sample button (re-rendered on change
+  via `UIScreenshotter.RenderToTexture` — the extracted texture core of `CaptureLive`); Shapes shows a faux
+  fill/outline swatch. Edits the exact structures the factory consults, so they flow into generated and
+  native-built UI.
+- **Default animation library** (`Tools → Neo UI → Setup → Create or Repair Animation Library`,
+  `Editor/AnimationLibraryBootstrap.cs`) seeds curated `UIAnimationPreset` assets (fades, four-way slides,
+  scale-pop, button press, loop pulse) built on the runtime's own `UIAnimation.ApplyPurposeDefaults`;
+  create-missing-only, auto-discovered via `AnimationPresetRegistry`. The package previously shipped none.
 - Settings/databases are created via `Tools → Neo UI → Setup → Create or Repair Settings`; the themed
   widget prefab library + Dark/Light palette + type scale via `Tools → Neo UI → Setup → Create or
   Repair Starter Kit`. TMP SDF font assets (Inter + the Lucide icon font, committed under
@@ -146,7 +165,17 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   `Tools → Neo UI → Setup → Apply Theme Bundle` or spec `"theme": { "bundle": "..." }`
   (`Editor/ThemeBundles.cs`) and ALSO seed/recolor the preset library to that personality (so a bundle
   = a full component library); the acceptance render (demo spec × every bundle) is
-  `-executeMethod Neo.UI.Editor.BeautificationAcceptance.Run` (needs graphics).
+  `-executeMethod Neo.UI.Editor.BeautificationAcceptance.Run` (needs graphics). A project adds its own
+  bundle WITHOUT C# by dropping a `ThemeBundleDefinition` asset (`Neo UI/Theme Bundle Definition`) —
+  `ThemeBundleRegistry` lazy-discovers it (like `NeoWidgetPresets`/`ShowcaseRegistry`).
+- **Designer-extensible SOs (lazy discovery, no fork, no C#):** the consistent seam across the package
+  is "drop an asset, it's discovered". `UIAnimationPreset` assets now AUTO-DISCOVER via
+  `AnimationPresetRegistry` (the generator resolves animation names through it — an explicitly-wired
+  `NeoUISettings.animationPresets` entry still wins; no manual database listing needed), `NeoWidgetPreset`
+  via `NeoWidgetPresets`, `ShowcaseDefinition` via `ShowcaseRegistry`, `ThemeBundleDefinition` via
+  `ThemeBundleRegistry`. Each pairs a lazy `EnsureDiscovered` + an `AssetPostprocessor` that invalidates
+  on `.asset` import. Authoring SOs get EditorUI-kit inspectors (`Editor/Inspectors/AuthoringInspectors.cs`
+  for `ShowcaseDefinition`/`AnimationPresetDatabase`, plus the sectioned `ThemeEditor`).
 - Build UI hierarchies in editor code through `UIWidgetFactory` (Editor/Agent) — it is the single
   source of widget structure; the spec generator AND exporter both rely on its child names.
 - Agent workflow with the editor OPEN: toggle `Tools → Neo UI → Advanced → Agent Bridge` once, then
@@ -358,6 +387,28 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   warns about per-frame cost. The `effects` showcase (`Assets/Showcases/Specs/effects.json`) demos the
   whole surface — Gallery (every effect), Interactive (hover/press/click/cursor triggers), Playground
   (sliders bound live to a glow), Combos (effects on real UI).
+- **Native-Unity authoring** (`Editor/Authoring/`) is the first-class, familiar way to build UI — the
+  GameObject menu + scene view + native inspectors + real prefabs — with a one-click path back to the
+  spec, so a developer never has to learn a bespoke window. Three pieces: (1) **creation** —
+  `GameObject → Neo UI → …` (`NeoCreateMenu`) drops a widget into the selection via
+  `NeoSceneAuthoring.CreateWidget`, which routes through `UISpecGenerator.BuildElementLive` (the SAME
+  build path generation uses, so a created widget is byte-identical to a generated one — proven by
+  `NativeAuthoringRoundTripTests`) and bootstraps a Canvas/EventSystem (New Input System) like Unity's
+  own UI create; the menu's "More Widgets…" is data-driven off `ComposerPalette.All` so custom
+  `NeoElementKinds` appear for free. (2) **capture** — `NeoCapture.CaptureView` folds a hand-built
+  `UIView` back into its showcase's spec + baseline by materializing it into the showcase
+  `Generated/Views` root and running the standing `SpecBaseline.CaptureEdits` protocol INSIDE
+  `NeoWorkspace.Scoped` — reusing the whole export/off-spec-lint/merge/baseline safety layer (off-spec
+  edits still refuse unless forced); attribution resolves via `GeneratedMarker.showcaseId` then the
+  active scene path, else the user picks/creates a showcase (`NeoCapture.CreateShowcase`). (3)
+  **scene-view overlay** — `NeoSceneOverlay` ([`Overlay(typeof(SceneView))`], Odin-Validator-style)
+  shows a drift-status dot (`DriftStatus.Scan`, shared with `DriftWindow`) + one-click Capture-to-Spec
+  / Validate / Check-Drift / Add-Widget / **Apply-Preset** when a `UIView` is selected; selection-driven
+  and cached (no per-repaint scans). The intent is for this to supersede the Composer once at parity.
+  `BuildElementLive` / `ViewPrefabPath` are the generator seams; `DriftStatus` the shared drift seam.
+  **Apply-Preset** (`NeoSceneAuthoring.ApplyPreset`) rebuilds the selected widget under a `NeoWidgetPreset`
+  by capturing its spec via the now-`internal` `UISpecExporter.ExportElement`, keeping kind/id/label/icon
+  but dropping captured styling so the preset drives the look; placement + sibling order preserved, one undo.
 - The **Composer** (`Tools → Neo UI → Composer`, `Editor/Composer/NeoComposerWindow.cs`) is the
   from-scratch, no-agent authoring surface: it edits a `UISpec` in memory and regenerates the prefab
   as a live preview, so everything round-trips losslessly by construction (the spec stays the single

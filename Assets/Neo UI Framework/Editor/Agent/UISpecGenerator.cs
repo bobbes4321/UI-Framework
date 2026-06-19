@@ -352,8 +352,7 @@ namespace Neo.UI.Editor
         private static void GenerateView(ViewSpec viewSpec, NeoUISettings settings, GenerateReport report)
         {
             EnsureFolder($"{GeneratedRoot}/Views");
-            string assetName = Sanitize($"{viewSpec.category}_{viewSpec.viewName}");
-            string path = $"{GeneratedRoot}/Views/{assetName}.prefab";
+            string path = ViewPrefabPath(viewSpec.category, viewSpec.viewName);
 
             GameObject existing = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             bool created = existing == null;
@@ -591,6 +590,29 @@ namespace Neo.UI.Editor
             NeoUISettings settings, GenerateReport report, ViewBuild build)
         {
             BuildElementTree(element, index, parent, settings, report, inLayout: false, build: build);
+        }
+
+        /// <summary>
+        /// Native-authoring seam: build ONE element live into an existing scene/prefab hierarchy through
+        /// the EXACT same path as generation (factory + custom-kind dispatch via <see cref="NeoElementKinds"/>
+        /// + id registration). Routing native "GameObject → Neo UI → …" creation through here — rather than
+        /// a parallel kind→factory map — guarantees a created-then-captured widget round-trips byte-identical
+        /// to a generated one, and lets project-registered custom kinds appear in the create menu for free.
+        /// The owning view root (walked up from <paramref name="parent"/>) hosts any shared toggle groups,
+        /// matching generation. <paramref name="inLayout"/> defaults to auto-detecting a layout-group parent.
+        /// </summary>
+        internal static GameObject BuildElementLive(ElementSpec element, RectTransform parent,
+            NeoUISettings settings, GenerateReport report, bool? inLayout = null)
+        {
+            if (element == null || parent == null) return null;
+            GameObject viewRoot = parent.GetComponentInParent<UIView>(includeInactive: true)?.gameObject
+                                  ?? parent.gameObject;
+            var build = new ViewBuild { root = viewRoot };
+            bool layout = inLayout ?? (parent.GetComponent<LayoutGroup>() != null);
+            GameObject go = BuildElementTree(element, parent.childCount, parent, settings, report, layout, build);
+            // Wire any tab→panel links created within this same drop (e.g. a template that brings both).
+            ResolveTabPanels(build, settings, report);
+            return go;
         }
 
         /// <summary>
@@ -1802,7 +1824,8 @@ namespace Neo.UI.Editor
             NeoUISettings settings, GenerateReport report, string context)
         {
             if (string.IsNullOrEmpty(presetName)) return;
-            UIAnimationPreset preset = settings.animationPresets != null ? settings.animationPresets.Get(presetName) : null;
+            // Explicit settings DB wins; otherwise any discovered UIAnimationPreset asset (no manual wiring).
+            UIAnimationPreset preset = AnimationPresetRegistry.Resolve(settings, presetName);
             if (preset == null)
             {
                 report.issues.Add($"{context}: preset '{presetName}' not found (define it in the spec's presets section)");
@@ -1939,6 +1962,15 @@ namespace Neo.UI.Editor
                 value = value.Replace(invalid, '_');
             return value;
         }
+
+        /// <summary>
+        /// The prefab asset path a view of (<paramref name="category"/>, <paramref name="viewName"/>)
+        /// generates to under the current <see cref="GeneratedRoot"/>. Single source of the naming so the
+        /// native-authoring capture (Phase 2) materializes a hand-built view to the SAME path a regenerate
+        /// would, letting the two converge instead of duplicating.
+        /// </summary>
+        internal static string ViewPrefabPath(string category, string viewName) =>
+            $"{GeneratedRoot}/Views/{Sanitize($"{category}_{viewName}")}.prefab";
 
         /// <summary>
         /// True when the element already exposes its id through an interactive widget's own NeoId, so the
