@@ -13,6 +13,11 @@ MonoBehaviour:
   m_Name: PanelIdDatabase
   m_EditorClassIdentifier: Neo.UI::Neo.UI.PanelIdDatabase
   categories:
+  - category: AnimPanels
+    names:
+    - Hover
+    - Loop
+    - Press
   - category: Bp
     names:
     - Card

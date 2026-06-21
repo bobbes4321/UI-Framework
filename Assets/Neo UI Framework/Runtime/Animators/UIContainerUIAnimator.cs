@@ -24,6 +24,13 @@ namespace Neo.UI
         public float showDuration => showAnimation.totalDuration;
         public float hideDuration => hideAnimation.totalDuration;
 
+        // Editor-only: seeds show/hide from the project's chosen defaults when the component is added.
+        protected virtual void Reset()
+        {
+            NeoUISettings.ApplyDefaultAnimation(NeoAnimatorRoles.ViewShow, showAnimation);
+            NeoUISettings.ApplyDefaultAnimation(NeoAnimatorRoles.ViewHide, hideAnimation);
+        }
+
         protected virtual void Awake()
         {
             BindTarget();

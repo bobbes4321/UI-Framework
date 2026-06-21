@@ -138,20 +138,47 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   `ThemeBundleDefinition`s) OR **custom colors** (one color per intent; hover/pressed derived via
   `ThemeBundles.BuildPalette`; optionally saved as a reusable `ThemeBundleDefinition`) — and tick what to
   include (Starter Kit / Fonts / Widget Presets / **Animation Library** / Effect Assets), then one click
-  orchestrates the existing idempotent bootstraps in order and applies the look last. Surfaced in the Hub
+  orchestrates the existing idempotent bootstraps in order and applies the look last. Also picks **Motion
+  defaults** (optional) — a preset per headline animator role (View show/hide, Button hover/press) written
+  to `NeoUISettings.animatorDefaults` so new widgets feel like the project by default. Surfaced in the Hub
   Tools tab; covered by `HubToolCoverageTests` (every Setup/Advanced menu item must have a Hub tool).
 - **Design System editor** (`Tools → Neo UI → Design System`, `Editor/NeoDesignSystemWindow.cs`) is the
   ongoing authoring window over the live `NeoUISettings` + `Theme`: tabs for **Colors** (variant tokens +
   derive hover/pressed), **Buttons** (`ButtonVariantAsset` per-state colors + `contentToken` + sizes),
   **Shapes** (`ShapeStyle` radius/outline/softness), **Presets** (create/select `NeoWidgetPreset`s incl. a
-  one-click "Primary Button"). The Buttons tab shows a REAL rendered sample button (re-rendered on change
+  one-click "Primary Button"), **Motion** (default animation preset per animator role —
+  `NeoUISettings.animatorDefaults`, the same data the Setup wizard seeds and animator `Reset()`/the factory
+  consume). The Buttons tab shows a REAL rendered sample button (re-rendered on change
   via `UIScreenshotter.RenderToTexture` — the extracted texture core of `CaptureLive`); Shapes shows a faux
   fill/outline swatch. Edits the exact structures the factory consults, so they flow into generated and
   native-built UI.
-- **Default animation library** (`Tools → Neo UI → Setup → Create or Repair Animation Library`,
-  `Editor/AnimationLibraryBootstrap.cs`) seeds curated `UIAnimationPreset` assets (fades, four-way slides,
-  scale-pop, button press, loop pulse) built on the runtime's own `UIAnimation.ApplyPurposeDefaults`;
-  create-missing-only, auto-discovered via `AnimationPresetRegistry`. The package previously shipped none.
+- **Animation presets** — the motion system, designer- and agent-authorable end to end. A `UIAnimation`
+  has FIVE independent channels: Move / Rotate / Scale / Fade / **Color** (the color/tint channel reuses
+  the existing `ColorAnimation` — endpoints resolve to a theme token, a `#hex`, or the start/current color;
+  default OFF so legacy animations are unchanged). `Tools → Neo UI → Setup → Create or Repair Animation
+  Library` (`Editor/AnimationLibraryBootstrap.cs`) seeds a curated **~46-preset** library across seven
+  categories — `Show`/`Hide` (fades, four-way slides, zoom, spin, drop-bounce), `Hover`/`Press`/`Click`
+  (scale/tilt/tint, punch, jello, rubber-band, spin360), `Toggle`, `Loop` (pulse, heartbeat, breathe, bob,
+  spin, shimmer) — create-missing-only, auto-discovered via `AnimationPresetRegistry`.
+  - **Project defaults (the "how widgets feel" seam):** `NeoUISettings.animatorDefaults` maps an animator
+    *role* → a default preset. Roles are an extensible registry (`NeoAnimatorRoles`: View/Show, View/Hide,
+    Button/Hover, Button/Press, Toggle/On, Toggle/Off, Loop, OneShot — a project adds one via `Register`).
+    `NeoUISettings.ApplyDefaultAnimation(role, target)` copies the configured preset in. An animator
+    component's `Reset()` seeds its slots from these defaults on add, and `UIWidgetFactory.AddHoverAndPressFeel`
+    routes through them (built-in scale-pop is the fallback when a role is unset) — so generated, native-built
+    AND hand-added widgets all honor the one project choice. Edit defaults in the Setup wizard or the Design
+    System **Motion** tab.
+  - **Per-state inspector picker:** every animator inspector (`AnimationPreviewEditor.cs`,
+    `AnimatorEditorGUI.PresetPicker`) shows a searchable dropdown per slot — presets whose category suits the
+    slot's role first — that copies a preset into that state (`AnimationPresetRegistry.FullNamesForRole`/
+    `GetByFullName` are the shared option source for the picker, wizard and Motion tab).
+  - **Per-element spec field** `"animations": { "hover", "press", "selected", "disabled", "loop" }` (preset
+    NAMES, like a view's `showAnimation`): hover/press/selected/disabled drive a `UISelectableUIAnimator`,
+    `loop` adds a play-on-start `UIAnimator`. The applied names are stamped on a `NeoAnimationSourceTag` so
+    they round-trip byte-identically (the animation analog of `WidgetPresetTag`). Demoed by the `animations`
+    showcase (`Assets/Showcases/Specs/animations.json`). The spec's top-level `presets` section also carries
+    the color channel now (`color`: from/to = `start`/`current`/`#hex`/token). Tests: `AnimationColorChannelTests`,
+    `AnimatorDefaultsTests`, `ElementAnimationsRoundTripTests`.
 - Settings/databases are created via `Tools → Neo UI → Setup → Create or Repair Settings`; the themed
   widget prefab library + Dark/Light palette + type scale via `Tools → Neo UI → Setup → Create or
   Repair Starter Kit`. TMP SDF font assets (Inter + the Lucide icon font, committed under

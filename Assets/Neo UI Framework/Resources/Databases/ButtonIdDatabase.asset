@@ -28,6 +28,29 @@ MonoBehaviour:
     - Quit
     - Resume
     - Settings
+  - category: Anim
+    names:
+    - Hero
+  - category: AnimHover
+    names:
+    - GlowPulse
+    - LiftUp
+    - ScaleDown
+    - ScaleUp
+    - ScaleUpBig
+    - TiltLeft
+    - TiltRight
+    - TintPrimary
+  - category: AnimPress
+    names:
+    - BarrelRoll
+    - Jello
+    - PressDip
+    - PunchScale
+    - RubberBand
+    - Spin360
+    - SquashStretch
+    - Wobble
   - category: B
     names:
     - Go

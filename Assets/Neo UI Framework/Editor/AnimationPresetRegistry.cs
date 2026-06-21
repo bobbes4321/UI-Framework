@@ -52,6 +52,42 @@ namespace Neo.UI.Editor
             return wired != null ? wired : (TryGet(presetName, out UIAnimationPreset found) ? found : null);
         }
 
+        /// <summary>
+        /// Discovered preset full-names ("Category/Name") ordered so those whose category suits the given
+        /// animator role (<see cref="NeoAnimatorRoles"/>) come first — the SHARED option source for the
+        /// per-state inspector picker, the Setup wizard and the Design System motion tab (so all three
+        /// surface the same, role-relevant presets). A null/empty role lists every preset alphabetically.
+        /// </summary>
+        public static List<string> FullNamesForRole(string role)
+        {
+            NeoAnimatorRole info = null;
+            if (!string.IsNullOrEmpty(role)) NeoAnimatorRoles.TryGet(role, out info);
+
+            EnsureDiscovered();
+            var suggested = new List<string>();
+            var others = new List<string>();
+            foreach (UIAnimationPreset preset in _presets)
+            {
+                if (preset == null || string.IsNullOrEmpty(preset.presetName)) continue;
+                bool isSuggested = info != null && Array.IndexOf(info.SuggestedCategories, preset.category) >= 0;
+                (isSuggested ? suggested : others).Add(preset.fullName);
+            }
+            suggested.Sort(StringComparer.Ordinal);
+            others.Sort(StringComparer.Ordinal);
+            suggested.AddRange(others);
+            return suggested;
+        }
+
+        /// <summary> Resolves a preset by its "Category/Name" full name (the picker option value). </summary>
+        public static UIAnimationPreset GetByFullName(string fullName)
+        {
+            if (string.IsNullOrEmpty(fullName)) return null;
+            EnsureDiscovered();
+            foreach (UIAnimationPreset preset in _presets)
+                if (preset != null && preset.fullName == fullName) return preset;
+            return null;
+        }
+
         public static void InvalidateDiscovery() => _discovered = false;
 
         internal static void ResetForTests() { _presets.Clear(); _discovered = false; }

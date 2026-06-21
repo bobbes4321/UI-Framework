@@ -138,6 +138,10 @@ namespace Neo.UI
 
         public void Reverse() => _tween?.Reverse();
 
+        public void Pause() => _tween?.Pause();
+
+        public void Resume() => _tween?.Resume();
+
         public void Stop(bool silent = false)
         {
             bool wasActive = isActive;

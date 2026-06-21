@@ -203,7 +203,31 @@ namespace Neo.UI.Editor
                     ease = animation.fade.settings.ease.ToString()
                 };
             }
+            if (animation.color.enabled)
+            {
+                presetSpec.color = new PresetChannelSpec
+                {
+                    enabled = true,
+                    from = FormatColorEndpoint(animation.color.from),
+                    to = FormatColorEndpoint(animation.color.to),
+                    duration = animation.color.settings.duration,
+                    ease = animation.color.settings.ease.ToString()
+                };
+            }
             return presetSpec;
+        }
+
+        // Encodes a color endpoint as the from/to string the spec uses: "start"/"current" for the
+        // captured/live color, a "#hex" for a custom color, or a bare theme-token name.
+        private static string FormatColorEndpoint(ColorAnimationEndpoint endpoint)
+        {
+            switch (endpoint.reference)
+            {
+                case ColorReference.StartColor: return "start";
+                case ColorReference.CurrentColor: return "current";
+                case ColorReference.ThemeToken: return endpoint.themeToken;
+                default: return ColorUtils.ToHex(endpoint.customColor);
+            }
         }
 
         private static string Format(Vector3 value) =>
@@ -397,6 +421,7 @@ namespace Neo.UI.Editor
             element.effect = ExportEffect(go);
             element.particles = ExportParticles(go);
             element.pointerGlow = ExportPointerGlow(go);
+            element.animations = ExportElementAnimations(go);
             ApplyPresetDelta(go, element);
             if (s_elementSink != null) s_elementSink[go] = element;
             return element;
@@ -888,6 +913,26 @@ namespace Neo.UI.Editor
                 from = ColorRefToString(gradient.colorA),
                 to = ColorRefToString(gradient.colorB),
                 angle = gradient.angle
+            };
+        }
+
+        /// <summary>
+        /// Recovers the element's per-element animation assignment from the <see cref="NeoAnimationSourceTag"/>
+        /// the generator stamps — the preset NAMES (CopyTo bakes the channels but drops the asset link), so
+        /// <c>"animations"</c> round-trips byte-identically. Null when the widget has no tag (e.g. the
+        /// implicit factory hover/press feel, which is not a per-element assignment).
+        /// </summary>
+        private static ElementAnimationsSpec ExportElementAnimations(GameObject go)
+        {
+            var tag = go.GetComponent<NeoAnimationSourceTag>();
+            if (tag == null || tag.IsEmpty) return null;
+            return new ElementAnimationsSpec
+            {
+                hover = string.IsNullOrEmpty(tag.hover) ? null : tag.hover,
+                press = string.IsNullOrEmpty(tag.press) ? null : tag.press,
+                selected = string.IsNullOrEmpty(tag.selected) ? null : tag.selected,
+                disabled = string.IsNullOrEmpty(tag.disabled) ? null : tag.disabled,
+                loop = string.IsNullOrEmpty(tag.loop) ? null : tag.loop
             };
         }
 

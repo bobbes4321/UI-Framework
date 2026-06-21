@@ -159,6 +159,52 @@ namespace Neo.UI.Editor
             GUILayout.Space(NeoGUI.Spacing);
             return result;
         }
+
+        /// <summary>
+        /// A "copy a library preset into this slot" row: a searchable dropdown of every discovered
+        /// <see cref="UIAnimationPreset"/> (those whose category suits the slot's <paramref name="role"/>
+        /// listed first), applied via <see cref="UIAnimationPreset.CopyTo"/> to every selected target so
+        /// the slot is seeded then freely tweaked. <paramref name="getSlot"/> picks the UIAnimation for a
+        /// given target (the currently-selected state/show-hide/on-off slot). <paramref name="role"/> may
+        /// be null (no suggested grouping — just shows every preset).
+        /// </summary>
+        public static void PresetPicker(SerializedObject so, string role, System.Func<Object, UIAnimation> getSlot)
+        {
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                string tooltip = string.IsNullOrEmpty(role)
+                    ? "Copy a library preset into this slot, then tweak it."
+                    : $"Copy a preset into this slot ({NeoAnimatorRoles.DisplayName(role)}), then tweak it.";
+                GUILayout.Label(new GUIContent("Preset", tooltip), GUILayout.Width(52f));
+                Rect rect = GUILayoutUtility.GetRect(GUIContent.none, EditorStyles.popup);
+                NeoDropdown.ValuePopup(rect, "", () => AnimationPresetRegistry.FullNamesForRole(role),
+                    chosen => ApplyPreset(so, getSlot, chosen), emptyLabel: "Apply preset…");
+            }
+            GUILayout.Space(NeoGUI.Spacing);
+        }
+
+        private static void ApplyPreset(SerializedObject so, System.Func<Object, UIAnimation> getSlot, string fullName)
+        {
+            UIAnimationPreset chosen = AnimationPresetRegistry.GetByFullName(fullName);
+            if (chosen == null) return;
+
+            try
+            {
+                foreach (Object target in so.targetObjects)
+                {
+                    UIAnimation slot = getSlot(target);
+                    if (slot == null) continue;
+                    Undo.RecordObject(target, "Apply Animation Preset");
+                    chosen.CopyTo(slot);
+                    EditorUtility.SetDirty(target);
+                }
+                if (so.targetObject != null) so.Update();
+            }
+            catch (System.Exception)
+            {
+                // the inspector (and its SerializedObject) may have gone away while the popup was open
+            }
+        }
     }
 
     [CustomEditor(typeof(UIAnimator))]
@@ -170,6 +216,8 @@ namespace Neo.UI.Editor
             NeoGUI.ComponentHeader("UI Animator", null, NeoColors.Animation);
             serializedObject.Update();
             EditorGUILayout.PropertyField(serializedObject.FindProperty("onStartBehaviour"));
+            AnimatorEditorGUI.PresetPicker(serializedObject, NeoAnimatorRoles.OneShot,
+                o => ((UIAnimator)o).animation);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("animation"));
             serializedObject.ApplyModifiedProperties();
 
@@ -195,6 +243,9 @@ namespace Neo.UI.Editor
             var animator = (UIContainerUIAnimator)target;
             var hasChannels = new[] { animator.showAnimation.hasEnabledChannels, animator.hideAnimation.hasEnabledChannels };
             int index = AnimatorEditorGUI.AnimationTabBar("Neo.ContainerAnim.tab", Labels, hasChannels);
+            AnimatorEditorGUI.PresetPicker(serializedObject,
+                index == 0 ? NeoAnimatorRoles.ViewShow : NeoAnimatorRoles.ViewHide,
+                o => index == 0 ? ((UIContainerUIAnimator)o).showAnimation : ((UIContainerUIAnimator)o).hideAnimation);
             EditorGUILayout.PropertyField(serializedObject.FindProperty(Props[index]), GUIContent.none);
             serializedObject.ApplyModifiedProperties();
 
@@ -224,6 +275,12 @@ namespace Neo.UI.Editor
                 hasChannels[i] = animator.GetAnimation((UISelectionState)i).hasEnabledChannels;
 
             int index = AnimatorEditorGUI.AnimationTabBar("Neo.SelectableAnim.tab", StateNames, hasChannels);
+            // Hover/Press map to project roles; Normal/Selected/Disabled have no shipped role (null →
+            // the picker just lists every preset).
+            string role = index == 1 ? NeoAnimatorRoles.ButtonHover
+                : index == 2 ? NeoAnimatorRoles.ButtonPress : null;
+            AnimatorEditorGUI.PresetPicker(serializedObject, role,
+                o => ((UISelectableUIAnimator)o).GetAnimation((UISelectionState)index));
             EditorGUILayout.PropertyField(serializedObject.FindProperty(Props[index]), GUIContent.none);
             serializedObject.ApplyModifiedProperties();
 
@@ -251,6 +308,9 @@ namespace Neo.UI.Editor
             var animator = (UIToggleUIAnimator)target;
             var hasChannels = new[] { animator.onAnimation.hasEnabledChannels, animator.offAnimation.hasEnabledChannels };
             int index = AnimatorEditorGUI.AnimationTabBar("Neo.ToggleAnim.tab", Labels, hasChannels);
+            AnimatorEditorGUI.PresetPicker(serializedObject,
+                index == 0 ? NeoAnimatorRoles.ToggleOn : NeoAnimatorRoles.ToggleOff,
+                o => index == 0 ? ((UIToggleUIAnimator)o).onAnimation : ((UIToggleUIAnimator)o).offAnimation);
             EditorGUILayout.PropertyField(serializedObject.FindProperty(Props[index]), GUIContent.none);
             serializedObject.ApplyModifiedProperties();
 

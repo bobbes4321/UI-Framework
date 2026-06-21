@@ -13,6 +13,11 @@ MonoBehaviour:
   m_Name: ToggleIdDatabase
   m_EditorClassIdentifier: Neo.UI::Neo.UI.ToggleIdDatabase
   categories:
+  - category: AnimTabs
+    names:
+    - Hover
+    - Loop
+    - Press
   - category: Audio
     names:
     - Music

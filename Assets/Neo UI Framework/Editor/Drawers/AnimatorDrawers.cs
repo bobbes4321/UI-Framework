@@ -18,8 +18,9 @@ namespace Neo.UI.Editor
     [CustomPropertyDrawer(typeof(UIAnimation))]
     public class UIAnimationDrawer : PropertyDrawer
     {
-        private static readonly string[] ChannelFields = { "move", "rotate", "scale", "fade" };
-        private static readonly string[] ChannelLabels = { "Move", "Rotate", "Scale", "Fade" };
+        private static readonly string[] ChannelFields = { "move", "rotate", "scale", "fade", "color" };
+        private static readonly string[] ChannelLabels = { "Move", "Rotate", "Scale", "Fade", "Color" };
+        private const int ColorChannelIndex = 4;
 
         private const float StripHeight = 22f;
         private const float CheckboxWidth = 16f;
@@ -185,8 +186,33 @@ namespace Neo.UI.Editor
         {
             buffer.Clear();
             buffer.Add(new PanelItem { Prop = channel.FindPropertyRelative("settings") });
+
+            // Color endpoints are ColorAnimationEndpoint objects (reference / customColor / themeToken),
+            // not the from*Direction/Reference/CustomValue/Offset fields the other four channels share —
+            // draw each endpoint as its own nested property under a From/To header.
+            if (channelIndex == ColorChannelIndex)
+            {
+                AddColorEndpoint(buffer, channel.FindPropertyRelative("from"), isFrom: true);
+                AddColorEndpoint(buffer, channel.FindPropertyRelative("to"), isFrom: false);
+                return;
+            }
+
             AddEndpoint(buffer, channel, channelIndex == 0, isFrom: true);
             AddEndpoint(buffer, channel, channelIndex == 0, isFrom: false);
+        }
+
+        // A color endpoint shows its reference, then ONLY the value that reference uses: a custom color
+        // for CustomColor, a token string for ThemeToken, nothing for Start/Current (resolved at play).
+        private static void AddColorEndpoint(List<PanelItem> buffer, SerializedProperty endpoint, bool isFrom)
+        {
+            buffer.Add(new PanelItem { Header = isFrom ? "From" : "To" });
+            SerializedProperty reference = endpoint.FindPropertyRelative("reference");
+            buffer.Add(new PanelItem { Prop = reference });
+            bool mixed = reference.hasMultipleDifferentValues;
+            if (mixed || reference.enumValueIndex == (int)ColorReference.CustomColor)
+                buffer.Add(new PanelItem { Prop = endpoint.FindPropertyRelative("customColor") });
+            if (mixed || reference.enumValueIndex == (int)ColorReference.ThemeToken)
+                buffer.Add(new PanelItem { Prop = endpoint.FindPropertyRelative("themeToken") });
         }
 
         private static void AddEndpoint(List<PanelItem> buffer, SerializedProperty channel, bool isMove, bool isFrom)

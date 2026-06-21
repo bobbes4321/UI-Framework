@@ -15,6 +15,7 @@ MonoBehaviour:
   theme: {fileID: 11400000, guid: 0852788dac4549a49ad210d24e1ca82c, type: 2}
   iconFont: {fileID: 11400000, guid: 5f1b298af17d2614f8332dcbe6c51e11, type: 2}
   animationPresets: {fileID: 11400000, guid: 624df2d6a410c40458af64eba0a88f90, type: 2}
+  animatorDefaults: []
   popupDatabase: {fileID: 11400000, guid: 0dfe29634ae01fe4aab74466df901075, type: 2}
   popupsCanvasName: PopupsCanvas
   tooltipsCanvasName: TooltipsCanvas

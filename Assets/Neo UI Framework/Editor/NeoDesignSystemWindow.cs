@@ -10,14 +10,15 @@ namespace Neo.UI.Editor
     /// The design-system editor: one window to author the project's LOOK over the live
     /// <see cref="NeoUISettings"/> + <see cref="Theme"/> — Colors (theme tokens/variants), Buttons
     /// (per-state variant colors + sizes), Shapes (radius / outline / softness), and Presets (named
-    /// component styles like "Primary Button"). It edits the exact structures the widget factory already
-    /// consults (`buttonVariants`, theme tokens, shape styles, <see cref="NeoWidgetPreset"/>), so changes
-    /// flow straight into generated and native-built UI. A faux preview shows the chosen colors/outline.
+    /// component styles like "Primary Button"), and Motion (default animation preset per animator role).
+    /// It edits the exact structures the widget factory already consults (`buttonVariants`, theme tokens,
+    /// shape styles, <see cref="NeoWidgetPreset"/>, `animatorDefaults`), so changes flow straight into
+    /// generated and native-built UI. A faux preview shows the chosen colors/outline.
     /// </summary>
     public sealed class NeoDesignSystemWindow : EditorWindow
     {
         private const string TabKey = "NeoUI.DesignSystem.Tab";
-        private static readonly string[] Tabs = { "Colors", "Buttons", "Shapes", "Presets" };
+        private static readonly string[] Tabs = { "Colors", "Buttons", "Shapes", "Presets", "Motion" };
 
         private Vector2 _scroll;
         private int _variantIdx, _btnIdx, _shapeIdx;
@@ -64,6 +65,7 @@ namespace Neo.UI.Editor
                 case 1: DrawButtons(settings, theme); break;
                 case 2: DrawShapes(theme); break;
                 case 3: DrawPresets(); break;
+                case 4: DrawMotion(settings); break;
                 default: DrawColors(theme); break;
             }
             EditorGUILayout.EndScrollView();
@@ -430,6 +432,67 @@ namespace Neo.UI.Editor
             NeoWidgetPresets.InvalidateDiscovery();
             Selection.activeObject = preset;
             EditorGUIUtility.PingObject(preset);
+        }
+
+        // ============================================================ Motion
+
+        // Default animation preset per animator role (NeoUISettings.animatorDefaults) — the same data the
+        // Setup wizard seeds and animator Reset() / the widget factory consume. Editing here flows into
+        // every newly-added animator and freshly-generated button/view.
+        private void DrawMotion(NeoUISettings settings)
+        {
+            EditorGUILayout.LabelField("Default motion per animator role", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Copied into new animator components and generated buttons/views. " +
+                "Pick a preset per role, or clear (✕) to keep the built-in feel.",
+                EditorStyles.wordWrappedMiniLabel);
+
+            if (AnimationPresetRegistry.All.Count == 0)
+            {
+                EditorGUILayout.HelpBox("No animation presets found yet.", MessageType.Info);
+                if (GUILayout.Button("Create or Repair Animation Library"))
+                {
+                    AnimationLibraryBootstrap.CreateOrRepair();
+                    AssetDatabase.SaveAssets();
+                }
+                return;
+            }
+
+            foreach (NeoAnimatorRole role in NeoAnimatorRoles.All)
+                DrawMotionRole(settings, role);
+
+            NeoGUI.Splitter();
+            if (GUILayout.Button(new GUIContent("Create or Repair Animation Library",
+                    "Seed/repair the curated preset library these dropdowns choose from")))
+            {
+                int n = AnimationLibraryBootstrap.CreateOrRepair();
+                AssetDatabase.SaveAssets();
+                Debug.Log($"[Neo.UI] Animation library: {n} preset(s) created.");
+            }
+        }
+
+        private void DrawMotionRole(NeoUISettings settings, NeoAnimatorRole role)
+        {
+            settings.TryGetDefaultAnimation(role.Id, out UIAnimationPreset current);
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField(new GUIContent(role.DisplayName, role.Description), GUILayout.Width(150f));
+                Rect rect = GUILayoutUtility.GetRect(GUIContent.none, EditorStyles.popup);
+                NeoDropdown.ValuePopup(rect, current != null ? current.fullName : "",
+                    () => AnimationPresetRegistry.FullNamesForRole(role.Id),
+                    chosen =>
+                    {
+                        Undo.RecordObject(settings, "Set motion default");
+                        settings.SetDefaultAnimation(role.Id, AnimationPresetRegistry.GetByFullName(chosen));
+                        EditorUtility.SetDirty(settings);
+                    }, emptyLabel: "(built-in)");
+                using (new EditorGUI.DisabledScope(current == null))
+                    if (GUILayout.Button("✕", GUILayout.Width(22f)))
+                    {
+                        Undo.RecordObject(settings, "Clear motion default");
+                        settings.SetDefaultAnimation(role.Id, null);
+                        EditorUtility.SetDirty(settings);
+                    }
+            }
         }
 
         // ============================================================ helpers

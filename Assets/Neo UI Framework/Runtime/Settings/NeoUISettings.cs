@@ -34,6 +34,21 @@ namespace Neo.UI
         [Header("Animation Presets")]
         public AnimationPresetDatabase animationPresets;
 
+        /// <summary> A project-chosen default animation preset for one animator role (<see cref="NeoAnimatorRoles"/>). </summary>
+        [System.Serializable]
+        public class AnimatorDefault
+        {
+            [Tooltip("Animator role id (NeoAnimatorRoles), e.g. \"Button/Hover\"")]
+            public string role;
+            [Tooltip("Preset copied into the animator slot when the component is added / generated")]
+            public UIAnimationPreset preset;
+        }
+
+        [Tooltip("Default animation preset per animator role — applied when an animator component is " +
+                 "added (Reset) and to generated/native widgets. Empty roles fall back to built-in feel. " +
+                 "See NeoAnimatorRoles for the role ids; edit via the Setup wizard or Design System window.")]
+        public List<AnimatorDefault> animatorDefaults = new List<AnimatorDefault>();
+
         [Header("Popups")]
         public PopupDatabase popupDatabase;
         [Tooltip("Name of the GameObject acting as the dedicated popups canvas")]
@@ -146,6 +161,53 @@ namespace Neo.UI
                 return true;
             }
             return false;
+        }
+
+        // ── Animator defaults ────────────────────────────────────────────────────────────────────
+        // The project's "how widgets feel by default" choices, keyed by NeoAnimatorRoles id.
+
+        /// <summary> Resolves the configured default preset for an animator role. </summary>
+        public bool TryGetDefaultAnimation(string role, out UIAnimationPreset preset)
+        {
+            preset = null;
+            if (string.IsNullOrEmpty(role) || animatorDefaults == null) return false;
+            foreach (AnimatorDefault entry in animatorDefaults)
+                if (entry != null && entry.preset != null
+                    && string.Equals(entry.role, role, System.StringComparison.Ordinal))
+                {
+                    preset = entry.preset;
+                    return true;
+                }
+            return false;
+        }
+
+        /// <summary> Sets (or clears, when <paramref name="preset"/> is null) the default for a role. </summary>
+        public void SetDefaultAnimation(string role, UIAnimationPreset preset)
+        {
+            if (string.IsNullOrEmpty(role)) return;
+            if (animatorDefaults == null) animatorDefaults = new List<AnimatorDefault>();
+            foreach (AnimatorDefault entry in animatorDefaults)
+                if (entry != null && string.Equals(entry.role, role, System.StringComparison.Ordinal))
+                {
+                    entry.preset = preset;
+                    return;
+                }
+            animatorDefaults.Add(new AnimatorDefault { role = role, preset = preset });
+        }
+
+        /// <summary>
+        /// Copies the active settings asset's configured default preset for <paramref name="role"/> into
+        /// <paramref name="target"/>. Returns false (leaving target untouched) when no settings asset
+        /// exists or the role has no default — callers then keep their own built-in fallback. The single
+        /// path animator <c>Reset()</c> and <see cref="UIWidgetFactory"/> use to honor the project choice.
+        /// </summary>
+        public static bool ApplyDefaultAnimation(string role, UIAnimation target)
+        {
+            NeoUISettings settings = instance;
+            if (settings == null || target == null) return false;
+            if (!settings.TryGetDefaultAnimation(role, out UIAnimationPreset preset)) return false;
+            preset.CopyTo(target);
+            return true;
         }
 
         // ── Design-lint configuration (extensibility seam: validation rules) ─────────────────────

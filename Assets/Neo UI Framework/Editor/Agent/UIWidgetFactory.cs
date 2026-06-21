@@ -456,25 +456,35 @@ namespace Neo.UI.Editor
 
         /// <summary>
         /// Default interaction juice shared by buttons and tabs: hovering scales up slightly,
-        /// pressing dips below rest. Leaving a state whose animation has no enabled channels
-        /// restores the rest scale (see UISelectableUIAnimator.OnSelectionStateChanged).
+        /// pressing dips below rest. The project's chosen Button/Hover + Button/Press defaults
+        /// (Setup wizard / Design System) win when configured — so generated UI feels exactly like a
+        /// hand-added animator — and the built-in scale-pop is the fallback when a role is unset, so a
+        /// project that never picks a default still gets good feel. Leaving a state whose animation has
+        /// no enabled channels restores the rest scale (see UISelectableUIAnimator.OnSelectionStateChanged).
         /// </summary>
         private static void AddHoverAndPressFeel(GameObject go, float hoverScale = 1.05f)
         {
             var feel = go.AddComponent<UISelectableUIAnimator>();
-            feel.highlightedAnimation.scale.enabled = true;
-            feel.highlightedAnimation.scale.fromReference = ReferenceValue.StartValue;
-            feel.highlightedAnimation.scale.toReference = ReferenceValue.CustomValue;
-            feel.highlightedAnimation.scale.toCustomValue = new Vector3(hoverScale, hoverScale, 1f);
-            feel.highlightedAnimation.scale.settings.duration = 0.12f;
-            feel.highlightedAnimation.scale.settings.ease = Ease.OutQuad;
 
-            feel.pressedAnimation.scale.enabled = true;
-            feel.pressedAnimation.scale.fromReference = ReferenceValue.StartValue;
-            feel.pressedAnimation.scale.toReference = ReferenceValue.CustomValue;
-            feel.pressedAnimation.scale.toCustomValue = new Vector3(0.96f, 0.96f, 1f);
-            feel.pressedAnimation.scale.settings.duration = 0.08f;
-            feel.pressedAnimation.scale.settings.ease = Ease.OutQuad;
+            if (!NeoUISettings.ApplyDefaultAnimation(NeoAnimatorRoles.ButtonHover, feel.highlightedAnimation))
+            {
+                feel.highlightedAnimation.scale.enabled = true;
+                feel.highlightedAnimation.scale.fromReference = ReferenceValue.StartValue;
+                feel.highlightedAnimation.scale.toReference = ReferenceValue.CustomValue;
+                feel.highlightedAnimation.scale.toCustomValue = new Vector3(hoverScale, hoverScale, 1f);
+                feel.highlightedAnimation.scale.settings.duration = 0.12f;
+                feel.highlightedAnimation.scale.settings.ease = Ease.OutQuad;
+            }
+
+            if (!NeoUISettings.ApplyDefaultAnimation(NeoAnimatorRoles.ButtonPress, feel.pressedAnimation))
+            {
+                feel.pressedAnimation.scale.enabled = true;
+                feel.pressedAnimation.scale.fromReference = ReferenceValue.StartValue;
+                feel.pressedAnimation.scale.toReference = ReferenceValue.CustomValue;
+                feel.pressedAnimation.scale.toCustomValue = new Vector3(0.96f, 0.96f, 1f);
+                feel.pressedAnimation.scale.settings.duration = 0.08f;
+                feel.pressedAnimation.scale.settings.ease = Ease.OutQuad;
+            }
         }
 
         private static (float height, string labelStyle) ButtonSize(string size)

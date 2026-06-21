@@ -16,6 +16,9 @@ MonoBehaviour:
   - category: A
     names:
     - Main
+  - category: Anim
+    names:
+    - Screen
   - category: Audio
     names:
     - Panel

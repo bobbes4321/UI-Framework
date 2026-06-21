@@ -1,0 +1,183 @@
+{
+  "theme": { "bundle": "CleanSlate" },
+  "views": [
+    {
+      "id": "Showcase/Animations",
+      "background": "Background",
+      "showAnimation": "ScalePopIn",
+      "hideAnimation": "FadeOut",
+      "elements": [
+        {
+          "safearea": {
+            "children": [
+              {
+                "scroll": {
+                  "anchor": "Stretch",
+                  "children": [
+                    {
+                      "vstack": {
+                        "anchor": "Stretch",
+                        "padding": 36,
+                        "spacing": 20,
+                        "children": [
+                          { "text": { "label": "Animation Presets", "color": "TextStrong", "textStyle": "Title", "align": "left" } },
+                          { "text": { "label": "A curated library of motion presets across five channels — Move / Rotate / Scale / Fade / Color. Assign one per widget state via the spec's \"animations\" block, pick per-state presets in any animator's inspector dropdown, or set project-wide defaults in Tools → Neo UI → Setup (every button hovers, every view fades in). This screen itself pops in via the ScalePopIn show preset. Enter Play mode to feel hover and press.", "color": "TextMuted", "textStyle": "Caption", "align": "left" } },
+
+                          {
+                            "tabbar": {
+                              "id": "AnimTabs/Bar",
+                              "children": [
+                                { "tab": { "id": "AnimTabs/Hover", "label": "Hover", "icon": "mouse-pointer", "value": 1, "controls": "AnimPanels/Hover" } },
+                                { "tab": { "id": "AnimTabs/Press", "label": "Press / Click", "icon": "mouse-pointer-click", "controls": "AnimPanels/Press" } },
+                                { "tab": { "id": "AnimTabs/Loop", "label": "Loops", "icon": "repeat", "controls": "AnimPanels/Loop" } }
+                              ]
+                            }
+                          },
+
+                          {
+                            "panel": {
+                              "id": "AnimPanels/Hover",
+                              "style": "Panel",
+                              "spacing": 14,
+                              "children": [
+                                { "text": { "label": "HOVER — rest → hovered, restores on exit", "color": "TextStrong", "textStyle": "ButtonLabel", "align": "left" } },
+                                { "text": { "label": "Each button copies a different Hover preset into its highlighted state. Hover them in Play mode.", "color": "TextMuted", "textStyle": "Caption", "align": "left" } },
+                                {
+                                  "grid": {
+                                    "cellSize": [210, 70],
+                                    "spacing": 14,
+                                    "cascade": true,
+                                    "children": [
+                                      { "button": { "id": "AnimHover/ScaleUp",    "label": "ScaleUp",    "variant": "secondary", "animations": { "hover": "ScaleUp" } } },
+                                      { "button": { "id": "AnimHover/ScaleUpBig", "label": "ScaleUpBig", "variant": "secondary", "animations": { "hover": "ScaleUpBig" } } },
+                                      { "button": { "id": "AnimHover/ScaleDown",  "label": "ScaleDown",  "variant": "secondary", "animations": { "hover": "ScaleDown" } } },
+                                      { "button": { "id": "AnimHover/LiftUp",     "label": "LiftUp",     "variant": "secondary", "animations": { "hover": "LiftUp" } } },
+                                      { "button": { "id": "AnimHover/TiltLeft",   "label": "TiltLeft",   "variant": "secondary", "animations": { "hover": "TiltLeft" } } },
+                                      { "button": { "id": "AnimHover/TiltRight",  "label": "TiltRight",  "variant": "secondary", "animations": { "hover": "TiltRight" } } },
+                                      { "button": { "id": "AnimHover/TintPrimary","label": "TintPrimary","variant": "secondary", "animations": { "hover": "TintPrimary" } } },
+                                      { "button": { "id": "AnimHover/GlowPulse",  "label": "GlowPulse",  "variant": "primary",   "animations": { "hover": "GlowPulse" } } }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+
+                          {
+                            "panel": {
+                              "id": "AnimPanels/Press",
+                              "style": "Panel",
+                              "spacing": 14,
+                              "children": [
+                                { "text": { "label": "PRESS / CLICK — pointer-down feedback & one-shots", "color": "TextStrong", "textStyle": "ButtonLabel", "align": "left" } },
+                                { "text": { "label": "Each button copies a different Press / Click preset into its pressed state — from a subtle dip to a full 360° spin. Click them in Play mode.", "color": "TextMuted", "textStyle": "Caption", "align": "left" } },
+                                {
+                                  "grid": {
+                                    "cellSize": [210, 70],
+                                    "spacing": 14,
+                                    "cascade": true,
+                                    "children": [
+                                      { "button": { "id": "AnimPress/PressDip",      "label": "PressDip",     "variant": "primary", "animations": { "press": "PressDip" } } },
+                                      { "button": { "id": "AnimPress/SquashStretch", "label": "SquashStretch","variant": "primary", "animations": { "press": "SquashStretch" } } },
+                                      { "button": { "id": "AnimPress/PunchScale",    "label": "PunchScale",   "variant": "primary", "animations": { "press": "PunchScale" } } },
+                                      { "button": { "id": "AnimPress/Spin360",       "label": "Spin360",      "variant": "primary", "animations": { "press": "Spin360" } } },
+                                      { "button": { "id": "AnimPress/Jello",         "label": "Jello",        "variant": "primary", "animations": { "press": "Jello" } } },
+                                      { "button": { "id": "AnimPress/RubberBand",    "label": "RubberBand",   "variant": "primary", "animations": { "press": "RubberBand" } } },
+                                      { "button": { "id": "AnimPress/Wobble",        "label": "Wobble",       "variant": "primary", "animations": { "press": "Wobble" } } },
+                                      { "button": { "id": "AnimPress/BarrelRoll",    "label": "BarrelRoll",   "variant": "primary", "animations": { "press": "BarrelRoll" } } }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+
+                          {
+                            "panel": {
+                              "id": "AnimPanels/Loop",
+                              "style": "Panel",
+                              "spacing": 14,
+                              "children": [
+                                { "text": { "label": "LOOPS — ambient, auto-playing (incl. the Color channel)", "color": "TextStrong", "textStyle": "ButtonLabel", "align": "left" } },
+                                { "text": { "label": "Each card runs a looping preset on a UIAnimator played at start. Shimmer and ColorCycle drive the new Color/tint channel; the rest are scale/move/rotate loops.", "color": "TextMuted", "textStyle": "Caption", "align": "left" } },
+                                {
+                                  "grid": {
+                                    "cellSize": [150, 150],
+                                    "spacing": 16,
+                                    "cascade": true,
+                                    "children": [
+                                      { "overlay": { "children": [
+                                        { "shape": { "anchor": "Stretch", "radius": 18, "background": "SurfaceElevated" } },
+                                        { "shape": { "id": "AnimLoop/Pulse", "shape": "Circle", "anchor": "Center", "size": [80, 80], "background": "Primary", "animations": { "loop": "Pulse" } } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [120, 24], "position": [10, -10], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "PULSE", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } },
+                                      { "overlay": { "children": [
+                                        { "shape": { "anchor": "Stretch", "radius": 18, "background": "SurfaceElevated" } },
+                                        { "shape": { "id": "AnimLoop/Heartbeat", "shape": "Circle", "anchor": "Center", "size": [80, 80], "background": "Danger", "animations": { "loop": "Heartbeat" } } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [130, 24], "position": [10, -10], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "HEARTBEAT", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } },
+                                      { "overlay": { "children": [
+                                        { "shape": { "anchor": "Stretch", "radius": 18, "background": "SurfaceElevated" } },
+                                        { "shape": { "id": "AnimLoop/Breathe", "shape": "RoundedRect", "anchor": "Center", "size": [88, 88], "radius": 16, "background": "Primary", "animations": { "loop": "Breathe" } } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [120, 24], "position": [10, -10], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "BREATHE", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } },
+                                      { "overlay": { "children": [
+                                        { "shape": { "anchor": "Stretch", "radius": 18, "background": "SurfaceElevated" } },
+                                        { "shape": { "id": "AnimLoop/Bob", "shape": "RoundedRect", "anchor": "Center", "size": [80, 80], "radius": 14, "background": "Success", "animations": { "loop": "Bob" } } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [110, 24], "position": [10, -10], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "BOB", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } },
+                                      { "overlay": { "children": [
+                                        { "shape": { "anchor": "Stretch", "radius": 18, "background": "SurfaceElevated" } },
+                                        { "shape": { "id": "AnimLoop/SpinLoop", "shape": "Arc", "anchor": "Center", "size": [84, 84], "thickness": 11, "arcStart": 0, "arcSweep": 100, "background": "Primary", "animations": { "loop": "SpinLoop" } } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [120, 24], "position": [10, -10], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "SPINLOOP", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } },
+                                      { "overlay": { "children": [
+                                        { "shape": { "id": "AnimLoop/Shimmer", "anchor": "Stretch", "radius": 18, "background": "Primary", "animations": { "loop": "Shimmer" } } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [120, 24], "position": [10, -10], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "SHIMMER", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } },
+                                      { "overlay": { "children": [
+                                        { "shape": { "id": "AnimLoop/ColorCycle", "anchor": "Stretch", "radius": 18, "background": "Surface", "animations": { "loop": "ColorCycle" } } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [130, 24], "position": [10, -10], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "COLORCYCLE", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } },
+                                      { "overlay": { "children": [
+                                        { "shape": { "anchor": "Stretch", "radius": 18, "background": "SurfaceElevated" } },
+                                        { "shape": { "id": "AnimLoop/GlowPulse", "shape": "Circle", "anchor": "Center", "size": [80, 80], "background": "Primary", "animations": { "loop": "GlowPulse" } } },
+                                        { "overlay": { "anchor": "TopLeft", "size": [120, 24], "position": [10, -10], "children": [
+                                          { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+                                          { "text": { "label": "GLOWPULSE", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } } ] } }
+                                      ] } }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+
+                          { "text": { "label": "Presets ship via Tools → Neo UI → Setup → Create or Repair Animation Library and auto-discover. The five-channel UIAnimation (Move/Rotate/Scale/Fade/Color) powers all of them; the Color channel tints to a theme token, a #hex, or the start/current color. Drop your own UIAnimationPreset asset to add one — it appears in every picker.", "color": "TextMuted", "textStyle": "Caption", "align": "left" } }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

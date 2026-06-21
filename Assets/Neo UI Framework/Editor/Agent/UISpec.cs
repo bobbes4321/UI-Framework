@@ -324,6 +324,9 @@ namespace Neo.UI.Editor
         public PresetChannelSpec rotate;
         public PresetChannelSpec scale;
         public PresetChannelSpec fade;
+        // Color/tint channel: from/to are a "#hex" color, a theme-token name, or the keywords
+        // "start"/"current" (the captured / live color), matching the GradientSpec from/to convention.
+        public PresetChannelSpec color;
 
         public static PresetSpec Parse(Dictionary<string, object> obj)
         {
@@ -336,7 +339,8 @@ namespace Neo.UI.Editor
                 move = PresetChannelSpec.Parse(JsonReader.GetObject(obj, "move")),
                 rotate = PresetChannelSpec.Parse(JsonReader.GetObject(obj, "rotate")),
                 scale = PresetChannelSpec.Parse(JsonReader.GetObject(obj, "scale")),
-                fade = PresetChannelSpec.Parse(JsonReader.GetObject(obj, "fade"))
+                fade = PresetChannelSpec.Parse(JsonReader.GetObject(obj, "fade")),
+                color = PresetChannelSpec.Parse(JsonReader.GetObject(obj, "color"))
             };
             if (string.IsNullOrWhiteSpace(spec.name))
                 throw new FormatException("Preset is missing required field 'name'");
@@ -356,6 +360,7 @@ namespace Neo.UI.Editor
             if (rotate != null && rotate.enabled) result["rotate"] = rotate.ToJsonObject();
             if (scale != null && scale.enabled) result["scale"] = scale.ToJsonObject();
             if (fade != null && fade.enabled) result["fade"] = fade.ToJsonObject();
+            if (color != null && color.enabled) result["color"] = color.ToJsonObject();
             return result;
         }
     }
@@ -621,6 +626,55 @@ namespace Neo.UI.Editor
             if (!string.IsNullOrEmpty(color)) result["color"] = color;
             if (size.HasValue) result["size"] = (double)size.Value;
             if (softness.HasValue) result["softness"] = (double)softness.Value;
+            return result;
+        }
+    }
+
+    /// <summary>
+    /// Per-element animation assignment: copies named library presets into the widget's interaction
+    /// animators — <c>"animations": { "hover": "ScaleUpBig", "press": "PressDip", "loop": "Breathe" }</c>.
+    /// <c>hover</c>/<c>press</c>/<c>selected</c>/<c>disabled</c> drive a <c>UISelectableUIAnimator</c> (so the
+    /// element should be a selectable — button/tab/toggle); <c>loop</c> adds a <c>UIAnimator</c> played on
+    /// start (ambient motion on any element). Each value is a preset name resolved through the
+    /// <c>AnimationPresetRegistry</c> (exactly like a view's <c>showAnimation</c>); the applied names are
+    /// stamped onto a <c>NeoAnimationSourceTag</c> so they round-trip. Distinct from the project-wide
+    /// defaults (Setup wizard) — this is per-widget, and overrides the default feel where set.
+    /// </summary>
+    [Serializable]
+    public class ElementAnimationsSpec
+    {
+        public string hover;
+        public string press;
+        public string selected;
+        public string disabled;
+        public string loop;
+
+        public bool IsEmpty =>
+            string.IsNullOrEmpty(hover) && string.IsNullOrEmpty(press) && string.IsNullOrEmpty(selected)
+            && string.IsNullOrEmpty(disabled) && string.IsNullOrEmpty(loop);
+
+        public static ElementAnimationsSpec Parse(Dictionary<string, object> obj)
+        {
+            if (obj == null) return null;
+            var spec = new ElementAnimationsSpec
+            {
+                hover = JsonReader.GetString(obj, "hover"),
+                press = JsonReader.GetString(obj, "press"),
+                selected = JsonReader.GetString(obj, "selected"),
+                disabled = JsonReader.GetString(obj, "disabled"),
+                loop = JsonReader.GetString(obj, "loop")
+            };
+            return spec.IsEmpty ? null : spec;
+        }
+
+        public Dictionary<string, object> ToJsonObject()
+        {
+            var result = new Dictionary<string, object>();
+            if (!string.IsNullOrEmpty(hover)) result["hover"] = hover;
+            if (!string.IsNullOrEmpty(press)) result["press"] = press;
+            if (!string.IsNullOrEmpty(selected)) result["selected"] = selected;
+            if (!string.IsNullOrEmpty(disabled)) result["disabled"] = disabled;
+            if (!string.IsNullOrEmpty(loop)) result["loop"] = loop;
             return result;
         }
     }
@@ -911,6 +965,7 @@ namespace Neo.UI.Editor
         public EffectSpec effect;     // open-bag shape effect (ShapeEffectRegistry owns parse/bake/export)
         public ParticleSpec particles; // UI particle emitter (modules ride ParticleEffectRegistry)
         public PointerGlowSpec pointerGlow; // pointer-follow glow (NeoPointerReactor)
+        public ElementAnimationsSpec animations; // per-element interaction presets (hover/press/loop…)
         public float? thickness;   // ring/arc band width px
         public float? arcStart;    // arc start angle, degrees cw from 12 o'clock
         public float? arcSweep;    // arc sweep, degrees
@@ -1020,6 +1075,7 @@ namespace Neo.UI.Editor
                     effect = EffectSpec.Parse(JsonReader.GetObject(body, "effect")),
                     particles = ParticleSpec.Parse(JsonReader.GetObject(body, "particles")),
                     pointerGlow = PointerGlowSpec.Parse(JsonReader.GetObject(body, "pointerGlow")),
+                    animations = ElementAnimationsSpec.Parse(JsonReader.GetObject(body, "animations")),
                     thickness = GetNullableFloat(body, "thickness"),
                     arcStart = GetNullableFloat(body, "arcStart"),
                     arcSweep = GetNullableFloat(body, "arcSweep")
@@ -1109,6 +1165,7 @@ namespace Neo.UI.Editor
             if (effect != null) body["effect"] = effect.ToJsonObject();
             if (particles != null) body["particles"] = particles.ToJsonObject();
             if (pointerGlow != null) body["pointerGlow"] = pointerGlow.ToJsonObject();
+            if (animations != null) body["animations"] = animations.ToJsonObject();
             if (thickness.HasValue) body["thickness"] = (double)thickness.Value;
             if (arcStart.HasValue) body["arcStart"] = (double)arcStart.Value;
             if (arcSweep.HasValue) body["arcSweep"] = (double)arcSweep.Value;

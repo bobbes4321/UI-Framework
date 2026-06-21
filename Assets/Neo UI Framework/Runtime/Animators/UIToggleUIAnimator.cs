@@ -13,6 +13,13 @@ namespace Neo.UI
         public UIAnimation onAnimation = new UIAnimation { purpose = AnimationPurpose.State };
         public UIAnimation offAnimation = new UIAnimation { purpose = AnimationPurpose.State };
 
+        // Editor-only: seeds on/off from the project's chosen defaults when the component is added.
+        protected virtual void Reset()
+        {
+            NeoUISettings.ApplyDefaultAnimation(NeoAnimatorRoles.ToggleOn, onAnimation);
+            NeoUISettings.ApplyDefaultAnimation(NeoAnimatorRoles.ToggleOff, offAnimation);
+        }
+
         protected virtual void Awake()
         {
             BindTarget();

@@ -82,6 +82,14 @@ namespace Neo.UI
         public ScaleAnimation scale = new ScaleAnimation();
         public FadeAnimation fade = new FadeAnimation();
 
+        // Fifth channel: tints the target's color/graphic (Image / TMP text / NeoShape, via IColorTarget).
+        // Defaults OFF — existing animations never animated color, so a fresh channel must stay inert
+        // until a preset/inspector enables it. Unlike the other four channels (plain data the methods
+        // below drive through pooled tweens), ColorAnimation already owns its own tween + endpoint
+        // resolution (incl. theme-token endpoints), so this class delegates to it rather than
+        // re-implementing color tweening.
+        public ColorAnimation color = new ColorAnimation { enabled = false };
+
         [NonSerialized] private RectTransform _rectTransform;
         [NonSerialized] private CanvasGroup _canvasGroup;
         [NonSerialized] private Vector3Tween _moveTween;
@@ -105,11 +113,12 @@ namespace Neo.UI
         /// <summary> Invoked when the animation is stopped before finishing. </summary>
         public Action onStop;
 
-        public bool hasEnabledChannels => move.enabled || rotate.enabled || scale.enabled || fade.enabled;
+        public bool hasEnabledChannels =>
+            move.enabled || rotate.enabled || scale.enabled || fade.enabled || color.enabled;
 
         public bool isActive =>
             (_moveTween?.isActive ?? false) || (_rotateTween?.isActive ?? false) ||
-            (_scaleTween?.isActive ?? false) || (_fadeTween?.isActive ?? false);
+            (_scaleTween?.isActive ?? false) || (_fadeTween?.isActive ?? false) || color.isActive;
 
         /// <summary> Worst-case duration of one play: max over enabled channels of delay + duration. </summary>
         public float totalDuration
@@ -121,6 +130,7 @@ namespace Neo.UI
                 if (rotate.enabled) total = Mathf.Max(total, rotate.settings.startDelay + rotate.settings.duration);
                 if (scale.enabled) total = Mathf.Max(total, scale.settings.startDelay + scale.settings.duration);
                 if (fade.enabled) total = Mathf.Max(total, fade.settings.startDelay + fade.settings.duration);
+                if (color.enabled) total = Mathf.Max(total, color.totalDuration);
                 return total;
             }
         }
@@ -131,6 +141,8 @@ namespace Neo.UI
         {
             _rectTransform = target;
             _canvasGroup = group != null ? group : (target != null ? target.GetComponent<CanvasGroup>() : null);
+            // The color channel tints whatever Graphic lives on the same GameObject (Image/TMP/NeoShape).
+            if (target != null) color.SetTarget(target.gameObject);
             if (!_hasStartValues) CaptureStartValues();
         }
 
@@ -142,6 +154,7 @@ namespace Neo.UI
             startRotation = _rectTransform.localEulerAngles;
             startScale = _rectTransform.localScale;
             startAlpha = _canvasGroup != null ? _canvasGroup.alpha : 1f;
+            color.CaptureStartColor();
             _hasStartValues = true;
         }
 
@@ -158,6 +171,7 @@ namespace Neo.UI
             if (rotate.enabled) _rectTransform.localEulerAngles = startRotation;
             if (scale.enabled) _rectTransform.localScale = startScale;
             if (fade.enabled && _canvasGroup != null) _canvasGroup.alpha = startAlpha;
+            if (color.enabled) color.RestoreStartColor();
         }
 
         // ------------------------------------------------------------------ playback
@@ -186,6 +200,7 @@ namespace Neo.UI
             if (rotate.enabled) _rotateTween.Play(direction);
             if (scale.enabled) _scaleTween.Play(direction);
             if (fade.enabled) _fadeTween.Play(direction);
+            if (color.enabled) color.Play(direction);
         }
 
         public void Reverse()
@@ -194,6 +209,7 @@ namespace Neo.UI
             _rotateTween?.Reverse();
             _scaleTween?.Reverse();
             _fadeTween?.Reverse();
+            color.Reverse();
         }
 
         public void Stop(bool silent = false)
@@ -203,6 +219,7 @@ namespace Neo.UI
             _rotateTween?.Stop(silent: true);
             _scaleTween?.Stop(silent: true);
             _fadeTween?.Stop(silent: true);
+            color.Stop(silent: true);
             if (wasActive && !silent) onStop?.Invoke();
         }
 
@@ -220,6 +237,7 @@ namespace Neo.UI
             _rotateTween?.Finish(silent: !rotate.enabled);
             _scaleTween?.Finish(silent: !scale.enabled);
             _fadeTween?.Finish(silent: !fade.enabled);
+            if (color.enabled) color.Finish();
         }
 
         public void Pause()
@@ -228,6 +246,7 @@ namespace Neo.UI
             _rotateTween?.Pause();
             _scaleTween?.Pause();
             _fadeTween?.Pause();
+            color.Pause();
         }
 
         public void Resume()
@@ -236,6 +255,7 @@ namespace Neo.UI
             _rotateTween?.Resume();
             _scaleTween?.Resume();
             _fadeTween?.Resume();
+            color.Resume();
         }
 
         /// <summary> Scrubs all enabled channels to the given progress without playing. </summary>
@@ -247,6 +267,7 @@ namespace Neo.UI
             if (rotate.enabled) _rotateTween.SetProgressAt(progress);
             if (scale.enabled) _scaleTween.SetProgressAt(progress);
             if (fade.enabled) _fadeTween.SetProgressAt(progress);
+            if (color.enabled) color.SetProgressAt(progress);
         }
 
         public void SetProgressAtZero() => SetProgressAt(0f);
@@ -259,6 +280,7 @@ namespace Neo.UI
             if (_rotateTween != null) { TweenPool.Release(_rotateTween); _rotateTween = null; }
             if (_scaleTween != null) { TweenPool.Release(_scaleTween); _scaleTween = null; }
             if (_fadeTween != null) { TweenPool.Release(_fadeTween); _fadeTween = null; }
+            color.ReleaseTweens();
         }
 
         // ------------------------------------------------------------------ wiring
@@ -266,6 +288,10 @@ namespace Neo.UI
         private void ConfigureTweens()
         {
             if (!_hasStartValues) CaptureStartValues();
+
+            // The color channel owns its tween; just route its completion into the shared finish gate
+            // so the composite animation reports finished only once every channel (incl. color) settles.
+            color.onFinish = CheckFinished;
 
             if (move.enabled)
             {

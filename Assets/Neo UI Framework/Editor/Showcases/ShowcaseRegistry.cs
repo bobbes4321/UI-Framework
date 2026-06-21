@@ -215,6 +215,17 @@ namespace Neo.UI.Editor
                 specPath = SpecsRoot + "/particles.json",
                 flowName = null,
             };
+            yield return new Showcase
+            {
+                id = "animations",
+                title = "Animation Presets",
+                description = "The motion library — hover/press/click feel, ambient loops and the new " +
+                              "Color/tint channel — assigned per widget via the spec's \"animations\" block " +
+                              "and the per-state inspector picker. Enter Play mode to feel hover and press.",
+                category = "Effects",
+                specPath = SpecsRoot + "/animations.json",
+                flowName = null,
+            };
         }
     }
 

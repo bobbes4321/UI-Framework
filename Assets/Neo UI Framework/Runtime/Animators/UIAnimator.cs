@@ -27,6 +27,12 @@ namespace Neo.UI
 
         public bool isPlaying => animation.isActive;
 
+        // Editor-only: seeds the animation from the project's chosen one-shot default when added.
+        protected virtual void Reset()
+        {
+            NeoUISettings.ApplyDefaultAnimation(NeoAnimatorRoles.OneShot, animation);
+        }
+
         protected virtual void Awake()
         {
             BindTarget();

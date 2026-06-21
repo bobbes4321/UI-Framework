@@ -16,6 +16,7 @@ Per-element JSON keys (an element is `{ "<kind>": { ...fields } }`). Fields appl
 |---|---|
 | `align` | string |
 | `anchor` | string |
+| `animations` | ElementAnimationsSpec |
 | `arcStart` | number |
 | `arcSweep` | number |
 | `background` | string |
@@ -53,6 +54,7 @@ Per-element JSON keys (an element is `{ "<kind>": { ...fields } }`). Fields appl
 | `padding` | number |
 | `padding4` | number[] |
 | `particles` | ParticleSpec |
+| `pointerGlow` | PointerGlowSpec |
 | `position` | number[] |
 | `preset` | string |
 | `radius` | number |

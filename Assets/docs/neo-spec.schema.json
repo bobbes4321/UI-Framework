@@ -770,6 +770,27 @@
             }
           }
         },
+        "animations": {
+          "type": "object",
+          "description": "per-element animation presets (preset names): hover/press/selected/disabled drive a selectable animator, loop adds a play-on-start animator",
+          "properties": {
+            "hover": {
+              "type": "string"
+            },
+            "press": {
+              "type": "string"
+            },
+            "selected": {
+              "type": "string"
+            },
+            "disabled": {
+              "type": "string"
+            },
+            "loop": {
+              "type": "string"
+            }
+          }
+        },
         "children": {
           "type": "array",
           "items": {

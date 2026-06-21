@@ -28,6 +28,7 @@ namespace Neo.UI
             CopyRotate(animation.rotate, targetAnimation.rotate);
             CopyScale(animation.scale, targetAnimation.scale);
             CopyFade(animation.fade, targetAnimation.fade);
+            CopyColor(animation.color, targetAnimation.color);
         }
 
         private static void CopyMove(MoveAnimation source, MoveAnimation target)
@@ -78,6 +79,21 @@ namespace Neo.UI
             target.toCustomValue = source.toCustomValue;
             target.fromOffset = source.fromOffset;
             target.toOffset = source.toOffset;
+        }
+
+        private static void CopyColor(ColorAnimation source, ColorAnimation target)
+        {
+            target.enabled = source.enabled;
+            target.settings.CopyFrom(source.settings);
+            CopyColorEndpoint(source.from, target.from);
+            CopyColorEndpoint(source.to, target.to);
+        }
+
+        private static void CopyColorEndpoint(ColorAnimationEndpoint source, ColorAnimationEndpoint target)
+        {
+            target.reference = source.reference;
+            target.customColor = source.customColor;
+            target.themeToken = source.themeToken;
         }
     }
 }

@@ -29,6 +29,16 @@ namespace Neo.UI.Editor
         private bool _animations = true;
         private bool _effects;
 
+        // Motion defaults: role id → chosen preset full-name ("Category/Name"). Applied (as direct
+        // references via NeoUISettings.SetDefaultAnimation) at the end of setup, after the library exists.
+        private static readonly string[] MotionRoles =
+        {
+            NeoAnimatorRoles.ViewShow, NeoAnimatorRoles.ViewHide,
+            NeoAnimatorRoles.ButtonHover, NeoAnimatorRoles.ButtonPress,
+        };
+        private readonly System.Collections.Generic.Dictionary<string, string> _motionDefaults =
+            new System.Collections.Generic.Dictionary<string, string>();
+
         // look
         private LookMode _lookMode = LookMode.Bundle;
         private string[] _bundleOptions = { KeepCurrent };
@@ -77,6 +87,8 @@ namespace Neo.UI.Editor
             DrawLook();
             EditorGUILayout.Space(4f);
             DrawInclude();
+            EditorGUILayout.Space(4f);
+            DrawMotionDefaults();
 
             EditorGUILayout.Space(8f);
             if (GUILayout.Button(new GUIContent("Set Up Project",
@@ -214,6 +226,54 @@ namespace Neo.UI.Editor
                 "Noise/ramp textures + dissolve/holo/glitch materials for variant shape effects"), _effects);
         }
 
+        // ---------------------------------------------------------------- motion defaults
+
+        // "How widgets feel by default": pick a preset per headline animator role. Stored as
+        // full-names and resolved to preset references at setup time (after the library is created).
+        private void DrawMotionDefaults()
+        {
+            if (!NeoGUI.BeginFoldoutSection("NeoUI.SetupWizard.Motion", "Motion defaults (optional)"))
+            {
+                NeoGUI.EndFoldoutSection();
+                return;
+            }
+
+            Hint("Pick how widgets feel by default — these presets are copied into new animator " +
+                 "components and generated buttons/views. Leave a row blank to keep the built-in feel.");
+
+            if (AnimationPresetRegistry.All.Count == 0)
+            {
+                EditorGUILayout.HelpBox(
+                    "No animation presets found yet — create the library to pick from it.", MessageType.Info);
+                if (GUILayout.Button("Create Animation Library Now"))
+                {
+                    AnimationLibraryBootstrap.CreateOrRepair();
+                    AssetDatabase.SaveAssets();
+                    GUI.FocusControl(null);
+                }
+            }
+            else
+            {
+                foreach (string role in MotionRoles) DrawMotionRow(role);
+            }
+
+            NeoGUI.EndFoldoutSection();
+        }
+
+        private void DrawMotionRow(string role)
+        {
+            NeoAnimatorRoles.TryGet(role, out NeoAnimatorRole info);
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField(info != null ? info.DisplayName : role, GUILayout.Width(150f));
+                _motionDefaults.TryGetValue(role, out string current);
+                Rect rect = GUILayoutUtility.GetRect(GUIContent.none, EditorStyles.popup);
+                NeoDropdown.ValuePopup(rect, current,
+                    () => AnimationPresetRegistry.FullNamesForRole(role),
+                    chosen => _motionDefaults[role] = chosen, emptyLabel: "(keep built-in)");
+            }
+        }
+
         // ---------------------------------------------------------------- run
 
         private void RunSetup()
@@ -253,6 +313,22 @@ namespace Neo.UI.Editor
                     SaveCustomBundle(custom);
                     steps.Add($"Saved bundle '{_customName.Trim()}'");
                 }
+            }
+
+            // Motion defaults LAST: the library (and any custom presets) now exist to resolve against.
+            int motion = 0;
+            foreach (System.Collections.Generic.KeyValuePair<string, string> choice in _motionDefaults)
+            {
+                if (string.IsNullOrEmpty(choice.Value)) continue;
+                UIAnimationPreset preset = AnimationPresetRegistry.GetByFullName(choice.Value);
+                if (preset == null) continue;
+                settings.SetDefaultAnimation(choice.Key, preset);
+                motion++;
+            }
+            if (motion > 0)
+            {
+                EditorUtility.SetDirty(settings);
+                steps.Add($"Motion defaults ({motion})");
             }
 
             AssetDatabase.SaveAssets();

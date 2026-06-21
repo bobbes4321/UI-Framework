@@ -300,6 +300,7 @@ namespace Neo.UI.Editor
             animation.rotate.enabled = presetSpec.rotate != null && presetSpec.rotate.enabled;
             animation.scale.enabled = presetSpec.scale != null && presetSpec.scale.enabled;
             animation.fade.enabled = presetSpec.fade != null && presetSpec.fade.enabled;
+            animation.color.enabled = presetSpec.color != null && presetSpec.color.enabled;
 
             if (animation.move.enabled)
             {
@@ -335,6 +336,35 @@ namespace Neo.UI.Editor
                 animation.fade.toReference = ReferenceValue.CustomValue;
                 animation.fade.fromCustomValue = ParseFloat(presetSpec.fade.from, animation.purpose == AnimationPurpose.Hide ? 1f : 0f);
                 animation.fade.toCustomValue = ParseFloat(presetSpec.fade.to, animation.purpose == AnimationPurpose.Hide ? 0f : 1f);
+            }
+
+            if (animation.color.enabled)
+            {
+                ConfigureChannelSettings(animation.color.settings, presetSpec.color, presetSpec.duration, defaultEase, report);
+                ParseColorEndpoint(presetSpec.color.from, animation.color.from, ColorReference.CurrentColor);
+                ParseColorEndpoint(presetSpec.color.to, animation.color.to, ColorReference.CustomColor);
+            }
+        }
+
+        // Decodes a color endpoint string (the FormatColorEndpoint output): "start"/"current" keywords,
+        // a "#hex" custom color, or a bare theme-token name. Empty falls back to the given reference.
+        private static void ParseColorEndpoint(string value, ColorAnimationEndpoint endpoint, ColorReference fallback)
+        {
+            if (string.IsNullOrWhiteSpace(value)) { endpoint.reference = fallback; return; }
+            string trimmed = value.Trim();
+            if (string.Equals(trimmed, "start", System.StringComparison.OrdinalIgnoreCase))
+                endpoint.reference = ColorReference.StartColor;
+            else if (string.Equals(trimmed, "current", System.StringComparison.OrdinalIgnoreCase))
+                endpoint.reference = ColorReference.CurrentColor;
+            else if (trimmed.StartsWith("#") && ColorUtils.TryParseHex(trimmed, out Color parsed))
+            {
+                endpoint.reference = ColorReference.CustomColor;
+                endpoint.customColor = parsed;
+            }
+            else
+            {
+                endpoint.reference = ColorReference.ThemeToken;
+                endpoint.themeToken = trimmed;
             }
         }
 
@@ -1085,6 +1115,7 @@ namespace Neo.UI.Editor
             // Open-bag shape effect + UI particles: dispatched through the editor descriptor
             // registries (no per-effect switch here — adding a future effect/module is one registration).
             if (go != null) ApplyEffectsAndParticles(element, go, settings, report);
+            if (go != null) ApplyElementAnimations(element, go, settings, report);
 
             if (ElementObjectSink != null && go != null) ElementObjectSink[element] = go;
             // Pillar B: record elements carrying breakpoint overrides for the post-build resolve pass.
@@ -1155,6 +1186,47 @@ namespace Neo.UI.Editor
 
             if (element.pointerGlow != null)
                 ApplyPointerGlow(element.pointerGlow, go);
+        }
+
+        /// <summary>
+        /// Copies the element's named interaction presets into its animators: hover/press/selected/disabled
+        /// reuse (or add) a <see cref="UISelectableUIAnimator"/>, loop adds a play-on-start
+        /// <see cref="UIAnimator"/>. The applied names are stamped on a <see cref="NeoAnimationSourceTag"/>
+        /// so the exporter recovers them (CopyTo drops the asset link). Overrides any default feel the
+        /// factory already gave the widget for the slots it names.
+        /// </summary>
+        private static void ApplyElementAnimations(ElementSpec element, GameObject go,
+            NeoUISettings settings, GenerateReport report)
+        {
+            ElementAnimationsSpec spec = element.animations;
+            if (spec == null || spec.IsEmpty) return;
+            string ctx = $"element '{element.id ?? element.kind}' animations";
+
+            if (!string.IsNullOrEmpty(spec.hover) || !string.IsNullOrEmpty(spec.press)
+                || !string.IsNullOrEmpty(spec.selected) || !string.IsNullOrEmpty(spec.disabled))
+            {
+                var sel = go.GetComponent<UISelectableUIAnimator>();
+                if (sel == null) sel = go.AddComponent<UISelectableUIAnimator>();
+                ApplyPresetByName(spec.hover, sel.highlightedAnimation, settings, report, ctx + " hover");
+                ApplyPresetByName(spec.press, sel.pressedAnimation, settings, report, ctx + " press");
+                ApplyPresetByName(spec.selected, sel.selectedAnimation, settings, report, ctx + " selected");
+                ApplyPresetByName(spec.disabled, sel.disabledAnimation, settings, report, ctx + " disabled");
+            }
+
+            if (!string.IsNullOrEmpty(spec.loop))
+            {
+                var loop = go.AddComponent<UIAnimator>();
+                loop.onStartBehaviour = AnimatorStartBehaviour.PlayForward;
+                ApplyPresetByName(spec.loop, loop.animation, settings, report, ctx + " loop");
+            }
+
+            var tag = go.GetComponent<NeoAnimationSourceTag>();
+            if (tag == null) tag = go.AddComponent<NeoAnimationSourceTag>();
+            tag.hover = spec.hover;
+            tag.press = spec.press;
+            tag.selected = spec.selected;
+            tag.disabled = spec.disabled;
+            tag.loop = spec.loop;
         }
 
         /// <summary>

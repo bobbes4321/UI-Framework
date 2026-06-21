@@ -119,6 +119,18 @@ namespace Neo.UI.Editor
                             ["close"] = Typed("boolean", "hides the enclosing popup/view")
                         }
                     },
+                    ["animations"] = new Dictionary<string, object>
+                    {
+                        ["type"] = "object",
+                        ["description"] = "per-element animation presets (preset names): hover/press/selected/" +
+                                          "disabled drive a selectable animator, loop adds a play-on-start animator",
+                        ["properties"] = new Dictionary<string, object>
+                        {
+                            ["hover"] = Typed("string"), ["press"] = Typed("string"),
+                            ["selected"] = Typed("string"), ["disabled"] = Typed("string"),
+                            ["loop"] = Typed("string")
+                        }
+                    },
                     ["children"] = new Dictionary<string, object> { ["type"] = "array", ["items"] = Ref("element") }
                 }
             };
