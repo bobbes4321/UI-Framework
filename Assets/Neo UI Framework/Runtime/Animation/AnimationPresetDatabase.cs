@@ -15,13 +15,23 @@ namespace Neo.UI
 
         public IEnumerable<string> GetPresetNames() => presets.Where(p => p != null).Select(p => p.presetName);
 
-        public UIAnimationPreset Get(string presetName) =>
-            presets.FirstOrDefault(p => p != null && string.Equals(p.presetName, presetName, StringComparison.Ordinal));
+        public UIAnimationPreset Get(string presetName)
+        {
+            UIAnimationPreset found = Find(presetName);
+            if (found == null)
+                Debug.LogWarning($"[Neo.UI] AnimationPresetDatabase '{name}': no preset named '{presetName}' " +
+                                  $"({presets.Count} presets registered).");
+            return found;
+        }
 
         public UIAnimationPreset Get(string category, string presetName) =>
             presets.FirstOrDefault(p => p != null && p.category == category && p.presetName == presetName);
 
-        public bool Contains(string presetName) => Get(presetName) != null;
+        /// <summary> Non-warning existence check (probing a possibly-absent name is expected usage). </summary>
+        public bool Contains(string presetName) => Find(presetName) != null;
+
+        private UIAnimationPreset Find(string presetName) =>
+            presets.FirstOrDefault(p => p != null && string.Equals(p.presetName, presetName, StringComparison.Ordinal));
 
         public void AddOrUpdate(UIAnimationPreset preset)
         {

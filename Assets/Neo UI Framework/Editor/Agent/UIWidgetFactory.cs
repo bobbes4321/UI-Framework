@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
@@ -219,20 +220,17 @@ namespace Neo.UI.Editor
 
         /// <summary>
         /// Gives a TMP text an SDF outline by assigning a cached material preset. Presets live
-        /// under Neo UI Generated/Materials and are keyed by font + color + width, so prefabs keep
-        /// stable references, repeat generates reuse them, and TMP batching only splits per
-        /// distinct outline — never per text.
+        /// under <c>{UISpecGenerator.GeneratedRoot}/Materials</c> and are keyed by font + color +
+        /// width, so prefabs keep stable references, repeat generates reuse them, and TMP batching
+        /// only splits per distinct outline — never per text. Deriving the folder from
+        /// <see cref="UISpecGenerator.GeneratedRoot"/> (rather than a hardcoded path) keeps
+        /// showcase/scratch generates from leaking materials into the committed shared root.
         /// </summary>
         public static void ApplyTextOutline(TMP_Text text, Color color, float width)
         {
             if (text == null || text.font == null) return;
-            const string dir = "Assets/Neo UI Generated/Materials";
-            if (!AssetDatabase.IsValidFolder(dir))
-            {
-                if (!AssetDatabase.IsValidFolder("Assets/Neo UI Generated"))
-                    AssetDatabase.CreateFolder("Assets", "Neo UI Generated");
-                AssetDatabase.CreateFolder("Assets/Neo UI Generated", "Materials");
-            }
+            string dir = $"{UISpecGenerator.GeneratedRoot}/Materials";
+            EnsureFolder(dir);
             string key = $"{text.font.name}_Outline_{ColorUtility.ToHtmlStringRGBA(color)}_{Mathf.RoundToInt(width * 100f)}";
             string path = $"{dir}/{key}.mat";
             var material = AssetDatabase.LoadAssetAtPath<Material>(path);
@@ -249,6 +247,21 @@ namespace Neo.UI.Editor
                 AssetDatabase.CreateAsset(material, path);
             }
             text.fontSharedMaterial = material;
+        }
+
+        /// <summary>
+        /// Creates every missing folder level of <paramref name="path"/> (mirrors the per-bootstrap
+        /// <c>EnsureFolder</c> helpers elsewhere in the package — <see cref="AssetDatabase.CreateFolder"/>
+        /// only accepts an existing parent + a single new leaf, so nested roots like
+        /// <c>Assets/Showcases/{id}/Generated/Materials</c> need each level created in turn).
+        /// </summary>
+        private static void EnsureFolder(string path)
+        {
+            if (AssetDatabase.IsValidFolder(path)) return;
+            string parent = Path.GetDirectoryName(path)?.Replace('\\', '/');
+            string leaf = Path.GetFileName(path);
+            if (!string.IsNullOrEmpty(parent) && !AssetDatabase.IsValidFolder(parent)) EnsureFolder(parent);
+            AssetDatabase.CreateFolder(parent, leaf);
         }
 
         public static TextMeshProUGUI CreateLabel(RectTransform parent, string text,

@@ -117,10 +117,18 @@ namespace Neo.UI
                         }
                         break;
                     case ViewCommand.CommandType.ShowCategory:
-                        if (view.id.Category == command.category) view.Execute(true, command.instant);
+                        if (view.id.Category == command.category)
+                        {
+                            view.Execute(true, command.instant);
+                            matched++;
+                        }
                         break;
                     case ViewCommand.CommandType.HideCategory:
-                        if (view.id.Category == command.category) view.Execute(false, command.instant);
+                        if (view.id.Category == command.category)
+                        {
+                            view.Execute(false, command.instant);
+                            matched++;
+                        }
                         break;
                     case ViewCommand.CommandType.HideAll:
                         view.Execute(false, command.instant);
@@ -128,12 +136,24 @@ namespace Neo.UI
                 }
             }
 
-            // a by-name command that hit nothing is almost always a bug (typo, view not in the
-            // scene, registry race) — fail loudly instead of black-screening silently
-            if (matched == 0 &&
-                (command.type == ViewCommand.CommandType.Show || command.type == ViewCommand.CommandType.Hide))
-                Debug.LogWarning($"[Neo.UI] UIView.{command.type}: no registered view matches " +
-                                 $"'{command.category}/{command.viewName}' ({targets.Count} views registered).");
+            // a by-name or by-category command that hit nothing is almost always a bug (typo, view
+            // not in the scene, registry race) — fail loudly instead of black-screening silently
+            if (matched == 0)
+            {
+                switch (command.type)
+                {
+                    case ViewCommand.CommandType.Show:
+                    case ViewCommand.CommandType.Hide:
+                        Debug.LogWarning($"[Neo.UI] UIView.{command.type}: no registered view matches " +
+                                         $"'{command.category}/{command.viewName}' ({targets.Count} views registered).");
+                        break;
+                    case ViewCommand.CommandType.ShowCategory:
+                    case ViewCommand.CommandType.HideCategory:
+                        Debug.LogWarning($"[Neo.UI] UIView.{command.type}: no registered view matches " +
+                                         $"category '{command.category}' ({targets.Count} views registered).");
+                        break;
+                }
+            }
         }
 
         private void Execute(bool show, bool instant)

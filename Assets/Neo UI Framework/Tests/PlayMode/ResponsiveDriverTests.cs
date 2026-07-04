@@ -150,6 +150,39 @@ namespace Neo.UI.Tests
         }
 
         [UnityTest]
+        public IEnumerator EmptyCondition_NeverMatches_FallsBackToBase()
+        {
+            // An all-default (unset) condition must never match — otherwise it would win
+            // unconditionally and shadow every later breakpoint (A7).
+            var rootGo = new GameObject("ResponsiveRoot", typeof(RectTransform));
+            _cleanup.Add(rootGo);
+            var rootRect = (RectTransform)rootGo.transform;
+            rootRect.anchorMin = Vector2.zero;
+            rootRect.anchorMax = Vector2.zero;
+
+            var childGo = new GameObject("Card", typeof(RectTransform));
+            childGo.transform.SetParent(rootGo.transform, false);
+            var target = (RectTransform)childGo.transform;
+            target.sizeDelta = BaseSize;
+
+            var root = rootGo.AddComponent<UIResponsiveRoot>();
+            var empty = new UIResponsiveRoot.ResponsiveCondition { name = "empty" };
+            Assert.IsTrue(empty.IsEmpty);
+            Assert.IsFalse(empty.Matches(1f, 1f), "an all-unset condition matches nothing");
+            Assert.IsFalse(empty.Matches(3200f, 100f), "not even an extreme viewport");
+            root.conditions.Add(empty);
+            root.bases.Add(Base(target, BaseSize));
+            root.entries.Add(Entry("empty", target, LandscapeSize));
+
+            rootRect.sizeDelta = new Vector2(3200f, 100f); // extreme viewport that would match "anything"
+            yield return null;
+
+            Assert.AreEqual(UIResponsiveRoot.BaseBreakpoint, root.ActiveBreakpoint,
+                "an empty condition must never be selected");
+            Assert.AreEqual(BaseSize, target.sizeDelta, "base vectors stand, not the empty condition's entry");
+        }
+
+        [UnityTest]
         public IEnumerator ForceActiveBreakpoint_PreviewHook_OverridesViewport()
         {
             (UIResponsiveRoot root, RectTransform target, RectTransform rootRect) = BuildDriver();

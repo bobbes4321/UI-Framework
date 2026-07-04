@@ -36,8 +36,17 @@ namespace Neo.UI
             public float minWidth = float.NaN;
             public float maxWidth = float.NaN;
 
+            /// <summary> An all-unset condition never matches — otherwise it would win unconditionally
+            /// and shadow every later breakpoint. Mirrors the editor-side guard in
+            /// <c>BreakpointConditions.Evaluate</c>. </summary>
+            public bool IsEmpty =>
+                string.IsNullOrEmpty(orientation) &&
+                float.IsNaN(minAspect) && float.IsNaN(maxAspect) &&
+                float.IsNaN(minWidth) && float.IsNaN(maxWidth);
+
             public bool Matches(float width, float height)
             {
+                if (IsEmpty) return false;
                 float aspect = height > 0f ? width / height : 0f;
                 bool portrait = height >= width;
                 if (!string.IsNullOrEmpty(orientation))

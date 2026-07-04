@@ -21,13 +21,22 @@ namespace Neo.UI.Editor
         private static readonly string[] Tabs = { "Colors", "Buttons", "Shapes", "Presets", "Motion" };
 
         private Vector2 _scroll;
-        private int _variantIdx, _btnIdx, _shapeIdx;
+        private int _btnIdx, _shapeIdx;
         private string _newToken = "", _newVariant = "", _newBtnVariant = "", _newShape = "", _newPreset = "";
 
         // Live button preview: a real render of a sample button, cached and re-rendered only when its
         // look key changes (never per OnGUI). Falls back to a faux swatch if rendering is unavailable.
         private Texture2D _btnPreview;
         private string _btnPreviewKey;
+
+        // Fallback preview label (used only when live rendering is unavailable) — hoisted to a cached
+        // static so the faux-preview path never allocates a GUIStyle per OnGUI pass; its text color is
+        // re-applied on the shared instance each draw since the content token can change.
+        private static GUIStyle _btnPreviewFallbackLabel;
+
+        private static GUIStyle BtnPreviewFallbackLabel =>
+            _btnPreviewFallbackLabel ?? (_btnPreviewFallbackLabel = new GUIStyle(EditorStyles.boldLabel)
+            { alignment = TextAnchor.MiddleCenter });
 
         private void OnDisable()
         {
@@ -78,15 +87,19 @@ namespace Neo.UI.Editor
 
         private void DrawColors(Theme theme)
         {
-            var variants = theme.Variants.Select(v => v.name).ToArray();
-            if (variants.Length == 0) { EditorGUILayout.LabelField("No variants."); }
+            if (theme.Variants.Count == 0) { EditorGUILayout.LabelField("No variants."); }
             else
             {
-                _variantIdx = Mathf.Clamp(_variantIdx, 0, variants.Length - 1);
-                _variantIdx = EditorGUILayout.Popup("Variant", _variantIdx, variants);
-                if (theme.ActiveVariantName != variants[_variantIdx]) theme.ActiveVariantName = variants[_variantIdx];
+                string current = theme.ActiveVariantName;
+                if (string.IsNullOrEmpty(current) || theme.GetVariant(current) == null)
+                    current = theme.Variants[0].name;
 
-                Theme.ThemeVariant variant = theme.GetVariant(variants[_variantIdx]);
+                Rect rect = EditorGUILayout.GetControlRect();
+                rect = EditorGUI.PrefixLabel(rect, new GUIContent("Variant"));
+                NeoDropdown.ValuePopup(rect, current, () => theme.Variants.Select(v => v.name).ToList(),
+                    chosen => theme.ActiveVariantName = chosen);
+
+                Theme.ThemeVariant variant = theme.GetVariant(current);
                 if (variant != null)
                 {
                     foreach (Theme.TokenColor tc in variant.colors.ToList())
@@ -162,13 +175,21 @@ namespace Neo.UI.Editor
         private void DrawButtons(NeoUISettings settings, Theme theme)
         {
             EditorGUILayout.LabelField("Variants", EditorStyles.boldLabel);
-            var names = settings.buttonVariants.Select(v => v.name).ToArray();
+            int variantCount = settings.buttonVariants.Count;
             using (new EditorGUILayout.HorizontalScope())
             {
-                if (names.Length > 0)
+                if (variantCount > 0)
                 {
-                    _btnIdx = Mathf.Clamp(_btnIdx, 0, names.Length - 1);
-                    _btnIdx = EditorGUILayout.Popup("Variant", _btnIdx, names);
+                    _btnIdx = Mathf.Clamp(_btnIdx, 0, variantCount - 1);
+                    Rect rect = EditorGUILayout.GetControlRect();
+                    rect = EditorGUI.PrefixLabel(rect, new GUIContent("Variant"));
+                    NeoDropdown.ValuePopup(rect, settings.buttonVariants[_btnIdx].name,
+                        () => settings.buttonVariants.Select(v => v.name).ToList(),
+                        chosen =>
+                        {
+                            int idx = settings.buttonVariants.FindIndex(v => v.name == chosen);
+                            if (idx >= 0) _btnIdx = idx;
+                        });
                 }
                 else EditorGUILayout.LabelField("No custom variants (built-ins: primary/secondary/ghost/danger)");
             }
@@ -187,11 +208,11 @@ namespace Neo.UI.Editor
                     EditorUtility.SetDirty(settings);
                     _btnIdx = settings.buttonVariants.Count - 1;
                     _newBtnVariant = "";
-                    names = settings.buttonVariants.Select(v => v.name).ToArray();
+                    variantCount = settings.buttonVariants.Count;
                 }
             }
 
-            if (names.Length > 0 && _btnIdx < settings.buttonVariants.Count)
+            if (variantCount > 0 && _btnIdx < settings.buttonVariants.Count)
             {
                 ButtonVariantAsset v = settings.buttonVariants[_btnIdx];
                 NeoGUI.Splitter();
@@ -202,13 +223,18 @@ namespace Neo.UI.Editor
                 ColorRef(theme, settings, "Pressed", v.colors.pressed);
                 ColorRef(theme, settings, "Selected", v.colors.selected);
                 ColorRef(theme, settings, "Disabled", v.colors.disabled);
-                v.contentToken = TokenPicker(theme, "Content (label/icon)", v.contentToken);
                 if (EditorGUI.EndChangeCheck())
                 {
                     Undo.RecordObject(settings, "Edit button variant");
                     v.name = newName;
                     EditorUtility.SetDirty(settings);
                 }
+                TokenPicker(theme, "Content (label/icon)", v.contentToken, chosen =>
+                {
+                    Undo.RecordObject(settings, "Edit button variant");
+                    v.contentToken = chosen;
+                    EditorUtility.SetDirty(settings);
+                });
 
                 PreviewButton(theme, v);
 
@@ -277,8 +303,8 @@ namespace Neo.UI.Editor
             else
             {
                 EditorGUI.DrawRect(r, v.colors.normal.Resolve(theme));
-                var label = new GUIStyle(EditorStyles.boldLabel)
-                { alignment = TextAnchor.MiddleCenter, normal = { textColor = ResolveToken(theme, v.contentToken) } };
+                GUIStyle label = BtnPreviewFallbackLabel;
+                label.normal.textColor = ResolveToken(theme, v.contentToken);
                 GUI.Label(r, "Button", label);
             }
             using (new EditorGUILayout.HorizontalScope())
@@ -321,11 +347,19 @@ namespace Neo.UI.Editor
 
         private void DrawShapes(Theme theme)
         {
-            var names = theme.GetShapeStyleNames().ToArray();
-            if (names.Length > 0)
+            List<string> names = theme.GetShapeStyleNames().ToList();
+            if (names.Count > 0)
             {
-                _shapeIdx = Mathf.Clamp(_shapeIdx, 0, names.Length - 1);
-                _shapeIdx = EditorGUILayout.Popup("Shape style", _shapeIdx, names);
+                _shapeIdx = Mathf.Clamp(_shapeIdx, 0, names.Count - 1);
+                Rect rect = EditorGUILayout.GetControlRect();
+                rect = EditorGUI.PrefixLabel(rect, new GUIContent("Shape style"));
+                NeoDropdown.ValuePopup(rect, names[_shapeIdx],
+                    () => theme.GetShapeStyleNames().ToList(),
+                    chosen =>
+                    {
+                        int idx = theme.GetShapeStyleNames().ToList().IndexOf(chosen);
+                        if (idx >= 0) _shapeIdx = idx;
+                    });
             }
             else EditorGUILayout.LabelField("No shape styles yet.");
 
@@ -338,12 +372,12 @@ namespace Neo.UI.Editor
                     theme.SetShapeStyle(new ShapeStyle { name = _newShape.Trim() });
                     EditorUtility.SetDirty(theme);
                     _newShape = "";
-                    names = theme.GetShapeStyleNames().ToArray();
-                    _shapeIdx = names.Length - 1;
+                    names = theme.GetShapeStyleNames().ToList();
+                    _shapeIdx = names.Count - 1;
                 }
             }
 
-            if (names.Length > 0 && theme.TryGetShapeStyle(names[Mathf.Clamp(_shapeIdx, 0, names.Length - 1)], out ShapeStyle style))
+            if (names.Count > 0 && theme.TryGetShapeStyle(names[Mathf.Clamp(_shapeIdx, 0, names.Count - 1)], out ShapeStyle style))
             {
                 NeoGUI.Splitter();
                 EditorGUI.BeginChangeCheck();
@@ -509,7 +543,12 @@ namespace Neo.UI.Editor
 
                 if (cref.useToken)
                 {
-                    cref.token = TokenPicker(theme, null, cref.token);
+                    TokenPicker(theme, null, cref.token, chosen =>
+                    {
+                        Undo.RecordObject(dirtyTarget, "edit token ref");
+                        cref.token = chosen;
+                        EditorUtility.SetDirty(dirtyTarget);
+                    });
                     EditorGUILayout.ColorField(GUIContent.none, ResolveToken(theme, cref.token), false, true, false,
                         GUILayout.Width(44f));
                 }
@@ -523,15 +562,20 @@ namespace Neo.UI.Editor
             }
         }
 
-        private static string TokenPicker(Theme theme, string label, string current)
+        // Searchable theme-token dropdown with a "(none)" sentinel (null token). The option list is only
+        // built when the dropdown is opened; onPick fires with the chosen token, or null for "(none)".
+        private static void TokenPicker(Theme theme, string label, string current, System.Action<string> onPick)
         {
-            List<string> tokens = theme.GetTokenNames().ToList();
-            tokens.Insert(0, "(none)");
-            int idx = Mathf.Max(0, tokens.IndexOf(current ?? "(none)"));
-            int n = label == null
-                ? EditorGUILayout.Popup(idx, tokens.ToArray())
-                : EditorGUILayout.Popup(label, idx, tokens.ToArray());
-            return n <= 0 ? null : tokens[n];
+            Rect rect = EditorGUILayout.GetControlRect();
+            if (label != null) rect = EditorGUI.PrefixLabel(rect, new GUIContent(label));
+            NeoDropdown.ValuePopup(rect, current ?? "(none)",
+                () =>
+                {
+                    List<string> tokens = theme.GetTokenNames().ToList();
+                    tokens.Insert(0, "(none)");
+                    return tokens;
+                },
+                chosen => onPick(chosen == "(none)" ? null : chosen));
         }
 
         private static Color ResolveToken(Theme theme, string token) =>

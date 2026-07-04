@@ -105,12 +105,19 @@ namespace Neo.UI
             string cat = b.category, name = b.signalName, param = b.param;
             float min = b.min, max = b.max;
             bool passthrough = Mathf.Approximately(min, max);
+            bool warned = false;
 
             Action<float> handler = v =>
             {
                 if (_effect == null) return;
                 float mapped = passthrough ? v : Mathf.LerpUnclamped(min, max, Mathf.Clamp01(v));
-                _effect.TrySetLiveParam(param, mapped);
+                if (!_effect.TrySetLiveParam(param, mapped) && !warned)
+                {
+                    warned = true;
+                    Debug.LogWarning($"[Neo.UI] NeoSignalParamBinding on '{gameObject.name}': " +
+                                      $"{_effect.GetType().Name} does not recognize param '{param}' " +
+                                      $"(bound from signal '{cat}/{name}').", this);
+                }
             };
             Signals.On(cat, name, handler);
             _unsubscribe.Add(() => Signals.Off(cat, name, handler));
