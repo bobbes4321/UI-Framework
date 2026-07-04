@@ -16,7 +16,7 @@ namespace Neo.UI.Editor.Composer
     {
         public static void DrawCatalog(SpecDocument document, MenuCatalogSpec catalog)
         {
-            bool known = ComposerCatalogKinds.TryGet(catalog.kind, out CatalogKind kind);
+            bool known = NeoCatalogKinds.TryGet(catalog.kind, out CatalogKind kind);
             string title = known ? $"{kind.label} Catalog" : $"{catalog.kind} Catalog";
             NeoGUI.ComponentHeader(title, catalog.id, NeoColors.Data);
 

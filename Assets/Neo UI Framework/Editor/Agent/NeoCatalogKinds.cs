@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 
-namespace Neo.UI.Editor.Composer
+namespace Neo.UI.Editor
 {
     /// <summary>
     /// A single catalog kind the Composer can author — the package's built-ins (settings, cheats)
     /// plus anything a consuming project registers. The Composer chrome (tree, toolbar picker,
-    /// context menu) iterates <see cref="ComposerCatalogKinds.All"/> instead of hardcoding the two
+    /// context menu) iterates <see cref="NeoCatalogKinds.All"/> instead of hardcoding the two
     /// built-in cases, so adding a third kind (debug, accessibility, key-bindings…) is one
-    /// <see cref="ComposerCatalogKinds.Register"/> call from a project's own assembly — no fork.
+    /// <see cref="NeoCatalogKinds.Register"/> call from a project's own assembly — no fork.
     ///
     /// <para>This is the <b>reference implementation of Pattern R</b> (the Kinds Registry) from the
     /// extensibility-seams master plan — every other registry in that family mirrors this shape.</para>
@@ -54,7 +54,7 @@ namespace Neo.UI.Editor.Composer
     /// package built-ins; a consuming project registers its own kind once (e.g. from an
     /// <c>[InitializeOnLoad]</c> static ctor). See <see cref="CatalogKind"/>.
     /// </summary>
-    public static class ComposerCatalogKinds
+    public static class NeoCatalogKinds
     {
         // built-in defaults — settings is near-universal, cheats opts into the favourites bit.
         private static readonly List<CatalogKind> _kinds = new List<CatalogKind>

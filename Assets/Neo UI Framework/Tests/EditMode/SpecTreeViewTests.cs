@@ -8,7 +8,7 @@ namespace Neo.UI.Tests
 {
     /// <summary>
     /// Phase 1 of the composer-catalog unification: the two co-equal "Settings"/"Cheats" tree
-    /// sections collapse into one neutral <c>Menus</c> section over <see cref="ComposerCatalogKinds"/>,
+    /// sections collapse into one neutral <c>Menus</c> section over <see cref="NeoCatalogKinds"/>,
     /// while each catalog <i>row</i> keeps its real <see cref="SpecPath.Catalog"/> path (selection +
     /// baseline addressing unchanged). Pure model + tree row build — no window.
     /// </summary>

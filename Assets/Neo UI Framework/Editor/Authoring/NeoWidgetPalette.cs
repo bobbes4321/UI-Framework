@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Neo.EditorUI;
 using UnityEngine;
 
-namespace Neo.UI.Editor.Composer
+namespace Neo.UI.Editor.Authoring
 {
     /// <summary>
     /// One entry in the widget palette — a kind the designer can drag onto the canvas or tree. Carries
@@ -50,11 +50,11 @@ namespace Neo.UI.Editor.Composer
     /// project's custom kind appears in the palette with zero extra wiring. This is the key extensibility
     /// win — the palette is never a sealed list.
     ///
-    /// <para>Mirrors <see cref="ComposerCatalogKinds"/> / <see cref="NeoElementKinds"/> (Pattern R):
+    /// <para>Mirrors <see cref="NeoCatalogKinds"/> / <see cref="NeoElementKinds"/> (Pattern R):
     /// <see cref="Register"/> replaces-by-kind else appends; <see cref="All"/> returns built-ins +
     /// project kinds; <see cref="Categories"/> lists the distinct categories in display order.</para>
     /// </summary>
-    public static class ComposerPalette
+    public static class NeoWidgetPalette
     {
         /// <summary> The <see cref="UnityEditor.DragAndDrop.SetGenericData"/> key a palette drag carries
         /// its element-kind string under. The canvas + tree drop handlers read this exact key. </summary>
@@ -76,7 +76,7 @@ namespace Neo.UI.Editor.Composer
         // explicit registrations (built-ins seeded once, plus any project Register calls)
         private static readonly List<PaletteEntry> _registered = new List<PaletteEntry>();
 
-        static ComposerPalette()
+        static NeoWidgetPalette()
         {
             RegisterBuiltins();
         }
@@ -183,7 +183,7 @@ namespace Neo.UI.Editor.Composer
         {
             if (string.IsNullOrEmpty(entry.kind))
             {
-                Debug.LogWarning("ComposerPalette.Register ignored an entry with a null/empty kind.");
+                Debug.LogWarning("NeoWidgetPalette.Register ignored an entry with a null/empty kind.");
                 return;
             }
             for (int i = 0; i < _registered.Count; i++)

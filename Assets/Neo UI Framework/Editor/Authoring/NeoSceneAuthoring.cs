@@ -1,5 +1,6 @@
-using Neo.UI.Editor.Composer; // ComposerFactory / ComposerPalette: shared spec-authoring utilities,
-                              // promoted to the Neo.UI.Editor root namespace when the Composer retires.
+using System.Collections.Generic;
+using Neo.UI.Editor.Composer; // ComposerFactory: shared spec-authoring utility, promoted to the
+                              // Neo.UI.Editor root namespace when the Composer retires.
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -67,6 +68,81 @@ namespace Neo.UI.Editor.Authoring
         }
 
         /// <summary>
+        /// Instantiates a curated <see cref="NeoLayoutTemplates"/> scaffold's element tree under
+        /// <paramref name="parentSelection"/> (or the resolved/created Canvas) — the native-authoring
+        /// counterpart to the Composer's spec-level template insert. Every top-level element of every
+        /// view/popup the template declares is built through the SAME
+        /// <see cref="UISpecGenerator.BuildElementLive"/> path <see cref="CreateWidget(string, string, GameObject)"/>
+        /// uses, so the result is byte-identical to a generated one; a template's own title/message/close
+        /// popup chrome (it has none of the kinds this seam builds) is out of scope — only its
+        /// <c>elements</c> are inserted. All created roots land under one undo step. Returns the first
+        /// created root (for selection), or null if the template failed to load/parse or built nothing.
+        /// </summary>
+        public static GameObject InsertTemplate(TemplateEntry entry, GameObject parentSelection)
+        {
+            string json;
+            try { json = entry.loadJson?.Invoke(); }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"Neo UI: template '{entry.id}' failed to load: {e.Message}");
+                return null;
+            }
+            if (string.IsNullOrEmpty(json))
+            {
+                Debug.LogWarning($"Neo UI: template '{entry.id}' produced no JSON; nothing inserted.");
+                return null;
+            }
+
+            UISpec fragment;
+            try { fragment = UISpec.FromJson(json); }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"Neo UI: template '{entry.id}' is not a valid UISpec: {e.Message}");
+                return null;
+            }
+
+            NeoUISettings settings = PrepareSettings();
+            ResolveParent(parentSelection, requireCanvas: true, out RectTransform parent, out _);
+
+            string undoLabel = $"Insert Template: {entry.label}";
+            int undoGroup = Undo.GetCurrentGroup();
+            Undo.SetCurrentGroupName(undoLabel);
+
+            var report = new GenerateReport();
+            GameObject firstRoot = null;
+            foreach (List<ElementSpec> elements in TopLevelElementLists(fragment))
+            foreach (ElementSpec element in elements)
+            {
+                GameObject go = UISpecGenerator.BuildElementLive(element, parent, settings, report);
+                if (go == null) continue;
+                if (go.transform.parent != parent) go.transform.SetParent(parent, worldPositionStays: false);
+                GameObjectUtility.EnsureUniqueNameForSibling(go);
+                Undo.RegisterCreatedObjectUndo(go, undoLabel);
+                if (firstRoot == null) firstRoot = go;
+            }
+            Undo.CollapseUndoOperations(undoGroup);
+
+            if (firstRoot == null)
+            {
+                Debug.LogWarning($"Neo UI: template '{entry.id}' produced no elements to insert.");
+                return null;
+            }
+            Selection.activeGameObject = firstRoot;
+            EditorGUIUtility.PingObject(firstRoot);
+            if (report.issues.Count > 0)
+                Debug.LogWarning($"Neo UI: insert template '{entry.id}' reported — {string.Join("; ", report.issues)}");
+            return firstRoot;
+        }
+
+        private static IEnumerable<List<ElementSpec>> TopLevelElementLists(UISpec fragment)
+        {
+            foreach (ViewSpec view in fragment.views)
+                if (view?.elements != null) yield return view.elements;
+            foreach (PopupSpec popup in fragment.popups)
+                if (popup?.elements != null) yield return popup.elements;
+        }
+
+        /// <summary>
         /// Re-styles <paramref name="widget"/> to a reusable <see cref="NeoWidgetPreset"/> by rebuilding it
         /// through the generator under that preset. Keeps the widget's identity + content (kind/id/label/icon)
         /// but drops its captured styling so the PRESET drives the look (otherwise the element's own
@@ -76,30 +152,174 @@ namespace Neo.UI.Editor.Authoring
         public static GameObject ApplyPreset(GameObject widget, string presetName)
         {
             if (widget == null || string.IsNullOrEmpty(presetName)) return null;
-            if (!(widget.transform.parent is RectTransform parent))
-            {
-                Debug.LogWarning("Neo UI: can't apply a preset to a root object — select a widget inside a view.");
-                return null;
-            }
-            bool inLayout = parent.GetComponent<LayoutGroup>() != null;
-            ElementSpec current = UISpecExporter.ExportElement(widget, inLayout);
-            if (current == null)
-            {
-                Debug.LogWarning($"Neo UI: '{widget.name}' isn't a recognized Neo widget — can't apply a preset.");
-                return null;
-            }
+            ElementSpec current = ExportForPresetWorkflow(widget);
+            if (current == null) return null; // already warned
 
             var spec = new ElementSpec
             {
                 kind = current.kind, id = current.id, label = current.label, icon = current.icon,
                 preset = presetName,
             };
+            return RebuildInPlace(widget, spec, "Apply Neo Preset", $"applying preset '{presetName}'");
+        }
+
+        /// <summary>
+        /// Captures <paramref name="widget"/>'s current styling into a NEW <see cref="NeoWidgetPreset"/>
+        /// asset at <paramref name="assetPath"/> — the native counterpart to the (doomed) Composer's
+        /// "Create From This…" (<c>SpecInspector.CreatePresetFromElement</c>/<c>CapturePreset</c>) — then
+        /// relinks the widget to it via <see cref="ApplyPreset"/> (its overrides become the preset's base).
+        /// Returns the created preset, or null (with a warning) if the widget isn't a recognized Neo
+        /// widget or <paramref name="assetPath"/> is empty.
+        /// // TODO(Wave 5): route the field list through the shared PresetFields helper (Task 5.3; audit D1).
+        /// </summary>
+        public static NeoWidgetPreset CreatePresetFromWidget(GameObject widget, string assetPath)
+        {
+            if (string.IsNullOrEmpty(assetPath)) return null;
+            ElementSpec current = ExportForPresetWorkflow(widget);
+            if (current == null) return null; // already warned
+
+            var preset = ScriptableObject.CreateInstance<NeoWidgetPreset>();
+            preset.presetName = System.IO.Path.GetFileNameWithoutExtension(assetPath);
+            preset.targetKind = current.kind;
+            CapturePresetFields(preset, current);
+            AssetDatabase.CreateAsset(preset, assetPath);
+            AssetDatabase.SaveAssets();
+            NeoWidgetPresets.InvalidateDiscovery();
+            PresetThumbnailCache.Invalidate();
+
+            ApplyPreset(widget, preset.presetName);
+            return preset;
+        }
+
+        /// <summary>
+        /// Pushes <paramref name="widget"/>'s current styling into its already-linked preset asset — every
+        /// other widget referencing it updates on the next regenerate/rebuild. The native counterpart to
+        /// the (doomed) Composer's "Update Preset" (<c>SpecInspector.UpdatePresetFromElement</c>). No-ops
+        /// (with a warning) when the widget isn't linked to a preset.
+        /// </summary>
+        public static bool UpdatePresetFromWidget(GameObject widget)
+        {
+            ElementSpec current = ExportForPresetWorkflow(widget);
+            if (current == null) return false; // already warned
+            if (string.IsNullOrEmpty(current.preset) || !NeoWidgetPresets.TryGet(current.preset, out NeoWidgetPreset preset))
+            {
+                Debug.LogWarning($"Neo UI: '{widget.name}' isn't linked to a preset — nothing to update.");
+                return false;
+            }
+            CapturePresetFields(preset, current);
+            EditorUtility.SetDirty(preset);
+            AssetDatabase.SaveAssets();
+            NeoWidgetPresets.InvalidateDiscovery();
+            PresetThumbnailCache.Invalidate();
+            return true;
+        }
+
+        /// <summary>
+        /// Clears <paramref name="widget"/>'s preset-governed style overrides so it falls back to its
+        /// linked preset's own values — the native counterpart to the (doomed) Composer's "Reset To Preset"
+        /// (<c>SpecInspector.ResetElementToPreset</c>). Unlike <see cref="ApplyPreset"/> (which drops every
+        /// field back to bare kind/id/label/icon), this only clears the preset-governed fields, so layout,
+        /// bindings, and other element-owned data survive the reset. Rebuilds in place, preserving
+        /// placement/sibling order. No-ops (with a warning) when the widget isn't linked to a preset.
+        /// </summary>
+        public static GameObject ResetWidgetToPreset(GameObject widget)
+        {
+            ElementSpec current = ExportForPresetWorkflow(widget);
+            if (current == null) return null; // already warned
+            if (string.IsNullOrEmpty(current.preset))
+            {
+                Debug.LogWarning($"Neo UI: '{widget.name}' isn't linked to a preset — nothing to reset.");
+                return null;
+            }
+            ClearPresetGovernedFields(current);
+            return RebuildInPlace(widget, current, "Reset Neo Widget To Preset", $"resetting '{widget.name}' to its preset");
+        }
+
+        // ---------------------------------------------------------------- preset workflow helpers
+
+        /// <summary>
+        /// Exports <paramref name="widget"/>'s live spec for a preset action (Apply/Create/Update/Reset),
+        /// the exact seam <see cref="ApplyPreset"/> always used (<see cref="UISpecExporter.ExportElement"/>).
+        /// Warns and returns null when <paramref name="widget"/> isn't parented under a RectTransform (a
+        /// root object) or isn't a recognized Neo widget; a null <paramref name="widget"/> returns null
+        /// quietly (no selection is not itself a failure).
+        /// </summary>
+        public static ElementSpec ExportForPresetWorkflow(GameObject widget)
+        {
+            if (widget == null) return null;
+            if (!(widget.transform.parent is RectTransform))
+            {
+                Debug.LogWarning("Neo UI: can't run a preset action on a root object — select a widget inside a view.");
+                return null;
+            }
+            ElementSpec element = TryExportForPresetWorkflow(widget);
+            if (element == null)
+                Debug.LogWarning($"Neo UI: '{widget.name}' isn't a recognized Neo widget.");
+            return element;
+        }
+
+        /// <summary>
+        /// Quiet variant of <see cref="ExportForPresetWorkflow"/> for UI status checks (e.g. enabling a
+        /// button while the user browses the scene) — same export, but never logs, since a null result
+        /// there just means "nothing preset-able selected yet", not a failed user action.
+        /// </summary>
+        public static ElementSpec TryExportForPresetWorkflow(GameObject widget)
+        {
+            if (widget == null || !(widget.transform.parent is RectTransform parent)) return null;
+            bool inLayout = parent.GetComponent<LayoutGroup>() != null;
+            return UISpecExporter.ExportElement(widget, inLayout);
+        }
+
+        /// <summary> Copies the preset-governed fields FROM <paramref name="element"/> ONTO <paramref name="preset"/>.
+        /// Mirrors the (doomed) Composer's <c>SpecInspector.CapturePreset</c> field-for-field (includes
+        /// <c>padding4</c> — audit D1) so both surfaces agree on which fields a preset owns. </summary>
+        private static void CapturePresetFields(NeoWidgetPreset preset, ElementSpec element)
+        {
+            preset.variant = element.variant;
+            preset.sizeVariant = element.sizeVariant;
+            preset.textStyle = element.textStyle;
+            preset.shapeStyle = element.style;
+            preset.background = element.background;
+            preset.labelColor = element.labelColor;
+            preset.icon = element.icon;
+            preset.padding4 = element.padding4;
+            preset.radius = element.radius ?? -1f;
+            preset.padding = element.padding ?? -1f;
+            preset.spacing = element.spacing ?? -1f;
+            preset.motion = element.animations?.loop; // the loop animation is the preset's "motion"
+        }
+
+        /// <summary> Nulls out every preset-governed field on <paramref name="element"/> in place. Mirrors
+        /// the (doomed) Composer's <c>SpecInspector.ResetElementToPreset</c> field-for-field. </summary>
+        private static void ClearPresetGovernedFields(ElementSpec element)
+        {
+            element.variant = null; element.sizeVariant = null; element.textStyle = null; element.style = null;
+            element.background = null; element.labelColor = null; element.icon = null;
+            element.radius = null; element.padding = null; element.spacing = null; element.padding4 = null;
+            // motion maps to the loop channel; clear only that, leaving the element's own hover/press intact.
+            if (element.animations != null)
+            {
+                element.animations.loop = null;
+                if (element.animations.IsEmpty) element.animations = null;
+            }
+        }
+
+        /// <summary>
+        /// Rebuilds <paramref name="widget"/> from <paramref name="spec"/> in place: same parent, sibling
+        /// index, and (outside a layout group) anchors/position/size — the placement-preserving swap
+        /// <see cref="ApplyPreset"/>/<see cref="ResetWidgetToPreset"/> share. One undo step.
+        /// </summary>
+        private static GameObject RebuildInPlace(GameObject widget, ElementSpec spec, string undoLabel, string failureContext)
+        {
+            var parent = (RectTransform)widget.transform.parent;
+            bool inLayout = parent.GetComponent<LayoutGroup>() != null;
+
             NeoUISettings settings = PrepareSettings();
             var report = new GenerateReport();
             GameObject built = UISpecGenerator.BuildElementLive(spec, parent, settings, report);
             if (built == null)
             {
-                Debug.LogWarning($"Neo UI: applying preset '{presetName}' failed — {string.Join("; ", report.issues)}");
+                Debug.LogWarning($"Neo UI: {failureContext} failed — {string.Join("; ", report.issues)}");
                 return null;
             }
 
@@ -114,13 +334,270 @@ namespace Neo.UI.Editor.Authoring
             dst.SetSiblingIndex(index);
             built.name = widget.name;
 
-            Undo.RegisterCreatedObjectUndo(built, "Apply Neo Preset");
+            Undo.RegisterCreatedObjectUndo(built, undoLabel);
             Undo.DestroyObjectImmediate(widget);
             Selection.activeGameObject = built;
             EditorGUIUtility.PingObject(built);
             if (report.issues.Count > 0)
-                Debug.LogWarning($"Neo UI: apply preset '{presetName}' — {string.Join("; ", report.issues)}");
+                Debug.LogWarning($"Neo UI: {failureContext} — {string.Join("; ", report.issues)}");
             return built;
+        }
+
+        // ---------------------------------------------------------------- breakpoint overrides
+        //
+        // Wave 2 Task 2.3: native parity for the (doomed) Composer's BreakpointBar. Deliberately
+        // capture-based, matching the rest of native authoring — there is no per-field breakpoint
+        // inspector; the developer drags/resizes the widget directly in the scene view (ordinary
+        // RectTransform handles, no special "editing mode") and then captures the result.
+
+        /// <summary>
+        /// The spec's top-level breakpoint declarations for <paramref name="showcase"/>, read from its
+        /// committed baseline (<see cref="SpecBaseline.Load"/>) — the standing source of truth for
+        /// "what breakpoints exist", independent of whether any view in the CURRENT scene happens to
+        /// carry a live <see cref="UIResponsiveRoot"/> yet (a view may be the first to ever capture an
+        /// override). Empty when the showcase has no baseline yet or declares none.
+        /// </summary>
+        public static List<BreakpointSpec> GetBreakpoints(Showcase showcase)
+        {
+            if (showcase == null) return new List<BreakpointSpec>();
+            using (NeoWorkspace.Scoped(showcase))
+            {
+                UISpec baseline = SpecBaseline.Load();
+                return baseline != null ? baseline.breakpoints : new List<BreakpointSpec>();
+            }
+        }
+
+        /// <summary>
+        /// Scene-view preview aid (Pillar C, editor-only — no serialization): applies
+        /// <paramref name="breakpoint"/>'s already-baked layout to <paramref name="view"/> via the same
+        /// runtime driver a live build uses (<see cref="UIResponsiveRoot.SetActiveBreakpoint"/>), or
+        /// forces the base when <paramref name="breakpoint"/> is null/empty ("(base)"). No resize
+        /// handling is built — this only switches vectors the view already knows about. No-ops (with a
+        /// warning) when the view has no baked <see cref="UIResponsiveRoot"/> yet — there is nothing to
+        /// preview until at least one element has a captured override.
+        /// </summary>
+        public static void PreviewBreakpoint(UIView view, string breakpoint)
+        {
+            if (view == null) return;
+            var responsive = view.GetComponent<UIResponsiveRoot>();
+            if (responsive == null)
+            {
+                Debug.LogWarning($"Neo UI: '{view.name}' has no baked breakpoint overrides yet — nothing to preview.");
+                return;
+            }
+            responsive.SetActiveBreakpoint(string.IsNullOrEmpty(breakpoint) ? UIResponsiveRoot.BaseBreakpoint : breakpoint);
+        }
+
+        /// <summary>
+        /// Captures <paramref name="widget"/>'s CURRENT live layout — however the developer just
+        /// dragged/resized it in the scene view — as <paramref name="breakpoint"/>'s override delta
+        /// against <paramref name="baseLayout"/> (a snapshot of the widget's layout taken BEFORE the
+        /// drag; the overlay caches this on selection since <see cref="ConstraintLayout.Detect"/> always
+        /// re-reads the LIVE RectTransform and has no memory of a "before" value on its own).
+        /// <para>
+        /// The widget is restored to <paramref name="baseLayout"/> immediately after diffing — the scene
+        /// must stay WYSIWYG at base — and the delta is baked directly onto the view's
+        /// <see cref="UIResponsiveRoot"/> as a real entry/base pair, the SAME shape
+        /// <c>UISpecGenerator.BakeResponsiveRoot</c> produces from spec. That is what lets the standing
+        /// <see cref="NeoCapture.CaptureView"/> export pick it up through the EXISTING, unmodified
+        /// <c>UISpecExporter</c> breakpoint-reconstruction pass (<c>ReconstructOverrides</c> /
+        /// <c>FromResponsiveDelta</c>) — this method never patches spec JSON itself.
+        /// </para>
+        /// Returns null (with a warning) when the widget isn't part of the constraint layout model (no
+        /// <see cref="NeoLayoutTag"/> — breakpoints only apply to that model) or nothing round-trippable
+        /// changed since selection.
+        /// </summary>
+        public static SyncResult CaptureLayoutOverride(GameObject widget, UIView view, Showcase showcase,
+            string breakpoint, LayoutSpec baseLayout)
+        {
+            if (widget == null || view == null || showcase == null || string.IsNullOrEmpty(breakpoint)) return null;
+            var rect = widget.transform as RectTransform;
+            var tag = widget.GetComponent<NeoLayoutTag>();
+            if (rect == null || tag == null)
+            {
+                Debug.LogWarning($"Neo UI: '{widget.name}' isn't placed through the constraint layout model — " +
+                                  "breakpoint overrides need 'layout', not the legacy anchor/position fields.");
+                return null;
+            }
+
+            List<BreakpointSpec> breakpoints = GetBreakpoints(showcase);
+            if (!breakpoints.Exists(b => b != null && b.name == breakpoint))
+                Debug.LogWarning($"Neo UI: '{breakpoint}' isn't declared in '{showcase.id}'s spec breakpoints — " +
+                                  "capturing anyway, but the override will never apply until it is.");
+
+            LayoutSpec current = ConstraintLayout.Detect(rect, tag);
+            if (current == null)
+            {
+                Debug.LogWarning($"Neo UI: '{widget.name}' has no detectable layout to capture.");
+                return null;
+            }
+            LayoutSpec delta = DiffLayout(baseLayout, current);
+            if (delta == null || delta.IsEmpty)
+            {
+                Debug.LogWarning($"Neo UI: '{widget.name}' hasn't changed since it was selected — nothing to " +
+                                  $"capture for '{breakpoint}'.");
+                return null;
+            }
+
+            RectVectors overrideVectors = CaptureVectors(rect);
+            var parentLayout = rect.parent != null ? rect.parent.GetComponent<HorizontalOrVerticalLayoutGroup>() : null;
+
+            // Restore the rect to its base state right away — the scene must stay WYSIWYG at base; the
+            // breakpoint's own resolved vectors were already captured above.
+            if (baseLayout != null && !baseLayout.IsEmpty)
+                ConstraintLayout.Apply(rect, baseLayout, parentLayout);
+            RectVectors baseVectors = CaptureVectors(rect);
+
+            UIResponsiveRoot responsive = view.GetComponent<UIResponsiveRoot>();
+            if (responsive == null) responsive = view.gameObject.AddComponent<UIResponsiveRoot>();
+            SyncConditions(responsive, breakpoints);
+            UpsertBase(responsive, rect, baseVectors);
+            UpsertEntry(responsive, breakpoint, rect, overrideVectors, delta);
+
+            return NeoCapture.CaptureView(view, showcase, force: false);
+        }
+
+        private readonly struct RectVectors
+        {
+            public readonly Vector2 anchorMin, anchorMax, offsetMin, offsetMax, sizeDelta, pivot;
+            public RectVectors(RectTransform r)
+            {
+                anchorMin = r.anchorMin; anchorMax = r.anchorMax;
+                offsetMin = r.offsetMin; offsetMax = r.offsetMax;
+                sizeDelta = r.sizeDelta; pivot = r.pivot;
+            }
+        }
+
+        private static RectVectors CaptureVectors(RectTransform rect) => new RectVectors(rect);
+
+        /// <summary> Rebuilds the condition table wholesale from the canonical spec breakpoints — cheap,
+        /// and it keeps the table's order/content correct even the first time a view ever bakes one. </summary>
+        private static void SyncConditions(UIResponsiveRoot responsive, List<BreakpointSpec> breakpoints)
+        {
+            responsive.conditions.Clear();
+            foreach (BreakpointSpec bp in breakpoints)
+            {
+                var cond = new UIResponsiveRoot.ResponsiveCondition { name = bp.name };
+                if (bp.when != null)
+                {
+                    cond.orientation = bp.when.orientation ?? string.Empty;
+                    cond.minAspect = bp.when.minAspect ?? float.NaN;
+                    cond.maxAspect = bp.when.maxAspect ?? float.NaN;
+                    cond.minWidth = bp.when.minWidth ?? float.NaN;
+                    cond.maxWidth = bp.when.maxWidth ?? float.NaN;
+                }
+                responsive.conditions.Add(cond);
+            }
+        }
+
+        private static void UpsertBase(UIResponsiveRoot responsive, RectTransform rect, RectVectors v)
+        {
+            UIResponsiveRoot.ResponsiveBase existing = responsive.bases.Find(b => b != null && b.target == rect);
+            if (existing == null)
+            {
+                existing = new UIResponsiveRoot.ResponsiveBase { target = rect };
+                responsive.bases.Add(existing);
+            }
+            existing.anchorMin = v.anchorMin; existing.anchorMax = v.anchorMax;
+            existing.offsetMin = v.offsetMin; existing.offsetMax = v.offsetMax;
+            existing.sizeDelta = v.sizeDelta; existing.pivot = v.pivot;
+        }
+
+        private static void UpsertEntry(UIResponsiveRoot responsive, string breakpoint, RectTransform rect,
+            RectVectors v, LayoutSpec delta)
+        {
+            UIResponsiveRoot.ResponsiveEntry existing = responsive.entries.Find(
+                e => e != null && e.target == rect && e.breakpoint == breakpoint);
+            if (existing == null)
+            {
+                existing = new UIResponsiveRoot.ResponsiveEntry { breakpoint = breakpoint, target = rect };
+                responsive.entries.Add(existing);
+            }
+            existing.anchorMin = v.anchorMin; existing.anchorMax = v.anchorMax;
+            existing.offsetMin = v.offsetMin; existing.offsetMax = v.offsetMax;
+            existing.sizeDelta = v.sizeDelta; existing.pivot = v.pivot;
+            existing.delta = BuildResponsiveDelta(delta);
+        }
+
+        /// <summary> Mirrors the generator's private <c>ToResponsiveDelta</c> mapping so a manually
+        /// captured delta bakes into the SAME force-text shape the generator would have produced from
+        /// spec — the exporter's existing <c>FromResponsiveDelta</c> reconstructs it back into
+        /// <c>overrides[...]</c> unchanged, byte-identically. </summary>
+        private static UIResponsiveRoot.ResponsiveDelta BuildResponsiveDelta(LayoutSpec delta)
+        {
+            var result = new UIResponsiveRoot.ResponsiveDelta
+            {
+                h = delta.h ?? string.Empty,
+                v = delta.v ?? string.Empty,
+                sizeW = delta.size != null && delta.size.w.HasValue ? delta.size.w.Value : float.NaN,
+                sizeH = delta.size != null && delta.size.h.HasValue ? delta.size.h.Value : float.NaN,
+                sizingW = delta.sizing != null ? (delta.sizing.w ?? string.Empty) : string.Empty,
+                sizingH = delta.sizing != null ? (delta.sizing.h ?? string.Empty) : string.Empty
+            };
+            if (delta.offset != null && !delta.offset.IsEmpty)
+                foreach (KeyValuePair<string, float> entry in delta.offset.values)
+                {
+                    result.offsetKeys.Add(entry.Key);
+                    result.offsetValues.Add(entry.Value);
+                }
+            return result;
+        }
+
+        /// <summary> Field-by-field inverse of <see cref="LayoutSpec.MergedWith"/>: only fields where
+        /// <paramref name="current"/> differs from <paramref name="baseLayout"/> are copied into the
+        /// delta (an unset field lets the merge fall back to the base), so a captured override stays a
+        /// minimal, human-readable delta rather than a flattened copy of the whole layout. </summary>
+        private static LayoutSpec DiffLayout(LayoutSpec baseLayout, LayoutSpec current)
+        {
+            if (current == null) return null;
+            baseLayout = baseLayout ?? new LayoutSpec();
+            var delta = new LayoutSpec
+            {
+                h = !string.Equals(current.h, baseLayout.h, System.StringComparison.Ordinal) ? current.h : null,
+                v = !string.Equals(current.v, baseLayout.v, System.StringComparison.Ordinal) ? current.v : null,
+                offset = DiffOffset(baseLayout.offset, current.offset),
+                size = DiffSize(baseLayout.size, current.size),
+                sizing = DiffSizing(baseLayout.sizing, current.sizing)
+            };
+            return delta.IsEmpty ? null : delta;
+        }
+
+        private static LayoutOffset DiffOffset(LayoutOffset baseOffset, LayoutOffset current)
+        {
+            if (current == null || current.IsEmpty) return null;
+            var result = new LayoutOffset();
+            foreach (KeyValuePair<string, float> entry in current.values)
+            {
+                float baseValue = baseOffset != null && baseOffset.TryGet(entry.Key, out float b) ? b : 0f;
+                if (!Mathf.Approximately(baseValue, entry.Value)) result.Set(entry.Key, entry.Value);
+            }
+            return result.IsEmpty ? null : result;
+        }
+
+        private static LayoutSize DiffSize(LayoutSize baseSize, LayoutSize current)
+        {
+            if (current == null) return null;
+            var result = new LayoutSize();
+            if (current.w.HasValue && !(baseSize != null && baseSize.w.HasValue
+                    && Mathf.Approximately(baseSize.w.Value, current.w.Value)))
+                result.w = current.w;
+            if (current.h.HasValue && !(baseSize != null && baseSize.h.HasValue
+                    && Mathf.Approximately(baseSize.h.Value, current.h.Value)))
+                result.h = current.h;
+            return result.IsEmpty ? null : result;
+        }
+
+        private static LayoutSizing DiffSizing(LayoutSizing baseSizing, LayoutSizing current)
+        {
+            if (current == null) return null;
+            var result = new LayoutSizing();
+            if (!string.IsNullOrEmpty(current.w) && !(baseSizing != null
+                    && string.Equals(baseSizing.w, current.w, System.StringComparison.Ordinal)))
+                result.w = current.w;
+            if (!string.IsNullOrEmpty(current.h) && !(baseSizing != null
+                    && string.Equals(baseSizing.h, current.h, System.StringComparison.Ordinal)))
+                result.h = current.h;
+            return result.IsEmpty ? null : result;
         }
 
         // ---------------------------------------------------------------- placement
@@ -242,7 +719,7 @@ namespace Neo.UI.Editor.Authoring
         // "vstack" → "Vertical Stack" when the palette knows it, else a title-cased fallback.
         internal static string Humanize(string kind)
         {
-            foreach (PaletteEntry e in ComposerPalette.All)
+            foreach (PaletteEntry e in NeoWidgetPalette.All)
                 if (e.kind == kind) return e.label;
             if (string.IsNullOrEmpty(kind)) return kind;
             return char.ToUpperInvariant(kind[0]) + kind.Substring(1);

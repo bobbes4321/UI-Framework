@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
-namespace Neo.UI.Editor.Composer
+namespace Neo.UI.Editor
 {
     /// <summary>
-    /// A static, editor-only cache of preset/kind thumbnails so the Composer never renders per
-    /// <c>OnGUI</c> pass (the "no editor-tick visuals" performance rule). Each entry is rendered once via
+    /// A static, editor-only cache of preset/kind thumbnails so no caller ever renders one per
+    /// <c>OnGUI</c> pass (the "no editor-tick visuals" performance rule) — used by the scene-view
+    /// overlay's <c>PresetPickerPopup</c>/palette tiles and, while it lives, the Composer's palette and
+    /// picker. Each entry is rendered once via
     /// <see cref="PresetThumbnailRenderer"/> and reused; the cache OWNS the textures (callers never
     /// destroy them). Entries are keyed by (preset name OR element kind) + requested size + the active
     /// theme variant name + a content hash of the preset's styling fields, so editing a preset, resizing,

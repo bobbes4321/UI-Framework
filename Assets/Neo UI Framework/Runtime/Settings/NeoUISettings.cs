@@ -212,9 +212,9 @@ namespace Neo.UI
 
         // ── Design-lint configuration (extensibility seam: validation rules) ─────────────────────
         // The blessed spacing scale + WCAG thresholds + contrast token pairs the soft design lint
-        // (AgentValidation.ValidateDesign) and the Composer's spacing snap (ComposerOptions) read.
+        // (AgentValidation.ValidateDesign) and the widget-attribute spacing snap (NeoWidgetOptions) read.
         // A consuming project on a different design system overrides these here — single source of
-        // truth so the lint and the Composer always agree, with no package file edited.
+        // truth so the lint and authoring tools always agree, with no package file edited.
         // See Assets/docs/extensibility-seam-validation-rules-plan.md.
 
         /// <summary> A text/surface token pair and the minimum WCAG contrast ratio it must meet. </summary>

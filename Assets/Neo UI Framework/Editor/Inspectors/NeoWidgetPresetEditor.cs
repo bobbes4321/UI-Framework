@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Neo.EditorUI;
-using Neo.UI.Editor.Composer;
 using UnityEditor;
 using UnityEngine;
 
@@ -17,7 +16,7 @@ namespace Neo.UI.Editor
     /// entry the project authors later; an empty selection means "this preset does not set this field".
     /// <para>
     /// Drawing is allocation-light: option lists are gathered only when a dropdown opens (the providers
-    /// below are one-shot gathers, exactly like <see cref="ComposerOptions"/>), the one cached
+    /// below are one-shot gathers, exactly like <see cref="NeoWidgetOptions"/>), the one cached
     /// <see cref="GUIStyle"/> is built lazily and reused, and there are no editor-tick subscriptions.
     /// All edits go through <c>serializedObject</c> + <see cref="EditorGUI.BeginChangeCheck"/> /
     /// <c>ApplyModifiedProperties</c> so multi-edit and undo behave (CLAUDE.md IMGUI rules).
@@ -156,18 +155,18 @@ namespace Neo.UI.Editor
 
         private static List<string> KindOptions() => new List<string>(ElementSpec.KnownKinds);
 
-        private static List<string> VariantOptions() => new List<string>(ComposerOptions.ButtonVariants);
+        private static List<string> VariantOptions() => new List<string>(NeoWidgetOptions.ButtonVariants);
 
-        private static List<string> SizeOptions() => new List<string>(ComposerOptions.ButtonSizes);
+        private static List<string> SizeOptions() => new List<string>(NeoWidgetOptions.ButtonSizes);
 
-        private static List<string> TextStyleOptions() => ComposerOptions.TextStyles();
+        private static List<string> TextStyleOptions() => NeoWidgetOptions.TextStyles();
 
-        private static List<string> ShapeStyleOptions() => ComposerOptions.ShapeStyles();
+        private static List<string> ShapeStyleOptions() => NeoWidgetOptions.ShapeStyles();
 
-        private static List<string> IconOptions() => ComposerOptions.Icons();
+        private static List<string> IconOptions() => NeoWidgetOptions.Icons();
 
         // Theme tokens — no live document here, so pass null (project theme only).
-        private static List<string> TokenOptions() => ComposerOptions.Tokens(null);
+        private static List<string> TokenOptions() => NeoWidgetOptions.Tokens(null);
 
         // Animation preset names from the settings' AnimationPresetDatabase (the motion seam).
         private static List<string> MotionOptions()

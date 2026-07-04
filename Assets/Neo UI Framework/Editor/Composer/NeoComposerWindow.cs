@@ -1,5 +1,6 @@
 using System.IO;
 using Neo.EditorUI;
+using Neo.UI.Editor.Authoring; // NeoLayoutTemplates — rehomed off the Composer in Task 2.1 (dies with the window in Wave 3)
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -355,17 +356,17 @@ namespace Neo.UI.Editor.Composer
         private void ShowTemplatePicker(Rect anchor)
         {
             var labels = new System.Collections.Generic.List<string>();
-            foreach (TemplateEntry t in ComposerTemplates.All) labels.Add(t.label);
+            foreach (TemplateEntry t in NeoLayoutTemplates.All) labels.Add(t.label);
             if (labels.Count == 0) return;
             NeoSearchablePopup.Show(anchor, null, labels, InsertTemplateByLabel);
         }
 
         private void InsertTemplateByLabel(string label)
         {
-            foreach (TemplateEntry t in ComposerTemplates.All)
+            foreach (TemplateEntry t in NeoLayoutTemplates.All)
             {
                 if (t.label != label) continue;
-                string select = ComposerTemplates.Insert(_document, t, out var warnings);
+                string select = NeoLayoutTemplates.Insert(_document, t, out var warnings);
                 if (warnings != null && warnings.Count > 0)
                     ShowNotification(new GUIContent($"Inserted “{t.label}” — {warnings.Count} name clash(es) renamed"));
                 else

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Neo.UI.Editor;
-using Neo.UI.Editor.Composer;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -12,7 +11,7 @@ namespace Neo.UI.Tests
     /// The validation-rule registry seam: a project can register a custom rule into the right
     /// bucket (Hard fires in ValidateAll, Design only in ValidateDesign), declare custom wiring
     /// live so the dead-interaction lint stops flagging it, and override the blessed spacing scale
-    /// once on settings so the lint and the Composer agree. Built-ins always run regardless.
+    /// once on settings so the lint and the authoring tools agree. Built-ins always run regardless.
     /// </summary>
     public class NeoValidationRulesTests
     {
@@ -88,9 +87,9 @@ namespace Neo.UI.Tests
             {
                 // A value off the default scale but present on a project's custom scale.
                 settings.spacingScale = new[] { 0f, 10f, 20f, 30f };
-                CollectionAssert.Contains(ComposerOptions.SpacingScale, 30f,
-                    "ComposerOptions.SpacingScale must read the settings field (one source of truth)");
-                CollectionAssert.DoesNotContain(ComposerOptions.SpacingScale, 16f,
+                CollectionAssert.Contains(NeoWidgetOptions.SpacingScale, 30f,
+                    "NeoWidgetOptions.SpacingScale must read the settings field (one source of truth)");
+                CollectionAssert.DoesNotContain(NeoWidgetOptions.SpacingScale, 16f,
                     "the default 16 should be gone once the project overrides the scale");
             }
             finally

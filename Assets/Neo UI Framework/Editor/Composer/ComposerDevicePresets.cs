@@ -11,7 +11,7 @@ namespace Neo.UI.Editor.Composer
     /// handheld, a kiosk aspect, a watch face — with one <see cref="ComposerDevicePresets.Register"/>
     /// call from its own assembly, no fork.
     ///
-    /// <para>This mirrors the shape of <see cref="CatalogKind"/> / <see cref="ComposerCatalogKinds"/>
+    /// <para>This mirrors the shape of <see cref="CatalogKind"/> / <see cref="NeoCatalogKinds"/>
     /// (Pattern R — the Kinds Registry): a readonly value type plus a static replace-by-id registry,
     /// so the viewport iterates <see cref="ComposerDevicePresets.All"/> instead of switching over a
     /// fixed enum of aspect ratios — which was the user's #1 complaint.</para>

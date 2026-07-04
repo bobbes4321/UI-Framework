@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Neo.UI.Editor.Composer
+namespace Neo.UI.Editor
 {
     /// <summary>
     /// Option providers for the Composer's dropdowns. Lists are built when a dropdown opens (never
@@ -10,7 +10,7 @@ namespace Neo.UI.Editor.Composer
     /// theme; everything else (styles, anchors) comes from the project theme / factory since the
     /// document doesn't redefine those.
     /// </summary>
-    public static class ComposerOptions
+    public static class NeoWidgetOptions
     {
         // ---------------------------------------------------------------------------------------
         // Widget-attribute option sets (Pattern R — extensibility-seam-widget-attributes-plan.md).

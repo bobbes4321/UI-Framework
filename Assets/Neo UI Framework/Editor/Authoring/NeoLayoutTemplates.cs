@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using System.IO;
+using Neo.UI.Editor.Composer; // SpecDocument — the Composer document Insert() edits (dies with the window in Wave 3)
 using UnityEngine;
 
-namespace Neo.UI.Editor.Composer
+namespace Neo.UI.Editor.Authoring
 {
     /// <summary>
     /// One curated scaffold the Composer can stamp into the current document — a small, valid
@@ -33,12 +34,12 @@ namespace Neo.UI.Editor.Composer
 
     /// <summary>
     /// The registry of insertable templates (Pattern R): the package built-ins shipped under
-    /// <c>Editor/Composer/Templates~/*.json</c> plus anything a consuming project registers via
+    /// <c>Editor/Authoring/Templates~/*.json</c> plus anything a consuming project registers via
     /// <see cref="Register"/>. The "New from template" picker reads <see cref="All"/>; insertion is
     /// performed by <see cref="Insert"/>, always through <see cref="SpecDocument.ApplyEdit"/>, with
     /// name-collision handling (warn + suffix, never silent overwrite).
     /// </summary>
-    public static class ComposerTemplates
+    public static class NeoLayoutTemplates
     {
         private static readonly List<TemplateEntry> _registered = new List<TemplateEntry>();
         private static bool _builtinsSeeded;
@@ -87,7 +88,7 @@ namespace Neo.UI.Editor.Composer
             EnsureBuiltins();
             if (string.IsNullOrEmpty(entry.id) || entry.loadJson == null)
             {
-                Debug.LogWarning("ComposerTemplates.Register ignored an entry with a null/empty id or loader.");
+                Debug.LogWarning("NeoLayoutTemplates.Register ignored an entry with a null/empty id or loader.");
                 return;
             }
             for (int i = 0; i < _registered.Count; i++)
@@ -204,18 +205,18 @@ namespace Neo.UI.Editor.Composer
                 if (_templatesDir != null) return _templatesDir;
 
                 // 1) locate this script asset and walk to its sibling Templates~ folder
-                string[] guids = UnityEditor.AssetDatabase.FindAssets("ComposerTemplates t:MonoScript");
+                string[] guids = UnityEditor.AssetDatabase.FindAssets("NeoLayoutTemplates t:MonoScript");
                 foreach (string guid in guids)
                 {
                     string assetPath = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
-                    if (!assetPath.EndsWith("/ComposerTemplates.cs", System.StringComparison.Ordinal)) continue;
+                    if (!assetPath.EndsWith("/NeoLayoutTemplates.cs", System.StringComparison.Ordinal)) continue;
                     string dir = Path.GetDirectoryName(ProjectPathToAbsolute(assetPath));
                     string candidate = Path.Combine(dir, "Templates~");
                     if (Directory.Exists(candidate)) { _templatesDir = candidate; return _templatesDir; }
                 }
 
                 // 2) standard package path
-                string standard = Path.Combine(Application.dataPath, "Neo UI Framework", "Editor", "Composer", "Templates~");
+                string standard = Path.Combine(Application.dataPath, "Neo UI Framework", "Editor", "Authoring", "Templates~");
                 if (Directory.Exists(standard)) { _templatesDir = standard; return _templatesDir; }
 
                 // 3) compile-time fallback

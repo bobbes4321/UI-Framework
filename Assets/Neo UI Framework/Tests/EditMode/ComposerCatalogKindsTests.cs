@@ -7,18 +7,18 @@ namespace Neo.UI.Tests
 {
     /// <summary>
     /// The reference Pattern-R registry (the shape the whole extensibility-seams family mirrors):
-    /// <see cref="ComposerCatalogKinds"/> ships the two built-ins through the seam, and
-    /// <see cref="ComposerCatalogKinds.Register"/> adds/replaces a kind by id. Mirrors
+    /// <see cref="NeoCatalogKinds"/> ships the two built-ins through the seam, and
+    /// <see cref="NeoCatalogKinds.Register"/> adds/replaces a kind by id. Mirrors
     /// <c>SpecFieldCatalogTests.AddPicker_IsExactlyTheSpecKindList</c>: the chrome's option list must
-    /// equal <see cref="ComposerCatalogKinds.All"/>.
+    /// equal <see cref="NeoCatalogKinds.All"/>.
     /// </summary>
-    public class ComposerCatalogKindsTests
+    public class NeoCatalogKindsTests
     {
         [Test]
         public void All_ContainsTheTwoBuiltins()
         {
             var ids = new List<string>();
-            foreach (CatalogKind kind in ComposerCatalogKinds.All) ids.Add(kind.id);
+            foreach (CatalogKind kind in NeoCatalogKinds.All) ids.Add(kind.id);
             CollectionAssert.Contains(ids, MenuCatalogSpec.SettingsKind);
             CollectionAssert.Contains(ids, MenuCatalogSpec.CheatKind);
         }
@@ -27,8 +27,8 @@ namespace Neo.UI.Tests
         public void Builtins_PointAtTheExistingSpecFields()
         {
             var spec = new UISpec();
-            Assert.IsTrue(ComposerCatalogKinds.TryGet(MenuCatalogSpec.SettingsKind, out CatalogKind settings));
-            Assert.IsTrue(ComposerCatalogKinds.TryGet(MenuCatalogSpec.CheatKind, out CatalogKind cheats));
+            Assert.IsTrue(NeoCatalogKinds.TryGet(MenuCatalogSpec.SettingsKind, out CatalogKind settings));
+            Assert.IsTrue(NeoCatalogKinds.TryGet(MenuCatalogSpec.CheatKind, out CatalogKind cheats));
             Assert.AreSame(spec.settings, settings.list(spec), "settings kind must store on spec.settings");
             Assert.AreSame(spec.cheats, cheats.list(spec), "cheats kind must store on spec.cheats");
         }
@@ -36,8 +36,8 @@ namespace Neo.UI.Tests
         [Test]
         public void Cheats_DeclareFavourites_SettingsDoNot()
         {
-            Assert.IsTrue(ComposerCatalogKinds.TryGet(MenuCatalogSpec.CheatKind, out CatalogKind cheats));
-            Assert.IsTrue(ComposerCatalogKinds.TryGet(MenuCatalogSpec.SettingsKind, out CatalogKind settings));
+            Assert.IsTrue(NeoCatalogKinds.TryGet(MenuCatalogSpec.CheatKind, out CatalogKind cheats));
+            Assert.IsTrue(NeoCatalogKinds.TryGet(MenuCatalogSpec.SettingsKind, out CatalogKind settings));
             Assert.IsTrue(cheats.showFavourites);
             Assert.IsFalse(settings.showFavourites);
         }
@@ -45,26 +45,26 @@ namespace Neo.UI.Tests
         [Test]
         public void TryGet_UnknownId_ReturnsFalse()
         {
-            Assert.IsFalse(ComposerCatalogKinds.TryGet("nope-not-a-kind", out _));
+            Assert.IsFalse(NeoCatalogKinds.TryGet("nope-not-a-kind", out _));
         }
 
         [Test]
         public void Register_AppendsNovelKind_ThenReplacesByIdInPlace()
         {
             const string id = "test-debug-kind";
-            int before = ComposerCatalogKinds.All.Count;
+            int before = NeoCatalogKinds.All.Count;
 
             var firstStore = new List<MenuCatalogSpec>();
-            ComposerCatalogKinds.Register(new CatalogKind(id, "Debug", _ => firstStore));
-            Assert.AreEqual(before + 1, ComposerCatalogKinds.All.Count, "a novel id appends");
-            Assert.IsTrue(ComposerCatalogKinds.TryGet(id, out CatalogKind got));
+            NeoCatalogKinds.Register(new CatalogKind(id, "Debug", _ => firstStore));
+            Assert.AreEqual(before + 1, NeoCatalogKinds.All.Count, "a novel id appends");
+            Assert.IsTrue(NeoCatalogKinds.TryGet(id, out CatalogKind got));
             Assert.AreEqual("Debug", got.label);
 
             // re-registering the same id replaces in place (no duplicate row)
             var secondStore = new List<MenuCatalogSpec>();
-            ComposerCatalogKinds.Register(new CatalogKind(id, "Debug2", _ => secondStore));
-            Assert.AreEqual(before + 1, ComposerCatalogKinds.All.Count, "same id replaces, never duplicates");
-            Assert.IsTrue(ComposerCatalogKinds.TryGet(id, out CatalogKind got2));
+            NeoCatalogKinds.Register(new CatalogKind(id, "Debug2", _ => secondStore));
+            Assert.AreEqual(before + 1, NeoCatalogKinds.All.Count, "same id replaces, never duplicates");
+            Assert.IsTrue(NeoCatalogKinds.TryGet(id, out CatalogKind got2));
             Assert.AreEqual("Debug2", got2.label);
             Assert.AreSame(secondStore, got2.list(new UISpec()));
         }
@@ -74,11 +74,11 @@ namespace Neo.UI.Tests
         {
             // the "+ Menu ▾" picker is exactly the registered kind list, in order
             var expected = new List<string>();
-            foreach (CatalogKind kind in ComposerCatalogKinds.All) expected.Add(kind.label);
+            foreach (CatalogKind kind in NeoCatalogKinds.All) expected.Add(kind.label);
             CollectionAssert.AreEqual(expected, SpecTreeView.CatalogKindLabels());
 
             // and each label round-trips back to its id
-            foreach (CatalogKind kind in ComposerCatalogKinds.All)
+            foreach (CatalogKind kind in NeoCatalogKinds.All)
                 Assert.AreEqual(kind.id, SpecTreeView.CatalogKindIdForLabel(kind.label));
         }
     }

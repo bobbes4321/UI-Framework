@@ -1,4 +1,3 @@
-using Neo.UI.Editor.Composer; // ComposerPalette — shared creatable-kind registry (built-ins + custom kinds)
 using UnityEditor;
 using UnityEngine;
 
@@ -7,10 +6,12 @@ namespace Neo.UI.Editor.Authoring
     /// <summary>
     /// Native <c>GameObject → Neo UI → …</c> creation menu — the familiar Unity way to add UI, mirroring
     /// the built-in <c>GameObject → UI</c> commands. Explicit items cover the common widgets (discoverable,
-    /// hotkey-able, grouped by submenu); "More Widgets…" lists the full <see cref="ComposerPalette"/> set
+    /// hotkey-able, grouped by submenu); "More Widgets…" lists the full <see cref="NeoWidgetPalette"/> set
     /// (the long tail PLUS any project-registered <see cref="NeoElementKinds"/> kind) via a popup, since
-    /// Unity can't synthesize <c>[MenuItem]</c>s at runtime. Every entry calls <see cref="NeoSceneAuthoring"/>,
-    /// so creation behaviour lives in one place and parents into the right-clicked object when there is one.
+    /// Unity can't synthesize <c>[MenuItem]</c>s at runtime; "Insert Template…" lists every
+    /// <see cref="NeoLayoutTemplates"/> scaffold via the same popup pattern. Every entry calls
+    /// <see cref="NeoSceneAuthoring"/>, so creation behaviour lives in one place and parents into the
+    /// right-clicked object when there is one.
     /// </summary>
     internal static class NeoCreateMenu
     {
@@ -69,12 +70,27 @@ namespace Neo.UI.Editor.Authoring
         {
             GameObject parent = Parent(cmd);
             var menu = new GenericMenu();
-            foreach (PaletteEntry e in ComposerPalette.All)
+            foreach (PaletteEntry e in NeoWidgetPalette.All)
             {
                 string kind = e.kind;
                 string preset = e.preset; // null for a bare kind; a Components tile carries its preset name
                 menu.AddItem(new GUIContent($"{e.category}/{e.label}"), false,
                     () => NeoSceneAuthoring.CreateWidget(kind, preset, parent));
+            }
+            menu.ShowAsContext();
+        }
+
+        // --- Curated layout scaffolds (a small valid element tree, not a bare kind) ---
+        [MenuItem(Root + "Insert Template…", false, 100)]
+        private static void InsertTemplate(MenuCommand cmd)
+        {
+            GameObject parent = Parent(cmd);
+            var menu = new GenericMenu();
+            foreach (TemplateEntry t in NeoLayoutTemplates.All)
+            {
+                TemplateEntry entry = t;
+                menu.AddItem(new GUIContent(entry.label), false,
+                    () => NeoSceneAuthoring.InsertTemplate(entry, parent));
             }
             menu.ShowAsContext();
         }

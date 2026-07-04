@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Neo.EditorUI;
+using Neo.UI.Editor.Authoring; // PresetPickerPopup — rehomed (Wave 2 Task 2.2), Composer still uses it here until Wave 3
 using UnityEditor;
 using UnityEngine;
 
@@ -74,7 +75,7 @@ namespace Neo.UI.Editor.Composer
                 v => { string c = Sanitize(v, "View"); Apply(() => view.category = c, "Edit View", SpecPath.View($"{c}/{view.viewName}")); },
                 v => { string n = Sanitize(v, "Main"); Apply(() => view.viewName = n, "Edit View", SpecPath.View($"{view.category}/{n}")); });
 
-            DrawPopupRow("Background", view.background, () => ComposerOptions.Tokens(Spec),
+            DrawPopupRow("Background", view.background, () => NeoWidgetOptions.Tokens(Spec),
                 v => Apply(() => view.background = Empty(v), "Edit Background"), AddTokenAction());
             DrawPopupRow("Show Animation", view.showAnimation, PresetNames,
                 v => Apply(() => view.showAnimation = Empty(v), "Edit Show Animation"));
@@ -495,7 +496,7 @@ namespace Neo.UI.Editor.Composer
 
             DrawSnapFloat("Gap (spacing)", e.spacing, v => Apply(() => e.spacing = v, "Edit Spacing"));
             DrawPadding4(e);
-            DrawEnumRow("Child Align", e.align, ComposerOptions.Aligns, v => Apply(() => e.align = Empty(v), "Edit Align"));
+            DrawEnumRow("Child Align", e.align, NeoWidgetOptions.Aligns, v => Apply(() => e.align = Empty(v), "Edit Align"));
         }
 
         // a 4-field per-side padding editor over padding4 [left, top, right, bottom]. When padding4 is
@@ -670,11 +671,11 @@ namespace Neo.UI.Editor.Composer
         {
             if (!NeoGUI.BeginFoldoutSection($"neo.composer.onclick", "On Click", null, true)) { NeoGUI.EndFoldoutSection(); return; }
 
-            DrawRefRow("Show View", e.onClickShowView, () => ComposerOptions.ViewIds(Spec),
+            DrawRefRow("Show View", e.onClickShowView, () => NeoWidgetOptions.ViewIds(Spec),
                 v => Apply(() => e.onClickShowView = v, "Edit On Click"));
-            DrawRefRow("Hide View", e.onClickHideView, () => ComposerOptions.ViewIds(Spec),
+            DrawRefRow("Hide View", e.onClickHideView, () => NeoWidgetOptions.ViewIds(Spec),
                 v => Apply(() => e.onClickHideView = v, "Edit On Click"));
-            DrawRefRow("Open Popup", e.onClickPopup, () => ComposerOptions.PopupNames(Spec),
+            DrawRefRow("Open Popup", e.onClickPopup, () => NeoWidgetOptions.PopupNames(Spec),
                 v => Apply(() => e.onClickPopup = v, "Edit On Click"));
             DrawBool("Close Container", e.onClickClose, v => Apply(() => e.onClickClose = v, "Edit On Click"));
 
@@ -718,34 +719,34 @@ namespace Neo.UI.Editor.Composer
                     DrawTokenRow(f.label, (string)f.get(e), v => Apply(() => f.set(e, Empty(v)), "Edit " + f.label));
                     break;
                 case FieldKind.ShapeStyle:
-                    DrawPopupRow(f.label, (string)f.get(e), ComposerOptions.ShapeStyles, v => Apply(() => f.set(e, Empty(v)), "Edit " + f.label));
+                    DrawPopupRow(f.label, (string)f.get(e), NeoWidgetOptions.ShapeStyles, v => Apply(() => f.set(e, Empty(v)), "Edit " + f.label));
                     break;
                 case FieldKind.TextStyle:
-                    DrawPopupRow(f.label, (string)f.get(e), ComposerOptions.TextStyles, v => Apply(() => f.set(e, Empty(v)), "Edit " + f.label));
+                    DrawPopupRow(f.label, (string)f.get(e), NeoWidgetOptions.TextStyles, v => Apply(() => f.set(e, Empty(v)), "Edit " + f.label));
                     break;
                 case FieldKind.Anchor:
-                    DrawPopupRow(f.label, (string)f.get(e), ComposerOptions.Anchors, v => Apply(() => f.set(e, Empty(v)), "Edit " + f.label));
+                    DrawPopupRow(f.label, (string)f.get(e), NeoWidgetOptions.Anchors, v => Apply(() => f.set(e, Empty(v)), "Edit " + f.label));
                     break;
                 case FieldKind.ButtonVariant:
-                    DrawEnumRow(f.label, (string)f.get(e), ComposerOptions.ButtonVariants, v => Apply(() => f.set(e, Empty(v)), "Edit " + f.label));
+                    DrawEnumRow(f.label, (string)f.get(e), NeoWidgetOptions.ButtonVariants, v => Apply(() => f.set(e, Empty(v)), "Edit " + f.label));
                     break;
                 case FieldKind.ButtonSize:
-                    DrawEnumRow(f.label, (string)f.get(e), ComposerOptions.ButtonSizes, v => Apply(() => f.set(e, Empty(v)), "Edit " + f.label));
+                    DrawEnumRow(f.label, (string)f.get(e), NeoWidgetOptions.ButtonSizes, v => Apply(() => f.set(e, Empty(v)), "Edit " + f.label));
                     break;
                 case FieldKind.Align:
-                    DrawEnumRow(f.label, (string)f.get(e), ComposerOptions.Aligns, v => Apply(() => f.set(e, Empty(v)), "Edit " + f.label));
+                    DrawEnumRow(f.label, (string)f.get(e), NeoWidgetOptions.Aligns, v => Apply(() => f.set(e, Empty(v)), "Edit " + f.label));
                     break;
                 case FieldKind.ShapeName:
-                    DrawEnumRow(f.label, (string)f.get(e), ComposerOptions.ShapeNames, v => Apply(() => f.set(e, Empty(v)), "Edit " + f.label));
+                    DrawEnumRow(f.label, (string)f.get(e), NeoWidgetOptions.ShapeNames, v => Apply(() => f.set(e, Empty(v)), "Edit " + f.label));
                     break;
                 case FieldKind.IconName:
-                    DrawPopupRow(f.label, (string)f.get(e), ComposerOptions.Icons, v => Apply(() => f.set(e, Empty(v)), "Edit " + f.label));
+                    DrawPopupRow(f.label, (string)f.get(e), NeoWidgetOptions.Icons, v => Apply(() => f.set(e, Empty(v)), "Edit " + f.label));
                     break;
                 case FieldKind.ViewRef:
-                    DrawRefRow(f.label, (string)f.get(e), () => ComposerOptions.ViewIds(Spec), v => Apply(() => f.set(e, v), "Edit " + f.label));
+                    DrawRefRow(f.label, (string)f.get(e), () => NeoWidgetOptions.ViewIds(Spec), v => Apply(() => f.set(e, v), "Edit " + f.label));
                     break;
                 case FieldKind.PopupRef:
-                    DrawRefRow(f.label, (string)f.get(e), () => ComposerOptions.PopupNames(Spec), v => Apply(() => f.set(e, v), "Edit " + f.label));
+                    DrawRefRow(f.label, (string)f.get(e), () => NeoWidgetOptions.PopupNames(Spec), v => Apply(() => f.set(e, v), "Edit " + f.label));
                     break;
                 case FieldKind.PanelRef:
                     DrawRefRow(f.label, (string)f.get(e), () => CurrentViewPanels(), v => Apply(() => f.set(e, v), "Edit " + f.label));
@@ -819,7 +820,7 @@ namespace Neo.UI.Editor.Composer
         private List<string> CurrentViewPanels()
         {
             var list = new List<string>();
-            foreach (ViewSpec view in Spec.views) list.AddRange(ComposerOptions.PanelIds(view));
+            foreach (ViewSpec view in Spec.views) list.AddRange(NeoWidgetOptions.PanelIds(view));
             return list;
         }
 
@@ -913,7 +914,7 @@ namespace Neo.UI.Editor.Composer
         private static List<string> ScaleStrings()
         {
             var list = new List<string>();
-            foreach (float v in ComposerOptions.SpacingScale) list.Add(v.ToString(CultureInfo.InvariantCulture));
+            foreach (float v in NeoWidgetOptions.SpacingScale) list.Add(v.ToString(CultureInfo.InvariantCulture));
             return list;
         }
 
@@ -985,7 +986,7 @@ namespace Neo.UI.Editor.Composer
             if (Event.current.type == EventType.Repaint && TryResolveToken(current, out Color color))
                 EditorGUI.DrawRect(swatchRect, color);
             var popupRect = new Rect(rect.x + 20f, rect.y, rect.width - 20f, rect.height);
-            NeoDropdown.ValuePopup(popupRect, current, () => ComposerOptions.Tokens(Spec), onSelect, "None", AddTokenAction());
+            NeoDropdown.ValuePopup(popupRect, current, () => NeoWidgetOptions.Tokens(Spec), onSelect, "None", AddTokenAction());
         }
 
         private Action<string> AddTokenAction() => token =>

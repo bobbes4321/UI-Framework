@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Neo.EditorUI;
-using Neo.UI.Editor.Composer; // ComposerPalette — the Add Widget menu source
 using UnityEditor;
 using UnityEditor.Overlays;
 using UnityEngine;
@@ -34,6 +33,18 @@ namespace Neo.UI.Editor.Authoring
         private SyncResult _lastCapture;
         private List<string> _validation;
 
+        // The Preset row's "what's selected" cache — refreshed on selection change (RefreshActiveView),
+        // never re-exported per repaint (same editor-perf discipline as _drift).
+        private GameObject _presetTarget;
+        private ElementSpec _presetCaptured;
+
+        // The Breakpoint row (Task 2.3 — native parity for the doomed Composer's BreakpointBar). The
+        // breakpoint list is showcase-scoped and cached like _drift (recomputed on selection change /
+        // on demand, never per repaint); the selection itself is UI-only state, not persisted.
+        private List<BreakpointSpec> _breakpoints;
+        private bool _breakpointsStale = true;
+        private string _selectedBreakpoint = ""; // "" = "(base)"
+
         public override VisualElement CreatePanelContent()
         {
             var imgui = new IMGUIContainer(OnGUI) { style = { minWidth = 250 } };
@@ -63,8 +74,22 @@ namespace Neo.UI.Editor.Authoring
                 _driftStale = true;
                 _lastCapture = null;
                 _validation = null;
+                _breakpoints = null;
+                _breakpointsStale = true;
+                _selectedBreakpoint = "";
             }
             displayed = _view != null;
+            RefreshPresetCapture();
+        }
+
+        // Quiet (never-logs) export of the current selection for the Preset row's enable/disable state —
+        // computed once per selection change, not per repaint (TryExportForPresetWorkflow, not the loud
+        // ExportForPresetWorkflow the action buttons use).
+        private void RefreshPresetCapture()
+        {
+            GameObject target = Selection.activeGameObject;
+            _presetTarget = (_view != null && target != null && target != _view.gameObject) ? target : null;
+            _presetCaptured = _presetTarget != null ? NeoSceneAuthoring.TryExportForPresetWorkflow(_presetTarget) : null;
         }
 
         private void OnGUI()
@@ -77,6 +102,7 @@ namespace Neo.UI.Editor.Authoring
 
             ResolveShowcase();
             EnsureDrift();
+            EnsureBreakpoints();
 
             DrawStatusHeader();
             EditorGUILayout.Space(2f);
@@ -131,12 +157,122 @@ namespace Neo.UI.Editor.Authoring
 
                 if (GUILayout.Button(new GUIContent("Apply Preset",
                         "Re-style the selected widget to a reusable component preset"), GUILayout.Height(20f)))
-                    ShowApplyPresetMenu();
+                    ShowApplyPresetPopup(GUILayoutUtility.GetLastRect());
 
                 if (_showcase == null && GUILayout.Button(new GUIContent("Assign Showcase",
                         "Pick or create the showcase this view belongs to"), GUILayout.Height(20f)))
                     ShowAssignShowcaseMenu();
             }
+
+            DrawPresetWorkflowRow();
+            DrawBreakpointRow();
+        }
+
+        // Create/Update/Reset-from-selection — the native counterpart to the (doomed) Composer's
+        // SpecInspector preset workflow (SpecInspector.cs:271-321/:301-312). Enabled state reads the
+        // cached _presetCaptured (refreshed on selection change, never re-exported per repaint).
+        private void DrawPresetWorkflowRow()
+        {
+            bool hasWidget = _presetCaptured != null;
+            bool hasPreset = hasWidget && !string.IsNullOrEmpty(_presetCaptured.preset);
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                using (new EditorGUI.DisabledScope(!hasWidget))
+                {
+                    if (GUILayout.Button(new GUIContent("Create Preset",
+                            "Save the selected widget's styling as a new reusable preset"), GUILayout.Height(20f)))
+                        CreatePresetFromSelection();
+                }
+                using (new EditorGUI.DisabledScope(!hasPreset))
+                {
+                    if (GUILayout.Button(new GUIContent("Update Preset",
+                            "Push the widget's current styling into its linked preset"), GUILayout.Height(20f)))
+                    {
+                        NeoSceneAuthoring.UpdatePresetFromWidget(_presetTarget);
+                        RefreshPresetCapture();
+                        _driftStale = true;
+                    }
+                    if (GUILayout.Button(new GUIContent("Reset To Preset",
+                            "Clear this widget's overrides back to its linked preset"), GUILayout.Height(20f)))
+                    {
+                        NeoSceneAuthoring.ResetWidgetToPreset(_presetTarget);
+                        RefreshPresetCapture();
+                        _driftStale = true;
+                    }
+                }
+            }
+        }
+
+        // Native parity for the (doomed) Composer's BreakpointBar (Task 2.3) — deliberately minimal:
+        // no condition editing (that stays spec-side), just a scope picker plus Capture/Preview against
+        // whichever breakpoint is picked. Hidden entirely when the showcase declares none.
+        private void DrawBreakpointRow()
+        {
+            if (_breakpoints == null || _breakpoints.Count == 0) return;
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField("Breakpoint", GUILayout.Width(70f));
+                if (GUILayout.Button(string.IsNullOrEmpty(_selectedBreakpoint) ? "(base)" : _selectedBreakpoint,
+                        EditorStyles.popup))
+                    ShowBreakpointMenu();
+            }
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                using (new EditorGUI.DisabledScope(string.IsNullOrEmpty(_selectedBreakpoint) || _presetCaptured == null))
+                {
+                    if (GUILayout.Button(new GUIContent("Capture Layout As Override",
+                            "Save the widget's current (dragged/resized) layout as this breakpoint's override"),
+                            GUILayout.Height(20f)))
+                        CaptureBreakpointOverride();
+                }
+                if (GUILayout.Button(new GUIContent("Preview Breakpoint",
+                        "Apply this breakpoint's baked layout live in the scene (editor-only, not saved)"),
+                        GUILayout.Height(20f)))
+                    NeoSceneAuthoring.PreviewBreakpoint(_view, _selectedBreakpoint);
+            }
+        }
+
+        private void ShowBreakpointMenu()
+        {
+            var menu = new GenericMenu();
+            menu.AddItem(new GUIContent("(base)"), string.IsNullOrEmpty(_selectedBreakpoint),
+                () => _selectedBreakpoint = "");
+            foreach (BreakpointSpec bp in _breakpoints)
+            {
+                if (bp == null || string.IsNullOrEmpty(bp.name)) continue;
+                string name = bp.name;
+                menu.AddItem(new GUIContent(name), _selectedBreakpoint == name, () => _selectedBreakpoint = name);
+            }
+            menu.ShowAsContext();
+        }
+
+        private void CaptureBreakpointOverride()
+        {
+            if (string.IsNullOrEmpty(_selectedBreakpoint)) return;
+            if (_presetTarget == null || _presetCaptured == null)
+            {
+                Debug.LogWarning("Neo UI: select a widget inside the view before capturing a breakpoint override.");
+                return;
+            }
+            if (_showcase == null) { ShowAssignShowcaseMenu(); return; }
+
+            _lastCapture = NeoSceneAuthoring.CaptureLayoutOverride(
+                _presetTarget, _view, _showcase, _selectedBreakpoint, _presetCaptured.layout);
+            RefreshPresetCapture();
+            _driftStale = true;
+        }
+
+        private void CreatePresetFromSelection()
+        {
+            if (_presetTarget == null || _presetCaptured == null) return;
+            string path = EditorUtility.SaveFilePanelInProject("Create Widget Preset",
+                $"{_presetCaptured.kind}Preset", "asset", "Save the reusable preset asset", NeoWidgetPresets.PresetsRoot);
+            if (string.IsNullOrEmpty(path)) return;
+            NeoSceneAuthoring.CreatePresetFromWidget(_presetTarget, path);
+            RefreshPresetCapture();
+            _driftStale = true;
         }
 
         private void DrawCaptureFindings()
@@ -185,7 +321,7 @@ namespace Neo.UI.Editor.Authoring
         {
             GameObject parent = Selection.activeGameObject != null ? Selection.activeGameObject : _view.gameObject;
             var menu = new GenericMenu();
-            foreach (PaletteEntry e in ComposerPalette.All)
+            foreach (PaletteEntry e in NeoWidgetPalette.All)
             {
                 string kind = e.kind;
                 menu.AddItem(new GUIContent($"{e.category}/{e.label}"), false, () =>
@@ -197,30 +333,26 @@ namespace Neo.UI.Editor.Authoring
             menu.ShowAsContext();
         }
 
-        private void ShowApplyPresetMenu()
+        // Kind-scoped thumbnail-card grid (PresetPickerPopup) anchored to the button, replacing the old
+        // flat GenericMenu — the same visual picker the Composer's inspector Preset row used.
+        private void ShowApplyPresetPopup(Rect anchor)
         {
             GameObject target = Selection.activeGameObject;
-            var menu = new GenericMenu();
             if (target == null || target == _view.gameObject)
             {
-                menu.AddDisabledItem(new GUIContent("Select a widget inside the view first"));
-                menu.ShowAsContext();
+                Debug.LogWarning("Neo UI: select a widget inside the view before applying a preset.");
                 return;
             }
-            bool any = false;
-            foreach (NeoWidgetPreset p in NeoWidgetPresets.All)
+            ElementSpec current = NeoSceneAuthoring.ExportForPresetWorkflow(target);
+            if (current == null) return; // already warned
+
+            UnityEditor.PopupWindow.Show(anchor, new PresetPickerPopup(current.kind, current.preset, name =>
             {
-                if (p == null || string.IsNullOrEmpty(p.presetName)) continue;
-                any = true;
-                string name = p.presetName;
-                menu.AddItem(new GUIContent($"{p.category}/{name}"), false, () =>
-                {
-                    NeoSceneAuthoring.ApplyPreset(target, name);
-                    _driftStale = true;
-                });
-            }
-            if (!any) menu.AddDisabledItem(new GUIContent("No presets — create one in the Design System window"));
-            menu.ShowAsContext();
+                if (string.IsNullOrEmpty(name)) return; // "(none)" — ApplyPreset always needs a name
+                NeoSceneAuthoring.ApplyPreset(target, name);
+                RefreshPresetCapture();
+                _driftStale = true;
+            }));
         }
 
         private void ShowAssignShowcaseMenu()
@@ -234,6 +366,7 @@ namespace Neo.UI.Editor.Authoring
                     _showcase = captured;
                     _showcaseResolved = true;
                     _driftStale = true;
+                    _breakpointsStale = true;
                 });
             }
             menu.AddSeparator("");
@@ -243,6 +376,7 @@ namespace Neo.UI.Editor.Authoring
                 _showcase = NeoCapture.CreateShowcase(id, $"{_view.id.Category} {_view.id.Name}", "Custom");
                 _showcaseResolved = true;
                 _driftStale = true;
+                _breakpointsStale = true;
             });
             menu.ShowAsContext();
         }
@@ -264,6 +398,15 @@ namespace Neo.UI.Editor.Authoring
             if (_showcase == null) { _drift = null; return; }
             using (NeoWorkspace.Scoped(_showcase))
                 _drift = DriftStatus.Scan();
+        }
+
+        // Lazy + cached like EnsureDrift: the breakpoint list only changes when the showcase's spec
+        // does, so it is recomputed on selection change / after a capture, never every repaint.
+        private void EnsureBreakpoints()
+        {
+            if (!_breakpointsStale) return;
+            _breakpointsStale = false;
+            _breakpoints = _showcase != null ? NeoSceneAuthoring.GetBreakpoints(_showcase) : null;
         }
 
         private static string Sanitize(string value)

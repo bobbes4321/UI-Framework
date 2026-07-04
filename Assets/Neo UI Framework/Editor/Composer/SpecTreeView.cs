@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Neo.EditorUI;
+using Neo.UI.Editor.Authoring; // NeoWidgetPalette — rehomed off the Composer in Task 2.1 (dies with the window in Wave 3)
 using UnityEditor;
 using UnityEngine;
 
@@ -185,20 +186,20 @@ namespace Neo.UI.Editor.Composer
         }
 
         /// <summary> One neutral <c>Menus (N)</c> section over every registered catalog kind
-        /// (<see cref="ComposerCatalogKinds.All"/>). The header is cosmetic — each catalog row keeps
+        /// (<see cref="NeoCatalogKinds.All"/>). The header is cosmetic — each catalog row keeps
         /// its real <see cref="SpecPath.Catalog"/> path (section = the kind id) so selection, the
         /// inspector and baseline addressing are unchanged — and carries a kind tag so one section
         /// stays legible. An empty <c>Menus (0)</c> asserts nothing about any particular kind. </summary>
         private void AddMenusSection(UISpec spec)
         {
             int total = 0;
-            foreach (CatalogKind kind in ComposerCatalogKinds.All)
+            foreach (CatalogKind kind in NeoCatalogKinds.All)
                 total += kind.list(spec).Count;
 
             AddRow(new SpecNode { kind = SpecNodeKind.MenusHeader, label = $"Menus ({total})", path = "menus", depth = 0, expandable = true, accent = NeoColors.Data });
             if (!IsExpanded("menus")) return;
 
-            foreach (CatalogKind kind in ComposerCatalogKinds.All)
+            foreach (CatalogKind kind in NeoCatalogKinds.All)
             {
                 foreach (MenuCatalogSpec catalog in kind.list(spec))
                 {
@@ -522,7 +523,7 @@ namespace Neo.UI.Editor.Composer
                     menu.AddItem(new GUIContent("Add Popup"), false, AddPopup);
                     break;
                 case SpecNodeKind.MenusHeader:
-                    foreach (CatalogKind kind in ComposerCatalogKinds.All)
+                    foreach (CatalogKind kind in NeoCatalogKinds.All)
                     {
                         string kindId = kind.id;
                         menu.AddItem(new GUIContent($"Add Menu/{kind.label}"), false, () => AddCatalog(kindId));
@@ -638,7 +639,7 @@ namespace Neo.UI.Editor.Composer
 
         private void DuplicateCatalog(MenuCatalogSpec catalog)
         {
-            if (!ComposerCatalogKinds.TryGet(catalog.kind, out CatalogKind kind))
+            if (!NeoCatalogKinds.TryGet(catalog.kind, out CatalogKind kind))
             {
                 Debug.LogWarning($"[Composer] No catalog kind registered for '{catalog.kind}'; cannot duplicate.");
                 return;
@@ -657,7 +658,7 @@ namespace Neo.UI.Editor.Composer
 
         private void AddCatalog(string kindId)
         {
-            if (!ComposerCatalogKinds.TryGet(kindId, out CatalogKind kind))
+            if (!NeoCatalogKinds.TryGet(kindId, out CatalogKind kind))
             {
                 Debug.LogWarning($"[Composer] No catalog kind registered for '{kindId}'; cannot add.");
                 return;
@@ -675,7 +676,7 @@ namespace Neo.UI.Editor.Composer
         {
             _document.ApplyEdit(() =>
             {
-                foreach (CatalogKind kind in ComposerCatalogKinds.All)
+                foreach (CatalogKind kind in NeoCatalogKinds.All)
                     if (kind.list(_document.Spec).Remove(catalog)) return;
             }, "Delete Catalog");
             SelectAfter(null);
@@ -712,7 +713,7 @@ namespace Neo.UI.Editor.Composer
         }
 
         /// <summary>
-        /// Pillar E drag-to-create onto the tree: when a <see cref="ComposerPalette"/> tile is dropped on a
+        /// Pillar E drag-to-create onto the tree: when a <see cref="NeoWidgetPalette"/> tile is dropped on a
         /// row, insert its kind as a child of that node — a view/popup gets a new top-level element, an
         /// element (container or not) gets a new child — reusing <see cref="AddElementTo"/> so it routes
         /// through <see cref="SpecDocument.ApplyEdit"/> like every other mutation. The ONLY Pillar-E edit
@@ -724,9 +725,9 @@ namespace Neo.UI.Editor.Composer
             if (e.type != EventType.DragUpdated && e.type != EventType.DragPerform) return;
             if (!rect.Contains(e.mousePosition)) return;
 
-            string kind = DragAndDrop.GetGenericData(ComposerPalette.DragKey) as string;
+            string kind = DragAndDrop.GetGenericData(NeoWidgetPalette.DragKey) as string;
             if (string.IsNullOrEmpty(kind)) return;
-            string preset = DragAndDrop.GetGenericData(ComposerPalette.PresetDragKey) as string;
+            string preset = DragAndDrop.GetGenericData(NeoWidgetPalette.PresetDragKey) as string;
 
             List<ElementSpec> destination =
                 node.kind == SpecNodeKind.View ? node.view?.elements
@@ -806,22 +807,22 @@ namespace Neo.UI.Editor.Composer
         public void AddPopupFromToolbar() => AddPopup();
 
         /// <summary> Adds a catalog of the given registered kind id — the single <c>+ Menu ▾</c>
-        /// picker routes here, one entry per <see cref="ComposerCatalogKinds.All"/>. </summary>
+        /// picker routes here, one entry per <see cref="NeoCatalogKinds.All"/>. </summary>
         public void AddCatalogFromToolbar(string kindId) => AddCatalog(kindId);
 
         /// <summary> The catalog-kind option labels shown in the <c>+ Menu ▾</c> picker (= every
         /// registered kind), and a parallel id lookup. Built fresh on demand (dropdown-open only). </summary>
         public static List<string> CatalogKindLabels()
         {
-            var labels = new List<string>(ComposerCatalogKinds.All.Count);
-            foreach (CatalogKind kind in ComposerCatalogKinds.All) labels.Add(kind.label);
+            var labels = new List<string>(NeoCatalogKinds.All.Count);
+            foreach (CatalogKind kind in NeoCatalogKinds.All) labels.Add(kind.label);
             return labels;
         }
 
         /// <summary> Maps a picker label back to its kind id (label is unique per registered kind). </summary>
         public static string CatalogKindIdForLabel(string label)
         {
-            foreach (CatalogKind kind in ComposerCatalogKinds.All)
+            foreach (CatalogKind kind in NeoCatalogKinds.All)
                 if (kind.label == label) return kind.id;
             return null;
         }

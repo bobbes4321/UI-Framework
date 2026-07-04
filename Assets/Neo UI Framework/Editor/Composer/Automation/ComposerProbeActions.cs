@@ -6,7 +6,7 @@ namespace Neo.UI.Editor.Composer.Automation
 {
     /// <summary>
     /// The registry of scenario step kinds — the extension seam for the probe vocabulary, mirroring
-    /// <see cref="ComposerPalette"/> / <see cref="ComposerDevicePresets"/> (Pattern R). Built-ins are
+    /// <see cref="NeoWidgetPalette"/> / <see cref="ComposerDevicePresets"/> (Pattern R). Built-ins are
     /// seeded through <see cref="Register"/> in the static ctor; a consuming project adds its own step
     /// kind (e.g. to drive a custom inspector field or a project-specific gesture) with one
     /// <see cref="Register"/> call and no package fork. The probe dispatches each

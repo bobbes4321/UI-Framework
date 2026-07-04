@@ -1,7 +1,7 @@
 using System.Linq;
 using Neo.UI;
 using Neo.UI.Editor;
-using Neo.UI.Editor.Composer;
+using Neo.UI.Editor.Authoring;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -93,9 +93,9 @@ namespace Neo.UI.Tests
             _a = Make("Hero CTA", "button");
             NeoWidgetPresets.Register(_a);
 
-            PaletteEntry tile = ComposerPalette.All.FirstOrDefault(e => e.preset == "Hero CTA");
+            PaletteEntry tile = NeoWidgetPalette.All.FirstOrDefault(e => e.preset == "Hero CTA");
             Assert.IsTrue(tile.IsPreset, "the preset appears as a preset-bearing palette tile");
-            Assert.AreEqual(ComposerPalette.ComponentsCategory, tile.category, "it groups under Components");
+            Assert.AreEqual(NeoWidgetPalette.ComponentsCategory, tile.category, "it groups under Components");
             Assert.AreEqual("button", tile.kind, "the tile creates the preset's target kind");
             Assert.AreEqual("Hero CTA", tile.label, "the tile is labeled by the preset name");
         }

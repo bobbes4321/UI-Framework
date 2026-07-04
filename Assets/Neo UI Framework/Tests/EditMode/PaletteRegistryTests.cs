@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Neo.UI.Editor;
+using Neo.UI.Editor.Authoring;
 using Neo.UI.Editor.Composer;
 using NUnit.Framework;
 using UnityEngine;
@@ -10,7 +11,7 @@ namespace Neo.UI.Tests
     /// <summary>
     /// Pillar E palette registry (Pattern R): the built-ins cover every <see cref="ElementSpec.Kinds"/>
     /// entry grouped by category, a project-registered <see cref="NeoElementKinds"/> kind appears for
-    /// free, and <see cref="ComposerPalette.Register"/> replaces-by-kind. Mirrors
+    /// free, and <see cref="NeoWidgetPalette.Register"/> replaces-by-kind. Mirrors
     /// <see cref="ComposerCatalogKindsTests"/>.
     /// </summary>
     public class PaletteRegistryTests
@@ -19,14 +20,14 @@ namespace Neo.UI.Tests
         public void Reset()
         {
             NeoElementKinds.ClearForTests();
-            ComposerPalette.ResetForTests();
+            NeoWidgetPalette.ResetForTests();
         }
 
         [Test]
         public void Builtins_CoverEveryElementKind()
         {
             var kinds = new HashSet<string>();
-            foreach (PaletteEntry e in ComposerPalette.All) kinds.Add(e.kind);
+            foreach (PaletteEntry e in NeoWidgetPalette.All) kinds.Add(e.kind);
             foreach (string builtin in ElementSpec.Kinds)
                 Assert.IsTrue(kinds.Contains(builtin), $"palette is missing built-in kind '{builtin}'");
         }
@@ -35,7 +36,7 @@ namespace Neo.UI.Tests
         public void Builtins_LandInSensibleCategories()
         {
             string CategoryOf(string kind) =>
-                ComposerPalette.All.First(e => e.kind == kind).category;
+                NeoWidgetPalette.All.First(e => e.kind == kind).category;
 
             Assert.AreEqual("Layout", CategoryOf("vstack"));
             Assert.AreEqual("Layout", CategoryOf("grid"));
@@ -50,7 +51,7 @@ namespace Neo.UI.Tests
         [Test]
         public void Categories_AreInDisplayOrder()
         {
-            List<string> categories = ComposerPalette.Categories.ToList();
+            List<string> categories = NeoWidgetPalette.Categories.ToList();
             // Layout/Input/Display/Data/Menus precede any "Custom" tail
             Assert.AreEqual("Layout", categories[0]);
             CollectionAssert.Contains(categories, "Input");
@@ -63,22 +64,22 @@ namespace Neo.UI.Tests
         public void ProjectKind_AppearsAutomatically_InCustom()
         {
             NeoElementKinds.Register(new FakeKind("carousel"));
-            PaletteEntry entry = ComposerPalette.All.FirstOrDefault(e => e.kind == "carousel");
+            PaletteEntry entry = NeoWidgetPalette.All.FirstOrDefault(e => e.kind == "carousel");
             Assert.AreEqual("carousel", entry.kind, "a registered project kind must appear in the palette");
             Assert.AreEqual("Custom", entry.category, "an unregistered project kind defaults to Custom");
-            Assert.AreEqual(Color.magenta, ComposerPalette.AccentFor(entry), "it uses its own Accent");
+            Assert.AreEqual(Color.magenta, NeoWidgetPalette.AccentFor(entry), "it uses its own Accent");
         }
 
         [Test]
         public void Register_ReplacesByKind_NeverDuplicates()
         {
-            int before = ComposerPalette.All.Count;
+            int before = NeoWidgetPalette.All.Count;
 
             // re-register an existing built-in kind into a different category
-            ComposerPalette.Register(new PaletteEntry("button", "Custom", "My Button"));
-            Assert.AreEqual(before, ComposerPalette.All.Count, "replacing a kind must not add a row");
+            NeoWidgetPalette.Register(new PaletteEntry("button", "Custom", "My Button"));
+            Assert.AreEqual(before, NeoWidgetPalette.All.Count, "replacing a kind must not add a row");
 
-            PaletteEntry button = ComposerPalette.All.First(e => e.kind == "button");
+            PaletteEntry button = NeoWidgetPalette.All.First(e => e.kind == "button");
             Assert.AreEqual("Custom", button.category);
             Assert.AreEqual("My Button", button.label);
         }
@@ -86,10 +87,10 @@ namespace Neo.UI.Tests
         [Test]
         public void Register_NovelKind_Appends()
         {
-            int before = ComposerPalette.All.Count;
-            ComposerPalette.Register(new PaletteEntry("ribbon", "Display", "Ribbon"));
-            Assert.AreEqual(before + 1, ComposerPalette.All.Count);
-            Assert.IsTrue(ComposerPalette.All.Any(e => e.kind == "ribbon" && e.category == "Display"));
+            int before = NeoWidgetPalette.All.Count;
+            NeoWidgetPalette.Register(new PaletteEntry("ribbon", "Display", "Ribbon"));
+            Assert.AreEqual(before + 1, NeoWidgetPalette.All.Count);
+            Assert.IsTrue(NeoWidgetPalette.All.Any(e => e.kind == "ribbon" && e.category == "Display"));
         }
 
         // a minimal INeoElementKind for the auto-include test

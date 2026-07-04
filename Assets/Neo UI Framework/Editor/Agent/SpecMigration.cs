@@ -1,9 +1,8 @@
 using System.Collections.Generic;
-using Neo.UI.Editor;
 using UnityEditor;
 using UnityEngine;
 
-namespace Neo.UI.Editor.Composer
+namespace Neo.UI.Editor
 {
     /// <summary>
     /// Opt-in, explicit migration of a spec's legacy <c>anchor</c>/<c>position</c>/<c>size</c>/

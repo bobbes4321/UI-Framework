@@ -5,16 +5,16 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 
-namespace Neo.UI.Editor.Composer
+namespace Neo.UI.Editor
 {
     /// <summary>
     /// Renders a single widget — a <see cref="NeoWidgetPreset"/> applied to its
     /// <see cref="NeoWidgetPreset.targetKind"/> (or a bare element kind) — to a small in-memory
-    /// <see cref="Texture2D"/>, so the Composer palette/picker can show a visual card instead of a text
-    /// row (UX goal #2 of the widget-presets plan). It reuses the EXISTING in-memory render path
+    /// <see cref="Texture2D"/>, so a palette/picker can show a visual card instead of a text row (UX
+    /// goal #2 of the widget-presets plan). It reuses the EXISTING in-memory render path
     /// (<c>UISpecPreview.BuildViews</c> builds the throwaway view; the world-space-canvas + orthographic
-    /// camera + <c>ReadPixels</c> recipe is the same one <see cref="Neo.UI.Editor.UIScreenshotter"/> and
-    /// <c>SpecPreviewPane</c> use) — no new rendering tech, no committed assets.
+    /// camera + <c>ReadPixels</c> recipe is the same one <see cref="UIScreenshotter"/> and (while it
+    /// lives) the Composer's <c>SpecPreviewPane</c> use) — no new rendering tech, no committed assets.
     /// <para>
     /// Headless-safe: returns <c>null</c> (never throws) when there is no graphics device or when a render
     /// faults, so callers fall back to a label. Every temp GameObject / RenderTexture / preview scene is

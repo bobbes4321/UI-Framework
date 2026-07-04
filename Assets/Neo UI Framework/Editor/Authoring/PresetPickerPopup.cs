@@ -4,15 +4,16 @@ using Neo.EditorUI;
 using UnityEditor;
 using UnityEngine;
 
-namespace Neo.UI.Editor.Composer
+namespace Neo.UI.Editor.Authoring
 {
     /// <summary>
     /// A visual, searchable grid of <see cref="NeoWidgetPreset"/> cards — the Figma-style "pick a
-    /// component" popup the inspector's Preset row opens, replacing a flat text dropdown (UX goal #2 of
-    /// the widget-presets plan). Each card is a cached in-memory render of the preset applied to its
-    /// target kind (<see cref="PresetThumbnailCache"/>), so you SEE "Primary Button" look primary before
-    /// choosing it. The first card is always "(none)" (unlink). Kind-scoped so only presets that fit the
-    /// selected element show.
+    /// component" popup a preset picker opens, replacing a flat text dropdown (UX goal #2 of the
+    /// widget-presets plan). Used by the scene-view overlay's Apply-Preset action (and, while it lives,
+    /// the Composer's inspector Preset row). Each card is a cached in-memory render of the preset applied
+    /// to its target kind (<see cref="PresetThumbnailCache"/>), so you SEE "Primary Button" look primary
+    /// before choosing it. The first card is always "(none)" (unlink). Kind-scoped so only presets that
+    /// fit the selected element show.
     /// <para>
     /// Pure IMGUI on the EditorUI palette; cached GUIStyles (built once); thumbnails come from the shared
     /// cache (never rendered per OnGUI). Headless-safe — a null thumbnail falls back to the preset name.

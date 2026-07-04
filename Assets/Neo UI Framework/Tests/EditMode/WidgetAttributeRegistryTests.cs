@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Neo.UI;
 using Neo.UI.Editor;
-using Neo.UI.Editor.Composer;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -12,8 +11,8 @@ namespace Neo.UI.Tests
     /// <summary>
     /// Covers the widget-attribute extensibility seams
     /// (extensibility-seam-widget-attributes-plan.md):
-    ///  - the Composer option sets (variants/sizes/aligns/shape names) seed exactly the built-ins
-    ///    and accept project Register() calls (Pattern R);
+    ///  - the widget-attribute option sets (variants/sizes/aligns/shape names) seed exactly the
+    ///    built-ins and accept project Register() calls (Pattern R);
     ///  - a project ButtonVariantAsset / ButtonSizeAsset on NeoUISettings flows through
     ///    UIWidgetFactory ahead of the built-in switch, and round-trips (Pattern A);
     ///  - an IconMapOverlay glyph resolves through IconMap before the built-in Lucide dict.
@@ -28,42 +27,42 @@ namespace Neo.UI.Tests
         public void OptionSets_SeedExactlyTheBuiltIns()
         {
             CollectionAssert.AreEqual(
-                new[] { "primary", "secondary", "ghost", "danger" }, ComposerOptions.ButtonVariants);
-            CollectionAssert.AreEqual(new[] { "sm", "md", "lg" }, ComposerOptions.ButtonSizes);
-            CollectionAssert.AreEqual(new[] { "left", "center", "right" }, ComposerOptions.Aligns);
+                new[] { "primary", "secondary", "ghost", "danger" }, NeoWidgetOptions.ButtonVariants);
+            CollectionAssert.AreEqual(new[] { "sm", "md", "lg" }, NeoWidgetOptions.ButtonSizes);
+            CollectionAssert.AreEqual(new[] { "left", "center", "right" }, NeoWidgetOptions.Aligns);
             CollectionAssert.AreEqual(
                 new[] { "roundedRect", "circle", "pill", "checkmark", "chevron", "cross", "ring", "arc" },
-                ComposerOptions.ShapeNames);
+                NeoWidgetOptions.ShapeNames);
         }
 
         [Test]
         public void Register_AppendsNewValue_AndIsIdempotent()
         {
-            int before = ComposerOptions.ButtonVariants.Length;
-            ComposerOptions.RegisterVariant("success");
-            CollectionAssert.Contains(ComposerOptions.ButtonVariants, "success");
-            Assert.AreEqual(before + 1, ComposerOptions.ButtonVariants.Length, "registering adds one");
+            int before = NeoWidgetOptions.ButtonVariants.Length;
+            NeoWidgetOptions.RegisterVariant("success");
+            CollectionAssert.Contains(NeoWidgetOptions.ButtonVariants, "success");
+            Assert.AreEqual(before + 1, NeoWidgetOptions.ButtonVariants.Length, "registering adds one");
 
             // case-insensitive no-op (built-in + re-register)
-            ComposerOptions.RegisterVariant("success");
-            ComposerOptions.RegisterVariant("PRIMARY");
-            Assert.AreEqual(before + 1, ComposerOptions.ButtonVariants.Length,
+            NeoWidgetOptions.RegisterVariant("success");
+            NeoWidgetOptions.RegisterVariant("PRIMARY");
+            Assert.AreEqual(before + 1, NeoWidgetOptions.ButtonVariants.Length,
                 "re-registering an existing id (any case) is a no-op");
 
-            ComposerOptions.RegisterSize("xl");
-            ComposerOptions.RegisterAlign("justify");
-            ComposerOptions.RegisterShape("star");
-            CollectionAssert.Contains(ComposerOptions.ButtonSizes, "xl");
-            CollectionAssert.Contains(ComposerOptions.Aligns, "justify");
-            CollectionAssert.Contains(ComposerOptions.ShapeNames, "star");
+            NeoWidgetOptions.RegisterSize("xl");
+            NeoWidgetOptions.RegisterAlign("justify");
+            NeoWidgetOptions.RegisterShape("star");
+            CollectionAssert.Contains(NeoWidgetOptions.ButtonSizes, "xl");
+            CollectionAssert.Contains(NeoWidgetOptions.Aligns, "justify");
+            CollectionAssert.Contains(NeoWidgetOptions.ShapeNames, "star");
         }
 
         [Test]
         public void All_ReturnsSnapshot_CallerCannotMutateSeed()
         {
-            string[] snapshot = ComposerOptions.ButtonVariants;
+            string[] snapshot = NeoWidgetOptions.ButtonVariants;
             snapshot[0] = "tampered";
-            CollectionAssert.DoesNotContain(ComposerOptions.ButtonVariants, "tampered",
+            CollectionAssert.DoesNotContain(NeoWidgetOptions.ButtonVariants, "tampered",
                 ".All must hand out a copy, not the backing list");
         }
 
@@ -217,7 +216,7 @@ namespace Neo.UI.Tests
         }
 
         [TearDown]
-        public void ResetRegistries() => ComposerOptions.ResetAttributeRegistriesForTests();
+        public void ResetRegistries() => NeoWidgetOptions.ResetAttributeRegistriesForTests();
 
         [OneTimeTearDown]
         public void Cleanup()

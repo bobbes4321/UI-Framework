@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Neo.EditorUI;
+using Neo.UI.Editor.Authoring; // NeoWidgetPalette — rehomed off the Composer in Task 2.1 (dies with the window in Wave 3)
 using UnityEditor;
 using UnityEngine;
 
@@ -7,7 +8,7 @@ namespace Neo.UI.Editor.Composer
 {
     /// <summary>
     /// The "kill the blank page" widget palette: a collapsible, searchable, categorized strip of tiles —
-    /// one per <see cref="ComposerPalette"/> entry (built-in kinds + project kinds). A tile starts a
+    /// one per <see cref="NeoWidgetPalette"/> entry (built-in kinds + project kinds). A tile starts a
     /// <see cref="DragAndDrop"/> carrying its kind so it can be dropped onto the canvas or the tree, and a
     /// click stamps the kind into the current view as a fallback (handed back through <see cref="_addToView"/>).
     ///
@@ -50,13 +51,13 @@ namespace Neo.UI.Editor.Composer
         {
             _groups.Clear();
             var byCategory = new Dictionary<string, List<PaletteEntry>>();
-            foreach (PaletteEntry e in ComposerPalette.All)
+            foreach (PaletteEntry e in NeoWidgetPalette.All)
             {
                 if (!byCategory.TryGetValue(e.category, out List<PaletteEntry> list))
                     byCategory[e.category] = list = new List<PaletteEntry>();
                 list.Add(e);
             }
-            foreach (string category in ComposerPalette.Categories)
+            foreach (string category in NeoWidgetPalette.Categories)
                 if (byCategory.TryGetValue(category, out List<PaletteEntry> list))
                     _groups.Add((category, list));
             _loaded = true;
@@ -118,7 +119,7 @@ namespace Neo.UI.Editor.Composer
         private void DrawCard(Rect rect, PaletteEntry entry)
         {
             Event e = Event.current;
-            Color accent = ComposerPalette.AccentFor(entry);
+            Color accent = NeoWidgetPalette.AccentFor(entry);
 
             if (e.type == EventType.Repaint)
             {
@@ -147,8 +148,8 @@ namespace Neo.UI.Editor.Composer
             if (e.type == EventType.MouseDown && e.button == 0 && rect.Contains(e.mousePosition))
             {
                 DragAndDrop.PrepareStartDrag();
-                DragAndDrop.SetGenericData(ComposerPalette.DragKey, entry.kind);
-                DragAndDrop.SetGenericData(ComposerPalette.PresetDragKey, entry.preset);
+                DragAndDrop.SetGenericData(NeoWidgetPalette.DragKey, entry.kind);
+                DragAndDrop.SetGenericData(NeoWidgetPalette.PresetDragKey, entry.preset);
                 DragAndDrop.objectReferences = new Object[0];
                 _pendingDragKind = entry.kind;
                 _pendingDragPreset = entry.preset;

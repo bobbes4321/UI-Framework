@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Neo.EditorUI;
+using Neo.UI.Editor.Authoring; // NeoWidgetPalette — rehomed off the Composer in Task 2.1 (dies with the window in Wave 3)
 using UnityEditor;
 using UnityEngine;
 
@@ -982,7 +983,7 @@ namespace Neo.UI.Editor.Composer
         private const float PaletteDropH = 48f;
 
         /// <summary>
-        /// Pillar E drag-to-create: accepts a <see cref="ComposerPalette"/> tile dragged onto the canvas.
+        /// Pillar E drag-to-create: accepts a <see cref="NeoWidgetPalette"/> tile dragged onto the canvas.
         /// On drop it finds the hovered container (the existing <see cref="FindDropTarget"/>), creates a
         /// <see cref="ComposerFactory.NewElement"/> for the carried kind, and places it at the cursor —
         /// for a free parent (overlay/safearea/top-level) it computes a constraint-correct <c>layout</c>
@@ -996,7 +997,7 @@ namespace Neo.UI.Editor.Composer
             if (e.type != EventType.DragUpdated && e.type != EventType.DragPerform) return;
             if (!_drawRect.Contains(e.mousePosition)) return;
 
-            string kind = DragAndDrop.GetGenericData(ComposerPalette.DragKey) as string;
+            string kind = DragAndDrop.GetGenericData(NeoWidgetPalette.DragKey) as string;
             if (string.IsNullOrEmpty(kind)) return;
 
             DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
@@ -1023,7 +1024,7 @@ namespace Neo.UI.Editor.Composer
 
             ElementSpec created = ComposerFactory.NewElement(kind);
             // a Components tile also carries a widget-preset name → link it (baked + round-tripped at generate)
-            if (DragAndDrop.GetGenericData(ComposerPalette.PresetDragKey) is string dropPreset
+            if (DragAndDrop.GetGenericData(NeoWidgetPalette.PresetDragKey) is string dropPreset
                 && !string.IsNullOrEmpty(dropPreset))
                 created.preset = dropPreset;
             string parentPath = target != null && _index.TryGetValue(target, out Node tnode)

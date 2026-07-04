@@ -422,8 +422,16 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   `NeoSceneAuthoring.CreateWidget`, which routes through `UISpecGenerator.BuildElementLive` (the SAME
   build path generation uses, so a created widget is byte-identical to a generated one — proven by
   `NativeAuthoringRoundTripTests`) and bootstraps a Canvas/EventSystem (New Input System) like Unity's
-  own UI create; the menu's "More Widgets…" is data-driven off `ComposerPalette.All` so custom
-  `NeoElementKinds` appear for free. (2) **capture** — `NeoCapture.CaptureView` folds a hand-built
+  own UI create; the menu's "More Widgets…" is data-driven off `NeoWidgetPalette.All` so custom
+  `NeoElementKinds` appear for free (rehomed off the Composer in Wave 2 Task 2.1, along with
+  `NeoLayoutTemplates` — the curated layout-scaffold registry, `Editor/Authoring/Templates~/*.json` —
+  and `NeoCatalogKinds`/`NeoWidgetOptions`, its `Editor/Agent/` spec-tooling siblings). The menu's
+  "Insert Template…" lists `NeoLayoutTemplates.All` and instantiates the chosen scaffold's top-level
+  elements (every view/popup's `elements`) under the selection via `NeoSceneAuthoring.InsertTemplate`
+  — the SAME `BuildElementLive` path, all created roots under one undo step; a template's own
+  title/message/close popup chrome is out of scope (only its `elements` insert) — proven by
+  `TemplateInsertTests.NativeInsertTemplate_BuildsElementTreeUnderSelectedView`. (2) **capture** —
+  `NeoCapture.CaptureView` folds a hand-built
   `UIView` back into its showcase's spec + baseline by materializing it into the showcase
   `Generated/Views` root and running the standing `SpecBaseline.CaptureEdits` protocol INSIDE
   `NeoWorkspace.Scoped` — reusing the whole export/off-spec-lint/merge/baseline safety layer (off-spec
@@ -431,12 +439,22 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   active scene path, else the user picks/creates a showcase (`NeoCapture.CreateShowcase`). (3)
   **scene-view overlay** — `NeoSceneOverlay` ([`Overlay(typeof(SceneView))`], Odin-Validator-style)
   shows a drift-status dot (`DriftStatus.Scan`, shared with `DriftWindow`) + one-click Capture-to-Spec
-  / Validate / Check-Drift / Add-Widget / **Apply-Preset** when a `UIView` is selected; selection-driven
-  and cached (no per-repaint scans). The intent is for this to supersede the Composer once at parity.
-  `BuildElementLive` / `ViewPrefabPath` are the generator seams; `DriftStatus` the shared drift seam.
-  **Apply-Preset** (`NeoSceneAuthoring.ApplyPreset`) rebuilds the selected widget under a `NeoWidgetPreset`
-  by capturing its spec via the now-`internal` `UISpecExporter.ExportElement`, keeping kind/id/label/icon
-  but dropping captured styling so the preset drives the look; placement + sibling order preserved, one undo.
+  / Validate / Check-Drift / Add-Widget / **Apply-Preset** / Create-Preset / Update-Preset / Reset-To-Preset
+  when a `UIView` is selected; selection-driven and cached (no per-repaint scans). The intent is for this
+  to supersede the Composer once at parity. `BuildElementLive` / `ViewPrefabPath` are the generator seams;
+  `DriftStatus` the shared drift seam. **Apply-Preset** opens `PresetPickerPopup` (`Editor/Authoring/`, a
+  kind-scoped thumbnail-card grid, thumbnails via `Editor/Inspectors/PresetThumbnailCache`+
+  `PresetThumbnailRenderer`) anchored to the button; the chosen preset routes into
+  `NeoSceneAuthoring.ApplyPreset`, which rebuilds the selected widget under that `NeoWidgetPreset` by
+  capturing its spec via the now-`internal` `UISpecExporter.ExportElement`, keeping kind/id/label/icon but
+  dropping captured styling so the preset drives the look; placement + sibling order preserved, one undo.
+  **Create/Update/Reset** (`NeoSceneAuthoring.CreatePresetFromWidget`/`UpdatePresetFromWidget`/
+  `ResetWidgetToPreset`) are the native counterpart to the (retired) Composer inspector's preset
+  workflow: Create saves the selected widget's captured styling as a new `NeoWidgetPreset` asset and
+  relinks the widget to it (via Apply-Preset); Update pushes the widget's current styling into its
+  already-linked preset asset; Reset clears just the preset-governed fields back to the preset's own
+  values (unlike Apply-Preset, it keeps the widget's other data — layout, bindings, etc. — intact) and
+  rebuilds in place. Tests: `NativePresetWorkflowTests`.
 - The **Composer** (`Tools → Neo UI → Composer`, `Editor/Composer/NeoComposerWindow.cs`) is the
   from-scratch, no-agent authoring surface: it edits a `UISpec` in memory and regenerates the prefab
   as a live preview, so everything round-trips losslessly by construction (the spec stays the single
