@@ -222,7 +222,8 @@ namespace Neo.UI.Editor
         // ----------------------------------------------------------------- color ref round-trip
 
         /// <summary> "#hex" / "Category/Token" string → a theme-aware <see cref="ThemeColorRef"/>. </summary>
-        internal static ThemeColorRef ParseColorRef(string value) => EffectParams.ParseColorRef(value);
+        internal static ThemeColorRef ParseColorRef(string value, System.Action<string> reportInvalid = null) =>
+            EffectParams.ParseColorRef(value, reportInvalid);
 
         /// <summary> A <see cref="ThemeColorRef"/> → its token string (or "#hex" when raw). </summary>
         internal static string ColorRefToString(ThemeColorRef reference) => EffectParams.ColorRefToString(reference);

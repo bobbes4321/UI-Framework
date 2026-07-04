@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -42,24 +41,25 @@ namespace Neo.UI.Editor
         {
             if (spec == null) return null;
             UISpec clone = UISpec.FromJson(spec.ToJson()); // deep copy via the canonical round-trip
+            // Tree recursion (children + item template) is handled once, by SpecWalk — this used to be
+            // its own hand-rolled walker (audit D5) that, unlike the others, never recursed INTO an item
+            // template's own subtree (only migrated the item element itself), so a container nested
+            // inside a bound-list row template silently kept its legacy placement. The parent-aware
+            // overload supplies exactly the context this walker needs: whether an element sits directly
+            // under a layout group (vstack/hstack/grid) — true for both a genuine child and an item
+            // template, same as the parent originally computed for its `childrenInLayout`.
             foreach (ViewSpec view in clone.views)
-                MigrateElements(view.elements, inLayout: false);
+                SpecWalk.Elements(view, includeItemTemplates: true,
+                    (ElementSpec element, ElementSpec parent) => MigrateOne(element, InLayout(parent)));
             foreach (PopupSpec popup in clone.popups)
-                MigrateElements(popup.elements, inLayout: false);
+                SpecWalk.Elements(popup, includeItemTemplates: true,
+                    (ElementSpec element, ElementSpec parent) => MigrateOne(element, InLayout(parent)));
             return clone;
         }
 
-        private static void MigrateElements(List<ElementSpec> elements, bool inLayout)
-        {
-            if (elements == null) return;
-            foreach (ElementSpec element in elements)
-            {
-                MigrateOne(element, inLayout);
-                bool childrenInLayout = IsLayoutGroup(element.kind);
-                MigrateElements(element.children, childrenInLayout);
-                if (element.item != null) MigrateOne(element.item, childrenInLayout);
-            }
-        }
+        /// <summary> An element is "in layout" when its immediate structural parent is a layout group
+        /// (vstack/hstack/grid) — null parent (a top-level view/popup element) is never in layout. </summary>
+        private static bool InLayout(ElementSpec parent) => parent != null && IsLayoutGroup(parent.kind);
 
         /// <summary> Containers whose direct children are placed by a layout group. </summary>
         private static bool IsLayoutGroup(string kind) =>

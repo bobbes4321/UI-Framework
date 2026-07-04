@@ -108,43 +108,29 @@ namespace Neo.UI.Editor
                 var request = JsonReader.AsObject(MiniJson.Parse(json), "agent request");
                 string action = JsonReader.GetString(request, "action", "screenshot");
 
+                // dispatch through the AgentBridgeActions registry (audit E1) rather than a sealed
+                // switch — a consuming project adds its own action via AgentBridgeActions.Register
+                // without forking this file.
+                if (!AgentBridgeActions.TryGet(action, out BridgeAction bridgeAction))
+                {
+                    result["ok"] = false;
+                    result["error"] = $"Unknown action '{action}' ({KnownActionIds()})";
+                    return MiniJson.Serialize(result);
+                }
+
                 // generating/screenshotting in play mode corrupts bakes: AddComponent fires
                 // Awake/OnEnable on the factory's temp objects mid-construction (and pollutes
                 // the running game's registries)
                 // diff/merge build reference widget subtrees in memory (like preview), so the same
                 // play-mode hazard applies (AddComponent fires Awake/OnEnable mid-construction)
-                bool mutatesAssets = action == "generate" || action == "buildScene"
-                                     || action == "regenerateShowcase"
-                                     || action == "screenshot" || action == "preview"
-                                     || action == "diff" || action == "merge" || action == "sync"
-                                     || action == "bindings";
-                if (mutatesAssets && UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode)
+                if (bridgeAction.mutatesAssets && UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode)
                 {
                     result["ok"] = false;
                     result["error"] = $"'{action}' refused while the editor is in Play mode — exit Play mode and retry";
                     return MiniJson.Serialize(result);
                 }
 
-                switch (action)
-                {
-                    case "screenshot": HandleScreenshot(request, result); break;
-                    case "generate": HandleGenerate(request, result); break;
-                    case "export": HandleExport(request, result); break;
-                    case "validate": HandleValidate(result); break;
-                    case "diff": HandleDiff(request, result); break;
-                    case "merge": HandleMerge(request, result); break;
-                    case "sync": HandleSync(request, result); break;
-                    case "buildScene": HandleBuildScene(request, result); break;
-                    case "regenerateShowcase": HandleRegenerateShowcase(request, result); break;
-                    case "specReference": HandleSpecReference(request, result); break;
-                    case "preview": HandlePreview(request, result); break;
-                    case "importSprites": HandleImportSprites(request, result); break;
-                    case "bindings": HandleBindings(request, result); break;
-                    default:
-                        result["ok"] = false;
-                        result["error"] = $"Unknown action '{action}' (screenshot | generate | export | validate | diff | merge | sync | buildScene | regenerateShowcase | specReference | preview | importSprites | bindings)";
-                        break;
-                }
+                bridgeAction.handler(request, result);
             }
             catch (Exception e)
             {
@@ -154,7 +140,14 @@ namespace Neo.UI.Editor
             return MiniJson.Serialize(result);
         }
 
-        private static void HandleScreenshot(Dictionary<string, object> request, Dictionary<string, object> result)
+        private static string KnownActionIds()
+        {
+            var ids = new List<string>(AgentBridgeActions.All.Count);
+            foreach (BridgeAction a in AgentBridgeActions.All) ids.Add(a.id);
+            return string.Join(" | ", ids);
+        }
+
+        internal static void HandleScreenshot(Dictionary<string, object> request, Dictionary<string, object> result)
         {
             string prefabPath = JsonReader.GetString(request, "prefab");
             string outPath = JsonReader.GetString(request, "out");
@@ -165,7 +158,7 @@ namespace Neo.UI.Editor
             result["path"] = Path.GetFullPath(written);
         }
 
-        private static void HandleGenerate(Dictionary<string, object> request, Dictionary<string, object> result)
+        internal static void HandleGenerate(Dictionary<string, object> request, Dictionary<string, object> result)
         {
             string specPath = JsonReader.GetString(request, "spec");
             if (string.IsNullOrEmpty(specPath))
@@ -182,7 +175,7 @@ namespace Neo.UI.Editor
             if (report.warnings.Count > 0) result["warning"] = string.Join(" ", report.warnings);
         }
 
-        private static void HandleExport(Dictionary<string, object> request, Dictionary<string, object> result)
+        internal static void HandleExport(Dictionary<string, object> request, Dictionary<string, object> result)
         {
             string specJson = UISpecExporter.ExportProject().ToJson();
             string outPath = JsonReader.GetString(request, "out");
@@ -197,7 +190,7 @@ namespace Neo.UI.Editor
             result["spec"] = specJson;
         }
 
-        private static void HandlePreview(Dictionary<string, object> request, Dictionary<string, object> result)
+        internal static void HandlePreview(Dictionary<string, object> request, Dictionary<string, object> result)
         {
             string specPath = JsonReader.GetString(request, "spec");
             if (string.IsNullOrEmpty(specPath))
@@ -214,7 +207,7 @@ namespace Neo.UI.Editor
             result["paths"] = absolute;
         }
 
-        private static void HandleSpecReference(Dictionary<string, object> request, Dictionary<string, object> result)
+        internal static void HandleSpecReference(Dictionary<string, object> request, Dictionary<string, object> result)
         {
             // "out" optional — default to the docs path so the committed reference stays current
             string outPath = JsonReader.GetString(request, "out");
@@ -225,7 +218,7 @@ namespace Neo.UI.Editor
             result["schema"] = Path.GetFullPath(schema);
         }
 
-        private static void HandleValidate(Dictionary<string, object> result)
+        internal static void HandleValidate(Dictionary<string, object> result)
         {
             List<string> issues = AgentValidation.ValidateAll();
             result["ok"] = issues.Count == 0;
@@ -241,7 +234,7 @@ namespace Neo.UI.Editor
             result["offSpecWarnings"] = offSpec;
         }
 
-        private static void HandleDiff(Dictionary<string, object> request, Dictionary<string, object> result)
+        internal static void HandleDiff(Dictionary<string, object> request, Dictionary<string, object> result)
         {
             string baselinePath = JsonReader.GetString(request, "baseline");
             UISpec baseline = !string.IsNullOrEmpty(baselinePath)
@@ -267,7 +260,7 @@ namespace Neo.UI.Editor
             result["offSpecWarnings"] = offSpec;
         }
 
-        private static void HandleMerge(Dictionary<string, object> request, Dictionary<string, object> result)
+        internal static void HandleMerge(Dictionary<string, object> request, Dictionary<string, object> result)
         {
             string incomingPath = JsonReader.GetString(request, "incoming");
             if (string.IsNullOrEmpty(incomingPath) || !File.Exists(incomingPath))
@@ -327,7 +320,7 @@ namespace Neo.UI.Editor
         /// standing way agents change generated UI — it preserves human prefab edits a stale incoming
         /// spec would otherwise wipe, and never discards a non-round-trippable edit silently.
         /// </summary>
-        private static void HandleSync(Dictionary<string, object> request, Dictionary<string, object> result)
+        internal static void HandleSync(Dictionary<string, object> request, Dictionary<string, object> result)
         {
             string incomingPath = JsonReader.GetString(request, "incoming");
             UISpec incoming = null;
@@ -343,7 +336,27 @@ namespace Neo.UI.Editor
             ConflictPolicy policy = ParsePolicy(JsonReader.GetString(request, "conflictPolicy"));
 
             SyncResult sync = SpecBaseline.Sync(incoming, policy, force);
+            WriteSyncResult(sync, result);
 
+            // optional: also write the merged/captured spec out for inspection (like merge's "out")
+            string outPath = JsonReader.GetString(request, "out");
+            if (!string.IsNullOrEmpty(outPath) && sync.merged != null)
+            {
+                string directory = Path.GetDirectoryName(outPath);
+                if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
+                File.WriteAllText(outPath, sync.merged.ToJson());
+                result["path"] = Path.GetFullPath(outPath);
+            }
+        }
+
+        /// <summary>
+        /// Shapes a <see cref="SyncResult"/> into the bridge result dictionary — the one place this
+        /// happens (audit D9: <c>HandleSync</c> and <c>HandleRegenerateShowcase</c> used to hand-mirror
+        /// ~20 lines of this each), so "sync" and "regenerateShowcase" always return identical key sets
+        /// for the same underlying <see cref="SyncResult"/> shape.
+        /// </summary>
+        private static void WriteSyncResult(SyncResult sync, Dictionary<string, object> result)
+        {
             result["ok"] = sync.ok;
             result["refused"] = sync.refused;
             result["regenerated"] = sync.regenerated;
@@ -362,16 +375,6 @@ namespace Neo.UI.Editor
                 result["issues"] = new List<object>(sync.generateReport.issues);
             }
             if (!string.IsNullOrEmpty(sync.note)) result["note"] = sync.note;
-
-            // optional: also write the merged/captured spec out for inspection (like merge's "out")
-            string outPath = JsonReader.GetString(request, "out");
-            if (!string.IsNullOrEmpty(outPath) && sync.merged != null)
-            {
-                string directory = Path.GetDirectoryName(outPath);
-                if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
-                File.WriteAllText(outPath, sync.merged.ToJson());
-                result["path"] = Path.GetFullPath(outPath);
-            }
         }
 
         private static List<object> ChangeList(List<SpecChange> changes)
@@ -388,7 +391,7 @@ namespace Neo.UI.Editor
             return list;
         }
 
-        private static void HandleBindings(Dictionary<string, object> request, Dictionary<string, object> result)
+        internal static void HandleBindings(Dictionary<string, object> request, Dictionary<string, object> result)
         {
             // the spec is the source of truth; "spec" optional — fall back to the exported project
             string specPath = JsonReader.GetString(request, "spec");
@@ -423,7 +426,7 @@ namespace Neo.UI.Editor
             result["manifest"] = manifestJson;
         }
 
-        private static void HandleImportSprites(Dictionary<string, object> request, Dictionary<string, object> result)
+        internal static void HandleImportSprites(Dictionary<string, object> request, Dictionary<string, object> result)
         {
             string folder = JsonReader.GetString(request, "folder");
             if (string.IsNullOrEmpty(folder) || !AssetDatabase.IsValidFolder(folder))
@@ -490,7 +493,7 @@ namespace Neo.UI.Editor
             return null;
         }
 
-        private static void HandleBuildScene(Dictionary<string, object> request, Dictionary<string, object> result)
+        internal static void HandleBuildScene(Dictionary<string, object> request, Dictionary<string, object> result)
         {
             // building replaces the open scene — never discard a human's unsaved work silently
             if (UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene().isDirty)
@@ -548,7 +551,7 @@ namespace Neo.UI.Editor
         /// way to regenerate an EXISTING showcase from its changed spec without clobbering the default
         /// root or losing human edits. Output shape mirrors <see cref="HandleSync"/> exactly.
         /// </summary>
-        private static void HandleRegenerateShowcase(Dictionary<string, object> request, Dictionary<string, object> result)
+        internal static void HandleRegenerateShowcase(Dictionary<string, object> request, Dictionary<string, object> result)
         {
             string showcaseId = JsonReader.GetString(request, "showcase");
             if (string.IsNullOrEmpty(showcaseId))
@@ -568,24 +571,7 @@ namespace Neo.UI.Editor
                 return;
             }
 
-            result["ok"] = sync.ok;
-            result["refused"] = sync.refused;
-            result["regenerated"] = sync.regenerated;
-            result["baselineUpdated"] = sync.baselineUpdated;
-            result["humanChanges"] = ChangeList(sync.humanChanges);
-            result["applied"] = ChangeList(sync.applied);
-            result["conflicts"] = ChangeList(sync.conflicts);
-            result["offSpecWarnings"] = FindingList(sync.offSpecWarnings);
-            result["dropped"] = FindingList(sync.dropped);
-            if (sync.merged != null) result["merged"] = sync.merged.ToJson();
-            if (sync.generateReport != null)
-            {
-                result["created"] = new List<object>(sync.generateReport.created);
-                result["updated"] = new List<object>(sync.generateReport.updated);
-                result["collisions"] = new List<object>(sync.generateReport.collisions);
-                result["issues"] = new List<object>(sync.generateReport.issues);
-            }
-            if (!string.IsNullOrEmpty(sync.note)) result["note"] = sync.note;
+            WriteSyncResult(sync, result);
         }
     }
 }

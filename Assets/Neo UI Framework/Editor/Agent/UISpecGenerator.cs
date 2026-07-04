@@ -1496,18 +1496,14 @@ namespace Neo.UI.Editor
             }
         }
 
-        /// <summary> "#hex" → literal color ref; anything else is a theme token name. </summary>
-        private static ThemeColorRef ParseColorRef(string value, GenerateReport report)
-        {
-            if (string.IsNullOrEmpty(value)) return new ThemeColorRef(Color.white);
-            if (value.StartsWith("#"))
-            {
-                if (ColorUtils.TryParseHex(value, out Color color)) return new ThemeColorRef(color);
-                report.issues.Add($"Invalid gradient color '{value}'");
-                return new ThemeColorRef(Color.white);
-            }
-            return new ThemeColorRef(value);
-        }
+        /// <summary>
+        /// "#hex" → literal color ref; anything else is a theme token name. Delegates the actual
+        /// hex-or-token decode to the one shared <see cref="EffectParams.ParseColorRef"/> (audit D6 —
+        /// this used to be a hand-copied second implementation); this wrapper only supplies the
+        /// generator's issue-reporting callback so an invalid hex still surfaces loudly.
+        /// </summary>
+        private static ThemeColorRef ParseColorRef(string value, GenerateReport report) =>
+            EffectParams.ParseColorRef(value, invalid => report.issues.Add($"Invalid gradient color '{invalid}'"));
 
         /// <summary> Unknown icon names become loud report issues (the factory still renders a fallback). </summary>
         private static void ValidateIcon(ElementSpec element, GenerateReport report)

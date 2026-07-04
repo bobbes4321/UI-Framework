@@ -210,7 +210,13 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   same requests headlessly: `Unity.exe -batchmode -projectPath . -executeMethod
   Neo.UI.Editor.AgentBridge.RunBatch -neoRequest req.json -neoResult res.json` (req.json =
   one request or an array, processed in order; omit `-nographics` when screenshots/previews are in
-  it; exit code 1 when any request fails). Actions:
+  it; exit code 1 when any request fails). `AgentBridge.HandleRequest` dispatches by looking the
+  request's `"action"` up in `AgentBridgeActions` — a `NeoKeyedRegistry<BridgeAction>` (id + a
+  `mutatesAssets` flag that alone decides the Play-mode refusal + the handler) — rather than a sealed
+  switch, so a consuming project adds its own action via `AgentBridgeActions.Register` without
+  forking this file; the unknown-action error enumerates `AgentBridgeActions.All` dynamically.
+  `sync` and `regenerateShowcase` both shape their `SyncResult` through the one shared
+  `AgentBridge.WriteSyncResult` (they return identical result key-sets). Actions:
   `{"action":"generate","spec":"path.json"}` · `{"action":"export","out":"path.json"}` ·
   `{"action":"validate"}` (issues + soft `designWarnings` + `offSpecWarnings` — editor edits that
   won't survive a regenerate) · `{"action":"diff","baseline":"path.json"}` (exports the project and

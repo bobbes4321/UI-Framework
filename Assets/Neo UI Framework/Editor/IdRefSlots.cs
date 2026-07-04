@@ -69,9 +69,7 @@ namespace Neo.UI.Editor
 
             if (spec.popups != null)
                 foreach (PopupSpec popup in spec.popups)
-                    if (popup?.elements != null)
-                        foreach (ElementSpec element in popup.elements)
-                            VisitElement(element, onSlot);
+                    SpecWalk.Elements(popup, includeItemTemplates: true, element => VisitElement(element, onSlot));
 
             if (spec.flow?.nodes != null)
                 foreach (FlowNodeSpec node in spec.flow.nodes)
@@ -88,11 +86,11 @@ namespace Neo.UI.Editor
                 () => view.category, () => view.viewName,
                 c => view.category = c, n => view.viewName = n));
 
-            if (view.elements != null)
-                foreach (ElementSpec element in view.elements)
-                    VisitElement(element, onSlot);
+            SpecWalk.Elements(view, includeItemTemplates: true, element => VisitElement(element, onSlot));
         }
 
+        /// <summary> Emits the id-reference slots owned by <paramref name="element"/> itself — tree
+        /// recursion (children + item template) is handled once, by <see cref="SpecWalk"/>. </summary>
         private static void VisitElement(ElementSpec element, Action<IdRefSlot> onSlot)
         {
             if (element == null) return;
@@ -123,10 +121,6 @@ namespace Neo.UI.Editor
                 onSlot(Slashed(typeof(ViewId), () => element.onClickShowView, s => element.onClickShowView = s));
             if (!string.IsNullOrEmpty(element.onClickHideView))
                 onSlot(Slashed(typeof(ViewId), () => element.onClickHideView, s => element.onClickHideView = s));
-
-            if (element.item != null) VisitElement(element.item, onSlot);
-            if (element.children != null)
-                foreach (ElementSpec child in element.children) VisitElement(child, onSlot);
         }
 
         private static void VisitFlowNode(FlowNodeSpec node, Action<IdRefSlot> onSlot)

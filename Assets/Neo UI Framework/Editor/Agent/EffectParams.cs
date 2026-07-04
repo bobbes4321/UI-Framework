@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,6 +13,10 @@ namespace Neo.UI.Editor
     /// registries call into instead. <see cref="ShapeEffectRegistry"/>/<see cref="ParticleEffectRegistry"/>
     /// keep their own same-named methods as thin forwarders so the per-descriptor files under
     /// <c>Editor/Agent/Effects/</c> (and other existing callers) never had to change.
+    /// <para/>
+    /// This is also the ONE "#hex-or-token → <see cref="ThemeColorRef"/>" decode in the package (audit
+    /// D6) — <see cref="UISpecGenerator"/>'s gradient/outline parsing forwards here too, supplying its
+    /// own issue-reporter callback instead of hand-rolling the hex check a second time.
     /// </summary>
     internal static class EffectParams
     {
@@ -21,14 +26,23 @@ namespace Neo.UI.Editor
         internal static string GetString(IDictionary<string, object> p, string key, string fallback) =>
             p != null && p.TryGetValue(key, out object v) && v != null ? v.ToString() : fallback;
 
-        /// <summary> "#hex" / "Category/Token" string → a theme-aware <see cref="ThemeColorRef"/>. </summary>
-        internal static ThemeColorRef ParseColorRef(string value)
+        /// <summary>
+        /// "#hex" / "Category/Token" string → a theme-aware <see cref="ThemeColorRef"/>. An invalid
+        /// "#hex" value always reports — never silently — falling back to white: pass
+        /// <paramref name="reportInvalid"/> to route the message into a caller-owned report (e.g. the
+        /// generator's <c>GenerateReport.issues</c>); omit it and the effect/particle callers get a
+        /// <see cref="Debug.LogWarning(object)"/> instead, so no call site can go quiet by accident.
+        /// </summary>
+        internal static ThemeColorRef ParseColorRef(string value, Action<string> reportInvalid = null)
         {
             if (string.IsNullOrEmpty(value)) return new ThemeColorRef(Color.white);
             if (value.StartsWith("#"))
-                return ColorUtils.TryParseHex(value, out Color c)
-                    ? new ThemeColorRef(c)
-                    : new ThemeColorRef(Color.white);
+            {
+                if (ColorUtils.TryParseHex(value, out Color c)) return new ThemeColorRef(c);
+                if (reportInvalid != null) reportInvalid(value);
+                else Debug.LogWarning($"Neo UI: invalid color '{value}' (expected #hex or a theme token) — falling back to white.");
+                return new ThemeColorRef(Color.white);
+            }
             return new ThemeColorRef(value); // a theme token ("Category/Name")
         }
 

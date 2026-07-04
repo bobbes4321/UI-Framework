@@ -109,8 +109,8 @@ namespace Neo.UI.Editor
             foreach (ViewSpec view in spec.views)
             {
                 manifest.views.Add(new ViewBinding { id = view.id, category = view.category, name = view.viewName });
-                foreach (ElementSpec element in view.elements)
-                    manifest.WalkElement(element, view.id, standardSeen, domainSeen);
+                SpecWalk.Elements(view, includeItemTemplates: true,
+                    element => manifest.WalkElement(element, view.id, standardSeen, domainSeen));
             }
 
             foreach (MenuCatalogSpec catalog in spec.settings)
@@ -123,6 +123,8 @@ namespace Neo.UI.Editor
             return manifest;
         }
 
+        /// <summary> Derives the bindings owned by <paramref name="element"/> itself — tree recursion
+        /// (children + item template) is handled once, by <see cref="SpecWalk"/>. </summary>
         private void WalkElement(ElementSpec element, string viewId, HashSet<string> standardSeen, HashSet<string> domainSeen)
         {
             if (element == null) return;
@@ -147,10 +149,6 @@ namespace Neo.UI.Editor
                         tokens = CollectTokens(element.item),
                         source = $"{element.kind} in view {viewId}"
                     });
-
-                if (element.item != null) WalkElement(element.item, viewId, standardSeen, domainSeen);
-                foreach (ElementSpec extChild in element.children)
-                    WalkElement(extChild, viewId, standardSeen, domainSeen);
                 return;
             }
 
@@ -193,10 +191,6 @@ namespace Neo.UI.Editor
                         });
                     break;
             }
-
-            if (element.item != null) WalkElement(element.item, viewId, standardSeen, domainSeen);
-            foreach (ElementSpec child in element.children)
-                WalkElement(child, viewId, standardSeen, domainSeen);
         }
 
         private void AddDomainSignal(HashSet<string> seen, string category, string name, string payload, string source)
@@ -243,21 +237,16 @@ namespace Neo.UI.Editor
             }
         }
 
-        /// <summary> The distinct <c>{token}</c> names referenced by a row template's text labels. </summary>
+        /// <summary> The distinct <c>{token}</c> names referenced by a row template's text labels.
+        /// Tree recursion (children + nested item templates) is handled once, by <see cref="SpecWalk"/>
+        /// — this used to be its own private walker that disagreed with <see cref="WalkElement"/> on
+        /// whether a nested item template counts (audit D5, the same drift class as D4). </summary>
         public static List<string> CollectTokens(ElementSpec template)
         {
             var tokens = new List<string>();
             var seen = new HashSet<string>();
-            CollectTokens(template, tokens, seen);
+            SpecWalk.Elements(template, includeItemTemplates: true, element => ExtractTokens(element.label, tokens, seen));
             return tokens;
-        }
-
-        private static void CollectTokens(ElementSpec element, List<string> tokens, HashSet<string> seen)
-        {
-            if (element == null) return;
-            ExtractTokens(element.label, tokens, seen);
-            if (element.item != null) CollectTokens(element.item, tokens, seen);
-            foreach (ElementSpec child in element.children) CollectTokens(child, tokens, seen);
         }
 
         private static void ExtractTokens(string text, List<string> tokens, HashSet<string> seen)
