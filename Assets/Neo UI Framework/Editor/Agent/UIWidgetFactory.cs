@@ -865,28 +865,44 @@ namespace Neo.UI.Editor
             var colors = go.AddComponent<UIToggleColorAnimator>();
             string onContentToken = TokenTextOnPrimary, offContentToken = TokenTextDefault;
             Color surface = new ThemeColorRef(TokenSurface).Resolve();
-            switch (variant)
+
+            // Pattern A seam (extensibility-seam-widget-attributes-plan.md): a project-authored
+            // variant on the settings asset wins, mirroring CreateButton/VariantColors — its 5-state
+            // SelectableColorSet maps onto the tab's on/off pair (selected -> on, normal -> off); the
+            // built-in switch below is the unchanged fallback.
+            NeoUISettings tabSettings = NeoUISettings.instance;
+            if (tabSettings != null && tabSettings.TryGetVariantColors(variant,
+                    out SelectableColorSet projectColors, out string projectToken))
             {
-                case VariantGhost:
-                    colors.onColor = new ThemeColorRef(TokenPrimary);
-                    colors.offColor = new ThemeColorRef(new Color(surface.r, surface.g, surface.b, 0f));
-                    offContentToken = TokenTextStrong;
-                    break;
-                case VariantLight:
-                    colors.onColor = new ThemeColorRef(TokenSurface);
-                    // fully transparent at rest: light tabs sit on an authored backdrop (the
-                    // header-tab sprite or art) that must show through until selected
-                    colors.offColor = new ThemeColorRef(new Color(surface.r, surface.g, surface.b, 0f));
-                    onContentToken = TokenPrimary;
-                    offContentToken = TokenTextStrong;
-                    // browser-tab silhouette: rounded shoulders, flat base
-                    tabShape.useUniformRadius = false;
-                    tabShape.cornerRadii = new Vector4(16f, 16f, 0f, 0f);
-                    break;
-                default:
-                    colors.onColor = new ThemeColorRef(TokenPrimary);
-                    colors.offColor = new ThemeColorRef(TokenSurface);
-                    break;
+                colors.onColor = projectColors.selected;
+                colors.offColor = projectColors.normal;
+                onContentToken = string.IsNullOrEmpty(projectToken) ? TokenTextOnPrimary : projectToken;
+            }
+            else
+            {
+                switch (variant)
+                {
+                    case VariantGhost:
+                        colors.onColor = new ThemeColorRef(TokenPrimary);
+                        colors.offColor = new ThemeColorRef(new Color(surface.r, surface.g, surface.b, 0f));
+                        offContentToken = TokenTextStrong;
+                        break;
+                    case VariantLight:
+                        colors.onColor = new ThemeColorRef(TokenSurface);
+                        // fully transparent at rest: light tabs sit on an authored backdrop (the
+                        // header-tab sprite or art) that must show through until selected
+                        colors.offColor = new ThemeColorRef(new Color(surface.r, surface.g, surface.b, 0f));
+                        onContentToken = TokenPrimary;
+                        offContentToken = TokenTextStrong;
+                        // browser-tab silhouette: rounded shoulders, flat base
+                        tabShape.useUniformRadius = false;
+                        tabShape.cornerRadii = new Vector4(16f, 16f, 0f, 0f);
+                        break;
+                    default:
+                        colors.onColor = new ThemeColorRef(TokenPrimary);
+                        colors.offColor = new ThemeColorRef(TokenSurface);
+                        break;
+                }
             }
             if (!string.IsNullOrEmpty(variant))
             {

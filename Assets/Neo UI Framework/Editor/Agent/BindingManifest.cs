@@ -219,23 +219,12 @@ namespace Neo.UI.Editor
             defaultValue = item.value
         };
 
-        /// <summary> C# value type a settings/cheat control reads/writes.
-        /// PHASE-2 TODO (element-kind plan sibling): when <c>MenuItemSpec.Kinds</c> migrates to a
-        /// <c>NeoMenuItemKinds</c> registry, route this through a registered descriptor's <c>ValueType</c>
-        /// so a project's novel menu-item kind surfaces its C# value type here too. Not implemented in
-        /// Phase 1 — built-in menu-item kinds keep this switch. </summary>
-        public static string TypeForKind(string kind)
-        {
-            switch (kind)
-            {
-                case "toggle":
-                case "switch": return "bool";
-                case "slider":
-                case "stepper": return "float";
-                case "dropdown": return "int";
-                default: return "none"; // button / label / rebind carry no plain value
-            }
-        }
+        /// <summary> C# value type a settings/cheat control reads/writes ("bool"/"float"/"int"/"none").
+        /// Wave 7 Task 7.1: resolves the Phase-2 TODO this doc used to carry — routes through
+        /// <see cref="NeoMenuItemKinds.TypeForKind"/> (the registered descriptor's <c>valueType</c>), so
+        /// a project's own registered menu-item kind surfaces its C# value type here too, not just the
+        /// 8 built-ins. </summary>
+        public static string TypeForKind(string kind) => NeoMenuItemKinds.TypeForKind(kind);
 
         /// <summary> The distinct <c>{token}</c> names referenced by a row template's text labels.
         /// Tree recursion (children + nested item templates) is handled once, by <see cref="SpecWalk"/>

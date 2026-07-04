@@ -202,6 +202,97 @@ namespace Neo.UI.Tests
             }
         }
 
+        // ------------------------------------------------------------------ Pattern A: tab variant
+
+        private const string TabVariantSpecJson = @"{
+          ""views"": [ { ""id"": ""Reg/TabScreen"", ""elements"": [
+            { ""tab"": { ""id"": ""Reg/Sidebar"", ""label"": ""Sidebar"", ""variant"": ""success"" } }
+          ] } ]
+        }";
+
+        [Test]
+        public void ProjectVariant_FlowsThroughCreateTab_LikeCreateButton()
+        {
+            NeoUISettings settings = NeoUISettings.instance;
+            Assert.IsNotNull(settings, "settings asset must exist (Create or Repair Settings)");
+
+            List<ButtonVariantAsset> saved = settings.buttonVariants;
+            try
+            {
+                settings.buttonVariants = new List<ButtonVariantAsset>
+                {
+                    new ButtonVariantAsset
+                    {
+                        name = "success",
+                        contentToken = UIWidgetFactory.TokenTextOnPrimary,
+                        colors = new SelectableColorSet
+                        {
+                            normal = new ThemeColorRef(UIWidgetFactory.TokenSuccess),
+                            highlighted = new ThemeColorRef(UIWidgetFactory.TokenSuccessHover),
+                            pressed = new ThemeColorRef(UIWidgetFactory.TokenSuccessPressed),
+                            selected = new ThemeColorRef(UIWidgetFactory.TokenSuccessHover),
+                            disabled = new ThemeColorRef(new Color(0.5f, 0.5f, 0.5f, 0.5f))
+                        }
+                    }
+                };
+
+                GenerateReport report = UISpecGenerator.Generate(UISpec.FromJson(TabVariantSpecJson));
+                Assert.IsEmpty(report.issues, report.ToString());
+
+                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(
+                    $"{UISpecGenerator.GeneratedRoot}/Views/Reg_TabScreen.prefab");
+                Assert.IsNotNull(prefab, "generated view prefab missing");
+
+                GameObject sidebar = prefab.GetComponentsInChildren<UITab>(true)
+                    .First(t => t.id.Matches("Reg", "Sidebar")).gameObject;
+
+                UIToggleColorAnimator colors = sidebar.GetComponent<UIToggleColorAnimator>();
+                Assert.AreEqual(UIWidgetFactory.TokenSuccessHover, colors.onColor.token,
+                    "project variant's selected color becomes the tab's on color");
+                Assert.AreEqual(UIWidgetFactory.TokenSuccess, colors.offColor.token,
+                    "project variant's normal color becomes the tab's off color");
+
+                // WidgetStyleTag stores the free string, so the variant round-trips like buttons
+                WidgetStyleTag tag = sidebar.GetComponent<WidgetStyleTag>();
+                Assert.AreEqual("success", tag.variant);
+            }
+            finally
+            {
+                settings.buttonVariants = saved;
+            }
+        }
+
+        [Test]
+        public void BuiltInTabVariant_IsByteIdentical_WhenNoAssetOverridesIt()
+        {
+            // With no project variants registered, the built-in "light" variant must be untouched
+            // (including the shape's corner-radii decor, which only the built-in switch applies).
+            NeoUISettings settings = NeoUISettings.instance;
+            List<ButtonVariantAsset> saved = settings.buttonVariants;
+            try
+            {
+                settings.buttonVariants = new List<ButtonVariantAsset>(); // empty: pure built-in path
+
+                const string json = @"{ ""views"": [ { ""id"": ""Reg/LightTab"", ""elements"": [
+                    { ""tab"": { ""id"": ""Reg/Light"", ""label"": ""Light"", ""variant"": ""light"" } } ] } ] }";
+                GenerateReport report = UISpecGenerator.Generate(UISpec.FromJson(json));
+                Assert.IsEmpty(report.issues, report.ToString());
+                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(
+                    $"{UISpecGenerator.GeneratedRoot}/Views/Reg_LightTab.prefab");
+                GameObject light = prefab.GetComponentsInChildren<UITab>(true)
+                    .First(t => t.id.Matches("Reg", "Light")).gameObject;
+                UIToggleColorAnimator colors = light.GetComponent<UIToggleColorAnimator>();
+                Assert.AreEqual(UIWidgetFactory.TokenSurface, colors.onColor.token);
+                Assert.AreEqual(ShapeType.RoundedRect, light.GetComponent<NeoShape>().shape);
+                Assert.IsFalse(light.GetComponent<NeoShape>().useUniformRadius,
+                    "built-in light variant still applies its browser-tab corner decor");
+            }
+            finally
+            {
+                settings.buttonVariants = saved;
+            }
+        }
+
         // ------------------------------------------------------------------ Pattern A: icon overlay
 
         [Test]

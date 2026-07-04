@@ -613,33 +613,23 @@ namespace Neo.UI.Editor
             else if (evt.target is GraphView && _graph != null)
             {
                 Vector2 graphPosition = contentViewContainer.WorldToLocal(evt.mousePosition);
-                AddCreateEntry<StartNode>(evt, graphPosition);
-                AddCreateEntry<UINode>(evt, graphPosition);
-                AddCreateEntry<SignalNode>(evt, graphPosition);
-                AddCreateEntry<BackButtonNode>(evt, graphPosition);
-                AddCreateEntry<PortalNode>(evt, graphPosition);
-                AddCreateEntry<RandomNode>(evt, graphPosition);
-                AddCreateEntry<TimeScaleNode>(evt, graphPosition);
-                AddCreateEntry<ApplicationQuitNode>(evt, graphPosition);
-                AddCreateEntry<PivotNode>(evt, graphPosition, "Reroute");
-                AddCreateEntry<StickyNoteNode>(evt, graphPosition);
-                AddCreateEntry<DebugNode>(evt, graphPosition);
+                foreach (FlowNodeDescriptor descriptor in FlowNodeKinds.All)
+                    AddCreateEntry(evt, graphPosition, descriptor);
                 evt.menu.AppendSeparator();
             }
             base.BuildContextualMenu(evt);
         }
 
-        private void AddCreateEntry<T>(ContextualMenuPopulateEvent evt, Vector2 position, string displayName = null) where T : FlowNode, new()
+        private void AddCreateEntry(ContextualMenuPopulateEvent evt, Vector2 position, FlowNodeDescriptor descriptor)
         {
-            string label = displayName ?? typeof(T).Name.Replace("Node", "");
-            evt.menu.AppendAction($"Create Node/{label}", _ =>
+            evt.menu.AppendAction($"Create Node/{descriptor.menuLabel}", _ =>
             {
                 Undo.RecordObject(_graph, "Create Flow Node");
-                FlowNode node = _graph.AddNode<T>(label, position);
-                if (node is UINode || node is PortalNode || node is RandomNode)
-                    node.outputs.Add(new FlowEdge());
-                else if (!(node is StickyNoteNode || node is ApplicationQuitNode))
-                    node.outputs.Add(new FlowEdge { portName = "Next" });
+                FlowNode node = descriptor.create();
+                node.name = _graph.MakeUniqueNodeName(descriptor.menuLabel);
+                node.position = position;
+                _graph.nodes.Add(node);
+                descriptor.seedDefaultOutputs(node);
                 EditorUtility.SetDirty(_graph);
                 PopulatePreservingSelection();
             });

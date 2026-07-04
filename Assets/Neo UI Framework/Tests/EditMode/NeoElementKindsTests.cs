@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Neo.UI;
 using Neo.UI.Editor;
 using NUnit.Framework;
 using UnityEditor;
@@ -70,11 +71,59 @@ namespace Neo.UI.Tests
             }
         }
 
+        /// <summary> A throwaway project-defined CONTAINER kind (Task 7.3 / audit E4) — proves
+        /// <c>UISpecGenerator.IsPlainContainer</c> consults the registry's <see cref="IElementKindContainer"/>
+        /// fact instead of only its sealed built-in string chain, so a registered container kind's
+        /// "background" field gets the same card-decor <see cref="NeoShape"/> treatment as vstack/hstack/etc. </summary>
+        private sealed class ProbeContainerKind : INeoElementKind, IElementKindContainer
+        {
+            public string Kind => "probeContainer";
+            public Color Accent => new Color(0.56f, 0.34f, 0.12f, 1f);
+            public string SignalPayload => "none";
+            public bool AcceptsChildren => true;
+
+            public IEnumerable<SpecField> Fields => System.Array.Empty<SpecField>();
+
+            public GameObject Build(ElementBuildContext ctx)
+            {
+                var go = new GameObject("ProbeContainer", typeof(RectTransform));
+                go.transform.SetParent(ctx.parent, false);
+                return go;
+            }
+
+            public bool TryExport(GameObject go, out ElementSpec spec)
+            {
+                spec = null;
+                return false;
+            }
+        }
+
         [TearDown]
         public void ClearRegistry()
         {
             NeoElementKinds.ResetForTests();
             AssetDatabase.DeleteAsset(UISpecGenerator.GeneratedRoot);
+        }
+
+        // ------------------------------------------------------------------ container decor seam (E4 / Task 7.3)
+
+        [Test]
+        public void RegisteredContainerKind_WithBackground_ReceivesCardDecor()
+        {
+            NeoElementKinds.Register(new ProbeContainerKind());
+            const string json = @"{ ""views"": [ { ""id"": ""Probe/View"", ""elements"": [
+                { ""probeContainer"": { ""id"": ""Probe/Card"", ""background"": ""Surface"" } }
+            ] } ] }";
+
+            GenerateReport report = UISpecGenerator.Generate(UISpec.FromJson(json));
+            CollectionAssert.IsEmpty(report.issues, report.ToString());
+
+            var view = AssetDatabase.LoadAssetAtPath<GameObject>(UISpecGenerator.ViewPrefabPath("Probe", "View"));
+            Assert.IsNotNull(view, "generated view prefab must exist");
+            Transform card = view.transform.Find("Probe_Card");
+            Assert.IsNotNull(card, "the registered container element must be built under the view");
+            Assert.IsNotNull(card.GetComponent<NeoShape>(),
+                "a registered container kind with 'background' must receive card decor (an NeoShape), same as a built-in container");
         }
 
         // ------------------------------------------------------------------ registry semantics

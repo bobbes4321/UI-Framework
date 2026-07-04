@@ -203,6 +203,18 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   `ThemeBundleRegistry`. Each pairs a lazy `EnsureDiscovered` + an `AssetPostprocessor` that invalidates
   on `.asset` import. Authoring SOs get EditorUI-kit inspectors (`Editor/Inspectors/AuthoringInspectors.cs`
   for `ShowcaseDefinition`/`AnimationPresetDatabase`, plus the sectioned `ThemeEditor`).
+- **Settings/cheats menu items** (a catalog's `items[]`, e.g. `{"toggle": {...}}`/`{"slider": {...}}`)
+  are keyed by kind through `Editor/Agent/Menus/NeoMenuItemKinds.cs` (`NeoKeyedRegistry<MenuItemKindDescriptor>`,
+  moved out of `UISpecGenerator`/`UISpecExporter`/`UISpec` in Wave 7 Task 7.1) instead of the old
+  `MapKind`/`BuildMenuRow`/`UnmapKind` switches — a descriptor owns its spec↔runtime kind mapping, row
+  build recipe, id-database pre-registration and typed-value conversion, and `MenuItemSpec.Kinds` reads
+  the registry so a project's registered kind shows up in `MenuCatalogInspector`'s kind popup for free.
+  The built-in 8 (label/button/toggle/switch/slider/stepper/dropdown/rebind) map to the runtime
+  `MenuControlKind` enum, which stays closed by design — a project-registered kind with no enum slot
+  still parses/exports/round-trips at the spec level, but its generated row bakes as a non-interactive
+  Label (logged) because `MenuItemDefinition.kind` has nowhere else to put it; making a custom kind
+  fully interactive at runtime needs a Runtime/ change (out of scope for Task 7.1 — see its handoff
+  notes) to `MenuItemDefinition`/`MenuControlBinder`/`MenuWidgetLibrary`.
 - Build UI hierarchies in editor code through `UIWidgetFactory` (Editor/Agent) — it is the single
   source of widget structure; the spec generator AND exporter both rely on its child names.
 - Agent workflow with the editor OPEN: toggle `Tools → Neo UI → Advanced → Agent Bridge` once, then

@@ -13,7 +13,7 @@ namespace Neo.UI.Editor
     /// Dumps the current theme, presets, generated views and flow graphs back to spec text,
     /// so agents can read the current UI state without parsing Unity YAML.
     /// </summary>
-    public static class UISpecExporter
+    public static partial class UISpecExporter
     {
         [MenuItem("Tools/Neo UI/Advanced/Export Spec…", priority = 11)]
         public static void ExportToFileDialog()
@@ -47,7 +47,11 @@ namespace Neo.UI.Editor
             foreach (MenuCatalog catalog in catalogs.OrderBy(c => c.Id, System.StringComparer.Ordinal))
             {
                 MenuCatalogSpec catalogSpec = ExportCatalog(catalog);
-                if (catalog is CheatCatalog) spec.cheats.Add(catalogSpec);
+                // Wave 7 Task 7.1: kind resolved via NeoCatalogKinds instead of an "is CheatCatalog" type
+                // check, so a project's own MenuCatalog subtype (registered with its own CatalogKind)
+                // files into its own spec list too, not just the settings/cheats binary.
+                string catalogKindId = NeoCatalogKinds.KindOf(catalog);
+                if (NeoCatalogKinds.TryGet(catalogKindId, out CatalogKind catalogKind)) catalogKind.list(spec).Add(catalogSpec);
                 else spec.settings.Add(catalogSpec);
             }
 
@@ -494,7 +498,7 @@ namespace Neo.UI.Editor
             if (menuPresenter != null && menuPresenter.catalog != null)
                 return new ElementSpec
                 {
-                    kind = menuPresenter.catalog is CheatCatalog ? "cheats" : "settings",
+                    kind = NeoCatalogKinds.KindOf(menuPresenter.catalog),
                     catalog = menuPresenter.catalog.Id
                 };
 
@@ -1251,67 +1255,7 @@ namespace Neo.UI.Editor
             return flowSpec;
         }
 
-        // ------------------------------------------------------------------ menus
-
-        public static MenuCatalogSpec ExportCatalog(MenuCatalog catalog)
-        {
-            var spec = new MenuCatalogSpec
-            {
-                kind = catalog is CheatCatalog ? MenuCatalogSpec.CheatKind : MenuCatalogSpec.SettingsKind,
-                category = catalog.category,
-                menuName = catalog.menuName,
-                groups = catalog.groups != null ? new List<string>(catalog.groups) : new List<string>(),
-                start = string.IsNullOrEmpty(catalog.startGroup) ? null : catalog.startGroup,
-                favourites = (catalog as CheatCatalog)?.favouritesEnabled ?? true,
-                inputActionAsset = string.IsNullOrEmpty(catalog.inputActionAssetPath) ? null : catalog.inputActionAssetPath
-            };
-            foreach (MenuItemDefinition item in catalog.items)
-                if (item != null) spec.items.Add(ExportItem(item));
-            return spec;
-        }
-
-        private static MenuItemSpec ExportItem(MenuItemDefinition def)
-        {
-            var item = new MenuItemSpec
-            {
-                kind = UnmapKind(def.kind),
-                category = def.Category,
-                name = def.Name,
-                group = string.IsNullOrEmpty(def.group) ? null : def.group,
-                label = string.IsNullOrEmpty(def.label) ? null : def.label,
-                tooltip = string.IsNullOrEmpty(def.tooltip) ? null : def.tooltip,
-                persisted = def.persisted,
-                wholeNumbers = def.wholeNumbers,
-                value = string.IsNullOrEmpty(def.defaultValue) ? null : def.defaultValue,
-                emitOnDrag = def.emitOnDrag,
-                emitOnRelease = def.emitOnRelease,
-                inputAction = string.IsNullOrEmpty(def.inputAction) ? null : def.inputAction,
-                bindingIndex = def.bindingIndex
-            };
-            if (def.kind == MenuControlKind.Slider || def.kind == MenuControlKind.Stepper)
-            {
-                item.min = def.min;
-                item.max = def.max;
-            }
-            if (def.kind == MenuControlKind.Stepper) item.step = def.step;
-            if (def.kind == MenuControlKind.Dropdown && def.options != null && def.options.Count > 0)
-                item.options = new List<string>(def.options);
-            return item;
-        }
-
-        private static string UnmapKind(MenuControlKind kind)
-        {
-            switch (kind)
-            {
-                case MenuControlKind.Button: return "button";
-                case MenuControlKind.Toggle: return "toggle";
-                case MenuControlKind.Switch: return "switch";
-                case MenuControlKind.Slider: return "slider";
-                case MenuControlKind.Stepper: return "stepper";
-                case MenuControlKind.Dropdown: return "dropdown";
-                case MenuControlKind.KeyRebind: return "rebind";
-                default: return "label";
-            }
-        }
+        // Menu export (ExportCatalog/ExportItem/UnmapKind) moved to Menus/UISpecExporter.Menus.cs
+        // (Wave 7 Task 7.1) — UnmapKind is now NeoMenuItemKinds.UnmapKind.
     }
 }

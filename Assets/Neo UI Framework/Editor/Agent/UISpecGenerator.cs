@@ -46,7 +46,7 @@ namespace Neo.UI.Editor
     /// (carrying <see cref="GeneratedMarker"/> / the generated flag) are updated in place;
     /// hand-made assets at generated paths are reported as collisions and left untouched.
     /// </summary>
-    public static class UISpecGenerator
+    public static partial class UISpecGenerator
     {
         /// <summary>The committed home of the demo assets — the default <see cref="GeneratedRoot"/>.</summary>
         public const string DefaultGeneratedRoot = "Assets/Neo UI Generated";
@@ -88,12 +88,6 @@ namespace Neo.UI.Editor
         /// normal generation; the Composer sets it, builds, then clears it.
         /// </summary>
         internal static Dictionary<ElementSpec, GameObject> ElementObjectSink;
-
-        // catalogs generated this run, so the view-embedded "settings"/"cheats" elements can find them
-        private static readonly Dictionary<string, MenuCatalog> s_catalogs =
-            new Dictionary<string, MenuCatalog>(StringComparer.Ordinal);
-        private static readonly Dictionary<string, InputActionAsset> s_catalogInputAssets =
-            new Dictionary<string, InputActionAsset>(StringComparer.Ordinal);
 
         /// <summary> Pillar B: the spec's top-level breakpoints for the current generate, consulted by
         /// the per-view responsive baking pass. Set for the duration of <see cref="Generate"/>; the
@@ -1478,9 +1472,18 @@ namespace Neo.UI.Editor
             }
         }
 
-        /// <summary> Container kinds that may carry card decor (an NeoShape on the host). </summary>
-        private static bool IsPlainContainer(string kind) =>
-            kind == "vstack" || kind == "hstack" || kind == "grid" || kind == "panel" || kind == "overlay";
+        /// <summary> Container kinds that may carry card decor (an NeoShape on the host). Consults the
+        /// <see cref="NeoElementKinds"/> registry first — a registered kind that implements
+        /// <see cref="IElementKindContainer"/> with <c>AcceptsChildren</c> true gets the same
+        /// background/gradient/card-decor treatment as a built-in container (this is a registry FACT,
+        /// not a string chain, so a project-defined container never has to be special-cased here); the
+        /// built-in 5-kind chain is the fallback for kinds the registry doesn't know about. </summary>
+        private static bool IsPlainContainer(string kind)
+        {
+            if (NeoElementKinds.TryGet(kind, out INeoElementKind custom))
+                return custom is IElementKindContainer container && container.AcceptsChildren;
+            return kind == "vstack" || kind == "hstack" || kind == "grid" || kind == "panel" || kind == "overlay";
+        }
 
         /// <summary>
         /// "align" on a stack → childAlignment. Middle row so an hstack centers/right-packs its
@@ -1543,283 +1546,10 @@ namespace Neo.UI.Editor
             RegisterId(settings.streamIds, signal.category, signal.name);
         }
 
-        // ------------------------------------------------------------------ menus (settings / cheats)
-
-        private static void GenerateMenuCatalog(MenuCatalogSpec spec, NeoUISettings settings, GenerateReport report)
-        {
-            EnsureFolder($"{GeneratedRoot}/Menus");
-            bool isCheat = spec.kind == MenuCatalogSpec.CheatKind;
-            string assetName = Sanitize($"{spec.category}_{spec.menuName}");
-            string path = $"{GeneratedRoot}/Menus/{assetName}.asset";
-
-            var existing = AssetDatabase.LoadAssetAtPath<MenuCatalog>(path);
-            bool typeMismatch = existing != null && (isCheat ? !(existing is CheatCatalog) : !(existing is SettingsCatalog));
-            bool created = existing == null || typeMismatch;
-            MenuCatalog catalog;
-            if (created)
-            {
-                if (typeMismatch) AssetDatabase.DeleteAsset(path);
-                catalog = (MenuCatalog)ScriptableObject.CreateInstance(isCheat ? typeof(CheatCatalog) : typeof(SettingsCatalog));
-            }
-            else catalog = existing;
-
-            catalog.category = spec.category;
-            catalog.menuName = spec.menuName;
-            catalog.groups = new List<string>(spec.groups);
-            catalog.startGroup = spec.start;
-            catalog.inputActionAssetPath = spec.inputActionAsset;
-            if (catalog is CheatCatalog cheatCatalog) cheatCatalog.favouritesEnabled = spec.favourites;
-
-            catalog.items.Clear();
-            foreach (MenuItemSpec item in spec.items)
-            {
-                catalog.items.Add(ToDefinition(item));
-                switch (MapKind(item.kind))
-                {
-                    case MenuControlKind.Dropdown: RegisterId(settings.dropdownIds, item.category, item.name); break;
-                    case MenuControlKind.Slider: RegisterId(settings.sliderIds, item.category, item.name); break;
-                    case MenuControlKind.Toggle:
-                    case MenuControlKind.Switch: RegisterId(settings.toggleIds, item.category, item.name); break;
-                    case MenuControlKind.Button: RegisterId(settings.buttonIds, item.category, item.name); break;
-                }
-            }
-
-            if (created) AssetDatabase.CreateAsset(catalog, path);
-            EditorUtility.SetDirty(catalog);
-
-            s_catalogs[catalog.Id] = catalog;
-            if (!string.IsNullOrEmpty(spec.inputActionAsset))
-            {
-                var asset = AssetDatabase.LoadAssetAtPath<InputActionAsset>(spec.inputActionAsset);
-                if (asset == null)
-                    report.issues.Add($"Catalog '{catalog.Id}': input action asset '{spec.inputActionAsset}' not found");
-                else s_catalogInputAssets[catalog.Id] = asset;
-            }
-
-            (created ? report.created : report.updated).Add(
-                $"{(isCheat ? "Cheat" : "Settings")} catalog '{catalog.Id}' ({catalog.items.Count} items) → {path}");
-        }
-
-        /// <summary>
-        /// Populates the in-memory catalog registry from a spec's settings/cheats WITHOUT writing any
-        /// asset — so an in-memory render (the agent <c>preview</c> path, which never commits prefabs or
-        /// catalog SOs) can still resolve a view's embedded <c>settings</c>/<c>cheats</c> elements and
-        /// show real menu rows. Mirrors <see cref="GenerateMenuCatalog"/>'s catalog population exactly;
-        /// the only difference is no <c>AssetDatabase.CreateAsset</c>. Clears the registry first so a
-        /// preview never reads a stale catalog left by an earlier generate.
-        /// </summary>
-        public static void PrepareCatalogsInMemory(UISpec spec, NeoUISettings settings)
-        {
-            s_catalogs.Clear();
-            s_catalogInputAssets.Clear();
-            if (spec == null) return;
-            var report = new GenerateReport();
-            if (spec.settings != null)
-                foreach (MenuCatalogSpec catalog in spec.settings) BuildCatalogInMemory(catalog, settings, report);
-            if (spec.cheats != null)
-                foreach (MenuCatalogSpec catalog in spec.cheats) BuildCatalogInMemory(catalog, settings, report);
-        }
-
-        private static void BuildCatalogInMemory(MenuCatalogSpec spec, NeoUISettings settings, GenerateReport report)
-        {
-            bool isCheat = spec.kind == MenuCatalogSpec.CheatKind;
-            var catalog = (MenuCatalog)ScriptableObject.CreateInstance(isCheat ? typeof(CheatCatalog) : typeof(SettingsCatalog));
-            catalog.category = spec.category;
-            catalog.menuName = spec.menuName;
-            catalog.groups = new List<string>(spec.groups);
-            catalog.startGroup = spec.start;
-            catalog.inputActionAssetPath = spec.inputActionAsset;
-            if (catalog is CheatCatalog cheatCatalog) cheatCatalog.favouritesEnabled = spec.favourites;
-            catalog.items.Clear();
-            foreach (MenuItemSpec item in spec.items) catalog.items.Add(ToDefinition(item));
-            s_catalogs[catalog.Id] = catalog;
-            if (!string.IsNullOrEmpty(spec.inputActionAsset))
-            {
-                var asset = AssetDatabase.LoadAssetAtPath<InputActionAsset>(spec.inputActionAsset);
-                if (asset != null) s_catalogInputAssets[catalog.Id] = asset;
-            }
-        }
-
-        private static MenuItemDefinition ToDefinition(MenuItemSpec item) => new MenuItemDefinition
-        {
-            category = item.category,
-            name = item.name,
-            kind = MapKind(item.kind),
-            label = item.label,
-            tooltip = item.tooltip,
-            group = item.group,
-            persisted = item.persisted,
-            min = item.min ?? 0f,
-            max = item.max ?? 1f,
-            step = item.step ?? 1f,
-            wholeNumbers = item.wholeNumbers,
-            defaultValue = item.value,
-            options = item.options != null ? new List<string>(item.options) : new List<string>(),
-            emitOnDrag = item.emitOnDrag,
-            emitOnRelease = item.emitOnRelease,
-            inputAction = item.inputAction,
-            bindingIndex = item.bindingIndex
-        };
-
-        private static MenuControlKind MapKind(string kind)
-        {
-            switch (kind)
-            {
-                case "button": return MenuControlKind.Button;
-                case "toggle": return MenuControlKind.Toggle;
-                case "switch": return MenuControlKind.Switch;
-                case "slider": return MenuControlKind.Slider;
-                case "stepper": return MenuControlKind.Stepper;
-                case "dropdown": return MenuControlKind.Dropdown;
-                case "rebind": return MenuControlKind.KeyRebind;
-                default: return MenuControlKind.Label;
-            }
-        }
-
-        private static MenuCatalog LookupCatalog(string id)
-        {
-            if (string.IsNullOrEmpty(id)) return null;
-            CategoryNameId.Parse(id, out string category, out string name);
-            string key = $"{category}/{name}";
-            if (s_catalogs.TryGetValue(key, out MenuCatalog catalog)) return catalog;
-            string assetName = Sanitize($"{category}_{name}");
-            return AssetDatabase.LoadAssetAtPath<MenuCatalog>($"{GeneratedRoot}/Menus/{assetName}.asset");
-        }
-
-        /// <summary>
-        /// Builds a baked menu (tabbar + per-group panels, or a flat row stack) from a generated catalog,
-        /// attaching a <see cref="MenuControlBinder"/> per control. A <see cref="MenuPresenter"/> on the
-        /// root registers the catalog at runtime; the baked binders self-wire (no runtime rebuild).
-        /// </summary>
-        private static GameObject BuildMenuElement(ElementSpec element, RectTransform parent,
-            NeoUISettings settings, GenerateReport report, ViewBuild build)
-        {
-            MenuCatalog catalog = LookupCatalog(element.catalog);
-            GameObject root = UIWidgetFactory.CreateStack(parent, vertical: true, padding: 0f, spacing: 8f);
-            root.name = "Menu";
-
-            if (catalog == null)
-            {
-                report.issues.Add($"Menu element references catalog '{element.catalog}' which was not generated");
-                return root;
-            }
-
-            MenuPresenter presenter = catalog is CheatCatalog
-                ? root.AddComponent<CheatMenu>()
-                : root.AddComponent<SettingsMenu>();
-            presenter.catalog = catalog;
-            presenter.buildOnStart = false;
-            presenter.contentRoot = (RectTransform)root.transform;
-
-            InputActionAsset rebindAsset = s_catalogInputAssets.TryGetValue(catalog.Id, out InputActionAsset a) ? a : null;
-            List<string> groups = catalog.groups != null
-                ? catalog.groups.Where(g => !string.IsNullOrEmpty(g)).ToList() : new List<string>();
-
-            if (groups.Count > 0)
-            {
-                var tabs = groups.Select(g => (g, g, (string)null)).ToList();
-                GameObject tabBar = UIWidgetFactory.CreateTabBar((RectTransform)root.transform, catalog.category, tabs);
-                foreach (string group in groups)
-                {
-                    Transform tab = tabBar.transform.Find(UIWidgetFactory.TabName(group));
-                    if (tab != null) build.tabPanelLinks.Add((tab.GetComponent<UITab>(), group));
-                }
-                foreach (string group in groups)
-                {
-                    GameObject panel = UIWidgetFactory.CreatePanel((RectTransform)root.transform, catalog.category, group, 12f, 8f);
-                    panel.name = $"Panel_{group}";
-                    UIPanel panelComponent = panel.GetComponent<UIPanel>();
-                    string panelKey = panelComponent.id.ToString();
-                    if (!build.panels.ContainsKey(panelKey)) build.panels[panelKey] = panelComponent;
-                    RegisterId(settings.panelIds, catalog.category, group);
-                    foreach (MenuItemDefinition def in catalog.ItemsInGroup(group))
-                        BuildMenuRow(catalog, def, (RectTransform)panel.transform, rebindAsset, settings, report);
-                }
-            }
-            else
-            {
-                foreach (MenuItemDefinition def in catalog.items)
-                    BuildMenuRow(catalog, def, (RectTransform)root.transform, rebindAsset, settings, report);
-            }
-            return root;
-        }
-
-        private static void BuildMenuRow(MenuCatalog catalog, MenuItemDefinition def, RectTransform parent,
-            InputActionAsset rebindAsset, NeoUISettings settings, GenerateReport report)
-        {
-            switch (def.kind)
-            {
-                case MenuControlKind.Label:
-                    UIWidgetFactory.CreateLabel(parent, def.label, UIWidgetFactory.TokenTextMuted, 20f,
-                        name: "Header", alignment: TMPro.TextAlignmentOptions.MidlineLeft,
-                        textStyle: UIWidgetFactory.TextStyleCaption);
-                    return;
-                case MenuControlKind.Button:
-                {
-                    GameObject button = UIWidgetFactory.CreateButton(parent, def.Category, def.Name, def.label,
-                        variant: UIWidgetFactory.VariantSecondary);
-                    AddBinder(button, catalog, def, null);
-                    RegisterId(settings.buttonIds, def.Category, def.Name);
-                    return;
-                }
-                case MenuControlKind.KeyRebind:
-                {
-                    GameObject rebindBtn = UIWidgetFactory.CreateButton(parent, def.Category, def.Name + "_Rebind",
-                        "—", variant: UIWidgetFactory.VariantSecondary);
-                    GameObject row = UIWidgetFactory.CreateMenuRow(parent, $"Row_{def.Name}", def.label, rebindBtn);
-                    var rebind = row.AddComponent<UIRebindControl>();
-                    rebind.Configure(catalog, def, rebindAsset);
-                    rebind.rebindButton = rebindBtn.GetComponent<UIButton>();
-                    rebind.bindingLabel = rebindBtn.transform.Find(UIWidgetFactory.LabelName)?.GetComponent<TMP_Text>();
-                    rebind.labelTarget = row.transform.Find(UIWidgetFactory.LabelName)?.GetComponent<TMP_Text>();
-                    RegisterId(settings.buttonIds, def.Category, def.Name + "_Rebind");
-                    return;
-                }
-            }
-
-            GameObject control;
-            switch (def.kind)
-            {
-                case MenuControlKind.Toggle:
-                    control = UIWidgetFactory.CreateToggle(parent, def.Category, def.Name, "");
-                    if (ParseBool(def.defaultValue)) UIWidgetFactory.BakeToggleOn(control);
-                    RegisterId(settings.toggleIds, def.Category, def.Name);
-                    break;
-                case MenuControlKind.Switch:
-                    control = UIWidgetFactory.CreateSwitch(parent, def.Category, def.Name);
-                    if (ParseBool(def.defaultValue)) UIWidgetFactory.BakeToggleOn(control);
-                    RegisterId(settings.toggleIds, def.Category, def.Name);
-                    break;
-                case MenuControlKind.Slider:
-                    control = UIWidgetFactory.CreateSlider(parent, def.Category, def.Name,
-                        def.min, def.max, ParseFloat(def.defaultValue, def.min));
-                    RegisterId(settings.sliderIds, def.Category, def.Name);
-                    break;
-                case MenuControlKind.Stepper:
-                    control = UIWidgetFactory.CreateStepper(parent, def.Category, def.Name,
-                        def.min, def.max, ParseFloat(def.defaultValue, def.min), def.step);
-                    RegisterId(settings.buttonIds, def.Category, def.Name + UIWidgetFactory.StepperButtonSuffixMinus);
-                    RegisterId(settings.buttonIds, def.Category, def.Name + UIWidgetFactory.StepperButtonSuffixPlus);
-                    break;
-                case MenuControlKind.Dropdown:
-                    control = UIWidgetFactory.CreateDropdown(parent, def.Category, def.Name, def.options,
-                        (int)ParseFloat(def.defaultValue, 0f));
-                    RegisterId(settings.dropdownIds, def.Category, def.Name);
-                    break;
-                default:
-                    return;
-            }
-            GameObject rowGo = UIWidgetFactory.CreateMenuRow(parent, $"Row_{def.Name}", def.label, control);
-            AddBinder(control, catalog, def, rowGo.transform.Find(UIWidgetFactory.LabelName)?.GetComponent<TMP_Text>());
-        }
-
-        private static void AddBinder(GameObject control, MenuCatalog catalog, MenuItemDefinition def, TMP_Text label)
-        {
-            var binder = control.AddComponent<MenuControlBinder>();
-            binder.Configure(catalog, def, label);
-        }
-
         // ------------------------------------------------------------------ popups
+        // The menus (settings/cheats) pipeline — GenerateMenuCatalog/BuildMenuElement/BuildMenuRow and
+        // friends — moved to Menus/UISpecGenerator.Menus.cs (Wave 7 Task 7.1), driven by the
+        // NeoMenuItemKinds registry instead of MapKind/BuildMenuRow switches.
 
         private static void GeneratePopup(PopupSpec popupSpec, NeoUISettings settings, GenerateReport report)
         {

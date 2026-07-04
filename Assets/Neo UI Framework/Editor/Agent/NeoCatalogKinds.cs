@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Neo.UI.Menus;
+using UnityEngine;
 
 namespace Neo.UI.Editor
 {
@@ -38,14 +40,25 @@ namespace Neo.UI.Editor
         /// <summary> Whether the editor exposes the <c>favourites</c> field for this kind (cheats do). </summary>
         public readonly bool showFavourites;
 
+        /// <summary>
+        /// Identifies a generated <see cref="MenuCatalog"/> ASSET as belonging to this kind — the
+        /// runtime-side counterpart to <see cref="list"/> (which locates a kind's catalogs on the
+        /// SPEC). Wave 7 Task 7.1: replaces the exporter's <c>catalog is CheatCatalog ? "cheats" :
+        /// "settings"</c> type check so a project's own <see cref="MenuCatalog"/> subtype can expose its
+        /// kind string too by registering a <see cref="CatalogKind"/> with this predicate — see
+        /// <see cref="NeoCatalogKinds.KindOf"/>.
+        /// </summary>
+        public readonly Func<MenuCatalog, bool> matchesInstance;
+
         public CatalogKind(string id, string label, Func<UISpec, List<MenuCatalogSpec>> list,
-            string defaultCategory = null, bool showFavourites = false)
+            string defaultCategory = null, bool showFavourites = false, Func<MenuCatalog, bool> matchesInstance = null)
         {
             this.id = id;
             this.label = label;
             this.list = list;
             this.defaultCategory = string.IsNullOrEmpty(defaultCategory) ? label : defaultCategory;
             this.showFavourites = showFavourites;
+            this.matchesInstance = matchesInstance;
         }
     }
 
@@ -72,8 +85,10 @@ namespace Neo.UI.Editor
         // built-in defaults — settings is near-universal, cheats opts into the favourites bit.
         private static IEnumerable<CatalogKind> Builtins()
         {
-            yield return new CatalogKind(MenuCatalogSpec.SettingsKind, "Settings", s => s.settings, "Settings");
-            yield return new CatalogKind(MenuCatalogSpec.CheatKind, "Cheats", s => s.cheats, "Cheats", showFavourites: true);
+            yield return new CatalogKind(MenuCatalogSpec.SettingsKind, "Settings", s => s.settings, "Settings",
+                matchesInstance: c => c is SettingsCatalog);
+            yield return new CatalogKind(MenuCatalogSpec.CheatKind, "Cheats", s => s.cheats, "Cheats",
+                showFavourites: true, matchesInstance: c => c is CheatCatalog);
         }
 
         /// <summary> Every registered catalog kind, in registration order (built-ins first). </summary>
@@ -92,5 +107,24 @@ namespace Neo.UI.Editor
 
         /// <summary> Test-only: clears project registrations and re-seeds the built-ins on next access. </summary>
         internal static void ResetForTests() => _registry.ResetForTests();
+
+        /// <summary>
+        /// The kind id of a generated <see cref="MenuCatalog"/> asset — replaces the exporter's
+        /// <c>catalog is CheatCatalog ? "cheats" : "settings"</c> type check (Wave 7 Task 7.1). Checks
+        /// every registered kind's <see cref="CatalogKind.matchesInstance"/> predicate (built-ins first);
+        /// a catalog matching none of them (a project subtype registered without one) warns and falls
+        /// back to <see cref="MenuCatalogSpec.SettingsKind"/> — no silent misclassification.
+        /// </summary>
+        public static string KindOf(MenuCatalog catalog)
+        {
+            if (catalog == null) return MenuCatalogSpec.SettingsKind;
+            foreach (CatalogKind kind in All)
+            {
+                if (kind.matchesInstance != null && kind.matchesInstance(catalog)) return kind.id;
+            }
+            Debug.LogWarning($"[Neo.UI] NeoCatalogKinds: catalog '{catalog.Id}' ({catalog.GetType().Name}) " +
+                "matches no registered catalog kind — exporting as 'settings'.");
+            return MenuCatalogSpec.SettingsKind;
+        }
     }
 }
