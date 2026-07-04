@@ -65,6 +65,9 @@ namespace Neo.UI.Editor
     /// <c>extensibility-seams-master-plan.md</c>). The package ships ZERO built-in rules through
     /// here — the built-ins stay inline in <see cref="AgentValidation"/>. This is purely the seam a
     /// consuming project extends through. Editor-only single domain, so a plain static list is fine.
+    /// Entries here have no string key (a rule is identified by instance, not by name), so this stays
+    /// a plain list rather than migrating onto <see cref="NeoKeyedRegistry{T}"/> (Wave 4 Task 4.4 — the
+    /// base classes model Shape A/B, both keyed).
     /// </summary>
     public static class NeoValidationRules
     {
@@ -78,7 +81,7 @@ namespace Neo.UI.Editor
         {
             if (rule == null)
             {
-                Debug.LogWarning("[Neo.UI] NeoValidationRules.Register called with a null rule — ignored.");
+                Debug.LogWarning("[Neo.UI] NeoValidationRules: ignored a null rule.");
                 return;
             }
             if (!_rules.Contains(rule)) _rules.Add(rule);
@@ -109,11 +112,13 @@ namespace Neo.UI.Editor
     }
 
     /// <summary>
-    /// The lighter of the two interactivity seams from the plan: a project registers a predicate
-    /// that claims a GameObject is "wired" (does something when clicked). The dead-interaction lint
-    /// OR-s these into its built-in checks, so a project's custom wiring component (e.g. "opens a
+    /// Pattern-R seam, the lighter of the two interactivity seams from the plan: a project registers a
+    /// predicate that claims a GameObject is "wired" (does something when clicked). The dead-interaction
+    /// lint OR-s these into its built-in checks, so a project's custom wiring component (e.g. "opens a
     /// URL") stops being falsely flagged dead — without the project implementing a full rule.
-    /// Registered from <c>[InitializeOnLoad]</c>. See <c>CLAUDE.md</c> → Dead-interaction lint.
+    /// Registered from <c>[InitializeOnLoad]</c>. See <c>CLAUDE.md</c> → Dead-interaction lint. Entries
+    /// are bare predicates with no string key, so — like <see cref="NeoValidationRules"/> — this stays a
+    /// plain list rather than migrating onto <see cref="NeoKeyedRegistry{T}"/> (Wave 4 Task 4.4).
     /// </summary>
     public static class NeoInteractivityProviders
     {
@@ -126,7 +131,7 @@ namespace Neo.UI.Editor
         {
             if (provider == null)
             {
-                Debug.LogWarning("[Neo.UI] NeoInteractivityProviders.Register called with a null provider — ignored.");
+                Debug.LogWarning("[Neo.UI] NeoInteractivityProviders: ignored a null provider.");
                 return;
             }
             if (!_providers.Contains(provider)) _providers.Add(provider);

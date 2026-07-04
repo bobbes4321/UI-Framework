@@ -56,10 +56,12 @@ namespace Neo.UI.Editor
 
     /// <summary>
     /// Pattern-R registry of layout constraints (the documented extensibility seam — a project can add
-    /// e.g. a "centerBias" constraint without forking the package). Built-ins register in the static
-    /// ctor in a FIXED order; the exporter detects in <see cref="All"/> order, first match wins, so
-    /// detection stays deterministic. Mirrors <see cref="NeoElementKinds"/>: All / Get / Register
-    /// (replace-by-Id+Axis, else append).
+    /// e.g. a "centerBias" constraint without forking the package). A thin public-static facade over
+    /// the shared <see cref="NeoKeyedRegistry{T}"/> base (Wave 4 Task 4.3) — keyed on
+    /// <c>"{Id}:{(int)Axis}"</c> so a constraint id is scoped per axis, built-ins seeded lazily (once,
+    /// in a FIXED order) on first access. The exporter detects in <see cref="All"/> order, first match
+    /// wins, so detection stays deterministic. Mirrors <see cref="NeoElementKinds"/>: All / Get /
+    /// Register (replace-by-Id+Axis, else append).
     /// </summary>
     public static class LayoutConstraints
     {
@@ -72,62 +74,52 @@ namespace Neo.UI.Editor
         public const string Center = "center";
         public const string Scale = "scale";
 
-        private static readonly List<ILayoutConstraint> _all = new List<ILayoutConstraint>();
+        // Thin forwarder over the shared keyed base (Task 4.3) — no caller changes. Keyed on Id+Axis
+        // (a bare Id would collide across axes: "center" exists on both). A null/empty Id maps to a
+        // null key so an invalid constraint is still rejected by NeoKeyedRegistry.IsValid, not
+        // silently admitted under a key like ":0".
+        private static readonly NeoKeyedRegistry<ILayoutConstraint> _registry =
+            new NeoKeyedRegistry<ILayoutConstraint>(
+                key: c => Key(c.Id, c.Axis),
+                builtins: Builtins,
+                registryName: "LayoutConstraints");
 
-        static LayoutConstraints()
-        {
-            RegisterBuiltins();
-        }
+        private static string Key(string id, LayoutAxis axis) =>
+            string.IsNullOrEmpty(id) ? null : $"{id}:{(int)axis}";
 
-        private static void RegisterBuiltins()
+        private static IEnumerable<ILayoutConstraint> Builtins()
         {
             // Order matters for deterministic exporter detection: edges first (most specific anchors),
             // then center, then stretch, then scale. Per axis.
-            Register(new EdgeConstraint(Left, LayoutAxis.Horizontal, atMax: false));
-            Register(new EdgeConstraint(Right, LayoutAxis.Horizontal, atMax: true));
-            Register(new CenterConstraint(Center, LayoutAxis.Horizontal));
-            Register(new StretchConstraint(LeftRight, LayoutAxis.Horizontal));
-            Register(new ScaleConstraint(Scale, LayoutAxis.Horizontal));
+            yield return new EdgeConstraint(Left, LayoutAxis.Horizontal, atMax: false);
+            yield return new EdgeConstraint(Right, LayoutAxis.Horizontal, atMax: true);
+            yield return new CenterConstraint(Center, LayoutAxis.Horizontal);
+            yield return new StretchConstraint(LeftRight, LayoutAxis.Horizontal);
+            yield return new ScaleConstraint(Scale, LayoutAxis.Horizontal);
 
-            Register(new EdgeConstraint(Top, LayoutAxis.Vertical, atMax: true));
-            Register(new EdgeConstraint(Bottom, LayoutAxis.Vertical, atMax: false));
-            Register(new CenterConstraint(Center, LayoutAxis.Vertical));
-            Register(new StretchConstraint(TopBottom, LayoutAxis.Vertical));
-            Register(new ScaleConstraint(Scale, LayoutAxis.Vertical));
+            yield return new EdgeConstraint(Top, LayoutAxis.Vertical, atMax: true);
+            yield return new EdgeConstraint(Bottom, LayoutAxis.Vertical, atMax: false);
+            yield return new CenterConstraint(Center, LayoutAxis.Vertical);
+            yield return new StretchConstraint(TopBottom, LayoutAxis.Vertical);
+            yield return new ScaleConstraint(Scale, LayoutAxis.Vertical);
         }
 
         /// <summary> Every registered constraint (built-ins first, in registration order). </summary>
-        public static IReadOnlyList<ILayoutConstraint> All => _all;
+        public static IReadOnlyList<ILayoutConstraint> All => _registry.All;
 
         /// <summary> Finds the constraint with the given id on the given axis; null + warning when missing. </summary>
         public static ILayoutConstraint Get(string id, LayoutAxis axis)
         {
-            if (!string.IsNullOrEmpty(id))
-                foreach (ILayoutConstraint c in _all)
-                    if (c != null && c.Axis == axis && c.Id == id) return c;
+            if (!string.IsNullOrEmpty(id) && _registry.TryGet(Key(id, axis), out ILayoutConstraint c)) return c;
             Debug.LogWarning($"LayoutConstraints.Get: no constraint '{id}' registered for {axis}; placement will fall back to the default. Register one in LayoutConstraints, or check the spec.");
             return null;
         }
 
         /// <summary> Registers a constraint, replacing any existing one with the same Id+Axis. </summary>
-        public static void Register(ILayoutConstraint constraint)
-        {
-            if (constraint == null || string.IsNullOrEmpty(constraint.Id))
-            {
-                Debug.LogWarning("LayoutConstraints.Register ignored a constraint with a null/empty Id.");
-                return;
-            }
-            for (int i = 0; i < _all.Count; i++)
-                if (_all[i].Id == constraint.Id && _all[i].Axis == constraint.Axis) { _all[i] = constraint; return; }
-            _all.Add(constraint);
-        }
+        public static void Register(ILayoutConstraint constraint) => _registry.Register(constraint);
 
-        /// <summary> Test/seam hook: clear and re-seed the built-ins (static state survives a test run). </summary>
-        internal static void ResetForTests()
-        {
-            _all.Clear();
-            RegisterBuiltins();
-        }
+        /// <summary> Test/seam hook: clears every registration and forces a fresh built-ins seed on next access. </summary>
+        internal static void ResetForTests() => _registry.ResetForTests();
 
         // ----------------------------------------------------------------- axis helpers
 

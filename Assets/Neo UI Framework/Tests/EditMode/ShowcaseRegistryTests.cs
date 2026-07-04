@@ -1,6 +1,10 @@
 using System.Linq;
+using System.Text.RegularExpressions;
 using Neo.UI.Editor;
 using NUnit.Framework;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace Neo.UI.Tests
 {
@@ -62,12 +66,15 @@ namespace Neo.UI.Tests
         }
 
         [Test]
-        public void Register_IgnoresNullOrIdlessShowcases()
+        public void Register_IgnoresNullOrIdlessShowcases_WarnsButNeverThrows()
         {
             int before = ShowcaseRegistry.All.Count;
-            ShowcaseRegistry.Register(null);
-            ShowcaseRegistry.Register(new Showcase { id = null });
-            ShowcaseRegistry.Register(new Showcase { id = "" });
+            LogAssert.Expect(LogType.Warning, new Regex("ShowcaseRegistry: ignored a null/invalid entry"));
+            LogAssert.Expect(LogType.Warning, new Regex("ShowcaseRegistry: ignored a null/invalid entry"));
+            LogAssert.Expect(LogType.Warning, new Regex("ShowcaseRegistry: ignored a null/invalid entry"));
+            Assert.DoesNotThrow(() => ShowcaseRegistry.Register(null));
+            Assert.DoesNotThrow(() => ShowcaseRegistry.Register(new Showcase { id = null }));
+            Assert.DoesNotThrow(() => ShowcaseRegistry.Register(new Showcase { id = "" }));
             Assert.AreEqual(before, ShowcaseRegistry.All.Count);
         }
 
@@ -128,6 +135,34 @@ namespace Neo.UI.Tests
                 Assert.AreEqual("fallback-showcase", s.title);
             }
             finally { UnityEngine.Object.DestroyImmediate(def); }
+        }
+
+        [Test]
+        public void DeletedShowcaseDefinitionAsset_IsEvictedOnNextDiscovery()
+        {
+            const string id = "z-registry-delete-probe";
+            const string path = "Assets/ZShowcaseDeleteProbe.asset";
+            var def = ScriptableObject.CreateInstance<ShowcaseDefinition>();
+            def.id = id;
+            def.title = "Delete Probe";
+            AssetDatabase.CreateAsset(def, path);
+            AssetDatabase.SaveAssets();
+            ShowcaseRegistry.InvalidateDiscovery();
+            try
+            {
+                Assert.IsTrue(ShowcaseRegistry.TryGet(id, out _), "precondition: the dropped asset is discovered");
+
+                AssetDatabase.DeleteAsset(path);
+                ShowcaseRegistry.InvalidateDiscovery();
+
+                Assert.IsFalse(ShowcaseRegistry.TryGet(id, out _),
+                    "a deleted ShowcaseDefinition asset must be evicted on the next discovery pass");
+            }
+            finally
+            {
+                AssetDatabase.DeleteAsset(path);
+                ShowcaseRegistry.InvalidateDiscovery();
+            }
         }
     }
 }

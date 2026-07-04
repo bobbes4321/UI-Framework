@@ -1,7 +1,9 @@
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Neo.UI;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace Neo.UI.Tests
 {
@@ -85,12 +87,39 @@ namespace Neo.UI.Tests
         }
 
         [Test]
-        public void Roles_BuiltInsPresent_AndRegisterIsIdempotent()
+        public void Roles_BuiltInsPresent()
         {
             Assert.IsTrue(NeoAnimatorRoles.TryGet(NeoAnimatorRoles.ButtonHover, out _));
+        }
+
+        [Test]
+        public void Register_SameId_WarnsThenReplaces_NeverDuplicates()
+        {
             int before = NeoAnimatorRoles.All.Count;
-            NeoAnimatorRoles.Register(new NeoAnimatorRole(NeoAnimatorRoles.ButtonHover, "dup", "dup"));
-            Assert.AreEqual(before, NeoAnimatorRoles.All.Count, "registering an existing id is a no-op");
+            try
+            {
+                LogAssert.Expect(LogType.Warning, new Regex($"NeoAnimatorRoles: role '{Regex.Escape(NeoAnimatorRoles.ButtonHover)}' is already registered"));
+                NeoAnimatorRoles.Register(new NeoAnimatorRole(NeoAnimatorRoles.ButtonHover, "dup", "dup"));
+
+                Assert.AreEqual(before, NeoAnimatorRoles.All.Count, "same-id registration replaces, never duplicates");
+                Assert.IsTrue(NeoAnimatorRoles.TryGet(NeoAnimatorRoles.ButtonHover, out NeoAnimatorRole got));
+                Assert.AreEqual("dup", got.DisplayName, "the later registration wins");
+            }
+            finally
+            {
+                // Restore the built-in so sibling tests see the normal Button/Hover role again.
+                NeoAnimatorRoles.ResetForTests();
+            }
+        }
+
+        [Test]
+        public void Register_NullOrEmptyId_WarnsAndIgnores_NeverThrows()
+        {
+            LogAssert.Expect(LogType.Warning, new Regex("NeoAnimatorRoles: ignored a null/invalid entry"));
+            Assert.DoesNotThrow(() => NeoAnimatorRoles.Register(null));
+
+            LogAssert.Expect(LogType.Warning, new Regex("NeoAnimatorRoles: ignored a null/invalid entry"));
+            Assert.DoesNotThrow(() => NeoAnimatorRoles.Register(new NeoAnimatorRole("", "blank", "blank")));
         }
 
         private static void InvokeReset(object component)

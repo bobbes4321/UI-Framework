@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Neo.UI;
 using Neo.UI.Editor;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace Neo.UI.Tests
 {
@@ -12,7 +14,8 @@ namespace Neo.UI.Tests
     /// Covers the widget-attribute extensibility seams
     /// (extensibility-seam-widget-attributes-plan.md):
     ///  - the widget-attribute option sets (variants/sizes/aligns/shape names) seed exactly the
-    ///    built-ins and accept project Register() calls (Pattern R);
+    ///    built-ins and accept project Register() calls (Pattern R — Wave 4 Task 4.2 migrated the four
+    ///    sets onto <see cref="NeoKeyedRegistry{T}"/>, one per attribute, OrdinalIgnoreCase-keyed);
     ///  - a project ButtonVariantAsset / ButtonSizeAsset on NeoUISettings flows through
     ///    UIWidgetFactory ahead of the built-in switch, and round-trips (Pattern A);
     ///  - an IconMapOverlay glyph resolves through IconMap before the built-in Lucide dict.
@@ -64,6 +67,32 @@ namespace Neo.UI.Tests
             snapshot[0] = "tampered";
             CollectionAssert.DoesNotContain(NeoWidgetOptions.ButtonVariants, "tampered",
                 ".All must hand out a copy, not the backing list");
+        }
+
+        [Test]
+        public void Register_SameKeyDifferentCasing_ReplacesInPlace_NeverDuplicates()
+        {
+            int before = NeoWidgetOptions.ButtonVariants.Length;
+
+            // "PRIMARY" is the same key as the built-in "primary" (OrdinalIgnoreCase) — replaces in
+            // place rather than appending a second row.
+            NeoWidgetOptions.RegisterVariant("PRIMARY");
+
+            Assert.AreEqual(before, NeoWidgetOptions.ButtonVariants.Length, "same key (any case) never duplicates");
+            CollectionAssert.Contains(NeoWidgetOptions.ButtonVariants, "PRIMARY");
+        }
+
+        [Test]
+        public void Register_NullOrEmpty_WarnsAndIgnores_NeverThrows()
+        {
+            int before = NeoWidgetOptions.ButtonVariants.Length;
+            LogAssert.Expect(LogType.Warning, new Regex("NeoWidgetOptions\\.ButtonVariants: ignored a null/invalid entry"));
+            LogAssert.Expect(LogType.Warning, new Regex("NeoWidgetOptions\\.ButtonVariants: ignored a null/invalid entry"));
+
+            Assert.DoesNotThrow(() => NeoWidgetOptions.RegisterVariant(null));
+            Assert.DoesNotThrow(() => NeoWidgetOptions.RegisterVariant(""));
+
+            Assert.AreEqual(before, NeoWidgetOptions.ButtonVariants.Length, "nothing was actually registered");
         }
 
         // ------------------------------------------------------------------ Pattern A: variant asset

@@ -73,70 +73,92 @@ namespace Neo.UI.Editor.Authoring
         private static readonly string[] CategoryOrder =
             { "Components", "Layout", "Input", "Display", "Data", "Menus", "Custom" };
 
-        // explicit registrations (built-ins seeded once, plus any project Register calls)
-        private static readonly List<PaletteEntry> _registered = new List<PaletteEntry>();
+        // Pattern R (Wave 4 Task 4.2): explicit registrations (built-ins + project Register calls) live
+        // on the shared keyed-registry base instead of a hand-rolled replace-by-kind loop.
+        private static readonly NeoKeyedRegistry<PaletteEntry> _registry = new NeoKeyedRegistry<PaletteEntry>(
+            e => e.kind,
+            builtins: Builtins,
+            registryName: "NeoWidgetPalette");
 
-        static NeoWidgetPalette()
-        {
-            RegisterBuiltins();
-        }
+        // ---- composed-`All` cache (audit registry bug 7: a fresh sorted list — with a Humanize
+        // StringBuilder alloc per auto-included custom kind — was rebuilt on every single access).
+        // NeoElementKinds (Wave 4 Task 4.4) and NeoWidgetPresets (Wave 4 Task 4.1) are now themselves
+        // NeoKeyedRegistry/NeoAssetRegistry-backed, so all three sources hand back a cached snapshot
+        // whose reference only changes on a real mutation (see NeoKeyedRegistryTests.All_IsACachedSnapshot_
+        // ThatRebuildsOnlyOnMutation) — comparing the three snapshot references is therefore a true O(1)
+        // "did anything change" check, with no re-scan needed on the unchanged fast path.
+        private static List<PaletteEntry> _cachedAll;
+        private static IReadOnlyList<PaletteEntry> _cachedRegistrySnapshot;
+        private static IReadOnlyList<INeoElementKind> _cachedKindsSnapshot;
+        private static IReadOnlyList<NeoWidgetPreset> _cachedPresetsSnapshot;
+        private static bool _cacheValid;
 
-        private static void RegisterBuiltins()
+        private static IEnumerable<PaletteEntry> Builtins()
         {
             // Layout containers / spacing.
-            Add("vstack", "Layout", "Vertical Stack", "layout", 0);
-            Add("hstack", "Layout", "Horizontal Stack", "layout", 1);
-            Add("grid", "Layout", "Grid", "grid", 2);
-            Add("scroll", "Layout", "Scroll", "scroll-text", 3);
-            Add("panel", "Layout", "Panel", "square", 4);
-            Add("overlay", "Layout", "Overlay", "layers", 5);
-            Add("safearea", "Layout", "Safe Area", "smartphone", 6);
-            Add("spacer", "Layout", "Spacer", "move-horizontal", 7);
+            yield return new PaletteEntry("vstack", "Layout", "Vertical Stack", "layout", 0);
+            yield return new PaletteEntry("hstack", "Layout", "Horizontal Stack", "layout", 1);
+            yield return new PaletteEntry("grid", "Layout", "Grid", "grid", 2);
+            yield return new PaletteEntry("scroll", "Layout", "Scroll", "scroll-text", 3);
+            yield return new PaletteEntry("panel", "Layout", "Panel", "square", 4);
+            yield return new PaletteEntry("overlay", "Layout", "Overlay", "layers", 5);
+            yield return new PaletteEntry("safearea", "Layout", "Safe Area", "smartphone", 6);
+            yield return new PaletteEntry("spacer", "Layout", "Spacer", "move-horizontal", 7);
 
             // Interactive input widgets.
-            Add("button", "Input", "Button", "square", 0);
-            Add("toggle", "Input", "Toggle", "toggle-left", 1);
-            Add("switch", "Input", "Switch", "toggle-right", 2);
-            Add("slider", "Input", "Slider", "sliders-horizontal", 3);
-            Add("stepper", "Input", "Stepper", "plus", 4);
-            Add("input", "Input", "Input Field", "text-cursor-input", 5);
-            Add("dropdown", "Input", "Dropdown", "chevron-down", 6);
-            Add("tab", "Input", "Tab", "square", 7);
-            Add("tabbar", "Input", "Tab Bar", "layout", 8);
+            yield return new PaletteEntry("button", "Input", "Button", "square", 0);
+            yield return new PaletteEntry("toggle", "Input", "Toggle", "toggle-left", 1);
+            yield return new PaletteEntry("switch", "Input", "Switch", "toggle-right", 2);
+            yield return new PaletteEntry("slider", "Input", "Slider", "sliders-horizontal", 3);
+            yield return new PaletteEntry("stepper", "Input", "Stepper", "plus", 4);
+            yield return new PaletteEntry("input", "Input", "Input Field", "text-cursor-input", 5);
+            yield return new PaletteEntry("dropdown", "Input", "Dropdown", "chevron-down", 6);
+            yield return new PaletteEntry("tab", "Input", "Tab", "square", 7);
+            yield return new PaletteEntry("tabbar", "Input", "Tab Bar", "layout", 8);
 
             // Static / display widgets.
-            Add("text", "Display", "Text", "type", 0);
-            Add("image", "Display", "Image", "image", 1);
-            Add("icon", "Display", "Icon", "star", 2);
-            Add("shape", "Display", "Shape", "circle", 3);
-            Add("progress", "Display", "Progress", "loader", 4);
-            Add("counter", "Display", "Counter", "hash", 5);
+            yield return new PaletteEntry("text", "Display", "Text", "type", 0);
+            yield return new PaletteEntry("image", "Display", "Image", "image", 1);
+            yield return new PaletteEntry("icon", "Display", "Icon", "star", 2);
+            yield return new PaletteEntry("shape", "Display", "Shape", "circle", 3);
+            yield return new PaletteEntry("progress", "Display", "Progress", "loader", 4);
+            yield return new PaletteEntry("counter", "Display", "Counter", "hash", 5);
 
             // Data-bound.
-            Add("list", "Data", "List", "list", 0);
+            yield return new PaletteEntry("list", "Data", "List", "list", 0);
 
             // Menu catalogs (settings / cheats are element kinds too).
-            Add("settings", "Menus", "Settings Menu", "settings", 0);
-            Add("cheats", "Menus", "Cheats Menu", "bug", 1);
+            yield return new PaletteEntry("settings", "Menus", "Settings Menu", "settings", 0);
+            yield return new PaletteEntry("cheats", "Menus", "Cheats Menu", "bug", 1);
         }
-
-        private static void Add(string kind, string category, string label, string icon, int order) =>
-            _registered.Add(new PaletteEntry(kind, category, label, icon, order));
 
         /// <summary>
         /// Every palette entry: the explicit registrations (built-ins + project <see cref="Register"/>
         /// calls) plus an auto-synthesized "Custom" entry for every <see cref="NeoElementKinds"/> kind not
-        /// already covered. Built fresh on each call (cheap — fetch it once when the pane opens, never per
-        /// OnGUI). Sorted by category display order, then per-entry <see cref="PaletteEntry.order"/>, then label.
+        /// already covered. Cached — rebuilt only when the explicit registrations, the project element
+        /// kinds, or the discovered presets actually changed (see the cache fields above). Sorted by
+        /// category display order, then per-entry <see cref="PaletteEntry.order"/>, then label.
         /// </summary>
         public static IReadOnlyList<PaletteEntry> All
         {
             get
             {
-                var list = new List<PaletteEntry>(_registered);
+                IReadOnlyList<PaletteEntry> registrySnapshot = _registry.All;
+                IReadOnlyList<INeoElementKind> kindsSnapshot = NeoElementKinds.All;
+                IReadOnlyList<NeoWidgetPreset> presetsSnapshot = NeoWidgetPresets.All;
+
+                if (_cacheValid
+                    && ReferenceEquals(registrySnapshot, _cachedRegistrySnapshot)
+                    && ReferenceEquals(kindsSnapshot, _cachedKindsSnapshot)
+                    && ReferenceEquals(presetsSnapshot, _cachedPresetsSnapshot))
+                {
+                    return _cachedAll;
+                }
+
+                var list = new List<PaletteEntry>(registrySnapshot);
 
                 // auto-include project kinds not already registered (the extensibility win)
-                foreach (INeoElementKind kind in NeoElementKinds.All)
+                foreach (INeoElementKind kind in kindsSnapshot)
                 {
                     if (kind == null || string.IsNullOrEmpty(kind.Kind)) continue;
                     if (HasKind(list, kind.Kind)) continue;
@@ -148,7 +170,7 @@ namespace Neo.UI.Editor.Authoring
                 // than a bare "button". Discovery is lazy + cached — All is fetched when the pane opens, not
                 // per OnGUI — so the registry scan here is cheap. A project preset asset appears for free.
                 int presetOrder = 0;
-                foreach (NeoWidgetPreset preset in NeoWidgetPresets.All)
+                foreach (NeoWidgetPreset preset in presetsSnapshot)
                 {
                     if (preset == null || string.IsNullOrEmpty(preset.presetName)
                         || string.IsNullOrEmpty(preset.targetKind)) continue;
@@ -157,6 +179,12 @@ namespace Neo.UI.Editor.Authoring
                 }
 
                 list.Sort(Compare);
+
+                _cachedAll = list;
+                _cachedRegistrySnapshot = registrySnapshot;
+                _cachedKindsSnapshot = kindsSnapshot;
+                _cachedPresetsSnapshot = presetsSnapshot;
+                _cacheValid = true;
                 return list;
             }
         }
@@ -179,17 +207,7 @@ namespace Neo.UI.Editor.Authoring
         /// kind into a specific category/order — otherwise an unregistered project kind still appears for
         /// free in "Custom" via <see cref="All"/>.
         /// </summary>
-        public static void Register(PaletteEntry entry)
-        {
-            if (string.IsNullOrEmpty(entry.kind))
-            {
-                Debug.LogWarning("NeoWidgetPalette.Register ignored an entry with a null/empty kind.");
-                return;
-            }
-            for (int i = 0; i < _registered.Count; i++)
-                if (_registered[i].kind == entry.kind) { _registered[i] = entry; return; }
-            _registered.Add(entry);
-        }
+        public static void Register(PaletteEntry entry) => _registry.Register(entry);
 
         /// <summary> Resolves the accent color for a palette entry — a project kind's own accent, else the
         /// category default (so a tile reads the same as its tree row). </summary>
@@ -208,12 +226,17 @@ namespace Neo.UI.Editor.Authoring
             }
         }
 
-        /// <summary> Test/seam hook: clears project <see cref="Register"/> additions and re-seeds the
-        /// built-ins (static state survives a test run). </summary>
+        /// <summary> Test/seam hook: clears project <see cref="Register"/> additions, re-seeds the
+        /// built-ins, and invalidates the composed-<see cref="All"/> cache (static state survives a test
+        /// run). </summary>
         internal static void ResetForTests()
         {
-            _registered.Clear();
-            RegisterBuiltins();
+            _registry.ResetForTests();
+            _cacheValid = false;
+            _cachedAll = null;
+            _cachedRegistrySnapshot = null;
+            _cachedKindsSnapshot = null;
+            _cachedPresetsSnapshot = null;
         }
 
         private static bool HasKind(List<PaletteEntry> list, string kind)

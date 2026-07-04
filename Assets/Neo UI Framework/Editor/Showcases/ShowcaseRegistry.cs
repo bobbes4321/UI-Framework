@@ -1,20 +1,19 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
 
 namespace Neo.UI.Editor
 {
     /// <summary>
     /// Pattern R registry of <see cref="Showcase"/>s — the front-door catalog of every self-contained
     /// demo. Hybrid extensibility: code-seeded built-ins (<see cref="ShowcaseRegistryDefaults"/>) PLUS a
-    /// lazy <see cref="EnsureDiscovered"/> pass that folds in every <see cref="ShowcaseDefinition"/>
-    /// asset in the project (a discovered definition overrides a built-in of the same id). A consuming
-    /// project therefore adds a showcase by dropping one asset — no fork, no C#.
+    /// <see cref="NeoAssetRegistry{TAsset,TEntry}"/> discovery pass that folds in every
+    /// <see cref="ShowcaseDefinition"/> asset in the project (a discovered definition overrides a
+    /// built-in of the same id). A consuming project therefore adds a showcase by dropping one asset —
+    /// no fork, no C#.
     /// <para>
-    /// Editor-only and single-domain, so a static list is sufficient. Discovery is invalidated on
-    /// asset import (see <see cref="ShowcaseDefinitionPostprocessor"/>) so a freshly created/edited
-    /// definition shows up without a domain reload.
+    /// Editor-only and single-domain. Discovery invalidation on asset import/delete/move is handled by
+    /// the shared <see cref="NeoAssetRegistryPostprocessor"/> so a freshly created/edited definition
+    /// shows up without a domain reload.
     /// </para>
     /// </summary>
     public static class ShowcaseRegistry
@@ -22,90 +21,51 @@ namespace Neo.UI.Editor
         /// <summary> Root folder every showcase lives under. Each showcase owns <c>{ShowcasesRoot}/{id}/</c>. </summary>
         public const string ShowcasesRoot = "Assets/Showcases";
 
-        private static readonly List<Showcase> _showcases = new List<Showcase>(ShowcaseRegistryDefaults.Builtins());
-
-        private static bool _discovered;
+        // Thin forwarders over the shared asset-backed base (Task 4.1) — no caller changes. Built-ins are
+        // seeded lazily (once) from ShowcaseRegistryDefaults; discovered ShowcaseDefinition assets are
+        // rescanned fresh every discovery generation (a deleted/renamed definition is evicted, not stuck).
+        private static readonly NeoAssetRegistry<ShowcaseDefinition, Showcase> _registry =
+            new NeoAssetRegistry<ShowcaseDefinition, Showcase>(
+                key: s => s.id,
+                project: def => def.ToShowcase(),
+                builtins: ShowcaseRegistryDefaults.Builtins,
+                registryName: "ShowcaseRegistry");
 
         /// <summary> All registered showcases (built-ins + discovered definitions), in registration order. </summary>
-        public static IReadOnlyList<Showcase> All
-        {
-            get { EnsureDiscovered(); return _showcases; }
-        }
+        public static IReadOnlyList<Showcase> All => _registry.All;
 
         /// <summary> The ids of every registered showcase. </summary>
-        public static IEnumerable<string> Ids
-        {
-            get { EnsureDiscovered(); return _showcases.Select(s => s.id); }
-        }
+        public static IEnumerable<string> Ids => _registry.All.Select(s => s.id);
 
         /// <summary> Case-sensitive (ordinal) lookup by id. Returns false (and a null showcase) when nothing matches. </summary>
-        public static bool TryGet(string id, out Showcase showcase)
-        {
-            EnsureDiscovered();
-            showcase = _showcases.FirstOrDefault(s => string.Equals(s.id, id, StringComparison.Ordinal));
-            return showcase != null;
-        }
+        public static bool TryGet(string id, out Showcase showcase) => _registry.TryGet(id, out showcase);
 
         /// <summary>
         /// Registers a showcase. If one with the same id already exists (ordinal) it is replaced in
         /// place (so a discovered definition or a project can override a built-in); otherwise the
-        /// showcase is appended. Null/blank-id showcases are ignored.
+        /// showcase is appended. Null/blank-id showcases are warned-and-ignored.
         /// </summary>
-        public static void Register(Showcase showcase)
-        {
-            if (showcase == null || string.IsNullOrEmpty(showcase.id))
-            {
-                UnityEngine.Debug.LogWarning("[Neo.UI] ShowcaseRegistry.Register ignored a null/id-less showcase");
-                return;
-            }
-            int existing = _showcases.FindIndex(s => string.Equals(s.id, showcase.id, StringComparison.Ordinal));
-            if (existing >= 0) _showcases[existing] = showcase;
-            else _showcases.Add(showcase);
-        }
+        public static void Register(Showcase showcase) => _registry.Register(showcase);
 
         /// <summary>
         /// Test-only: removes a registered showcase by id (ordinal). Returns true if one was removed.
         /// </summary>
-        internal static bool Remove(string id) =>
-            _showcases.RemoveAll(s => string.Equals(s.id, id, StringComparison.Ordinal)) > 0;
+        internal static bool Remove(string id) => _registry.Remove(id);
 
         /// <summary>
         /// Test-only: restores the registry to exactly the code-seeded built-ins and forces a fresh
         /// discovery on next access — so a suite that registers/discovers probes leaves the static
         /// registry clean for sibling suites in the same domain.
         /// </summary>
-        internal static void ResetForTests()
-        {
-            _showcases.Clear();
-            _showcases.AddRange(ShowcaseRegistryDefaults.Builtins());
-            _discovered = false;
-        }
+        internal static void ResetForTests() => _registry.ResetForTests();
 
         /// <summary>
         /// Marks the discovered set stale so the next <see cref="All"/>/<see cref="Ids"/>/
-        /// <see cref="TryGet"/> re-scans for <see cref="ShowcaseDefinition"/> assets. Called by the
-        /// asset post-processor on any <c>.asset</c> import.
+        /// <see cref="TryGet"/> re-scans for <see cref="ShowcaseDefinition"/> assets. The shared
+        /// <see cref="NeoAssetRegistryPostprocessor"/> already calls this automatically on asset
+        /// import/delete/move; exposed publicly too since existing call sites invalidate explicitly.
         /// </summary>
-        public static void InvalidateDiscovery() => _discovered = false;
-
-        /// <summary>
-        /// Lazily folds every <see cref="ShowcaseDefinition"/> asset in the project into the registry,
-        /// once per discovery generation. A discovered definition overrides a built-in of the same id
-        /// (it routes through <see cref="Register"/>'s replace-by-id). Cheap and idempotent.
-        /// </summary>
-        private static void EnsureDiscovered()
-        {
-            if (_discovered) return;
-            _discovered = true; // set first so a re-entrant Register call can't recurse into discovery
-            foreach (string guid in AssetDatabase.FindAssets("t:ShowcaseDefinition"))
-            {
-                string path = AssetDatabase.GUIDToAssetPath(guid);
-                var def = AssetDatabase.LoadAssetAtPath<ShowcaseDefinition>(path);
-                if (def == null) continue;
-                Showcase showcase = def.ToShowcase();
-                if (showcase != null && !string.IsNullOrEmpty(showcase.id)) Register(showcase);
-            }
-        }
+        public static void InvalidateDiscovery() => _registry.InvalidateDiscovery();
     }
 
     /// <summary>
@@ -237,28 +197,6 @@ namespace Neo.UI.Editor
                 specPath = SpecsRoot + "/animations.json",
                 flowName = null,
             };
-        }
-    }
-
-    /// <summary>
-    /// Invalidates showcase discovery whenever a <c>.asset</c> is imported/deleted/moved, so a freshly
-    /// created or edited <see cref="ShowcaseDefinition"/> surfaces in the registry without a domain
-    /// reload. Kept deliberately cheap — it only flips a bool; the actual rescan is lazy.
-    /// </summary>
-    internal sealed class ShowcaseDefinitionPostprocessor : AssetPostprocessor
-    {
-        private static void OnPostprocessAllAssets(
-            string[] imported, string[] deleted, string[] moved, string[] movedFrom)
-        {
-            if (HasAsset(imported) || HasAsset(deleted) || HasAsset(moved))
-                ShowcaseRegistry.InvalidateDiscovery();
-        }
-
-        private static bool HasAsset(string[] paths)
-        {
-            foreach (string p in paths)
-                if (p != null && p.EndsWith(".asset", StringComparison.OrdinalIgnoreCase)) return true;
-            return false;
         }
     }
 }

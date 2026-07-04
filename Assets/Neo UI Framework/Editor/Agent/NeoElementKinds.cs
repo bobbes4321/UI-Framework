@@ -109,41 +109,27 @@ namespace Neo.UI.Editor
     /// <summary>
     /// Pattern-R registry of project-defined element kinds. Built-ins are NOT registered here in Phase 1
     /// (they keep their proven generator switch / exporter chain), so <see cref="All"/> is empty until a
-    /// project registers — zero risk to the round-trip. Mirrors the shape of the master plan's reference
-    /// registry: <see cref="All"/> / <see cref="TryGet"/> / <see cref="Register"/> (replace-by-Kind, else append).
+    /// project registers — zero risk to the round-trip. A thin public-static facade over
+    /// <see cref="NeoKeyedRegistry{T}"/> (Wave 4 Task 4.4): <see cref="All"/> / <see cref="TryGet"/> /
+    /// <see cref="Register"/> (replace-by-Kind, else append).
     /// </summary>
     public static class NeoElementKinds
     {
-        private static readonly List<INeoElementKind> _kinds = new List<INeoElementKind>();
+        private static readonly NeoKeyedRegistry<INeoElementKind> _registry =
+            new NeoKeyedRegistry<INeoElementKind>(k => k.Kind, registryName: "NeoElementKinds");
 
         /// <summary> Every registered project kind (built-ins live in the generator switch, not here). </summary>
-        public static IReadOnlyList<INeoElementKind> All => _kinds;
+        public static IReadOnlyList<INeoElementKind> All => _registry.All;
 
         /// <summary> Finds a registered kind by its <see cref="INeoElementKind.Kind"/> string. </summary>
-        public static bool TryGet(string kind, out INeoElementKind result)
-        {
-            if (!string.IsNullOrEmpty(kind))
-                foreach (INeoElementKind k in _kinds)
-                    if (k != null && k.Kind == kind) { result = k; return true; }
-            result = null;
-            return false;
-        }
+        public static bool TryGet(string kind, out INeoElementKind result) => _registry.TryGet(kind, out result);
 
         /// <summary> Registers a kind, replacing any existing one with the same <see cref="INeoElementKind.Kind"/>
-        /// (so a project can override), else appending. </summary>
-        public static void Register(INeoElementKind kind)
-        {
-            if (kind == null || string.IsNullOrEmpty(kind.Kind))
-            {
-                Debug.LogWarning("NeoElementKinds.Register ignored a kind with a null/empty Kind id.");
-                return;
-            }
-            for (int i = 0; i < _kinds.Count; i++)
-                if (_kinds[i].Kind == kind.Kind) { _kinds[i] = kind; return; }
-            _kinds.Add(kind);
-        }
+        /// (so a project can override), else appending. A null kind or one with a null/empty Kind id is
+        /// warned-and-ignored, never thrown. </summary>
+        public static void Register(INeoElementKind kind) => _registry.Register(kind);
 
-        /// <summary> Test/seam hook: clears the registry (built-ins are unaffected — they aren't here). </summary>
-        public static void ClearForTests() => _kinds.Clear();
+        /// <summary> Test-only: clears the registry (built-ins are unaffected — they aren't here). </summary>
+        internal static void ResetForTests() => _registry.ResetForTests();
     }
 }

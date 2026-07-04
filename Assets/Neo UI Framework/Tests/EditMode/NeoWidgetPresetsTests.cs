@@ -1,9 +1,12 @@
 using System.Linq;
+using System.Text.RegularExpressions;
 using Neo.UI;
 using Neo.UI.Editor;
 using Neo.UI.Editor.Authoring;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace Neo.UI.Tests
 {
@@ -72,19 +75,43 @@ namespace Neo.UI.Tests
         }
 
         [Test]
-        public void Register_IgnoresNullAndNameless()
+        public void Register_IgnoresNullAndNameless_WarnsButNeverThrows()
         {
-            LogAssert_ExpectAnyWarning();
-            NeoWidgetPresets.Register(null);
+            LogAssert.Expect(LogType.Warning, new Regex("NeoWidgetPresets: ignored a null/invalid entry"));
+            LogAssert.Expect(LogType.Warning, new Regex("NeoWidgetPresets: ignored a null/invalid entry"));
+            Assert.DoesNotThrow(() => NeoWidgetPresets.Register(null));
             _a = Make("", "button");
-            NeoWidgetPresets.Register(_a);
+            Assert.DoesNotThrow(() => NeoWidgetPresets.Register(_a));
             Assert.IsFalse(NeoWidgetPresets.All.Any(p => p != null && p.presetName == ""));
         }
 
-        private static void LogAssert_ExpectAnyWarning()
+        [Test]
+        public void DeletedNeoWidgetPresetAsset_IsEvictedOnNextDiscovery()
         {
-            // Register logs a warning for null/name-less presets; allow it without coupling to the wording.
-            UnityEngine.TestTools.LogAssert.ignoreFailingMessages = true;
+            const string presetName = "ZDeleteEvictionProbePreset";
+            const string path = "Assets/ZWidgetPresetDeleteProbe.asset";
+            var asset = ScriptableObject.CreateInstance<NeoWidgetPreset>();
+            asset.presetName = presetName;
+            asset.targetKind = "button";
+            AssetDatabase.CreateAsset(asset, path);
+            AssetDatabase.SaveAssets();
+            NeoWidgetPresets.InvalidateDiscovery();
+            try
+            {
+                Assert.IsTrue(NeoWidgetPresets.TryGet(presetName, out _),
+                    "precondition: the dropped asset is discovered");
+
+                AssetDatabase.DeleteAsset(path);
+                NeoWidgetPresets.InvalidateDiscovery();
+
+                Assert.IsFalse(NeoWidgetPresets.TryGet(presetName, out _),
+                    "a deleted NeoWidgetPreset asset must be evicted on the next discovery pass");
+            }
+            finally
+            {
+                AssetDatabase.DeleteAsset(path);
+                NeoWidgetPresets.InvalidateDiscovery();
+            }
         }
 
         [Test]

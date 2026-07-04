@@ -42,8 +42,12 @@ namespace Neo.UI.Editor.Authoring
     /// </summary>
     public static class NeoLayoutTemplates
     {
-        private static readonly List<TemplateEntry> _registered = new List<TemplateEntry>();
-        private static bool _builtinsSeeded;
+        // Pattern R (Wave 4 Task 4.2): migrated onto the shared keyed-registry base.
+        private static readonly NeoKeyedRegistry<TemplateEntry> _registry = new NeoKeyedRegistry<TemplateEntry>(
+            t => t.id,
+            builtins: BuiltinEntries,
+            validate: t => t.loadJson != null,
+            registryName: "NeoLayoutTemplates");
 
         // built-in template files (under Templates~, loaded by File.ReadAllText)
         private static readonly (string id, string label, string file, string desc)[] Builtins =
@@ -55,47 +59,28 @@ namespace Neo.UI.Editor.Authoring
             ("popup",          "Popup",           "popup.json",           "A rich confirm popup card with two actions."),
         };
 
-        private static void EnsureBuiltins()
+        private static IEnumerable<TemplateEntry> BuiltinEntries()
         {
-            if (_builtinsSeeded) return;
-            _builtinsSeeded = true;
             foreach (var b in Builtins)
             {
                 string file = b.file;
-                _registered.Add(new TemplateEntry(b.id, b.label, () => LoadBuiltin(file), b.desc));
+                yield return new TemplateEntry(b.id, b.label, () => LoadBuiltin(file), b.desc);
             }
         }
 
         /// <summary> Every registered template (built-ins first, then project additions). </summary>
-        public static IReadOnlyList<TemplateEntry> All
-        {
-            get { EnsureBuiltins(); return _registered; }
-        }
+        public static IReadOnlyList<TemplateEntry> All => _registry.All;
 
         /// <summary> Finds a template by id. </summary>
-        public static bool TryGet(string id, out TemplateEntry entry)
-        {
-            EnsureBuiltins();
-            for (int i = 0; i < _registered.Count; i++)
-                if (_registered[i].id == id) { entry = _registered[i]; return true; }
-            entry = default;
-            return false;
-        }
+        public static bool TryGet(string id, out TemplateEntry entry) => _registry.TryGet(id, out entry);
 
         /// <summary> Registers (or replaces, by id) a template. The extension seam: a project adds its own
-        /// scaffolds with one call. </summary>
-        public static void Register(TemplateEntry entry)
-        {
-            EnsureBuiltins();
-            if (string.IsNullOrEmpty(entry.id) || entry.loadJson == null)
-            {
-                Debug.LogWarning("NeoLayoutTemplates.Register ignored an entry with a null/empty id or loader.");
-                return;
-            }
-            for (int i = 0; i < _registered.Count; i++)
-                if (_registered[i].id == entry.id) { _registered[i] = entry; return; }
-            _registered.Add(entry);
-        }
+        /// scaffolds with one call. An entry with an empty id or a null loader is warned-and-ignored,
+        /// never thrown. </summary>
+        public static void Register(TemplateEntry entry) => _registry.Register(entry);
+
+        /// <summary> Test-only: clears project registrations and re-seeds the built-ins on next access. </summary>
+        internal static void ResetForTests() => _registry.ResetForTests();
 
         /// <summary>
         /// Merges the template's views, popups and breakpoints directly into <paramref name="spec"/>.

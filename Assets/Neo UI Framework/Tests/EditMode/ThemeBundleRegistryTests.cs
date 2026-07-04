@@ -1,6 +1,10 @@
 using System.Linq;
+using System.Text.RegularExpressions;
 using Neo.UI.Editor;
 using NUnit.Framework;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace Neo.UI.Tests
 {
@@ -73,13 +77,45 @@ namespace Neo.UI.Tests
         }
 
         [Test]
-        public void Register_IgnoresNullOrUnnamedBundles()
+        public void Register_IgnoresNullOrUnnamedBundles_WarnsButNeverThrows()
         {
             int before = ThemeBundleRegistry.All.Count;
-            ThemeBundleRegistry.Register(null);
-            ThemeBundleRegistry.Register(new ThemeBundles.Bundle { name = null });
-            ThemeBundleRegistry.Register(new ThemeBundles.Bundle { name = "" });
+            LogAssert.Expect(LogType.Warning, new Regex("ThemeBundleRegistry: ignored a null/invalid entry"));
+            LogAssert.Expect(LogType.Warning, new Regex("ThemeBundleRegistry: ignored a null/invalid entry"));
+            LogAssert.Expect(LogType.Warning, new Regex("ThemeBundleRegistry: ignored a null/invalid entry"));
+            Assert.DoesNotThrow(() => ThemeBundleRegistry.Register(null));
+            Assert.DoesNotThrow(() => ThemeBundleRegistry.Register(new ThemeBundles.Bundle { name = null }));
+            Assert.DoesNotThrow(() => ThemeBundleRegistry.Register(new ThemeBundles.Bundle { name = "" }));
             Assert.AreEqual(before, ThemeBundleRegistry.All.Count);
+        }
+
+        [Test]
+        public void DeletedThemeBundleDefinitionAsset_IsEvictedOnNextDiscovery()
+        {
+            const string bundleName = "ZDeleteEvictionProbeBundle";
+            const string path = "Assets/ZThemeBundleDeleteProbe.asset";
+            var def = ScriptableObject.CreateInstance<ThemeBundleDefinition>();
+            def.bundleName = bundleName;
+            AssetDatabase.CreateAsset(def, path);
+            AssetDatabase.SaveAssets();
+            ThemeBundleRegistry.InvalidateDiscovery();
+            try
+            {
+                Assert.IsTrue(ThemeBundleRegistry.TryGet(bundleName, out _),
+                    "precondition: the dropped asset is discovered");
+
+                AssetDatabase.DeleteAsset(path);
+                ThemeBundleRegistry.InvalidateDiscovery();
+
+                Assert.IsFalse(ThemeBundleRegistry.TryGet(bundleName, out _),
+                    "a deleted ThemeBundleDefinition asset must be evicted on the next discovery pass");
+            }
+            finally
+            {
+                AssetDatabase.DeleteAsset(path);
+                ThemeBundleRegistry.Remove(bundleName);
+                ThemeBundleRegistry.InvalidateDiscovery();
+            }
         }
     }
 }

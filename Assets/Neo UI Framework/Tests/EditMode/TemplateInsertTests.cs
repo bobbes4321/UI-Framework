@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Neo.UI.Editor;
 using Neo.UI.Editor.Authoring;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace Neo.UI.Tests
 {
@@ -14,7 +16,8 @@ namespace Neo.UI.Tests
     /// generates without issues, and round-trips byte-identically (export → generate → export). Also
     /// covers the registry seam + collision handling. (Formerly ran through the Composer's
     /// <c>SpecDocument</c> — that overload died with the window in Wave 3; these tests now exercise the
-    /// same collision-suffix/registry logic through the plain-<see cref="UISpec"/> overload.)
+    /// same collision-suffix/registry logic through the plain-<see cref="UISpec"/> overload.) Wave 4
+    /// Task 4.2: <see cref="NeoLayoutTemplates"/> migrated onto <see cref="NeoKeyedRegistry{T}"/>.
     /// </summary>
     public class TemplateInsertTests
     {
@@ -108,6 +111,43 @@ namespace Neo.UI.Tests
             NeoLayoutTemplates.Register(new TemplateEntry("main-menu", "Main Menu",
                 () => System.IO.File.ReadAllText(System.IO.Path.Combine(
                     Application.dataPath, "Neo UI Framework", "Editor", "Authoring", "Templates~", "main-menu.json"))));
+        }
+
+        [Test]
+        public void Register_EmptyId_WarnsAndIgnores_NeverThrows()
+        {
+            int before = NeoLayoutTemplates.All.Count;
+            LogAssert.Expect(LogType.Warning, new Regex("NeoLayoutTemplates: ignored a null/invalid entry"));
+
+            Assert.DoesNotThrow(() => NeoLayoutTemplates.Register(new TemplateEntry("", "Nameless", () => "{}")));
+
+            Assert.AreEqual(before, NeoLayoutTemplates.All.Count, "an invalid registration must not add a row");
+        }
+
+        [Test]
+        public void Register_NullLoader_WarnsAndIgnores_NeverThrows()
+        {
+            int before = NeoLayoutTemplates.All.Count;
+            LogAssert.Expect(LogType.Warning, new Regex("NeoLayoutTemplates: ignored a null/invalid entry"));
+
+            Assert.DoesNotThrow(() => NeoLayoutTemplates.Register(new TemplateEntry("no-loader", "No Loader", null)));
+
+            Assert.AreEqual(before, NeoLayoutTemplates.All.Count, "a null loader must not add a row");
+            Assert.IsFalse(NeoLayoutTemplates.TryGet("no-loader", out _));
+        }
+
+        [Test]
+        public void ResetForTests_ClearsProjectRegistrations_AndRestoresTheBuiltins()
+        {
+            NeoLayoutTemplates.Register(new TemplateEntry("test-reset-template", "Debug", () => "{}"));
+            Assert.IsTrue(NeoLayoutTemplates.TryGet("test-reset-template", out _));
+            int builtinCount = NeoLayoutTemplates.All.Count - 1;
+
+            NeoLayoutTemplates.ResetForTests();
+
+            Assert.IsFalse(NeoLayoutTemplates.TryGet("test-reset-template", out _), "reset drops project registrations");
+            Assert.AreEqual(builtinCount, NeoLayoutTemplates.All.Count, "reset re-seeds exactly the built-ins");
+            Assert.IsTrue(NeoLayoutTemplates.TryGet("main-menu", out _), "built-ins are still present after reset");
         }
 
         // ------------------------------------------------------------------ native-authoring parity

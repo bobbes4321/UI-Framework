@@ -28,8 +28,10 @@ namespace Neo.UI.Editor
 
     /// <summary>
     /// Pattern-R registry of per-child sizing modes (the documented seam — a project can add a
-    /// min/max "clamp" mode without forking). Built-ins fixed/hug/fill register in the static ctor in
-    /// a fixed order; the exporter detects in <see cref="All"/> order, first match wins.
+    /// min/max "clamp" mode without forking). A thin public-static facade over the shared
+    /// <see cref="NeoKeyedRegistry{T}"/> base (Wave 4 Task 4.3) — built-ins fixed/hug/fill are seeded
+    /// lazily (once, in a fixed order) on first access; the exporter detects in <see cref="All"/>
+    /// order, first match wins.
     /// </summary>
     public static class LayoutSizingModes
     {
@@ -37,52 +39,36 @@ namespace Neo.UI.Editor
         public const string Hug = "hug";
         public const string Fill = "fill";
 
-        private static readonly List<ILayoutSizingMode> _all = new List<ILayoutSizingMode>();
+        // Thin forwarder over the shared keyed base (Task 4.3) — no caller changes.
+        private static readonly NeoKeyedRegistry<ILayoutSizingMode> _registry =
+            new NeoKeyedRegistry<ILayoutSizingMode>(
+                key: m => m.Id,
+                builtins: Builtins,
+                registryName: "LayoutSizingModes");
 
-        static LayoutSizingModes()
+        private static IEnumerable<ILayoutSizingMode> Builtins()
         {
-            RegisterBuiltins();
-        }
-
-        private static void RegisterBuiltins()
-        {
-            Register(new FixedSizing());
-            Register(new HugSizing());
-            Register(new FillSizing());
+            yield return new FixedSizing();
+            yield return new HugSizing();
+            yield return new FillSizing();
         }
 
         /// <summary> Every registered mode (built-ins first, in registration order). </summary>
-        public static IReadOnlyList<ILayoutSizingMode> All => _all;
+        public static IReadOnlyList<ILayoutSizingMode> All => _registry.All;
 
         /// <summary> Finds a mode by id; null + warning when missing (no silent failure). </summary>
         public static ILayoutSizingMode Get(string id)
         {
-            if (!string.IsNullOrEmpty(id))
-                foreach (ILayoutSizingMode m in _all)
-                    if (m != null && m.Id == id) return m;
+            if (_registry.TryGet(id, out ILayoutSizingMode m)) return m;
             Debug.LogWarning($"LayoutSizingModes.Get: no sizing mode '{id}' registered; the child keeps its default sizing. Register one in LayoutSizingModes, or check the spec.");
             return null;
         }
 
         /// <summary> Registers a mode, replacing any existing one with the same Id. </summary>
-        public static void Register(ILayoutSizingMode mode)
-        {
-            if (mode == null || string.IsNullOrEmpty(mode.Id))
-            {
-                Debug.LogWarning("LayoutSizingModes.Register ignored a mode with a null/empty Id.");
-                return;
-            }
-            for (int i = 0; i < _all.Count; i++)
-                if (_all[i].Id == mode.Id) { _all[i] = mode; return; }
-            _all.Add(mode);
-        }
+        public static void Register(ILayoutSizingMode mode) => _registry.Register(mode);
 
-        /// <summary> Test/seam hook: clear and re-seed the built-ins. </summary>
-        internal static void ResetForTests()
-        {
-            _all.Clear();
-            RegisterBuiltins();
-        }
+        /// <summary> Test/seam hook: clears every registration and forces a fresh built-ins seed on next access. </summary>
+        internal static void ResetForTests() => _registry.ResetForTests();
 
         private static LayoutElement GetOrAddLayoutElement(GameObject go)
         {

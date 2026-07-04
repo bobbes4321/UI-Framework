@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 
 namespace Neo.UI.Editor
@@ -49,11 +48,12 @@ namespace Neo.UI.Editor
 
     /// <summary>
     /// Pattern-R registry of shape-effect descriptors (mirrors <see cref="LayoutConstraints"/>): the
-    /// documented extensibility seam for spec-driven shape effects. Built-ins register in the static
-    /// ctor in a FIXED order; the exporter walks <see cref="All"/> and the first descriptor whose
-    /// <see cref="IShapeEffectDescriptor.TryExport"/> succeeds wins, so detection stays deterministic.
-    /// <see cref="All"/> / <see cref="Get"/> / <see cref="Register"/> (replace-by-Id) /
-    /// <see cref="ResetForTests"/>.
+    /// documented extensibility seam for spec-driven shape effects. A thin public-static facade over
+    /// the shared <see cref="NeoKeyedRegistry{T}"/> base (Wave 4 Task 4.3) — built-ins are seeded
+    /// lazily (once, in a FIXED order) on first access; the exporter walks <see cref="All"/> and the
+    /// first descriptor whose <see cref="IShapeEffectDescriptor.TryExport"/> succeeds wins, so
+    /// detection stays deterministic. <see cref="All"/> / <see cref="Get"/> /
+    /// <see cref="Register"/> (replace-by-Id) / <see cref="ResetForTests"/>.
     /// </summary>
     public static class ShapeEffectRegistry
     {
@@ -76,74 +76,61 @@ namespace Neo.UI.Editor
         /// <summary> Built-in Tier-1 idle/attention motion effect id (bob/sway/rotate/scale/squash on the RectTransform). </summary>
         public const string TransformJuice = "transformJuice";
 
-        private static readonly List<IShapeEffectDescriptor> _all = new List<IShapeEffectDescriptor>();
+        // Thin forwarder over the shared keyed base (Task 4.3) — no caller changes. Built-ins are
+        // seeded lazily (once, in a FIXED order) on first access rather than eagerly in a static ctor.
+        private static readonly NeoKeyedRegistry<IShapeEffectDescriptor> _registry =
+            new NeoKeyedRegistry<IShapeEffectDescriptor>(
+                key: d => d.Id,
+                builtins: Builtins,
+                registryName: "ShapeEffectRegistry");
 
-        static ShapeEffectRegistry()
-        {
-            RegisterBuiltins();
-        }
-
-        private static void RegisterBuiltins()
+        private static IEnumerable<IShapeEffectDescriptor> Builtins()
         {
             // Order matters for deterministic exporter detection: the Tier-2 variant is detected by a
             // distinct component (NeoShapeVariant) so order vs the Tier-1 drivers is incidental, but we
             // keep a fixed, documented order regardless.
-            Register(new GlowPulseDescriptor());
-            Register(new SheenSweepDescriptor());
-            Register(new GradientCycleDescriptor());
-            Register(new VariantDescriptor());
+            yield return new GlowPulseDescriptor();
+            yield return new SheenSweepDescriptor();
+            yield return new GradientCycleDescriptor();
+            yield return new VariantDescriptor();
             // Tier-1 library expansion — each descriptor lives in its own file under Effects/ (the
             // per-descriptor extensibility seam), registered here so the built-in order stays fixed.
-            Register(new ArcSpinnerDescriptor());
-            Register(new CornerMorphDescriptor());
-            Register(new BorderPulseDescriptor());
-            Register(new HueShiftDescriptor());
-            Register(new TransformJuiceDescriptor());
+            yield return new ArcSpinnerDescriptor();
+            yield return new CornerMorphDescriptor();
+            yield return new BorderPulseDescriptor();
+            yield return new HueShiftDescriptor();
+            yield return new TransformJuiceDescriptor();
         }
 
         /// <summary> Every registered descriptor (built-ins first, in registration order). </summary>
-        public static IReadOnlyList<IShapeEffectDescriptor> All => _all;
+        public static IReadOnlyList<IShapeEffectDescriptor> All => _registry.All;
 
         /// <summary> Finds the descriptor with the given id; null + warning when missing (no silent failure). </summary>
         public static IShapeEffectDescriptor Get(string id)
         {
-            if (!string.IsNullOrEmpty(id))
-                foreach (IShapeEffectDescriptor d in _all)
-                    if (d != null && d.Id == id) return d;
+            if (_registry.TryGet(id, out IShapeEffectDescriptor d)) return d;
             Debug.LogWarning($"ShapeEffectRegistry.Get: no shape effect '{id}' registered — the effect will be skipped. Register one in ShapeEffectRegistry, or check the spec.");
             return null;
         }
 
         /// <summary> Registers a descriptor, replacing any existing one with the same Id. </summary>
-        public static void Register(IShapeEffectDescriptor descriptor)
-        {
-            if (descriptor == null || string.IsNullOrEmpty(descriptor.Id))
-            {
-                Debug.LogWarning("ShapeEffectRegistry.Register ignored a descriptor with a null/empty Id.");
-                return;
-            }
-            for (int i = 0; i < _all.Count; i++)
-                if (_all[i].Id == descriptor.Id) { _all[i] = descriptor; return; }
-            _all.Add(descriptor);
-        }
+        public static void Register(IShapeEffectDescriptor descriptor) => _registry.Register(descriptor);
 
-        /// <summary> Test/seam hook: clear and re-seed the built-ins (static state survives a test run). </summary>
-        internal static void ResetForTests()
-        {
-            _all.Clear();
-            RegisterBuiltins();
-        }
+        /// <summary> Test/seam hook: clears every registration and forces a fresh built-ins seed on next access. </summary>
+        internal static void ResetForTests() => _registry.ResetForTests();
 
         // ----------------------------------------------------------------- param-bag helpers
 
+        // Thin forwarders onto the shared EffectParams home (audit D9) — kept here (same names/
+        // signatures) so the per-descriptor files under Effects/ never had to change.
         internal static float GetFloat(IDictionary<string, object> p, string key, float fallback) =>
-            p != null && p.TryGetValue(key, out object v) && v is double d ? (float)d : fallback;
+            EffectParams.GetFloat(p, key, fallback);
 
         internal static bool GetBool(IDictionary<string, object> p, string key, bool fallback) =>
             p != null && p.TryGetValue(key, out object v) && v is bool b ? b : fallback;
 
         internal static string GetString(IDictionary<string, object> p, string key, string fallback) =>
-            p != null && p.TryGetValue(key, out object v) && v != null ? v.ToString() : fallback;
+            EffectParams.GetString(p, key, fallback);
 
         // ----------------------------------------------------------------- built-in descriptors
 
@@ -239,15 +226,15 @@ namespace Neo.UI.Editor
 
                 // Cycle endpoint colors are OPTIONAL theme-token-or-hex refs (same model as
                 // colorOverLife / variant). Omitted → keep the component's (vivid) defaults so a bare
-                // `cycleColors:true` never bakes a gray wash. Reuses the shared ParseColorRef.
+                // `cycleColors:true` never bakes a gray wash. Reuses the shared EffectParams.ParseColorRef.
                 string fromA = GetString(parameters, "fromColorA", null);
                 string fromB = GetString(parameters, "fromColorB", null);
                 string toA = GetString(parameters, "toColorA", null);
                 string toB = GetString(parameters, "toColorB", null);
-                if (!string.IsNullOrEmpty(fromA)) e.FromColorA = ParticleEffectRegistry.ParseColorRef(fromA);
-                if (!string.IsNullOrEmpty(fromB)) e.FromColorB = ParticleEffectRegistry.ParseColorRef(fromB);
-                if (!string.IsNullOrEmpty(toA)) e.ToColorA = ParticleEffectRegistry.ParseColorRef(toA);
-                if (!string.IsNullOrEmpty(toB)) e.ToColorB = ParticleEffectRegistry.ParseColorRef(toB);
+                if (!string.IsNullOrEmpty(fromA)) e.FromColorA = EffectParams.ParseColorRef(fromA);
+                if (!string.IsNullOrEmpty(fromB)) e.FromColorB = EffectParams.ParseColorRef(fromB);
+                if (!string.IsNullOrEmpty(toA)) e.ToColorA = EffectParams.ParseColorRef(toA);
+                if (!string.IsNullOrEmpty(toB)) e.ToColorB = EffectParams.ParseColorRef(toB);
 
                 e.EvaluateRest();
             }
@@ -263,10 +250,10 @@ namespace Neo.UI.Editor
                 p["cycleColors"] = e.CycleColors;
                 // Deterministic key order; always emitted so the round-trip is a fixed point regardless
                 // of whether the colors came from the spec or the component defaults.
-                p["fromColorA"] = ParticleEffectRegistry.ColorRefToString(e.FromColorA);
-                p["fromColorB"] = ParticleEffectRegistry.ColorRefToString(e.FromColorB);
-                p["toColorA"] = ParticleEffectRegistry.ColorRefToString(e.ToColorA);
-                p["toColorB"] = ParticleEffectRegistry.ColorRefToString(e.ToColorB);
+                p["fromColorA"] = EffectParams.ColorRefToString(e.FromColorA);
+                p["fromColorB"] = EffectParams.ColorRefToString(e.FromColorB);
+                p["toColorA"] = EffectParams.ColorRefToString(e.ToColorA);
+                p["toColorB"] = EffectParams.ColorRefToString(e.ToColorB);
                 parameters = p;
                 return true;
             }
@@ -340,19 +327,10 @@ namespace Neo.UI.Editor
                 return true;
             }
 
-            private static ShapeEffectDefinition ResolveDefinition(string id)
-            {
-                if (string.IsNullOrEmpty(id)) return null;
-                // Agent-first resolve by stable id (never a GUID). Scoped to the asset TYPE — this is a
-                // ScriptableObject lookup, NOT the forbidden "scan all of Assets" prefab fallback.
-                foreach (string guid in AssetDatabase.FindAssets("t:ShapeEffectDefinition"))
-                {
-                    string path = AssetDatabase.GUIDToAssetPath(guid);
-                    var def = AssetDatabase.LoadAssetAtPath<ShapeEffectDefinition>(path);
-                    if (def != null && def.Id == id) return def;
-                }
-                return null;
-            }
+            private static ShapeEffectDefinition ResolveDefinition(string id) =>
+                !string.IsNullOrEmpty(id) && ShapeEffectDefinitions.TryGet(id, out ShapeEffectDefinition def)
+                    ? def
+                    : null;
         }
 
         // ----------------------------------------------------------------- Tier-1 base round-trip
@@ -498,5 +476,38 @@ namespace Neo.UI.Editor
             category = signal.Substring(0, slash);
             name = signal.Substring(slash + 1);
         }
+    }
+
+    /// <summary>
+    /// Registry-backed facade over <see cref="ShapeEffectDefinition"/> assets (Pattern R "Shape B" —
+    /// <see cref="NeoAssetRegistry{TAsset,TEntry}"/>), replacing the per-call
+    /// <c>AssetDatabase.FindAssets("t:ShapeEffectDefinition")</c> scan
+    /// <see cref="ShapeEffectRegistry"/>'s Tier-2 variant descriptor used to run on every apply/export
+    /// (audit A4/A5 — the only per-call project scan the audit found, and a "drop an asset, it's
+    /// discovered" seam that had no registry at all). Discovery re-scans fresh every generation, so a
+    /// deleted/renamed definition is evicted rather than resolving forever.
+    /// </summary>
+    public static class ShapeEffectDefinitions
+    {
+        private static readonly NeoAssetRegistry<ShapeEffectDefinition, ShapeEffectDefinition> _registry =
+            new NeoAssetRegistry<ShapeEffectDefinition, ShapeEffectDefinition>(
+                key: d => d.Id,
+                project: d => d,
+                registryName: "ShapeEffectDefinitions");
+
+        /// <summary> Every discovered <see cref="ShapeEffectDefinition"/> asset (+ any manual registrations). </summary>
+        public static IReadOnlyList<ShapeEffectDefinition> All => _registry.All;
+
+        /// <summary> Agent-first lookup by stable id (never a GUID). False when nothing matches. </summary>
+        public static bool TryGet(string id, out ShapeEffectDefinition definition) => _registry.TryGet(id, out definition);
+
+        /// <summary>
+        /// Registers a definition that survives every future discovery rebuild (e.g. an in-memory
+        /// instance handed in by a test or a consuming project).
+        /// </summary>
+        public static void Register(ShapeEffectDefinition definition) => _registry.Register(definition);
+
+        /// <summary> Test-only: clears manual registrations and forces a fresh discovery scan on next access. </summary>
+        internal static void ResetForTests() => _registry.ResetForTests();
     }
 }

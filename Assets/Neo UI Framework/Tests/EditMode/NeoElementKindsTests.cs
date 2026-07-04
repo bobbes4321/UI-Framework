@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Neo.UI.Editor;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace Neo.UI.Tests
 {
@@ -71,7 +73,7 @@ namespace Neo.UI.Tests
         [TearDown]
         public void ClearRegistry()
         {
-            NeoElementKinds.ClearForTests();
+            NeoElementKinds.ResetForTests();
             AssetDatabase.DeleteAsset(UISpecGenerator.GeneratedRoot);
         }
 
@@ -104,6 +106,15 @@ namespace Neo.UI.Tests
         {
             Assert.IsFalse(NeoElementKinds.TryGet("nope", out INeoElementKind k));
             Assert.IsNull(k);
+        }
+
+        [Test]
+        public void Register_NullOrEmptyKind_WarnsAndIgnores_NeverThrows()
+        {
+            LogAssert.Expect(LogType.Warning, new Regex("NeoElementKinds: ignored a null/invalid entry"));
+            Assert.DoesNotThrow(() => NeoElementKinds.Register(null));
+
+            Assert.AreEqual(0, NeoElementKinds.All.Count, "nothing was actually registered");
         }
 
         [Test]

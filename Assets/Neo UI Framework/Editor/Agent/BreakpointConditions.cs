@@ -43,54 +43,44 @@ namespace Neo.UI.Editor
     }
 
     /// <summary>
-    /// Pattern-R registry of breakpoint condition kinds. Built-ins register in the static ctor;
-    /// <see cref="Evaluate"/> ANDs every active kind. Mirrors <see cref="NeoElementKinds"/> /
+    /// Pattern-R registry of breakpoint condition kinds. A thin public-static facade over the shared
+    /// <see cref="NeoKeyedRegistry{T}"/> base (Wave 4 Task 4.3) — built-ins are seeded lazily (once) on
+    /// first access; <see cref="Evaluate"/> ANDs every active kind. Mirrors <see cref="NeoElementKinds"/> /
     /// <see cref="LayoutConstraints"/>: <see cref="All"/> / <see cref="TryGet"/> / <see cref="Register"/>
     /// (replace-by-Id, else append).
     /// </summary>
     public static class BreakpointConditions
     {
-        private static readonly List<IBreakpointCondition> _all = new List<IBreakpointCondition>();
+        // Thin forwarder over the shared keyed base (Task 4.3) — no caller changes.
+        private static readonly NeoKeyedRegistry<IBreakpointCondition> _registry =
+            new NeoKeyedRegistry<IBreakpointCondition>(
+                key: c => c.Id,
+                builtins: Builtins,
+                registryName: "BreakpointConditions");
 
-        static BreakpointConditions()
+        private static IEnumerable<IBreakpointCondition> Builtins()
         {
-            RegisterBuiltins();
-        }
-
-        private static void RegisterBuiltins()
-        {
-            Register(new OrientationCondition());
-            Register(new MinAspectCondition());
-            Register(new MaxAspectCondition());
-            Register(new MinWidthCondition());
-            Register(new MaxWidthCondition());
+            yield return new OrientationCondition();
+            yield return new MinAspectCondition();
+            yield return new MaxAspectCondition();
+            yield return new MinWidthCondition();
+            yield return new MaxWidthCondition();
         }
 
         /// <summary> Every registered kind (built-ins first, in registration order). </summary>
-        public static IReadOnlyList<IBreakpointCondition> All => _all;
+        public static IReadOnlyList<IBreakpointCondition> All => _registry.All;
 
-        /// <summary> Finds the kind with the given id. </summary>
+        /// <summary> Finds the kind with the given id; false + warning when missing (audit A3 — this used
+        /// to fail silently despite copying from the warning <see cref="LayoutConstraints.Get"/>). </summary>
         public static bool TryGet(string id, out IBreakpointCondition result)
         {
-            if (!string.IsNullOrEmpty(id))
-                foreach (IBreakpointCondition c in _all)
-                    if (c != null && c.Id == id) { result = c; return true; }
-            result = null;
+            if (_registry.TryGet(id, out result)) return true;
+            Debug.LogWarning($"BreakpointConditions.TryGet: no condition kind '{id}' registered. Register one in BreakpointConditions, or check the spec.");
             return false;
         }
 
         /// <summary> Registers a kind, replacing any existing one with the same <see cref="IBreakpointCondition.Id"/>. </summary>
-        public static void Register(IBreakpointCondition condition)
-        {
-            if (condition == null || string.IsNullOrEmpty(condition.Id))
-            {
-                Debug.LogWarning("BreakpointConditions.Register ignored a condition with a null/empty Id.");
-                return;
-            }
-            for (int i = 0; i < _all.Count; i++)
-                if (_all[i].Id == condition.Id) { _all[i] = condition; return; }
-            _all.Add(condition);
-        }
+        public static void Register(IBreakpointCondition condition) => _registry.Register(condition);
 
         /// <summary>
         /// Whether <paramref name="condition"/> matches the env. Every active kind must match (AND); a
@@ -101,7 +91,7 @@ namespace Neo.UI.Editor
         {
             if (condition == null || condition.IsEmpty) return false;
             bool anyActive = false;
-            foreach (IBreakpointCondition kind in _all)
+            foreach (IBreakpointCondition kind in _registry.All)
             {
                 if (kind == null || !kind.IsActive(condition)) continue;
                 anyActive = true;
@@ -110,12 +100,8 @@ namespace Neo.UI.Editor
             return anyActive;
         }
 
-        /// <summary> Test/seam hook: clear and re-seed the built-ins (static state survives a test run). </summary>
-        internal static void ResetForTests()
-        {
-            _all.Clear();
-            RegisterBuiltins();
-        }
+        /// <summary> Test/seam hook: clears every registration and forces a fresh built-ins seed on next access. </summary>
+        internal static void ResetForTests() => _registry.ResetForTests();
 
         // ----------------------------------------------------------------- built-in kinds
 

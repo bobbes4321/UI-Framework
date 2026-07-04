@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Neo.UI.Editor;
 using Neo.UI.Editor.Authoring;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace Neo.UI.Tests
 {
@@ -11,14 +13,14 @@ namespace Neo.UI.Tests
     /// Pillar E palette registry (Pattern R): the built-ins cover every <see cref="ElementSpec.Kinds"/>
     /// entry grouped by category, a project-registered <see cref="NeoElementKinds"/> kind appears for
     /// free, and <see cref="NeoWidgetPalette.Register"/> replaces-by-kind. Mirrors
-    /// <see cref="ComposerCatalogKindsTests"/>.
+    /// <see cref="ComposerCatalogKindsTests"/>. Wave 4 Task 4.2: migrated onto <see cref="NeoKeyedRegistry{T}"/>.
     /// </summary>
     public class PaletteRegistryTests
     {
         [TearDown]
         public void Reset()
         {
-            NeoElementKinds.ClearForTests();
+            NeoElementKinds.ResetForTests();
             NeoWidgetPalette.ResetForTests();
         }
 
@@ -90,6 +92,33 @@ namespace Neo.UI.Tests
             NeoWidgetPalette.Register(new PaletteEntry("ribbon", "Display", "Ribbon"));
             Assert.AreEqual(before + 1, NeoWidgetPalette.All.Count);
             Assert.IsTrue(NeoWidgetPalette.All.Any(e => e.kind == "ribbon" && e.category == "Display"));
+        }
+
+        [Test]
+        public void Register_EmptyKind_WarnsAndIgnores_NeverThrows()
+        {
+            int before = NeoWidgetPalette.All.Count;
+            LogAssert.Expect(LogType.Warning, new Regex("NeoWidgetPalette: ignored a null/invalid entry"));
+
+            Assert.DoesNotThrow(() => NeoWidgetPalette.Register(new PaletteEntry("", "Display", "Nameless")));
+
+            Assert.AreEqual(before, NeoWidgetPalette.All.Count, "an invalid registration must not add a row");
+        }
+
+        [Test]
+        public void All_CachesBetweenCalls_ButInvalidatesOnSourceMutation()
+        {
+            IReadOnlyList<PaletteEntry> first = NeoWidgetPalette.All;
+            Assert.AreSame(first, NeoWidgetPalette.All, "repeated reads with no mutation return the cached instance");
+
+            NeoWidgetPalette.Register(new PaletteEntry("banner", "Display", "Banner"));
+            IReadOnlyList<PaletteEntry> afterRegister = NeoWidgetPalette.All;
+            Assert.AreNotSame(first, afterRegister, "registering a new tile invalidates the cache");
+
+            NeoElementKinds.Register(new FakeKind("marquee"));
+            IReadOnlyList<PaletteEntry> afterKind = NeoWidgetPalette.All;
+            Assert.AreNotSame(afterRegister, afterKind, "a project element kind change invalidates the cache");
+            Assert.IsTrue(afterKind.Any(e => e.kind == "marquee"));
         }
 
         // a minimal INeoElementKind for the auto-include test

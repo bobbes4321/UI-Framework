@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEditor;
 
 namespace Neo.UI.Editor
@@ -10,51 +8,37 @@ namespace Neo.UI.Editor
     /// entries (<see cref="HubToolRegistryDefaults"/>) cover every Neo UI window and menu action; a
     /// consuming project folds in its own tools with a single <see cref="Register"/> call, no fork.
     /// <para>
-    /// Mirrors <see cref="ShowcaseRegistry"/> exactly: a static list seeded with built-ins, replace-by-id
-    /// registration, an ordinal lookup. Editor-only and single-domain, so a static list suffices.
+    /// A thin public-static facade over <see cref="NeoKeyedRegistry{T}"/> (Wave 4 Task 4.4): replace-by-id
+    /// registration, ordinal lookup, invoke-less tools rejected via the <c>validate</c> guard (a launcher
+    /// button that does nothing is the bug this guards against).
     /// </para>
     /// </summary>
     public static class HubToolRegistry
     {
-        private static readonly List<HubTool> _tools = new List<HubTool>(HubToolRegistryDefaults.Builtins());
+        private static readonly NeoKeyedRegistry<HubTool> _registry = new NeoKeyedRegistry<HubTool>(
+            t => t.id,
+            builtins: HubToolRegistryDefaults.Builtins,
+            validate: t => t.invoke != null,
+            registryName: "HubToolRegistry");
 
         /// <summary> All registered tools (built-ins + project additions), in registration order. </summary>
-        public static IReadOnlyList<HubTool> All => _tools;
+        public static IReadOnlyList<HubTool> All => _registry.All;
 
         /// <summary> Case-sensitive (ordinal) lookup by id. False (and null) when nothing matches. </summary>
-        public static bool TryGet(string id, out HubTool tool)
-        {
-            tool = _tools.FirstOrDefault(t => string.Equals(t.id, id, StringComparison.Ordinal));
-            return tool != null;
-        }
+        public static bool TryGet(string id, out HubTool tool) => _registry.TryGet(id, out tool);
 
         /// <summary>
         /// Registers a tool. Replaces in place when one with the same id (ordinal) already exists — so a
         /// project can override a built-in — otherwise appends. Null / id-less / invoke-less tools are
-        /// ignored with a warning (a launcher button that does nothing is the bug this guards against).
+        /// warned-and-ignored, never thrown.
         /// </summary>
-        public static void Register(HubTool tool)
-        {
-            if (tool == null || string.IsNullOrEmpty(tool.id) || tool.invoke == null)
-            {
-                UnityEngine.Debug.LogWarning("[Neo.UI] HubToolRegistry.Register ignored a null / id-less / invoke-less tool");
-                return;
-            }
-            int existing = _tools.FindIndex(t => string.Equals(t.id, tool.id, StringComparison.Ordinal));
-            if (existing >= 0) _tools[existing] = tool;
-            else _tools.Add(tool);
-        }
+        public static void Register(HubTool tool) => _registry.Register(tool);
 
         /// <summary> Test-only: removes a registered tool by id (ordinal). True if one was removed. </summary>
-        internal static bool Remove(string id) =>
-            _tools.RemoveAll(t => string.Equals(t.id, id, StringComparison.Ordinal)) > 0;
+        internal static bool Remove(string id) => _registry.Remove(id);
 
         /// <summary> Test-only: restores the registry to exactly the code-seeded built-ins. </summary>
-        internal static void ResetForTests()
-        {
-            _tools.Clear();
-            _tools.AddRange(HubToolRegistryDefaults.Builtins());
-        }
+        internal static void ResetForTests() => _registry.ResetForTests();
     }
 
     /// <summary>

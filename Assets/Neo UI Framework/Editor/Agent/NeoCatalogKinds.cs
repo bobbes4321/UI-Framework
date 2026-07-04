@@ -53,39 +53,44 @@ namespace Neo.UI.Editor
     /// The single source of truth the Composer reads for the set of catalog kinds. Seeded with the
     /// package built-ins; a consuming project registers its own kind once (e.g. from an
     /// <c>[InitializeOnLoad]</c> static ctor). See <see cref="CatalogKind"/>.
+    /// <para>
+    /// Wave 4 Task 4.2: migrated onto <see cref="NeoKeyedRegistry{T}"/> (Pattern R's shared base). This
+    /// is also where the audit's pre-made policy for this registry applies: an invalid <see cref="Register"/>
+    /// call (empty id or a null <see cref="CatalogKind.list"/> accessor) now warns-and-ignores instead of
+    /// throwing — a thrown exception from an <c>[InitializeOnLoad]</c> static ctor poisons the whole
+    /// registering type with a <see cref="TypeInitializationException"/> (audit A6).
+    /// </para>
     /// </summary>
     public static class NeoCatalogKinds
     {
+        private static readonly NeoKeyedRegistry<CatalogKind> _registry = new NeoKeyedRegistry<CatalogKind>(
+            k => k.id,
+            builtins: Builtins,
+            validate: k => k.list != null,
+            registryName: "NeoCatalogKinds");
+
         // built-in defaults — settings is near-universal, cheats opts into the favourites bit.
-        private static readonly List<CatalogKind> _kinds = new List<CatalogKind>
+        private static IEnumerable<CatalogKind> Builtins()
         {
-            new CatalogKind(MenuCatalogSpec.SettingsKind, "Settings", s => s.settings, "Settings"),
-            new CatalogKind(MenuCatalogSpec.CheatKind,    "Cheats",   s => s.cheats,   "Cheats", showFavourites: true),
-        };
+            yield return new CatalogKind(MenuCatalogSpec.SettingsKind, "Settings", s => s.settings, "Settings");
+            yield return new CatalogKind(MenuCatalogSpec.CheatKind, "Cheats", s => s.cheats, "Cheats", showFavourites: true);
+        }
 
         /// <summary> Every registered catalog kind, in registration order (built-ins first). </summary>
-        public static IReadOnlyList<CatalogKind> All => _kinds;
+        public static IReadOnlyList<CatalogKind> All => _registry.All;
 
         /// <summary> Resolves a kind by id. Returns false when no kind is registered for it. </summary>
-        public static bool TryGet(string id, out CatalogKind kind)
-        {
-            for (int i = 0; i < _kinds.Count; i++)
-                if (_kinds[i].id == id) { kind = _kinds[i]; return true; }
-            kind = default;
-            return false;
-        }
+        public static bool TryGet(string id, out CatalogKind kind) => _registry.TryGet(id, out kind);
 
         /// <summary>
         /// Registers (or replaces, by id) a catalog kind. The extension seam: a consuming project
-        /// calls this once to make a new menu kind appear in the Composer's picker and tree.
+        /// calls this once to make a new menu kind appear in the Composer's picker and tree. An entry
+        /// with an empty id or a null <see cref="CatalogKind.list"/> accessor is warned-and-ignored,
+        /// never thrown (see the type doc above).
         /// </summary>
-        public static void Register(CatalogKind kind)
-        {
-            if (string.IsNullOrEmpty(kind.id) || kind.list == null)
-                throw new ArgumentException("A CatalogKind needs a non-empty id and a list accessor.", nameof(kind));
-            for (int i = 0; i < _kinds.Count; i++)
-                if (_kinds[i].id == kind.id) { _kinds[i] = kind; return; }
-            _kinds.Add(kind);
-        }
+        public static void Register(CatalogKind kind) => _registry.Register(kind);
+
+        /// <summary> Test-only: clears project registrations and re-seeds the built-ins on next access. </summary>
+        internal static void ResetForTests() => _registry.ResetForTests();
     }
 }

@@ -1,8 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Neo.UI.Editor;
 using NUnit.Framework;
 using UnityEditor;
+using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace Neo.UI.Tests
 {
@@ -95,6 +98,40 @@ namespace Neo.UI.Tests
             string leaf = path.Substring(path.LastIndexOf('/') + 1);
             Assert.IsTrue(HubToolRegistry.All.Any(t => t.label == leaf),
                 $"No HubTool surfaces '{path}'. Expected a tool whose label is '{leaf}'.");
+        }
+
+        // ------------------------------------------------------------------ Wave 4 Task 4.4:
+        // NeoKeyedRegistry<HubTool> contract mirror (replace-on-duplicate, invalid-register-warns).
+
+        [Test]
+        public void Register_SameId_ReplacesInPlace_NeverDuplicates()
+        {
+            int before = HubToolRegistry.All.Count;
+            var first = new HubTool { id = "probe-tool", label = "Probe First", category = "Author", invoke = () => { } };
+            var second = new HubTool { id = "probe-tool", label = "Probe Second", category = "Author", invoke = () => { } };
+
+            HubToolRegistry.Register(first);
+            Assert.AreEqual(before + 1, HubToolRegistry.All.Count);
+
+            HubToolRegistry.Register(second);
+            Assert.AreEqual(before + 1, HubToolRegistry.All.Count, "a same-id registration replaces, never duplicates");
+            Assert.IsTrue(HubToolRegistry.TryGet("probe-tool", out HubTool got));
+            Assert.AreEqual("Probe Second", got.label, "the later registration wins");
+        }
+
+        [Test]
+        public void Register_NullOrInvokeLessTool_WarnsAndIgnores_NeverThrows()
+        {
+            int before = HubToolRegistry.All.Count;
+
+            LogAssert.Expect(LogType.Warning, new Regex("HubToolRegistry: ignored a null/invalid entry"));
+            Assert.DoesNotThrow(() => HubToolRegistry.Register(null));
+
+            LogAssert.Expect(LogType.Warning, new Regex("HubToolRegistry: ignored a null/invalid entry"));
+            Assert.DoesNotThrow(() => HubToolRegistry.Register(new HubTool { id = "no-invoke", label = "No Invoke", invoke = null }));
+
+            Assert.AreEqual(before, HubToolRegistry.All.Count, "nothing invalid was actually registered");
+            Assert.IsFalse(HubToolRegistry.TryGet("no-invoke", out _));
         }
     }
 }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Neo.UI
 {
@@ -33,6 +34,14 @@ namespace Neo.UI
     /// <see cref="NeoUISettings.animatorDefaults"/> all read THIS list, so a new role appears in the
     /// UI with no fork (mirrors the drop-an-asset seams like <c>NeoWidgetPresets</c>, but the role set
     /// is code-defined data rather than discovered assets).
+    /// <para>
+    /// A thin public-static facade over the Runtime-asmdef <see cref="NeoRuntimeKeyedRegistry{T}"/> base
+    /// (Wave 4 Task 4.4 — see <c>neo-ui-remediation-plan.md</c>). Unlike most Pattern R registries, a
+    /// same-id <see cref="Register"/> call here WARNS before replacing: two custom animator components
+    /// racing to own the same role id is more likely a project bug worth surfacing than a deliberate
+    /// override, and roles (unlike widget presets) are looked up by animator components at Reset() time,
+    /// so a silently-swapped role could change every future widget's default feel with no trace.
+    /// </para>
     /// </summary>
     public static class NeoAnimatorRoles
     {
@@ -46,37 +55,46 @@ namespace Neo.UI
         public const string Loop = "Loop";
         public const string OneShot = "OneShot";
 
-        private static readonly List<NeoAnimatorRole> _roles = new List<NeoAnimatorRole>
+        private static readonly NeoRuntimeKeyedRegistry<NeoAnimatorRole> _registry =
+            new NeoRuntimeKeyedRegistry<NeoAnimatorRole>(
+                r => r.Id,
+                builtins: Builtins,
+                registryName: "NeoAnimatorRoles");
+
+        private static IEnumerable<NeoAnimatorRole> Builtins()
         {
-            new NeoAnimatorRole(ViewShow, "View — Show", "Plays when a view/container becomes visible.", "Show"),
-            new NeoAnimatorRole(ViewHide, "View — Hide", "Plays when a view/container is hidden.", "Hide"),
-            new NeoAnimatorRole(ButtonHover, "Button — Hover", "Plays while a button/selectable is hovered (highlighted).", "Hover"),
-            new NeoAnimatorRole(ButtonPress, "Button — Press", "Plays when a button/selectable is pressed or clicked.", "Press", "Click"),
-            new NeoAnimatorRole(ToggleOn, "Toggle — On", "Plays when a toggle/switch turns on.", "Toggle", "Show"),
-            new NeoAnimatorRole(ToggleOff, "Toggle — Off", "Plays when a toggle/switch turns off.", "Toggle", "Hide"),
-            new NeoAnimatorRole(Loop, "Loop", "Continuous ambient motion (idle pulse, spinner).", "Loop"),
-            new NeoAnimatorRole(OneShot, "One-shot", "A standalone animator played on demand from code.", "Click", "Show", "Loop"),
-        };
+            yield return new NeoAnimatorRole(ViewShow, "View — Show", "Plays when a view/container becomes visible.", "Show");
+            yield return new NeoAnimatorRole(ViewHide, "View — Hide", "Plays when a view/container is hidden.", "Hide");
+            yield return new NeoAnimatorRole(ButtonHover, "Button — Hover", "Plays while a button/selectable is hovered (highlighted).", "Hover");
+            yield return new NeoAnimatorRole(ButtonPress, "Button — Press", "Plays when a button/selectable is pressed or clicked.", "Press", "Click");
+            yield return new NeoAnimatorRole(ToggleOn, "Toggle — On", "Plays when a toggle/switch turns on.", "Toggle", "Show");
+            yield return new NeoAnimatorRole(ToggleOff, "Toggle — Off", "Plays when a toggle/switch turns off.", "Toggle", "Hide");
+            yield return new NeoAnimatorRole(Loop, "Loop", "Continuous ambient motion (idle pulse, spinner).", "Loop");
+            yield return new NeoAnimatorRole(OneShot, "One-shot", "A standalone animator played on demand from code.", "Click", "Show", "Loop");
+        }
 
         /// <summary> Every known role (built-ins + project-registered). </summary>
-        public static IReadOnlyList<NeoAnimatorRole> All => _roles;
+        public static IReadOnlyList<NeoAnimatorRole> All => _registry.All;
 
-        /// <summary> Registers a project-defined role (idempotent on id). Call once at editor/init time. </summary>
+        /// <summary>
+        /// Registers a project-defined role. A same-id registration REPLACES the existing role (unlike
+        /// most Pattern R registries, this logs a warning first — see the type doc) rather than silently
+        /// winning or losing. Call once at editor/init time.
+        /// </summary>
         public static void Register(NeoAnimatorRole role)
         {
-            if (role == null || string.IsNullOrEmpty(role.Id)) return;
-            if (TryGet(role.Id, out _)) return;
-            _roles.Add(role);
+            if (role != null && !string.IsNullOrEmpty(role.Id) && _registry.TryGet(role.Id, out _))
+            {
+                Debug.LogWarning($"[Neo.UI] NeoAnimatorRoles: role '{role.Id}' is already registered — replacing it.");
+            }
+            _registry.Register(role);
         }
 
-        public static bool TryGet(string id, out NeoAnimatorRole role)
-        {
-            for (int i = 0; i < _roles.Count; i++)
-                if (string.Equals(_roles[i].Id, id, System.StringComparison.Ordinal)) { role = _roles[i]; return true; }
-            role = null;
-            return false;
-        }
+        public static bool TryGet(string id, out NeoAnimatorRole role) => _registry.TryGet(id, out role);
 
         public static string DisplayName(string id) => TryGet(id, out NeoAnimatorRole r) ? r.DisplayName : id;
+
+        /// <summary> Test-only: clears every registration and forces a fresh built-ins seed on next access. </summary>
+        internal static void ResetForTests() => _registry.ResetForTests();
     }
 }

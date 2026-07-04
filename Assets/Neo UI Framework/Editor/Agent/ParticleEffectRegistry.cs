@@ -32,10 +32,11 @@ namespace Neo.UI.Editor
 
     /// <summary>
     /// Pattern-R registry of particle-module descriptors (mirrors <see cref="LayoutConstraints"/> /
-    /// <see cref="ShapeEffectRegistry"/>). Built-ins register in the static ctor in a FIXED order;
-    /// the exporter resolves a config back to its descriptor via <see cref="GetForConfig"/>.
-    /// <see cref="All"/> / <see cref="Get"/> / <see cref="GetForConfig"/> / <see cref="Register"/>
-    /// (replace-by-Id) / <see cref="ResetForTests"/>.
+    /// <see cref="ShapeEffectRegistry"/>). A thin public-static facade over the shared
+    /// <see cref="NeoKeyedRegistry{T}"/> base (Wave 4 Task 4.3) — built-ins are seeded lazily (once, in
+    /// a FIXED order) on first access; the exporter resolves a config back to its descriptor via
+    /// <see cref="GetForConfig"/>. <see cref="All"/> / <see cref="Get"/> / <see cref="GetForConfig"/> /
+    /// <see cref="Register"/> (replace-by-Id) / <see cref="ResetForTests"/>.
     /// </summary>
     public static class ParticleEffectRegistry
     {
@@ -48,71 +49,64 @@ namespace Neo.UI.Editor
         /// <summary> Built-in size-over-life module id. </summary>
         public const string SizeOverLife = "sizeOverLife";
 
-        private static readonly List<IParticleModuleDescriptor> _all = new List<IParticleModuleDescriptor>();
+        // Thin forwarder over the shared keyed base (Task 4.3) — no caller changes. Built-ins are
+        // seeded lazily (once, in a FIXED order) on first access rather than eagerly in a static ctor.
+        private static readonly NeoKeyedRegistry<IParticleModuleDescriptor> _registry =
+            new NeoKeyedRegistry<IParticleModuleDescriptor>(
+                key: d => d.Id,
+                builtins: Builtins,
+                registryName: "ParticleEffectRegistry");
 
-        static ParticleEffectRegistry()
+        private static IEnumerable<IParticleModuleDescriptor> Builtins()
         {
-            RegisterBuiltins();
-        }
-
-        private static void RegisterBuiltins()
-        {
-            Register(new GravityDescriptor());
-            Register(new DragDescriptor());
-            Register(new ColorOverLifeDescriptor());
-            Register(new SizeOverLifeDescriptor());
+            yield return new GravityDescriptor();
+            yield return new DragDescriptor();
+            yield return new ColorOverLifeDescriptor();
+            yield return new SizeOverLifeDescriptor();
         }
 
         /// <summary> Every registered descriptor (built-ins first, in registration order). </summary>
-        public static IReadOnlyList<IParticleModuleDescriptor> All => _all;
+        public static IReadOnlyList<IParticleModuleDescriptor> All => _registry.All;
 
         /// <summary> Finds the descriptor with the given id; null + warning when missing (no silent failure). </summary>
         public static IParticleModuleDescriptor Get(string id)
         {
-            if (!string.IsNullOrEmpty(id))
-                foreach (IParticleModuleDescriptor d in _all)
-                    if (d != null && d.Id == id) return d;
+            if (_registry.TryGet(id, out IParticleModuleDescriptor d)) return d;
             Debug.LogWarning($"ParticleEffectRegistry.Get: no particle module '{id}' registered — the module will be skipped. Register one in ParticleEffectRegistry, or check the spec.");
             return null;
         }
 
-        /// <summary> Finds the descriptor whose <see cref="IParticleModuleDescriptor.ConfigType"/> matches a config; null when unregistered. </summary>
+        /// <summary>
+        /// Finds the descriptor whose <see cref="IParticleModuleDescriptor.ConfigType"/> matches a
+        /// config; null + warning when unregistered (audit A3 — this used to fail silently while its
+        /// sibling <see cref="Get"/> warned).
+        /// </summary>
         public static IParticleModuleDescriptor GetForConfig(ParticleModuleConfig config)
         {
             if (config == null) return null;
             Type t = config.GetType();
-            foreach (IParticleModuleDescriptor d in _all)
+            foreach (IParticleModuleDescriptor d in _registry.All)
                 if (d != null && d.ConfigType == t) return d;
+            Debug.LogWarning($"ParticleEffectRegistry.GetForConfig: no descriptor registered for module config type '{t.Name}' — the module will be skipped on export. Register one in ParticleEffectRegistry.");
             return null;
         }
 
         /// <summary> Registers a descriptor, replacing any existing one with the same Id. </summary>
-        public static void Register(IParticleModuleDescriptor descriptor)
-        {
-            if (descriptor == null || string.IsNullOrEmpty(descriptor.Id))
-            {
-                Debug.LogWarning("ParticleEffectRegistry.Register ignored a descriptor with a null/empty Id.");
-                return;
-            }
-            for (int i = 0; i < _all.Count; i++)
-                if (_all[i].Id == descriptor.Id) { _all[i] = descriptor; return; }
-            _all.Add(descriptor);
-        }
+        public static void Register(IParticleModuleDescriptor descriptor) => _registry.Register(descriptor);
 
-        /// <summary> Test/seam hook: clear and re-seed the built-ins (static state survives a test run). </summary>
-        internal static void ResetForTests()
-        {
-            _all.Clear();
-            RegisterBuiltins();
-        }
+        /// <summary> Test/seam hook: clears every registration and forces a fresh built-ins seed on next access. </summary>
+        internal static void ResetForTests() => _registry.ResetForTests();
 
         // ----------------------------------------------------------------- param-bag helpers
 
+        // Thin forwarders onto the shared EffectParams home (audit D9) — kept here (same names/
+        // signatures) so existing callers (UISpecGenerator, the Effects/ descriptor files) never had
+        // to change.
         internal static float GetFloat(IDictionary<string, object> p, string key, float fallback) =>
-            p != null && p.TryGetValue(key, out object v) && v is double d ? (float)d : fallback;
+            EffectParams.GetFloat(p, key, fallback);
 
         internal static string GetString(IDictionary<string, object> p, string key, string fallback) =>
-            p != null && p.TryGetValue(key, out object v) && v != null ? v.ToString() : fallback;
+            EffectParams.GetString(p, key, fallback);
 
         internal static Vector2 GetVector2(IDictionary<string, object> p, string key, Vector2 fallback)
         {
@@ -228,20 +222,9 @@ namespace Neo.UI.Editor
         // ----------------------------------------------------------------- color ref round-trip
 
         /// <summary> "#hex" / "Category/Token" string → a theme-aware <see cref="ThemeColorRef"/>. </summary>
-        internal static ThemeColorRef ParseColorRef(string value)
-        {
-            if (string.IsNullOrEmpty(value)) return new ThemeColorRef(Color.white);
-            if (value.StartsWith("#"))
-                return ColorUtils.TryParseHex(value, out Color c)
-                    ? new ThemeColorRef(c)
-                    : new ThemeColorRef(Color.white);
-            return new ThemeColorRef(value); // a theme token ("Category/Name")
-        }
+        internal static ThemeColorRef ParseColorRef(string value) => EffectParams.ParseColorRef(value);
 
         /// <summary> A <see cref="ThemeColorRef"/> → its token string (or "#hex" when raw). </summary>
-        internal static string ColorRefToString(ThemeColorRef reference) =>
-            reference == null ? "#FFFFFFFF"
-            : reference.useToken ? reference.token
-            : ColorUtils.ToHex(reference.color);
+        internal static string ColorRefToString(ThemeColorRef reference) => EffectParams.ColorRefToString(reference);
     }
 }

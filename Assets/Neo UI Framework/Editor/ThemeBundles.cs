@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Neo.EditorUI;
@@ -10,92 +11,57 @@ namespace Neo.UI.Editor
     /// Pattern R registry of theme <see cref="ThemeBundles.Bundle"/>s — the extensibility seam for the
     /// curated bundle set. Seeded with the three package built-ins (CleanSlate / NeonArcade /
     /// SoftFantasy); a consuming project ships its own coherent look by calling
-    /// <see cref="Register"/> once from an <c>[InitializeOnLoad]</c> type, and it appears everywhere a
-    /// bundle can be picked (the Apply-Theme-Bundle menu, the inspector dropdown) and resolves through
-    /// the spec <c>"theme":{"bundle":"…"}</c> path. Editor-only (the editor is a single domain), so the
-    /// static seed is sufficient — no domain-reload survival needed.
+    /// <see cref="Register"/> once from an <c>[InitializeOnLoad]</c> type, OR by dropping a
+    /// <see cref="ThemeBundleDefinition"/> asset (discovered by the shared
+    /// <see cref="NeoAssetRegistry{TAsset,TEntry}"/> base) — and it appears everywhere a bundle can be
+    /// picked (the Apply-Theme-Bundle menu, the inspector dropdown) and resolves through the spec
+    /// <c>"theme":{"bundle":"…"}</c> path. Editor-only (the editor is a single domain), so the static
+    /// seed is sufficient — no domain-reload survival needed.
     /// </summary>
     public static class ThemeBundleRegistry
     {
-        private static readonly List<ThemeBundles.Bundle> _bundles = new List<ThemeBundles.Bundle>
-        {
-            ThemeBundles.CleanSlate, ThemeBundles.NeonArcade, ThemeBundles.SoftFantasy
-        };
-
-        private static bool _discovered;
+        // Bundle names are user-facing display strings picked from a menu/dropdown or authored in a spec's
+        // "theme":{"bundle":"…"} — keep matching case-insensitive (unlike most Neo.UI registries, which are
+        // ordinal) so "neonarcade" in a hand-typed spec still resolves to "NeonArcade".
+        private static readonly NeoAssetRegistry<ThemeBundleDefinition, ThemeBundles.Bundle> _registry =
+            new NeoAssetRegistry<ThemeBundleDefinition, ThemeBundles.Bundle>(
+                key: b => b.name,
+                project: def => def.ToBundle(),
+                comparison: StringComparison.OrdinalIgnoreCase,
+                builtins: () => new[] { ThemeBundles.CleanSlate, ThemeBundles.NeonArcade, ThemeBundles.SoftFantasy },
+                registryName: "ThemeBundleRegistry");
 
         /// <summary> All registered bundles, built-ins first, in registration order. </summary>
-        public static IReadOnlyList<ThemeBundles.Bundle> All { get { EnsureDiscovered(); return _bundles; } }
+        public static IReadOnlyList<ThemeBundles.Bundle> All => _registry.All;
 
         /// <summary> The names of every registered bundle — what the menu and inspector dropdown list. </summary>
-        public static IEnumerable<string> Names { get { EnsureDiscovered(); return _bundles.Select(b => b.name); } }
+        public static IEnumerable<string> Names => _registry.All.Select(b => b.name);
 
         /// <summary> Case-insensitive lookup by name. Returns false (and a null bundle) when nothing matches. </summary>
-        public static bool TryGet(string name, out ThemeBundles.Bundle bundle)
-        {
-            EnsureDiscovered();
-            bundle = _bundles.FirstOrDefault(b =>
-                string.Equals(b.name, name, System.StringComparison.OrdinalIgnoreCase));
-            return bundle != null;
-        }
+        public static bool TryGet(string name, out ThemeBundles.Bundle bundle) => _registry.TryGet(name, out bundle);
 
         /// <summary> Marks discovered <see cref="ThemeBundleDefinition"/> assets stale (asset post-processor hook). </summary>
-        public static void InvalidateDiscovery() => _discovered = false;
-
-        /// <summary> Lazily folds every <see cref="ThemeBundleDefinition"/> asset into the registry (a
-        /// discovered definition overrides a built-in of the same name via <see cref="Register"/>). </summary>
-        private static void EnsureDiscovered()
-        {
-            if (_discovered) return;
-            _discovered = true; // set first so Register can't recurse into discovery
-            foreach (string guid in AssetDatabase.FindAssets("t:ThemeBundleDefinition"))
-            {
-                var def = AssetDatabase.LoadAssetAtPath<ThemeBundleDefinition>(AssetDatabase.GUIDToAssetPath(guid));
-                if (def != null) Register(def.ToBundle());
-            }
-        }
+        public static void InvalidateDiscovery() => _registry.InvalidateDiscovery();
 
         /// <summary>
         /// Registers a bundle. If one with the same name already exists (case-insensitive) it is
         /// replaced in place (so a project can override a built-in); otherwise the bundle is appended.
+        /// A null/unnamed bundle is warned-and-ignored.
         /// </summary>
-        public static void Register(ThemeBundles.Bundle bundle)
-        {
-            if (bundle == null || string.IsNullOrEmpty(bundle.name))
-            {
-                Debug.LogWarning("[Neo.UI] ThemeBundleRegistry.Register ignored a null/unnamed bundle");
-                return;
-            }
-            int existing = _bundles.FindIndex(b =>
-                string.Equals(b.name, bundle.name, System.StringComparison.OrdinalIgnoreCase));
-            if (existing >= 0) _bundles[existing] = bundle;
-            else _bundles.Add(bundle);
-        }
+        public static void Register(ThemeBundles.Bundle bundle) => _registry.Register(bundle);
 
         /// <summary>
         /// Test-only: removes a registered bundle by name (case-insensitive). Not part of the public
         /// extensibility seam — exists so tests that register a probe can leave the static registry
         /// clean for sibling suites in the same domain. Returns true if a bundle was removed.
         /// </summary>
-        internal static bool Remove(string name) =>
-            _bundles.RemoveAll(b =>
-                string.Equals(b.name, name, System.StringComparison.OrdinalIgnoreCase)) > 0;
-    }
+        internal static bool Remove(string name) => _registry.Remove(name);
 
-    /// <summary> Invalidates theme-bundle discovery on any <c>.asset</c> import, so a freshly created/
-    /// edited <see cref="ThemeBundleDefinition"/> surfaces without a domain reload. </summary>
-    internal sealed class ThemeBundleDefinitionPostprocessor : AssetPostprocessor
-    {
-        private static void OnPostprocessAllAssets(
-            string[] imported, string[] deleted, string[] moved, string[] movedFrom)
-        {
-            foreach (string p in imported) if (IsAsset(p)) { ThemeBundleRegistry.InvalidateDiscovery(); return; }
-            foreach (string p in deleted) if (IsAsset(p)) { ThemeBundleRegistry.InvalidateDiscovery(); return; }
-            foreach (string p in moved) if (IsAsset(p)) { ThemeBundleRegistry.InvalidateDiscovery(); return; }
-        }
-
-        private static bool IsAsset(string p) =>
-            p != null && p.EndsWith(".asset", System.StringComparison.OrdinalIgnoreCase);
+        /// <summary>
+        /// Test-only: restores the registry to exactly the three code-seeded built-ins and forces a
+        /// fresh discovery on next access.
+        /// </summary>
+        internal static void ResetForTests() => _registry.ResetForTests();
     }
 
     /// <summary>

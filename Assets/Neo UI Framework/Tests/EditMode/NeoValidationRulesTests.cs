@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Neo.UI.Editor;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace Neo.UI.Tests
 {
@@ -74,6 +76,14 @@ namespace Neo.UI.Tests
 
             Assert.IsTrue(issues.Contains(tag), "a Hard rule must fire in ValidateAll");
             Assert.IsFalse(warnings.Contains(tag), "a Hard rule must NOT fire in ValidateDesign");
+        }
+
+        [Test]
+        public void Register_Null_WarnsAndIgnores_NeverThrows()
+        {
+            LogAssert.Expect(LogType.Warning, new Regex("NeoValidationRules: ignored a null rule"));
+            Assert.DoesNotThrow(() => NeoValidationRules.Register(null));
+            Assert.IsFalse(NeoValidationRules.All.Contains(null));
         }
 
         [Test]
@@ -156,6 +166,14 @@ namespace Neo.UI.Tests
 
             Assert.IsFalse(DeadButton(AgentValidation.ValidateAll()),
                 "once a provider claims it wired, the button must no longer be flagged dead");
+        }
+
+        [Test]
+        public void Register_Null_WarnsAndIgnores_NeverThrows()
+        {
+            LogAssert.Expect(LogType.Warning, new Regex("NeoInteractivityProviders: ignored a null provider"));
+            Assert.DoesNotThrow(() => NeoInteractivityProviders.Register(null));
+            Assert.IsFalse(NeoInteractivityProviders.All.Contains(null));
         }
     }
 }
