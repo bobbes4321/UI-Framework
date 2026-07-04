@@ -236,6 +236,11 @@ namespace Neo.UI.Editor
             sb.AppendLine();
 
             Section(sb, "Element kinds", ElementSpec.Kinds.OrderBy(k => k, StringComparer.Ordinal));
+            sb.AppendLine("`scroll` is a forgiving alias for `list` — accepted on parse, but always " +
+                          "normalized to `list` immediately, so an authored `scroll` element always " +
+                          "exports back as `list` (byte-stable; there is no separate `scroll` kind to " +
+                          "round-trip to).");
+            sb.AppendLine();
 
             sb.AppendLine("## Element fields");
             sb.AppendLine();

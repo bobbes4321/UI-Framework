@@ -60,7 +60,7 @@ namespace Neo.UI.Editor
         /// </summary>
         public static string Build(string flowName, string scenePath)
         {
-            string viewsFolder = $"{UISpecGenerator.GeneratedRoot}/Views";
+            string viewsFolder = UISpecGenerator.ViewsFolder;
             if (!AssetDatabase.IsValidFolder(viewsFolder)
                 || AssetDatabase.FindAssets("t:Prefab", new[] { viewsFolder }).Length == 0)
                 throw new System.InvalidOperationException(
@@ -207,7 +207,7 @@ namespace Neo.UI.Editor
                 FlowGraph match = flows.Find(g => MatchesFlowName(g, flowName));
                 if (match == null)
                     throw new System.InvalidOperationException(
-                        $"No generated flow named '{flowName}' under {UISpecGenerator.GeneratedRoot}/Flow " +
+                        $"No generated flow named '{flowName}' under {UISpecGenerator.FlowFolder} " +
                         $"(found: {string.Join(", ", flows.ConvertAll(FlowLabel))})");
                 return match;
             }
@@ -215,7 +215,7 @@ namespace Neo.UI.Editor
             if (flows.Count == 1) return flows[0];
 
             throw new System.InvalidOperationException(
-                $"{flows.Count} generated flows share {UISpecGenerator.GeneratedRoot}/Flow " +
+                $"{flows.Count} generated flows share {UISpecGenerator.FlowFolder} " +
                 $"({string.Join(", ", flows.ConvertAll(FlowLabel))}) — pass a flow name " +
                 "(scene builder: Build(name); agent: {\"action\":\"buildScene\",\"flow\":\"…\"}) " +
                 "so the scene isn't built from an arbitrary one.");
@@ -265,7 +265,7 @@ namespace Neo.UI.Editor
                 if (!present.Contains(key))
                     Debug.LogWarning(
                         $"[Neo.UI] Flow '{graph.graphName}' references view '{key}' but no generated prefab " +
-                        $"exists under {UISpecGenerator.GeneratedRoot}/Views — that navigation target will do nothing.");
+                        $"exists under {UISpecGenerator.ViewsFolder} — that navigation target will do nothing.");
         }
 
         private static RectTransform CreateCanvas(string name, int sortingOrder)
@@ -306,7 +306,7 @@ namespace Neo.UI.Editor
         private static List<GameObject> LoadGeneratedViewPrefabs(HashSet<string> wanted)
         {
             var prefabs = new List<GameObject>();
-            string folder = $"{UISpecGenerator.GeneratedRoot}/Views";
+            string folder = UISpecGenerator.ViewsFolder;
             if (!AssetDatabase.IsValidFolder(folder)) return prefabs;
             foreach (string guid in AssetDatabase.FindAssets("t:Prefab", new[] { folder }))
             {
@@ -323,7 +323,7 @@ namespace Neo.UI.Editor
         private static List<FlowGraph> LoadGeneratedFlowGraphs()
         {
             var graphs = new List<FlowGraph>();
-            string folder = $"{UISpecGenerator.GeneratedRoot}/Flow";
+            string folder = UISpecGenerator.FlowFolder;
             // "t:FlowGraph" rides the scripted-type search index, which can lag freshly created
             // assets in cold batch sessions — enumerate the folder on disk instead (anchored on
             // dataPath: Directory APIs resolve against the process CWD, which batch runs don't

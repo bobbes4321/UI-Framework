@@ -1034,9 +1034,13 @@ namespace Neo.UI.Editor
             {
                 Dictionary<string, object> body = JsonReader.GetObject(obj, kind);
                 if (body == null) continue;
+                // "scroll" is a forgiving alias for "list" — normalized here (parse time) rather
+                // than dual-accepted downstream, so an authored "scroll" element is byte-stable on
+                // export (it always re-serializes as "list", the canonical kind).
+                string resolvedKind = kind == "scroll" ? "list" : kind;
                 var spec = new ElementSpec
                 {
-                    kind = kind,
+                    kind = resolvedKind,
                     id = JsonReader.GetString(body, "id"),
                     label = JsonReader.GetString(body, "label"),
                     labelColor = JsonReader.GetString(body, "labelColor") ?? JsonReader.GetString(body, "color"),

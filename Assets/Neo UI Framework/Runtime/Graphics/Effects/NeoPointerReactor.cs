@@ -25,6 +25,11 @@ namespace Neo.UI
         [Tooltip("Tint of the follow-glow. A soft, semi-transparent white reads as a neutral spotlight.")]
         [SerializeField] private Color glowColor = new Color(1f, 1f, 1f, 0.5f);
 
+        [Tooltip("Theme token the glow color was authored from (empty when authored as a literal hex " +
+                 "color). Baked at generate time so the spec exporter can emit the token back instead " +
+                 "of a resolved hex, keeping a theme-token pointerGlow color live across round-trips.")]
+        [SerializeField] private string colorToken = "";
+
         [Tooltip("Diameter of the spawned glow follower, in canvas px.")]
         [SerializeField] private float glowSize = 120f;
 
@@ -52,6 +57,15 @@ namespace Neo.UI
                 glowColor = value;
                 if (follower != null && follower.TryGetComponent(out NeoShape shape)) shape.color = value;
             }
+        }
+
+        /// <summary> Theme token the glow color was authored from, or empty when authored as a literal
+        /// hex color. Set by the generator alongside <see cref="GlowColor"/> so the exporter can round-trip
+        /// a theme-token pointerGlow color instead of freezing it to a resolved hex value. </summary>
+        public string ColorToken
+        {
+            get => colorToken;
+            set => colorToken = value;
         }
 
         /// <summary> Diameter of the spawned glow follower in canvas px. </summary>

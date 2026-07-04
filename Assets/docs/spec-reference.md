@@ -8,6 +8,8 @@ A spec is JSON with optional top-level sections: `theme`, `presets`, `views`, `p
 
 `button`, `cheats`, `counter`, `dropdown`, `grid`, `hstack`, `icon`, `image`, `input`, `list`, `overlay`, `panel`, `progress`, `safearea`, `scroll`, `settings`, `shape`, `slider`, `spacer`, `stepper`, `switch`, `tab`, `tabbar`, `text`, `toggle`, `vstack`
 
+`scroll` is a forgiving alias for `list` — accepted on parse, but always normalized to `list` immediately, so an authored `scroll` element always exports back as `list` (byte-stable; there is no separate `scroll` kind to round-trip to).
+
 ## Element fields
 
 Per-element JSON keys (an element is `{ "<kind>": { ...fields } }`). Fields apply only to the kinds that use them.

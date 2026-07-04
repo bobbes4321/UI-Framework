@@ -308,7 +308,12 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   resolved at generate as the BASE with element fields overriding; exports as the preset name + only
   the override delta via `WidgetPresetTag`, so the link survives round-trip — see
   `widget-presets-plan.md`; the preset's `motion` field seeds the element's on-start `loop` animation
-  channel, stripped back out on export like any other delta), `icon` + `badge` on button/tab, `gradient` `{from,to,angle}` on shape/image
+  channel, stripped back out on export like any other delta. Which fields a preset governs lives in
+  ONE place, `Editor/Agent/PresetFields.cs` — an ordered `PresetField` descriptor table (name +
+  element/preset get-set-clear + equality) looped over by the generator's merge, the exporter's
+  delta, and native authoring's Apply/Create/Update/Reset preset workflow; a project adds a custom
+  preset-governed field via `PresetFields.Register` — the extension seam — instead of touching any
+  of those call sites), `icon` + `badge` on button/tab, `gradient` `{from,to,angle}` on shape/image
   (rides NeoGradient, tokens stay live), `src` on image (sprite asset path — rides an NeoShape
   texture fill so `radius` rounds the corners; full-rect sprites only, the shared material
   survives because the texture binds per CanvasRenderer; missing sprites report an issue),

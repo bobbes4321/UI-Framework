@@ -142,10 +142,10 @@ namespace Neo.UI.Editor.Authoring
 
         /// <summary>
         /// Re-styles <paramref name="widget"/> to a reusable <see cref="NeoWidgetPreset"/> by rebuilding it
-        /// through the generator under that preset. Keeps the widget's identity + content (kind/id/label/icon)
-        /// but drops its captured styling so the PRESET drives the look (otherwise the element's own
-        /// variant/size/shape would override the preset and nothing would change). Placement and sibling
-        /// order are preserved; the swap is one undo step.
+        /// through the generator under that preset. Keeps the widget's identity + content (kind/id/label)
+        /// but drops every preset-governed field (incl. icon — see <see cref="PresetFields"/>) so the
+        /// PRESET drives the look (otherwise the widget's own old values would override the preset and
+        /// nothing would change). Placement and sibling order are preserved; the swap is one undo step.
         /// </summary>
         public static GameObject ApplyPreset(GameObject widget, string presetName)
         {
@@ -153,11 +153,14 @@ namespace Neo.UI.Editor.Authoring
             ElementSpec current = ExportForPresetWorkflow(widget);
             if (current == null) return null; // already warned
 
-            var spec = new ElementSpec
-            {
-                kind = current.kind, id = current.id, label = current.label, icon = current.icon,
-                preset = presetName,
-            };
+            // Keep identity + content (kind/id/label) but explicitly clear every preset-governed field via
+            // the shared PresetFields table so the PRESET's own values win when it's resolved at generate.
+            // Routing this through the table (instead of hand-listing kind/id/label/icon, as before) is
+            // what fixes the audit's icon-clobber bug: icon is preset-governed, so it's cleared here
+            // instead of being carried over from the widget's old value.
+            var spec = new ElementSpec { kind = current.kind, id = current.id, label = current.label };
+            foreach (PresetField field in PresetFields.All) field.clearElement(spec);
+            spec.preset = presetName;
             return RebuildInPlace(widget, spec, "Apply Neo Preset", $"applying preset '{presetName}'");
         }
 
@@ -168,7 +171,6 @@ namespace Neo.UI.Editor.Authoring
         /// relinks the widget to it via <see cref="ApplyPreset"/> (its overrides become the preset's base).
         /// Returns the created preset, or null (with a warning) if the widget isn't a recognized Neo
         /// widget or <paramref name="assetPath"/> is empty.
-        /// // TODO(Wave 5): route the field list through the shared PresetFields helper (Task 5.3; audit D1).
         /// </summary>
         public static NeoWidgetPreset CreatePresetFromWidget(GameObject widget, string assetPath)
         {
@@ -216,7 +218,7 @@ namespace Neo.UI.Editor.Authoring
         /// Clears <paramref name="widget"/>'s preset-governed style overrides so it falls back to its
         /// linked preset's own values — the native counterpart to the (doomed) Composer's "Reset To Preset"
         /// (<c>SpecInspector.ResetElementToPreset</c>). Unlike <see cref="ApplyPreset"/> (which drops every
-        /// field back to bare kind/id/label/icon), this only clears the preset-governed fields, so layout,
+        /// field back to bare kind/id/label), this only clears the preset-governed fields, so layout,
         /// bindings, and other element-owned data survive the reset. Rebuilds in place, preserving
         /// placement/sibling order. No-ops (with a warning) when the widget isn't linked to a preset.
         /// </summary>
@@ -268,38 +270,21 @@ namespace Neo.UI.Editor.Authoring
             return UISpecExporter.ExportElement(widget, inLayout);
         }
 
-        /// <summary> Copies the preset-governed fields FROM <paramref name="element"/> ONTO <paramref name="preset"/>.
-        /// Mirrors the (doomed) Composer's <c>SpecInspector.CapturePreset</c> field-for-field (includes
-        /// <c>padding4</c> — audit D1) so both surfaces agree on which fields a preset owns. </summary>
+        /// <summary> Copies the preset-governed fields FROM <paramref name="element"/> ONTO <paramref name="preset"/>,
+        /// via the shared <see cref="PresetFields"/> table (audit D1) so this always agrees with the
+        /// generator's merge and the exporter's delta on which fields a preset owns. </summary>
         private static void CapturePresetFields(NeoWidgetPreset preset, ElementSpec element)
         {
-            preset.variant = element.variant;
-            preset.sizeVariant = element.sizeVariant;
-            preset.textStyle = element.textStyle;
-            preset.shapeStyle = element.style;
-            preset.background = element.background;
-            preset.labelColor = element.labelColor;
-            preset.icon = element.icon;
-            preset.padding4 = element.padding4;
-            preset.radius = element.radius ?? -1f;
-            preset.padding = element.padding ?? -1f;
-            preset.spacing = element.spacing ?? -1f;
-            preset.motion = element.animations?.loop; // the loop animation is the preset's "motion"
+            foreach (PresetField field in PresetFields.All)
+                field.setPreset(preset, field.getElement(element));
         }
 
-        /// <summary> Nulls out every preset-governed field on <paramref name="element"/> in place. Mirrors
-        /// the (doomed) Composer's <c>SpecInspector.ResetElementToPreset</c> field-for-field. </summary>
+        /// <summary> Nulls out every preset-governed field on <paramref name="element"/> in place, via the
+        /// shared <see cref="PresetFields"/> table (audit D1). </summary>
         private static void ClearPresetGovernedFields(ElementSpec element)
         {
-            element.variant = null; element.sizeVariant = null; element.textStyle = null; element.style = null;
-            element.background = null; element.labelColor = null; element.icon = null;
-            element.radius = null; element.padding = null; element.spacing = null; element.padding4 = null;
-            // motion maps to the loop channel; clear only that, leaving the element's own hover/press intact.
-            if (element.animations != null)
-            {
-                element.animations.loop = null;
-                if (element.animations.IsEmpty) element.animations = null;
-            }
+            foreach (PresetField field in PresetFields.All)
+                field.clearElement(element);
         }
 
         /// <summary>

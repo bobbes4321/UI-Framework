@@ -92,6 +92,16 @@ namespace Neo.UI.Editor
         public const string StepperButtonSuffixMinus = "_Minus";
         public const string StepperButtonSuffixPlus = "_Plus";
 
+        // tab child-name prefix — the exporter/generator address a tabbar's tab GameObjects by this
+        public const string TabPrefix = "Tab_";
+        public static string TabName(string name) => $"{TabPrefix}{name}";
+
+        // popup chrome child names — matched by name on export to distinguish factory chrome from
+        // authored content elements (an authored element id sanitizing to one of these is chrome-shadowed)
+        public const string PopupTitleName = "Title";
+        public const string PopupMessageName = "Message";
+        public const string PopupButtonsName = "Buttons";
+
         // ------------------------------------------------------------------ anchor presets
 
         private struct AnchorPreset
@@ -841,7 +851,7 @@ namespace Neo.UI.Editor
             string label, UIToggleGroup group, bool startOn = false, string icon = null,
             string variant = null)
         {
-            GameObject go = CreateRect(parent, $"Tab_{name}", new Vector2(120f, 44f));
+            GameObject go = CreateRect(parent, TabName(name), new Vector2(120f, 44f));
             NeoShape tabShape = AddShape(go, ShapeType.RoundedRect, 10f);
             var tab = go.AddComponent<UITab>();
             tab.id = new ToggleId(category, name);
@@ -1058,12 +1068,12 @@ namespace Neo.UI.Editor
             GameObject go = CreatePopupShell(popupName, PopupDefaultCardSize, out RectTransform content);
             var popup = go.GetComponent<UIPopup>();
 
-            TextMeshProUGUI titleLabel = CreateLabel(content, title, TokenTextStrong, 28f, "Title",
+            TextMeshProUGUI titleLabel = CreateLabel(content, title, TokenTextStrong, 28f, PopupTitleName,
                 textStyle: TextStyleHeading);
-            TextMeshProUGUI messageLabel = CreateLabel(content, message, TokenTextDefault, 22f, "Message",
+            TextMeshProUGUI messageLabel = CreateLabel(content, message, TokenTextDefault, 22f, PopupMessageName,
                 textStyle: TextStyleBody);
 
-            GameObject buttonRow = CreateRect(content, "Buttons", new Vector2(0f, 56f));
+            GameObject buttonRow = CreateRect(content, PopupButtonsName, new Vector2(0f, 56f));
             var row = buttonRow.AddComponent<HorizontalLayoutGroup>();
             row.spacing = 12f;
             row.childAlignment = TextAnchor.MiddleCenter;

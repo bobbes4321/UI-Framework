@@ -145,7 +145,7 @@ namespace Neo.UI.Editor
             foreach (string warning in design) summary.Add($"{look}: design: {warning}");
 
             int captured = 0;
-            string folder = $"{UISpecGenerator.GeneratedRoot}/Views";
+            string folder = UISpecGenerator.ViewsFolder;
             foreach (string guid in AssetDatabase.FindAssets("t:Prefab", new[] { folder }))
             {
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guid));

@@ -51,13 +51,19 @@ namespace Neo.UI.Editor
                 else spec.settings.Add(catalogSpec);
             }
 
-            var responsiveRoots = new List<UIResponsiveRoot>();
-            foreach (string guid in FindGenerated("t:Prefab", $"{UISpecGenerator.GeneratedRoot}/Views"))
+            // views (sorted by id so export stays idempotent regardless of asset-scan order)
+            var views = new List<UIView>();
+            foreach (string guid in FindGenerated("t:Prefab", UISpecGenerator.ViewsFolder))
             {
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guid));
-                if (prefab == null || prefab.GetComponent<UIView>() == null) continue;
-                spec.views.Add(ExportView(prefab));
-                var responsive = prefab.GetComponent<UIResponsiveRoot>();
+                UIView view = prefab != null ? prefab.GetComponent<UIView>() : null;
+                if (view != null) views.Add(view);
+            }
+            var responsiveRoots = new List<UIResponsiveRoot>();
+            foreach (UIView view in views.OrderBy(v => v.id.ToString(), System.StringComparer.Ordinal))
+            {
+                spec.views.Add(ExportView(view.gameObject));
+                var responsive = view.GetComponent<UIResponsiveRoot>();
                 if (responsive != null) responsiveRoots.Add(responsive);
             }
 
@@ -65,21 +71,32 @@ namespace Neo.UI.Editor
             // tables on the views' UIResponsiveRoots, deduped by name preserving first-seen order.
             ReconstructBreakpoints(spec, responsiveRoots);
 
-            foreach (string guid in FindGenerated("t:Prefab", $"{UISpecGenerator.GeneratedRoot}/Popups"))
+            // popups (sorted by name so export stays idempotent regardless of asset-scan order)
+            var popups = new List<UIPopup>();
+            foreach (string guid in FindGenerated("t:Prefab", UISpecGenerator.PopupsFolder))
             {
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guid));
                 UIPopup popup = prefab != null ? prefab.GetComponent<UIPopup>() : null;
-                if (popup == null) continue;
-                spec.popups.Add(ExportPopup(popup));
+                if (popup != null) popups.Add(popup);
             }
+            foreach (UIPopup popup in popups.OrderBy(p => p.popupName, System.StringComparer.Ordinal))
+                spec.popups.Add(ExportPopup(popup));
 
-            foreach (string guid in FindGenerated("t:FlowGraph", $"{UISpecGenerator.GeneratedRoot}/Flow"))
+            // flow graphs (sorted by name so which graph exports is deterministic, not scan-order
+            // dependent). NOTE: UISpec.flow is a single FlowSpec, not a list, so only the
+            // alphabetically-first graph is exported when more than one lives in the shared
+            // GeneratedRoot/Flow folder — exporting every flow graph needs an additive schema change
+            // (spec.flow -> a list) that is out of scope here; see the caller's task notes.
+            var flowGraphs = new List<FlowGraph>();
+            foreach (string guid in FindGenerated("t:FlowGraph", UISpecGenerator.FlowFolder))
             {
                 var graph = AssetDatabase.LoadAssetAtPath<FlowGraph>(AssetDatabase.GUIDToAssetPath(guid));
-                if (graph == null) continue;
-                spec.flow = ExportFlow(graph);
-                break; // one navigation graph per spec
+                if (graph != null) flowGraphs.Add(graph);
             }
+            FlowGraph selectedFlow = flowGraphs
+                .OrderBy(g => string.IsNullOrEmpty(g.graphName) ? g.name : g.graphName, System.StringComparer.Ordinal)
+                .FirstOrDefault();
+            if (selectedFlow != null) spec.flow = ExportFlow(selectedFlow);
 
             return spec;
         }
@@ -113,12 +130,13 @@ namespace Neo.UI.Editor
             Transform contentHost = card.Find(UIWidgetFactory.ContentName);
             if (contentHost == null) return popupSpec;
 
-            popupSpec.title = FindChildText(contentHost.gameObject, "Title")?.text;
-            popupSpec.message = FindChildText(contentHost.gameObject, "Message")?.text;
+            popupSpec.title = FindChildText(contentHost.gameObject, UIWidgetFactory.PopupTitleName)?.text;
+            popupSpec.message = FindChildText(contentHost.gameObject, UIWidgetFactory.PopupMessageName)?.text;
 
             foreach (Transform child in contentHost)
             {
-                if (child.name == "Title" || child.name == "Message" || child.name == "Buttons") continue;
+                if (child.name == UIWidgetFactory.PopupTitleName || child.name == UIWidgetFactory.PopupMessageName ||
+                    child.name == UIWidgetFactory.PopupButtonsName) continue;
                 ElementSpec element = ExportElement(child.gameObject, inLayout: true);
                 if (element != null) popupSpec.elements.Add(element);
             }
@@ -447,42 +465,18 @@ namespace Neo.UI.Editor
                 return;
             }
 
-            if (element.variant == p.variant) element.variant = null;
-            if (element.sizeVariant == p.sizeVariant) element.sizeVariant = null;
-            if (element.textStyle == p.textStyle) element.textStyle = null;
-            if (element.style == p.shapeStyle) element.style = null;
-            if (element.background == p.background) element.background = null;
-            if (element.labelColor == p.labelColor) element.labelColor = null;
-            if (element.icon == p.icon) element.icon = null;
-            if (NullableFloatEq(element.radius, p.RadiusOrNull)) element.radius = null;
-            if (NullableFloatEq(element.padding, p.PaddingOrNull)) element.padding = null;
-            if (FloatArrayEq(element.padding4, p.Padding4OrNull)) element.padding4 = null;
-            if (NullableFloatEq(element.spacing, p.SpacingOrNull)) element.spacing = null;
-
-            // Motion seeds the element's `loop` channel at generate; strip it back out when it still
-            // equals the preset's motion so the spec keeps only the override delta (a different loop the
-            // author set explicitly survives). Drop the whole animations object if nothing else remains.
-            if (element.animations != null && element.animations.loop == p.motion
-                && !string.IsNullOrEmpty(p.motion))
+            // One descriptor table drives every preset-governed field (audit D1) — a field that still
+            // equals the preset's value is cleared, so the export keeps only the override delta. "motion"
+            // is one of these fields (a custom get/set/clear — see PresetFields.MotionField): it strips
+            // the element's `loop` channel back out when it still equals the preset's motion (a different
+            // loop the author set explicitly survives) and drops the whole animations object if nothing
+            // else remains.
+            foreach (PresetField field in PresetFields.All)
             {
-                element.animations.loop = null;
-                if (element.animations.IsEmpty) element.animations = null;
+                object elementValue = field.getElement(element);
+                object presetValue = field.getPreset(p);
+                if (field.equal(elementValue, presetValue)) field.clearElement(element);
             }
-        }
-
-        private static bool NullableFloatEq(float? a, float? b)
-        {
-            if (!a.HasValue || !b.HasValue) return a.HasValue == b.HasValue;
-            return Mathf.Approximately(a.Value, b.Value);
-        }
-
-        private static bool FloatArrayEq(float[] a, float[] b)
-        {
-            if (a == null || b == null) return a == null && b == null;
-            if (a.Length != b.Length) return false;
-            for (int i = 0; i < a.Length; i++)
-                if (!Mathf.Approximately(a[i], b[i])) return false;
-            return true;
         }
 
         private static ElementSpec ExportElementBody(GameObject go, bool inLayout)
@@ -610,6 +604,7 @@ namespace Neo.UI.Editor
                     kind = "tab",
                     id = tab.id.ToString(),
                     label = tabLabel?.text,
+                    labelColor = tabLabel?.GetComponent<ThemeColorTarget>()?.token,
                     icon = ExportIconName(go),
                     badge = ExportBadgeCount(go),
                     textStyle = tabLabel?.GetComponent<ThemeTextStyleTarget>()?.style,
@@ -633,6 +628,7 @@ namespace Neo.UI.Editor
                     kind = isSwitch ? "switch" : "toggle",
                     id = toggle.id.ToString(),
                     label = toggleLabel?.text,
+                    labelColor = toggleLabel?.GetComponent<ThemeColorTarget>()?.token,
                     textStyle = toggleLabel?.GetComponent<ThemeTextStyleTarget>()?.style,
                     background = go.GetComponent<ThemeColorTarget>()?.token,
                     group = toggle.toggleGroup != null ? toggle.toggleGroup.id.Name : null,
@@ -663,11 +659,34 @@ namespace Neo.UI.Editor
                 UIActionBehaviour click = button.GetBehaviour(BehaviourTrigger.Click);
                 if (click != null && click.sendSignal && !click.signalStream.isDefault)
                     element.onClickSignal = new SignalRefSpec { category = click.signalStream.Category, name = click.signalStream.Name };
-                var viewCommand = go.GetComponent<ViewCommandOnClick>();
-                if (viewCommand != null)
+                // A button can carry BOTH a Show and a Hide command (two separate components) — walk
+                // all of them rather than one GetComponent, or the second command is silently lost.
+                // A duplicate of the SAME command keeps the first and warns (no-silent-failure).
+                bool sawShowCommand = false, sawHideCommand = false;
+                foreach (ViewCommandOnClick viewCommand in go.GetComponents<ViewCommandOnClick>())
                 {
-                    if (viewCommand.command == ViewCommandOnClick.Command.Show) element.onClickShowView = viewCommand.view.ToString();
-                    else element.onClickHideView = viewCommand.view.ToString();
+                    if (viewCommand.command == ViewCommandOnClick.Command.Show)
+                    {
+                        if (sawShowCommand)
+                        {
+                            Debug.LogWarning($"[Neo.UI] Element '{button.id}' has more than one onClick " +
+                                             $"Show view command — keeping '{element.onClickShowView}', ignoring '{viewCommand.view}'.");
+                            continue;
+                        }
+                        sawShowCommand = true;
+                        element.onClickShowView = viewCommand.view.ToString();
+                    }
+                    else
+                    {
+                        if (sawHideCommand)
+                        {
+                            Debug.LogWarning($"[Neo.UI] Element '{button.id}' has more than one onClick " +
+                                             $"Hide view command — keeping '{element.onClickHideView}', ignoring '{viewCommand.view}'.");
+                            continue;
+                        }
+                        sawHideCommand = true;
+                        element.onClickHideView = viewCommand.view.ToString();
+                    }
                 }
                 var popupOnClick = go.GetComponent<ShowPopupOnClick>();
                 if (popupOnClick != null) element.onClickPopup = popupOnClick.popupName;
@@ -857,8 +876,13 @@ namespace Neo.UI.Editor
                     float outlineWidth = text.fontSharedMaterial.GetFloat(ShaderUtilities.ID_OutlineWidth);
                     if (outlineWidth > 0f)
                     {
-                        textElement.outlineColor = ColorUtils.ToHex(
-                            text.fontSharedMaterial.GetColor(ShaderUtilities.ID_OutlineColor));
+                        // the outline bakes into a shared material (no live token at runtime), so a
+                        // theme-token ref is carried separately on ThemeColorTarget.outlineToken —
+                        // prefer it over the frozen hex so the token link survives round-trip.
+                        string outlineToken = go.GetComponent<ThemeColorTarget>()?.outlineToken;
+                        textElement.outlineColor = !string.IsNullOrEmpty(outlineToken)
+                            ? outlineToken
+                            : ColorUtils.ToHex(text.fontSharedMaterial.GetColor(ShaderUtilities.ID_OutlineColor));
                         textElement.outlineWidth = outlineWidth;
                     }
                 }
@@ -1018,7 +1042,9 @@ namespace Neo.UI.Editor
         }
 
         /// <summary>
-        /// Reconstructs a <see cref="NeoPointerReactor"/> (pointer-follow glow) to spec form. Color is
+        /// Reconstructs a <see cref="NeoPointerReactor"/> (pointer-follow glow) to spec form. When the
+        /// glow was authored from a theme token, <see cref="NeoPointerReactor.ColorToken"/> carries it
+        /// and is emitted verbatim (keeping the token link live); otherwise the resolved color is
         /// written as <c>#RRGGBBAA</c> so it round-trips deterministically. Null when none attached.
         /// </summary>
         private static PointerGlowSpec ExportPointerGlow(GameObject go)
@@ -1027,7 +1053,9 @@ namespace Neo.UI.Editor
             if (reactor == null) return null;
             return new PointerGlowSpec
             {
-                color = "#" + ColorUtility.ToHtmlStringRGBA(reactor.GlowColor),
+                color = !string.IsNullOrEmpty(reactor.ColorToken)
+                    ? reactor.ColorToken
+                    : "#" + ColorUtility.ToHtmlStringRGBA(reactor.GlowColor),
                 size = reactor.GlowSize,
                 softness = reactor.GlowSoftness
             };

@@ -220,7 +220,7 @@ namespace Neo.UI.Editor
 
         private static IEnumerable<GameObject> LoadGeneratedPrefabs()
         {
-            string folder = $"{UISpecGenerator.GeneratedRoot}/Views";
+            string folder = UISpecGenerator.ViewsFolder;
             if (!AssetDatabase.IsValidFolder(folder)) yield break;
             foreach (string guid in AssetDatabase.FindAssets("t:Prefab", new[] { folder }))
             {

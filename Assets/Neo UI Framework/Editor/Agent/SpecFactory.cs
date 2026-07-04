@@ -13,6 +13,11 @@ namespace Neo.UI.Editor
     {
         public static ElementSpec NewElement(string kind)
         {
+            // "scroll" is a forgiving alias for "list" (ElementSpec.Parse normalizes the same way for
+            // spec-authored elements) — native-authoring callers (NeoCreateMenu's "Scroll" item,
+            // NeoWidgetPalette) mint an ElementSpec directly here, bypassing Parse, so the alias is
+            // normalized here too rather than reintroducing a dual-accept in the generator switch.
+            if (kind == "scroll") kind = "list";
             var element = new ElementSpec { kind = kind };
             switch (kind)
             {

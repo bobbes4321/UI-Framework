@@ -14,6 +14,12 @@ namespace Neo.UI
         [Tooltip("Theme token name, e.g. Primary / Background / TextDefault")]
         public string token;
 
+        [Tooltip("Theme token the text SDF outline color was authored from (empty when the outline was " +
+                 "authored as a literal hex color, or when this element has no outline). The outline " +
+                 "itself is baked into a shared material at generate time — this field exists purely so " +
+                 "the spec exporter can hand back the authored token instead of a frozen hex value.")]
+        public string outlineToken;
+
         [Tooltip("Leave empty to use the active theme from settings")]
         public Theme themeOverride;
 
