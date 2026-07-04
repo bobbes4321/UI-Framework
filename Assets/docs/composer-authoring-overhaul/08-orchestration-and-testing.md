@@ -1,5 +1,7 @@
 # Orchestration — Waves, Dependencies, Verification, Risk, Migration, DoD
 
+> Status: retired 2026-07 — the Composer was removed; native authoring supersedes it; see CLAUDE.md.
+
 [← Master plan](00-master-plan.md) · Prev: [07 — Fidelity](07-preview-fidelity.md)
 
 > The operational playbook for orchestrating the waves of parallel worktree agents.

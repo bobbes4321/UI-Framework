@@ -1,5 +1,7 @@
 # Pillar B — Breakpoint / Orientation Override System
 
+> Status: retired 2026-07 — the Composer was removed; native authoring supersedes it; see CLAUDE.md.
+
 [← Master plan](00-master-plan.md) · Prev: [01 — Layout](01-responsive-layout-foundation.md) · Next: [03 — Viewport](03-free-viewport.md)
 
 > The deep one. A view authors a **base** layout (Pillar A); a `breakpoints` section + per-element

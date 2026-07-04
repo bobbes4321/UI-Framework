@@ -1,5 +1,7 @@
 # Composer Authoring Overhaul — Master Plan
 
+> Status: retired 2026-07 — the Composer was removed; native authoring supersedes it; see CLAUDE.md.
+
 > Status: planning. Author: lead architect. Target branch: `composer-authoring-overhaul`.
 > All file paths are relative to `Assets/Neo UI Framework/` unless absolute.
 > Verified against the live codebase (file:line references throughout) — agents must re-verify before editing.

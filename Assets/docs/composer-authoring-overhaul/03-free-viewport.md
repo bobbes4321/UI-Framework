@@ -1,5 +1,7 @@
 # Pillar C — Free, Draggable, Resizable Viewport
 
+> Status: retired 2026-07 — the Composer was removed; native authoring supersedes it; see CLAUDE.md.
+
 [← Master plan](00-master-plan.md) · Prev: [02 — Breakpoints](02-breakpoint-override-system.md) · Next: [04 — Canvas](04-direct-manipulation-canvas.md)
 
 > Solves pain point #1 ("only a fixed amount of aspect ratios"). **Composer/preview-only — touches

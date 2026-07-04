@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Neo.UI.Editor.Composer
+namespace Neo.UI.Editor
 {
     /// <summary>
     /// A single device preset the Composer's viewport (and the headless agent

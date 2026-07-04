@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Neo.UI.Editor;
-using Neo.UI.Editor.Composer;
 using NUnit.Framework;
 
 namespace Neo.UI.Tests
@@ -8,9 +7,7 @@ namespace Neo.UI.Tests
     /// <summary>
     /// The reference Pattern-R registry (the shape the whole extensibility-seams family mirrors):
     /// <see cref="NeoCatalogKinds"/> ships the two built-ins through the seam, and
-    /// <see cref="NeoCatalogKinds.Register"/> adds/replaces a kind by id. Mirrors
-    /// <c>SpecFieldCatalogTests.AddPicker_IsExactlyTheSpecKindList</c>: the chrome's option list must
-    /// equal <see cref="NeoCatalogKinds.All"/>.
+    /// <see cref="NeoCatalogKinds.Register"/> adds/replaces a kind by id.
     /// </summary>
     public class NeoCatalogKindsTests
     {
@@ -67,19 +64,6 @@ namespace Neo.UI.Tests
             Assert.IsTrue(NeoCatalogKinds.TryGet(id, out CatalogKind got2));
             Assert.AreEqual("Debug2", got2.label);
             Assert.AreSame(secondStore, got2.list(new UISpec()));
-        }
-
-        [Test]
-        public void AddPicker_OptionsEqual_All()
-        {
-            // the "+ Menu ▾" picker is exactly the registered kind list, in order
-            var expected = new List<string>();
-            foreach (CatalogKind kind in NeoCatalogKinds.All) expected.Add(kind.label);
-            CollectionAssert.AreEqual(expected, SpecTreeView.CatalogKindLabels());
-
-            // and each label round-trips back to its id
-            foreach (CatalogKind kind in NeoCatalogKinds.All)
-                Assert.AreEqual(kind.id, SpecTreeView.CatalogKindIdForLabel(kind.label));
         }
     }
 }

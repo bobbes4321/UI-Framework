@@ -1,5 +1,7 @@
 # Pillar G — Preview Fidelity & Polish
 
+> Status: retired 2026-07 — the Composer was removed; native authoring supersedes it; see CLAUDE.md.
+
 [← Master plan](00-master-plan.md) · Prev: [06 — Inspector](06-inspector-overhaul.md) · Next: [08 — Orchestration](08-orchestration-and-testing.md)
 
 > The final polish wave. Live theme recolor, live sample data in bound lists, optional live flow

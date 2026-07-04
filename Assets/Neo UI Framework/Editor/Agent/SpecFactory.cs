@@ -1,13 +1,15 @@
 using System.Collections.Generic;
 
-namespace Neo.UI.Editor.Composer
+namespace Neo.UI.Editor
 {
     /// <summary>
     /// Builds new spec nodes with sensible defaults, and deep-clones existing ones. Clones go through
     /// the spec's own JSON round-trip (<c>ToJsonObject</c> → <c>Parse</c>) so a duplicate is exactly
-    /// what a regenerate would see — no field is ever missed.
+    /// what a regenerate would see — no field is ever missed. Shared by native-authoring
+    /// (<see cref="Authoring.NeoSceneAuthoring"/>) and anything else that needs to stamp out a default
+    /// spec node.
     /// </summary>
-    public static class ComposerFactory
+    public static class SpecFactory
     {
         public static ElementSpec NewElement(string kind)
         {

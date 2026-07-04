@@ -1,7 +1,6 @@
 using System.IO;
 using Neo.UI.Editor;
 using Neo.UI.Editor.Authoring;
-using Neo.UI.Editor.Composer; // ComposerFactory
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -61,7 +60,7 @@ namespace Neo.UI.Tests
             var viewSpec = new ViewSpec { category = "Cap", viewName = "Main" };
             _viewGo = UISpecGenerator.BuildViewGameObject(viewSpec, _settings, new GenerateReport());
             UISpecGenerator.BuildElementLive(
-                ComposerFactory.NewElement("button"), (RectTransform)_viewGo.transform,
+                SpecFactory.NewElement("button"), (RectTransform)_viewGo.transform,
                 _settings, new GenerateReport());
             var view = _viewGo.GetComponent<UIView>();
 

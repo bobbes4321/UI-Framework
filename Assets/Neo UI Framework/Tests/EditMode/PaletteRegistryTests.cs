@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Neo.UI.Editor;
 using Neo.UI.Editor.Authoring;
-using Neo.UI.Editor.Composer;
 using NUnit.Framework;
 using UnityEngine;
 

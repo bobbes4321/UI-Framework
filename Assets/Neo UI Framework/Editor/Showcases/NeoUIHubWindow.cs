@@ -16,8 +16,8 @@ namespace Neo.UI.Editor
     /// <item><b>Showcases</b> — a <b>setup-status strip</b> (Settings / Starter Kit / Fonts indicators +
     ///   Repair All), then a <b>searchable, category-grouped gallery</b> with lazily rendered thumbnails
     ///   (only for showcases already generated — never paying the render cost for unbuilt ones) and a
-    ///   <b>per-showcase action row</b>: Open, Regenerate (→ <see cref="SpecBaseline.Sync"/>), Edit in
-    ///   Composer, and an inline Check-Drift badge.</item>
+    ///   <b>per-showcase action row</b>: Open, Regenerate (→ <see cref="SpecBaseline.Sync"/>), and an
+    ///   inline Check-Drift badge.</item>
     /// <item><b>Tools</b> — a launcher for every Neo UI window / wizard / menu action, grouped by
     ///   category. Sourced from <see cref="HubToolRegistry"/> (a project adds its own with one Register
     ///   call) — windows open directly, menu actions route through their exact menu path.</item>
@@ -363,13 +363,6 @@ namespace Neo.UI.Editor
                         RecomputeSetup();
                     }
                     if (GUILayout.Button("Regenerate", GUILayout.Height(22f))) Regenerate(s);
-                    if (GUILayout.Button("Edit in Composer", GUILayout.Height(22f)))
-                    {
-                        if (string.IsNullOrEmpty(s.specPath))
-                            Debug.LogWarning($"[Neo.UI] Showcase '{s.id}' has no spec to edit.");
-                        else
-                            Composer.NeoComposerWindow.Open(s); // scopes Save to the showcase's own root
-                    }
                     if (GUILayout.Button("Check Drift", GUILayout.Height(22f))) CheckDrift(s);
                 }
                 _ = selected;

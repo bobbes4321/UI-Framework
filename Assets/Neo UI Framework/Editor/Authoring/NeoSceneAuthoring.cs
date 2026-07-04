@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using Neo.UI.Editor.Composer; // ComposerFactory: shared spec-authoring utility, promoted to the
-                              // Neo.UI.Editor root namespace when the Composer retires.
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -44,7 +42,7 @@ namespace Neo.UI.Editor.Authoring
         public static GameObject CreateWidget(string kind, string presetName, GameObject parentSelection)
         {
             if (string.IsNullOrEmpty(kind)) return null;
-            ElementSpec element = ComposerFactory.NewElement(kind);
+            ElementSpec element = SpecFactory.NewElement(kind);
             if (!string.IsNullOrEmpty(presetName)) element.preset = presetName;
             string label = string.IsNullOrEmpty(presetName) ? Humanize(kind) : presetName;
             return Place(element, kind, parentSelection, $"Create Neo {label}");

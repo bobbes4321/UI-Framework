@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Neo.UI.Editor;
-using Neo.UI.Editor.Composer;
 using NUnit.Framework;
 
 namespace Neo.UI.Tests

@@ -1,5 +1,7 @@
 # Plan 2 — The Neo UI Composer: A Spec-Authoring Editor Window
 
+> Status: retired 2026-07 — the Composer was removed; native authoring supersedes it; see CLAUDE.md.
+
 ## The core idea
 
 Today humans edit the **prefab** (the disposable output) and we reverse-engineer it back to spec,

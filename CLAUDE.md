@@ -268,25 +268,6 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   `BindingManifest`/`BindingStubGenerator`, tests `BindingManifestTests`/`BindingStubTests`)
   (screenshot output paths must live OUTSIDE Temp/ if they need to survive an editor exit; the
   screenshotter needs a graphics device — batch runs must omit -nographics).
-- `{"action":"composerSession","scenarioPath":"…/Scenarios~/drag-and-snap.json","out":"Temp/neo-composer-session"}`
-  (also inline `"scenario":{…}`) — **the agent's "try it and watch it" loop for the Composer**. Drives
-  the LIVE Composer window through a scripted scenario of user gestures and returns a filmstrip (one
-  window PNG per step) + per-step interaction telemetry, so an agent can experience the Composer's feel
-  instead of only mutating the spec. Steps split honestly: *injected* (select/drag/resize/nudge feed
-  real `Event`s via `EditorWindow.SendEvent` through the genuine `ComposerCanvas` handlers — the feel
-  surface) vs *driven* (addWidget/setDevice/setBreakpoint/undo/redo call the same code path the control
-  hits, because Unity's `DragAndDrop`/per-frame toolbars can't be faithfully synthesized). The session
-  only mutates the in-memory document (never saves). Metrics = the measurable face of "clunky":
-  input-events-per-step (economy), event→repaint latency (responsiveness), repaint count + preview
-  rebuild-stall ms, GC bytes/step (cost), spec round-trip (correctness). The loop: run scenario → read
-  `session.json` + frames → fix Composer code → re-run SAME scenario → `SessionReport.Diff` proves the
-  delta. `Editor/Composer/Automation/` (`ComposerProbe`/`ComposerDriver`/`WindowCapture`/`ComposerScenario`/
-  `ComposerProbeActions`/`SessionReport`, gated `ComposerProbeMetrics`); window+pane geometry via the
-  `Probe_*`/`internal` automation seam on `NeoComposerWindow`/`SpecPreviewPane`; seed scenarios under
-  `Automation/Scenarios~/`; step kinds extend via `ComposerProbeActions.Register`. Needs a graphics
-  device (window capture + preview) — a batch run must omit -nographics; without graphics the session
-  still completes (capture null, preview-dependent gestures skipped). Tests `ComposerScenarioParseTests`/
-  `ComposerProbeTests`.
 - First-class domain signals: toggle/slider/dropdown take an optional `signal` ("Category/Name") that the
   widget publishes its typed value to (bool/float/int) IN ADDITION to its standard "…/Behaviour" stream —
   so game code does `Signals.On<bool>("Audio","Muted", …)` directly instead of branching the firehose
@@ -440,9 +421,19 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   **scene-view overlay** — `NeoSceneOverlay` ([`Overlay(typeof(SceneView))`], Odin-Validator-style)
   shows a drift-status dot (`DriftStatus.Scan`, shared with `DriftWindow`) + one-click Capture-to-Spec
   / Validate / Check-Drift / Add-Widget / **Apply-Preset** / Create-Preset / Update-Preset / Reset-To-Preset
-  when a `UIView` is selected; selection-driven and cached (no per-repaint scans). The intent is for this
-  to supersede the Composer once at parity. `BuildElementLive` / `ViewPrefabPath` are the generator seams;
-  `DriftStatus` the shared drift seam. **Apply-Preset** opens `PresetPickerPopup` (`Editor/Authoring/`, a
+  when a `UIView` is selected; selection-driven and cached (no per-repaint scans). Native authoring IS
+  the one authoring surface — the Composer (the from-scratch, no-agent spec-editing window that lived
+  under `Editor/Composer/`) was removed 2026-07 once native authoring reached parity; its surviving,
+  rehomed pieces are documented above and in this bullet (`NeoWidgetPalette`, `NeoLayoutTemplates`,
+  `NeoCatalogKinds`, `NeoWidgetOptions` in `Editor/Agent`/`Editor/Authoring`; `PresetPickerPopup` in
+  `Editor/Authoring`; `PresetThumbnailCache`/`PresetThumbnailRenderer` and `MenuCatalogInspector` in
+  `Editor/Inspectors`; `SpecField`/`FieldKind` folded into `Editor/Agent/NeoElementKinds.cs`;
+  `ComposerDevicePresets` rehomed to `Editor/Agent/ComposerDevicePresets.cs`; the old `ComposerFactory`
+  rehomed and renamed to `Editor/Agent/SpecFactory.cs`'s `SpecFactory`) — template insertion lives on
+  the native create menu ("Insert Template…"), breakpoint-override authoring is native (Capture Layout
+  As Override / Preview Breakpoint on the scene-view overlay), and preset create/update/reset-from-
+  selection are native scene-view overlay actions (below). `BuildElementLive` / `ViewPrefabPath` are the
+  generator seams; `DriftStatus` the shared drift seam. **Apply-Preset** opens `PresetPickerPopup` (`Editor/Authoring/`, a
   kind-scoped thumbnail-card grid, thumbnails via `Editor/Inspectors/PresetThumbnailCache`+
   `PresetThumbnailRenderer`) anchored to the button; the chosen preset routes into
   `NeoSceneAuthoring.ApplyPreset`, which rebuilds the selected widget under that `NeoWidgetPreset` by
@@ -455,29 +446,6 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   already-linked preset asset; Reset clears just the preset-governed fields back to the preset's own
   values (unlike Apply-Preset, it keeps the widget's other data — layout, bindings, etc. — intact) and
   rebuilds in place. Tests: `NativePresetWorkflowTests`.
-- The **Composer** (`Tools → Neo UI → Composer`, `Editor/Composer/NeoComposerWindow.cs`) is the
-  from-scratch, no-agent authoring surface: it edits a `UISpec` in memory and regenerates the prefab
-  as a live preview, so everything round-trips losslessly by construction (the spec stays the single
-  source of truth — never a scene-first editor). Tree · canvas · inspector panes, plus: a **widget
-  palette** with drag-to-create onto canvas/tree (`ComposerPalette` registry — auto-includes
-  `NeoElementKinds` AND a **Components** category, one tile per discovered `NeoWidgetPreset`, so you drag
-  "Primary Button" not a bare "button"; tiles render the real widget via `PresetThumbnailCache`) and
-  **layout templates** (`ComposerTemplates`, `Editor/Composer/Templates~/*`);
-  a **free, draggable/resizable viewport** with device presets (`ComposerDevicePresets` registry),
-  rotate, zoom, and a CanvasScaler-equivalent so content scales like a real device
-  (`SpecPreviewPane`, gated `RenderOptions.deviceScale` keeps agent renders byte-stable); a
-  **Figma-grade canvas** — constraint-aware drag/resize writeback (`ConstraintWriteback`),
-  drag-to-reorder in layout groups, smart alignment guides + equal-spacing, multi-select
-  align/distribute, keyboard nudge/duplicate/delete; a **constraint-widget inspector**
-  (`NeoConstraintWidget` in the EditorUI kit, Neo.UI-free) with Fixed/Hug/Fill sizing + auto-layout
-  panel; **breakpoint authoring** (`BreakpointBar` — scope inspector edits to a breakpoint's override
-  delta); a **visual preset picker** (the inspector's Preset row opens `PresetPickerPopup` — a
-  thumbnail-card grid of kind-scoped `NeoWidgetPreset`s — plus Figma-style override indicators and
-  Create/Update/Reset-from-selection); and **live preview** (theme recolor, sample rows in bound lists
-  via `PreviewSampleData`, breakpoint-override preview via an effective-spec merge). Every new fixed set
-  is an extension seam.
-  To improve the Composer's *feel*, drive it through the `composerSession` probe (above) rather than
-  testing by hand — it captures a filmstrip + interaction telemetry an agent can critique and re-run.
 - Soft design lint (`AgentValidation.ValidateDesign`, surfaced as `designWarnings` by the bridge's
   validate action): WCAG contrast on theme token pairs (3:1 for button labels — large text),
   raw fontSize where text styles exist, off-scale container spacing (4/8/12/16/24/32/48/64).

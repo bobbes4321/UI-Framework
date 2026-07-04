@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Neo.UI.Editor;
-using Neo.UI.Editor.Composer;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -12,9 +11,9 @@ namespace Neo.UI.Tests
     /// The keystone extensibility seam: <see cref="NeoElementKinds"/>. Phase 1 is seam-first — built-ins
     /// stay on their proven generator/exporter path (so the registry is empty by default and the existing
     /// round-trip/golden suites can't regress), and only a project's NOVEL kind flows through the registry.
-    /// These tests register a throwaway "probe" kind and prove it reaches every site: the picker /
-    /// field catalog, generation + export round-trip, the binding manifest (signal + data source), the
-    /// Composer accent, and that an unknown kind still WARNS (no silent failure).
+    /// These tests register a throwaway "probe" kind and prove it reaches every site: generation +
+    /// export round-trip, the binding manifest (signal + data source), a host inspector's accent, and
+    /// that an unknown kind still WARNS (no silent failure).
     /// </summary>
     public class NeoElementKindsTests
     {
@@ -73,7 +72,6 @@ namespace Neo.UI.Tests
         public void ClearRegistry()
         {
             NeoElementKinds.ClearForTests();
-            SpecFieldCatalog.ClearRegisteredForTests();
             AssetDatabase.DeleteAsset(UISpecGenerator.GeneratedRoot);
         }
 
@@ -118,20 +116,6 @@ namespace Neo.UI.Tests
             CollectionAssert.Contains(ElementSpec.KnownKinds.ToArray(), "probe");
             CollectionAssert.DoesNotContain(ElementSpec.Kinds, "probe",
                 "the built-in Kinds array must stay the pure built-in list");
-        }
-
-        // ------------------------------------------------------------------ chrome (picker + fields + accent)
-
-        [Test]
-        public void Picker_And_FieldCatalog_IncludeRegisteredKind()
-        {
-            NeoElementKinds.Register(new ProbeKind());
-
-            CollectionAssert.Contains(SpecFieldCatalog.ElementKinds.ToArray(), "probe",
-                "the '+ Add child' picker must offer a registered kind");
-
-            var keys = SpecFieldCatalog.For("probe").Select(f => f.key).ToList();
-            CollectionAssert.Contains(keys, "label", "the registered kind's own Fields must surface in the inspector");
         }
 
         // ------------------------------------------------------------------ parse + generate + export round-trip

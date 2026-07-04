@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.IO;
-using Neo.UI.Editor.Composer; // SpecDocument — the Composer document Insert() edits (dies with the window in Wave 3)
 using UnityEngine;
 
 namespace Neo.UI.Editor.Authoring
@@ -35,9 +34,11 @@ namespace Neo.UI.Editor.Authoring
     /// <summary>
     /// The registry of insertable templates (Pattern R): the package built-ins shipped under
     /// <c>Editor/Authoring/Templates~/*.json</c> plus anything a consuming project registers via
-    /// <see cref="Register"/>. The "New from template" picker reads <see cref="All"/>; insertion is
-    /// performed by <see cref="Insert"/>, always through <see cref="SpecDocument.ApplyEdit"/>, with
-    /// name-collision handling (warn + suffix, never silent overwrite).
+    /// <see cref="Register"/>. Insertion is performed by <see cref="Insert"/>, which merges the
+    /// template's views/popups/breakpoints directly into a <see cref="UISpec"/>, with name-collision
+    /// handling (warn + suffix, never silent overwrite). <see cref="NeoSceneAuthoring.InsertTemplate"/>
+    /// is the native-authoring counterpart — it builds the template's elements live under a selected
+    /// view instead of editing a spec.
     /// </summary>
     public static class NeoLayoutTemplates
     {
@@ -97,27 +98,29 @@ namespace Neo.UI.Editor.Authoring
         }
 
         /// <summary>
-        /// Inserts the template's views, popups and breakpoints into <paramref name="document"/> (one
-        /// undo step). Names that collide with the document's existing views/popups are renamed (a numeric
-        /// suffix) and reported through <paramref name="report"/> — a template never silently overwrites a
-        /// designer's screen. Returns the id of the first inserted view (or popup) for selection, or null.
+        /// Merges the template's views, popups and breakpoints directly into <paramref name="spec"/>.
+        /// Names that collide with the spec's existing views/popups are renamed (a numeric suffix) and
+        /// reported through <paramref name="report"/> — a template never silently overwrites an existing
+        /// screen. Returns the id of the first inserted view (or popup) for selection, or null. Pure
+        /// data — no editor window/undo involved, so it's equally usable by tests or by anything else
+        /// embedding a <see cref="UISpec"/>.
         /// </summary>
-        public static string Insert(SpecDocument document, TemplateEntry entry, out List<string> report)
+        public static string Insert(UISpec spec, TemplateEntry entry, out List<string> report)
         {
             report = new List<string>();
-            if (document == null) return null;
+            if (spec == null) return null;
 
             string json;
             try { json = entry.loadJson?.Invoke(); }
             catch (System.Exception e)
             {
-                Debug.LogWarning($"[Composer] Template '{entry.id}' failed to load: {e.Message}");
+                Debug.LogWarning($"[NeoLayoutTemplates] Template '{entry.id}' failed to load: {e.Message}");
                 report.Add($"Template '{entry.id}' failed to load: {e.Message}");
                 return null;
             }
             if (string.IsNullOrEmpty(json))
             {
-                Debug.LogWarning($"[Composer] Template '{entry.id}' produced no JSON; nothing inserted.");
+                Debug.LogWarning($"[NeoLayoutTemplates] Template '{entry.id}' produced no JSON; nothing inserted.");
                 report.Add($"Template '{entry.id}' produced no JSON.");
                 return null;
             }
@@ -126,60 +129,54 @@ namespace Neo.UI.Editor.Authoring
             try { fragment = UISpec.FromJson(json); }
             catch (System.Exception e)
             {
-                Debug.LogWarning($"[Composer] Template '{entry.id}' is not a valid UISpec: {e.Message}");
+                Debug.LogWarning($"[NeoLayoutTemplates] Template '{entry.id}' is not a valid UISpec: {e.Message}");
                 report.Add($"Template '{entry.id}' is not a valid UISpec: {e.Message}");
                 return null;
             }
 
-            var localReport = report;
             string firstSelectPath = null;
 
-            document.ApplyEdit(() =>
+            // breakpoints: add any the template names that the spec doesn't already declare
+            foreach (BreakpointSpec bp in fragment.breakpoints)
             {
-                UISpec spec = document.Spec;
+                if (bp == null || string.IsNullOrEmpty(bp.name)) continue;
+                if (spec.breakpoints.Exists(b => b != null && b.name == bp.name)) continue;
+                spec.breakpoints.Add(bp);
+            }
 
-                // breakpoints: add any the template names that the doc doesn't already declare
-                foreach (BreakpointSpec bp in fragment.breakpoints)
+            foreach (ViewSpec view in fragment.views)
+            {
+                if (view == null) continue;
+                string originalId = view.id;
+                if (spec.views.Exists(v => v != null && v.id == view.id))
                 {
-                    if (bp == null || string.IsNullOrEmpty(bp.name)) continue;
-                    if (spec.breakpoints.Exists(b => b != null && b.name == bp.name)) continue;
-                    spec.breakpoints.Add(bp);
+                    string baseName = view.viewName;
+                    int n = 2;
+                    while (spec.views.Exists(v => v != null && v.id == $"{view.category}/{baseName}{n}")) n++;
+                    view.viewName = baseName + n;
+                    report.Add($"View '{originalId}' already exists — inserted as '{view.id}'.");
                 }
+                spec.views.Add(view);
+                if (firstSelectPath == null) firstSelectPath = SpecPath.View(view.id);
+            }
 
-                foreach (ViewSpec view in fragment.views)
+            foreach (PopupSpec popup in fragment.popups)
+            {
+                if (popup == null) continue;
+                string originalName = popup.name;
+                if (spec.popups.Exists(p => p != null && p.name == popup.name))
                 {
-                    if (view == null) continue;
-                    string originalId = view.id;
-                    if (spec.views.Exists(v => v != null && v.id == view.id))
-                    {
-                        string baseName = view.viewName;
-                        int n = 2;
-                        while (spec.views.Exists(v => v != null && v.id == $"{view.category}/{baseName}{n}")) n++;
-                        view.viewName = baseName + n;
-                        localReport.Add($"View '{originalId}' already exists — inserted as '{view.id}'.");
-                    }
-                    spec.views.Add(view);
-                    if (firstSelectPath == null) firstSelectPath = SpecPath.View(view.id);
+                    string baseName = popup.name;
+                    int n = 2;
+                    while (spec.popups.Exists(p => p != null && p.name == $"{baseName}{n}")) n++;
+                    popup.name = baseName + n;
+                    report.Add($"Popup '{originalName}' already exists — inserted as '{popup.name}'.");
                 }
+                spec.popups.Add(popup);
+                if (firstSelectPath == null) firstSelectPath = SpecPath.Popup(popup.name);
+            }
 
-                foreach (PopupSpec popup in fragment.popups)
-                {
-                    if (popup == null) continue;
-                    string originalName = popup.name;
-                    if (spec.popups.Exists(p => p != null && p.name == popup.name))
-                    {
-                        string baseName = popup.name;
-                        int n = 2;
-                        while (spec.popups.Exists(p => p != null && p.name == $"{baseName}{n}")) n++;
-                        popup.name = baseName + n;
-                        localReport.Add($"Popup '{originalName}' already exists — inserted as '{popup.name}'.");
-                    }
-                    spec.popups.Add(popup);
-                    if (firstSelectPath == null) firstSelectPath = SpecPath.Popup(popup.name);
-                }
-            }, $"Insert Template: {entry.label}");
-
-            foreach (string warning in report) Debug.LogWarning($"[Composer] {warning}");
+            foreach (string warning in report) Debug.LogWarning($"[NeoLayoutTemplates] {warning}");
             return firstSelectPath;
         }
 

@@ -76,13 +76,6 @@ namespace Neo.UI.Editor
             // --- Author: the primary authoring / navigation windows ------------------------------
             yield return new HubTool
             {
-                id = "composer", label = "Composer", category = Author,
-                tooltip = "From-scratch, no-agent UI authoring surface — edits a spec in memory and " +
-                          "regenerates the prefab as a live preview.",
-                invoke = Composer.NeoComposerWindow.Open,
-            };
-            yield return new HubTool
-            {
                 id = "flow-graph", label = "Flow Graph Editor", category = Author,
                 tooltip = "Visual flow graph editor — wire views, popups and triggers into app flow.",
                 invoke = FlowGraphWindow.Open,

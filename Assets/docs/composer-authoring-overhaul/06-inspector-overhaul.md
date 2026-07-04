@@ -1,5 +1,7 @@
 # Pillar F — Inspector / Properties Panel Overhaul
 
+> Status: retired 2026-07 — the Composer was removed; native authoring supersedes it; see CLAUDE.md.
+
 [← Master plan](00-master-plan.md) · Prev: [05 — Palette](05-palette-and-templates.md) · Next: [07 — Fidelity](07-preview-fidelity.md)
 
 > A Figma-like properties panel: constraint widget, auto-layout panel, per-child sizing dropdowns,

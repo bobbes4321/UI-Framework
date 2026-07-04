@@ -1,5 +1,7 @@
 # Plan — Composer Catalog Unification (de-opinionated, extensible menu authoring)
 
+> Status: retired 2026-07 — the Composer was removed; native authoring supersedes it; see CLAUDE.md.
+
 > **Member of `extensibility-seams-master-plan.md`** — and the **reference implementation of
 > Pattern R** (the Kinds Registry) that the whole seam family mirrors. `ComposerCatalogKinds` (the
 > registry introduced below) is the shape every other registry in the family copies, and its

@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Neo.UI.Editor;
 using Neo.UI.Editor.Authoring;
-using Neo.UI.Editor.Composer;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -10,9 +9,12 @@ using UnityEngine;
 namespace Neo.UI.Tests
 {
     /// <summary>
-    /// Pillar E templates: every curated scaffold is a valid <see cref="UISpec"/> that inserts into a
-    /// document through <see cref="SpecDocument.ApplyEdit"/>, generates without issues, and round-trips
-    /// byte-identically (export → generate → export). Also covers the registry seam + collision handling.
+    /// Pillar E templates: every curated scaffold is a valid <see cref="UISpec"/> that merges into a
+    /// spec via <see cref="NeoLayoutTemplates.Insert(UISpec, TemplateEntry, out List{string})"/>,
+    /// generates without issues, and round-trips byte-identically (export → generate → export). Also
+    /// covers the registry seam + collision handling. (Formerly ran through the Composer's
+    /// <c>SpecDocument</c> — that overload died with the window in Wave 3; these tests now exercise the
+    /// same collision-suffix/registry logic through the plain-<see cref="UISpec"/> overload.)
     /// </summary>
     public class TemplateInsertTests
     {
@@ -21,13 +23,6 @@ namespace Neo.UI.Tests
         {
             AssetDatabase.DeleteAsset(UISpecGenerator.GeneratedRoot);
             AssetDatabase.SaveAssets();
-        }
-
-        private static SpecDocument EmptyDocument()
-        {
-            var doc = new SpecDocument();
-            doc.Load(new UISpec(), null); // truly empty — no default view
-            return doc;
         }
 
         [Test]
@@ -45,16 +40,16 @@ namespace Neo.UI.Tests
         [TestCase("popup")]
         public void Template_InsertsIntoEmptySpec_AndGenerates(string id)
         {
-            SpecDocument doc = EmptyDocument();
+            var spec = new UISpec();
             Assert.IsTrue(NeoLayoutTemplates.TryGet(id, out TemplateEntry entry), $"template '{id}' missing");
 
-            string select = NeoLayoutTemplates.Insert(doc, entry, out List<string> warnings);
+            string select = NeoLayoutTemplates.Insert(spec, entry, out List<string> warnings);
             Assert.IsEmpty(warnings, "a fresh insert into an empty spec must not collide");
             Assert.IsNotNull(select, "insert must return a selection path for the first inserted screen");
-            Assert.IsTrue(doc.Spec.views.Count > 0 || doc.Spec.popups.Count > 0,
+            Assert.IsTrue(spec.views.Count > 0 || spec.popups.Count > 0,
                 "the template must contribute at least one view or popup");
 
-            GenerateReport report = UISpecGenerator.Generate(doc.Spec);
+            GenerateReport report = UISpecGenerator.Generate(spec);
             Assert.IsEmpty(report.issues, report.ToString());
             Assert.IsEmpty(report.collisions, report.ToString());
         }
@@ -66,11 +61,11 @@ namespace Neo.UI.Tests
         [TestCase("popup")]
         public void Template_RoundTripsByteIdentical(string id)
         {
-            SpecDocument doc = EmptyDocument();
+            var spec = new UISpec();
             NeoLayoutTemplates.TryGet(id, out TemplateEntry entry);
-            NeoLayoutTemplates.Insert(doc, entry, out _);
+            NeoLayoutTemplates.Insert(spec, entry, out _);
 
-            UISpecGenerator.Generate(doc.Spec);
+            UISpecGenerator.Generate(spec);
             string firstExport = UISpecExporter.ExportProject().ToJson();
             GenerateReport regen = UISpecGenerator.Generate(UISpec.FromJson(firstExport));
             Assert.IsEmpty(regen.collisions, regen.ToString());
@@ -85,19 +80,19 @@ namespace Neo.UI.Tests
         [Test]
         public void Insert_NameCollision_SuffixesAndWarns_NeverOverwrites()
         {
-            SpecDocument doc = EmptyDocument();
+            var spec = new UISpec();
             NeoLayoutTemplates.TryGet("main-menu", out TemplateEntry entry);
 
-            NeoLayoutTemplates.Insert(doc, entry, out List<string> first);
+            NeoLayoutTemplates.Insert(spec, entry, out List<string> first);
             Assert.IsEmpty(first);
-            int viewsAfterFirst = doc.Spec.views.Count;
+            int viewsAfterFirst = spec.views.Count;
 
             // inserting the same template again collides on Menu/Main → must rename + warn, not overwrite
-            NeoLayoutTemplates.Insert(doc, entry, out List<string> second);
+            NeoLayoutTemplates.Insert(spec, entry, out List<string> second);
             Assert.IsNotEmpty(second, "a colliding insert must surface a warning");
-            Assert.AreEqual(viewsAfterFirst * 2, doc.Spec.views.Count, "the second copy is added, not merged over");
-            Assert.AreEqual(1, doc.Spec.views.Count(v => v.id == "Menu/Main"), "the original is untouched");
-            Assert.IsTrue(doc.Spec.views.Any(v => v.id == "Menu/Main2"), "the collision is suffixed");
+            Assert.AreEqual(viewsAfterFirst * 2, spec.views.Count, "the second copy is added, not merged over");
+            Assert.AreEqual(1, spec.views.Count(v => v.id == "Menu/Main"), "the original is untouched");
+            Assert.IsTrue(spec.views.Any(v => v.id == "Menu/Main2"), "the collision is suffixed");
         }
 
         [Test]

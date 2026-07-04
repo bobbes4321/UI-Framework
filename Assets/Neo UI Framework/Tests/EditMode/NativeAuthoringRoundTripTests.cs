@@ -1,5 +1,4 @@
 using Neo.UI.Editor;
-using Neo.UI.Editor.Composer; // ComposerFactory
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -14,7 +13,7 @@ namespace Neo.UI.Tests
     /// </summary>
     public class NativeAuthoringRoundTripTests
     {
-        // Kinds whose ComposerFactory default is self-contained (no required children / external refs).
+        // Kinds whose SpecFactory default is self-contained (no required children / external refs).
         private static readonly string[] Kinds =
         {
             "button", "toggle", "switch", "slider", "stepper", "dropdown",
@@ -45,14 +44,14 @@ namespace Neo.UI.Tests
 
             // Path A — generation: the kind sits in the view spec and is built by BuildViewGameObject.
             var viewA = new ViewSpec { category = category, viewName = viewName };
-            viewA.elements.Add(ComposerFactory.NewElement(kind));
+            viewA.elements.Add(SpecFactory.NewElement(kind));
             GameObject rootA = UISpecGenerator.BuildViewGameObject(viewA, _settings, new GenerateReport());
 
             // Path B — native: an empty view, then the same element dropped in live.
             var viewB = new ViewSpec { category = category, viewName = viewName };
             GameObject rootB = UISpecGenerator.BuildViewGameObject(viewB, _settings, new GenerateReport());
             GameObject created = UISpecGenerator.BuildElementLive(
-                ComposerFactory.NewElement(kind), (RectTransform)rootB.transform, _settings, new GenerateReport());
+                SpecFactory.NewElement(kind), (RectTransform)rootB.transform, _settings, new GenerateReport());
             Assert.IsNotNull(created, $"BuildElementLive returned null for kind '{kind}'");
 
             try

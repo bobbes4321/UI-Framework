@@ -1,5 +1,7 @@
 # Pillar D — Direct-Manipulation Canvas Upgrades (Figma-grade)
 
+> Status: retired 2026-07 — the Composer was removed; native authoring supersedes it; see CLAUDE.md.
+
 [← Master plan](00-master-plan.md) · Prev: [03 — Viewport](03-free-viewport.md) · Next: [05 — Palette](05-palette-and-templates.md)
 
 > Makes the canvas feel like Figma: constraint-aware writeback, drag-to-reorder in layout groups,

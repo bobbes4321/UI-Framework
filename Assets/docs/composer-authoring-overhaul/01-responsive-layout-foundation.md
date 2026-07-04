@@ -1,5 +1,7 @@
 # Pillar A — Responsive Layout Foundation (the keystone)
 
+> Status: retired 2026-07 — the Composer was removed; native authoring supersedes it; see CLAUDE.md.
+
 [← Master plan](00-master-plan.md) · Next: [02 — Breakpoints](02-breakpoint-override-system.md)
 
 > **This phase blocks everything else.** It replaces absolute-px positioning with a Figma-style

@@ -1,5 +1,7 @@
 # Pillar E — Widget Palette + Drag-to-Create + Templates
 
+> Status: retired 2026-07 — the Composer was removed; native authoring supersedes it; see CLAUDE.md.
+
 [← Master plan](00-master-plan.md) · Prev: [04 — Canvas](04-direct-manipulation-canvas.md) · Next: [06 — Inspector](06-inspector-overhaul.md)
 
 > Kills the blank page: a categorized searchable palette, drag-to-create onto canvas/tree, and curated
