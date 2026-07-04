@@ -22,15 +22,24 @@ namespace Neo.UI.Editor.Composer
         public readonly string icon;
         /// <summary> Sort order within the category (lower first). </summary>
         public readonly int order;
+        /// <summary> Optional <see cref="NeoWidgetPreset"/> name this tile applies on drop (null = a bare kind).
+        /// A preset tile creates an element of <see cref="kind"/> (the preset's target kind) with its
+        /// <c>preset</c> field set — so you drag "Primary Button", not generic "button". </summary>
+        public readonly string preset;
 
-        public PaletteEntry(string kind, string category, string label = null, string icon = null, int order = 0)
+        public PaletteEntry(string kind, string category, string label = null, string icon = null,
+            int order = 0, string preset = null)
         {
             this.kind = kind;
             this.category = string.IsNullOrEmpty(category) ? "Custom" : category;
             this.label = string.IsNullOrEmpty(label) ? kind : label;
             this.icon = icon;
             this.order = order;
+            this.preset = preset;
         }
+
+        /// <summary> True when this tile applies a widget preset on drop (vs creating a bare kind). </summary>
+        public bool IsPreset => !string.IsNullOrEmpty(preset);
     }
 
     /// <summary>
@@ -51,8 +60,18 @@ namespace Neo.UI.Editor.Composer
         /// its element-kind string under. The canvas + tree drop handlers read this exact key. </summary>
         public const string DragKey = "Neo.Composer.PaletteKind";
 
+        /// <summary> The generic-data key a preset tile carries its <see cref="NeoWidgetPreset"/> name under
+        /// (alongside <see cref="DragKey"/> = the preset's target kind). The canvas + tree drop handlers
+        /// read it and set the created element's <c>preset</c> field. Null for a bare-kind tile. </summary>
+        public const string PresetDragKey = "Neo.Composer.PalettePreset";
+
+        /// <summary> The category preset tiles group under (the design-system "component" layer). </summary>
+        public const string ComponentsCategory = "Components";
+
         // Display order for the canonical built-in categories; unknown categories sort after, alpha.
-        private static readonly string[] CategoryOrder = { "Layout", "Input", "Display", "Data", "Menus", "Custom" };
+        // Components (the preset layer) lead — they're the highest-level thing a designer reaches for.
+        private static readonly string[] CategoryOrder =
+            { "Components", "Layout", "Input", "Display", "Data", "Menus", "Custom" };
 
         // explicit registrations (built-ins seeded once, plus any project Register calls)
         private static readonly List<PaletteEntry> _registered = new List<PaletteEntry>();
@@ -124,6 +143,19 @@ namespace Neo.UI.Editor.Composer
                     list.Add(new PaletteEntry(kind.Kind, "Custom", Humanize(kind.Kind)));
                 }
 
+                // The design-system "component" layer: one tile per discovered NeoWidgetPreset, so a
+                // designer drags "Primary Button" (kind = the preset's target kind, preset field set) rather
+                // than a bare "button". Discovery is lazy + cached — All is fetched when the pane opens, not
+                // per OnGUI — so the registry scan here is cheap. A project preset asset appears for free.
+                int presetOrder = 0;
+                foreach (NeoWidgetPreset preset in NeoWidgetPresets.All)
+                {
+                    if (preset == null || string.IsNullOrEmpty(preset.presetName)
+                        || string.IsNullOrEmpty(preset.targetKind)) continue;
+                    list.Add(new PaletteEntry(preset.targetKind, ComponentsCategory,
+                        preset.presetName, preset.icon, presetOrder++, preset.presetName));
+                }
+
                 list.Sort(Compare);
                 return list;
             }
@@ -163,6 +195,7 @@ namespace Neo.UI.Editor.Composer
         /// category default (so a tile reads the same as its tree row). </summary>
         public static Color AccentFor(PaletteEntry entry)
         {
+            if (entry.IsPreset) return NeoColors.Theming; // the design-system "component" layer (pink)
             if (NeoElementKinds.TryGet(entry.kind, out INeoElementKind ext)) return ext.Accent;
             switch (entry.category)
             {

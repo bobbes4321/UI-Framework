@@ -77,7 +77,7 @@ namespace Neo.UI.Editor
                 StringPicker("sizeVariant", "Size", SizeOptions);              // button-ish
                 StringPicker("textStyle", "Text Style", TextStyleOptions);     // text-bearing
                 StringPicker("shapeStyle", "Shape Style", ShapeStyleOptions);  // surface
-                StringPicker("motion", "Motion", MotionOptions);               // show/hide animation
+                StringPicker("motion", "Motion", MotionOptions);               // on-start / loop animation
                 StringPicker("background", "Background Token", TokenOptions);  // theme token
                 StringPicker("labelColor", "Label Color Token", TokenOptions); // theme token
                 StringPicker("icon", "Icon", IconOptions);                     // Lucide glyph

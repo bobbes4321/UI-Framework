@@ -72,8 +72,9 @@ namespace Neo.UI.Editor.Authoring
             foreach (PaletteEntry e in ComposerPalette.All)
             {
                 string kind = e.kind;
+                string preset = e.preset; // null for a bare kind; a Components tile carries its preset name
                 menu.AddItem(new GUIContent($"{e.category}/{e.label}"), false,
-                    () => NeoSceneAuthoring.CreateWidget(kind, parent));
+                    () => NeoSceneAuthoring.CreateWidget(kind, preset, parent));
             }
             menu.ShowAsContext();
         }

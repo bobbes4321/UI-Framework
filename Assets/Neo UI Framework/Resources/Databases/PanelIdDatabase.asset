@@ -89,6 +89,9 @@ MonoBehaviour:
   - category: Pause
     names:
     - Dim
+  - category: Presets
+    names:
+    - CardSurface
   - category: Settings
     names:
     - Audio

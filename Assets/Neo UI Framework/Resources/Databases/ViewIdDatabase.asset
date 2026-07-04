@@ -135,10 +135,12 @@ MonoBehaviour:
     - Store
   - category: Showcase
     names:
+    - Animations
     - Buttons
     - Effects
     - Particles
     - Popups
+    - Presets
     - TabsPanels
     - TogglesSwitches
   - category: Spec

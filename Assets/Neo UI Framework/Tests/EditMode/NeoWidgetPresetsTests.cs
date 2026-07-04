@@ -1,6 +1,7 @@
 using System.Linq;
 using Neo.UI;
 using Neo.UI.Editor;
+using Neo.UI.Editor.Composer;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -84,6 +85,19 @@ namespace Neo.UI.Tests
         {
             // Register logs a warning for null/name-less presets; allow it without coupling to the wording.
             UnityEngine.TestTools.LogAssert.ignoreFailingMessages = true;
+        }
+
+        [Test]
+        public void RegisteredPreset_SurfacesAsAComponentsPaletteTile()
+        {
+            _a = Make("Hero CTA", "button");
+            NeoWidgetPresets.Register(_a);
+
+            PaletteEntry tile = ComposerPalette.All.FirstOrDefault(e => e.preset == "Hero CTA");
+            Assert.IsTrue(tile.IsPreset, "the preset appears as a preset-bearing palette tile");
+            Assert.AreEqual(ComposerPalette.ComponentsCategory, tile.category, "it groups under Components");
+            Assert.AreEqual("button", tile.kind, "the tile creates the preset's target kind");
+            Assert.AreEqual("Hero CTA", tile.label, "the tile is labeled by the preset name");
         }
     }
 }

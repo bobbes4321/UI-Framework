@@ -1,0 +1,79 @@
+{
+  "theme": { "bundle": "CleanSlate" },
+  "views": [
+    {
+      "id": "Showcase/Presets",
+      "background": "Background",
+      "elements": [
+        {
+          "safearea": {
+            "children": [
+              {
+                "scroll": {
+                  "anchor": "Stretch",
+                  "children": [
+                    {
+                      "vstack": {
+                        "anchor": "Stretch",
+                        "padding": 48,
+                        "spacing": 24,
+                        "children": [
+                          { "text": { "label": "Widget Presets", "color": "TextStrong", "textStyle": "Title", "align": "left" } },
+                          { "text": {
+                              "label": "Reusable component styles. A widget references a preset BY NAME; the preset's styling resolves at generate, and per-element fields still override. Edit the preset asset, regenerate, every instance updates.",
+                              "color": "TextMuted", "textStyle": "Caption", "align": "left" } },
+
+                          { "text": { "label": "BUTTON COMPONENTS", "color": "TextMuted", "textStyle": "Caption", "align": "left" } },
+                          { "hstack": {
+                              "spacing": 16,
+                              "children": [
+                                { "button": { "id": "Presets/Primary",   "label": "Primary",   "preset": "Primary Button" } },
+                                { "button": { "id": "Presets/Secondary", "label": "Secondary", "preset": "Secondary Button" } },
+                                { "button": { "id": "Presets/Ghost",     "label": "Ghost",     "preset": "Ghost Button" } },
+                                { "button": { "id": "Presets/Danger",    "label": "Danger",    "preset": "Danger Button" } }
+                              ] } },
+
+                          { "text": { "label": "SAME PRESET, DIFFERENT SIZES (preset + override)", "color": "TextMuted", "textStyle": "Caption", "align": "left" } },
+                          { "hstack": {
+                              "spacing": 16,
+                              "children": [
+                                { "button": { "id": "Presets/PrimaryDefault",  "label": "Default", "preset": "Primary Button" } },
+                                { "button": { "id": "Presets/PrimarySmall",    "label": "Small override", "preset": "Primary Button", "size": "sm" } },
+                                { "button": { "id": "Presets/PrimaryAsDanger", "label": "Variant override", "preset": "Primary Button", "variant": "danger" } }
+                              ] } },
+
+                          { "text": { "label": "TEXT COMPONENTS", "color": "TextMuted", "textStyle": "Caption", "align": "left" } },
+                          { "vstack": {
+                              "anchor": "Stretch",
+                              "spacing": 8,
+                              "children": [
+                                { "text": { "id": "Presets/Display", "label": "Display Text",   "preset": "Display Text",   "align": "left" } },
+                                { "text": { "id": "Presets/TitleP",  "label": "Title Text",     "preset": "Title Text",     "align": "left" } },
+                                { "text": { "id": "Presets/Header",  "label": "Section Header", "preset": "Section Header", "align": "left" } },
+                                { "text": { "id": "Presets/Body",    "label": "Body text reads at the body scale and color the preset assigns.", "preset": "Body Text", "align": "left" } },
+                                { "text": { "id": "Presets/Cap",     "label": "Caption — muted, small.", "preset": "Caption", "align": "left" } }
+                              ] } },
+
+                          { "text": { "label": "SURFACE COMPONENT", "color": "TextMuted", "textStyle": "Caption", "align": "left" } },
+                          { "panel": {
+                              "id": "Presets/CardSurface",
+                              "anchor": "Stretch",
+                              "preset": "Card",
+                              "children": [
+                                { "text": { "label": "Card", "color": "TextStrong", "textStyle": "Heading", "align": "left" } },
+                                { "text": { "label": "The “Card” preset carries the surface shape style, padding and child spacing — drop content in and it's themed.", "color": "TextMuted", "textStyle": "Body", "align": "left" } },
+                                { "button": { "id": "Presets/CardAction", "label": "Action", "preset": "Primary Button", "size": "sm" } }
+                              ] } }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -458,6 +458,16 @@ namespace Neo.UI.Editor
             if (NullableFloatEq(element.padding, p.PaddingOrNull)) element.padding = null;
             if (FloatArrayEq(element.padding4, p.Padding4OrNull)) element.padding4 = null;
             if (NullableFloatEq(element.spacing, p.SpacingOrNull)) element.spacing = null;
+
+            // Motion seeds the element's `loop` channel at generate; strip it back out when it still
+            // equals the preset's motion so the spec keeps only the override delta (a different loop the
+            // author set explicitly survives). Drop the whole animations object if nothing else remains.
+            if (element.animations != null && element.animations.loop == p.motion
+                && !string.IsNullOrEmpty(p.motion))
+            {
+                element.animations.loop = null;
+                if (element.animations.IsEmpty) element.animations = null;
+            }
         }
 
         private static bool NullableFloatEq(float? a, float? b)

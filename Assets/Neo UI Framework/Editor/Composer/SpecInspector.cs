@@ -187,9 +187,9 @@ namespace Neo.UI.Editor.Composer
         {
             DrawSection("neo.composer.sec.preset", "Preset", NeoColors.Theming, true, () =>
             {
-                DrawPopupRow("Preset", element.preset ?? NonePreset,
-                    () => { var l = new List<string> { NonePreset }; l.AddRange(ComposerOptions.PresetsForKind(element.kind)); return l; },
-                    v => Apply(() => element.preset = v == NonePreset ? null : Empty(v), "Set Preset"));
+                // Visual picker: a card showing the linked preset's thumbnail + name; click to open the
+                // grid popup (kind-scoped). Replaces the old flat text dropdown so you SEE the component.
+                DrawPresetPickerRow(element);
 
                 using (new EditorGUILayout.HorizontalScope())
                 {
@@ -201,13 +201,72 @@ namespace Neo.UI.Editor.Composer
                     }
                 }
 
-                if (!string.IsNullOrEmpty(element.preset) && !NeoWidgetPresets.TryGet(element.preset, out _))
+                if (!string.IsNullOrEmpty(element.preset) && NeoWidgetPresets.TryGet(element.preset, out NeoWidgetPreset linked))
+                {
+                    // Figma-style override indicator: which fields the element overrides over the preset.
+                    List<string> overrides = PresetOverrides(element, linked);
+                    if (overrides.Count > 0)
+                        EditorGUILayout.LabelField("Overrides", string.Join(", ", overrides), EditorStyles.miniLabel);
+                }
+                else if (!string.IsNullOrEmpty(element.preset))
+                {
                     EditorGUILayout.HelpBox($"Preset “{element.preset}” not found — it may have been deleted. " +
                         "The element keeps its own field values.", MessageType.Warning);
+                }
             });
         }
 
         private const string NonePreset = "(none)";
+
+        // The preset row: a thumbnail-card button (or "(none)") that opens the visual PresetPickerPopup.
+        private void DrawPresetPickerRow(ElementSpec element)
+        {
+            const float thumb = 40f;
+            Rect row = EditorGUILayout.GetControlRect(false, thumb + 4f);
+            Rect labelRect = new Rect(row.x, row.y, EditorGUIUtility.labelWidth, row.height);
+            GUI.Label(labelRect, "Preset");
+            Rect btnRect = new Rect(labelRect.xMax, row.y + 2f, row.width - labelRect.width, thumb);
+
+            bool linked = !string.IsNullOrEmpty(element.preset)
+                && NeoWidgetPresets.TryGet(element.preset, out NeoWidgetPreset p) && p != null;
+            string caption = linked ? element.preset : "(none) — click to pick…";
+            if (GUI.Button(btnRect, GUIContent.none))
+            {
+                ElementSpec captured = element;
+                PopupWindow.Show(btnRect, new PresetPickerPopup(element.kind, element.preset,
+                    name => Apply(() => captured.preset = string.IsNullOrEmpty(name) ? null : name, "Set Preset")));
+            }
+            // draw the linked preset's thumbnail + name inside the button
+            if (Event.current.type == EventType.Repaint)
+            {
+                var iconRect = new Rect(btnRect.x + 3f, btnRect.y + 2f, thumb - 4f, thumb - 4f);
+                Texture2D tex = linked && NeoWidgetPresets.TryGet(element.preset, out NeoWidgetPreset lp)
+                    ? PresetThumbnailCache.GetOrRender(lp, 96) : null;
+                if (tex != null) GUI.DrawTexture(iconRect, tex, ScaleMode.ScaleToFit, true);
+                GUI.Label(new Rect(iconRect.xMax + 6f, btnRect.y, btnRect.width - thumb - 8f, btnRect.height), caption);
+            }
+        }
+
+        // The element fields that override the linked preset (non-null element value differing from the
+        // preset's) — the Figma "this instance is overridden" hint. Mirrors ApplyPresetDelta's compares.
+        private static List<string> PresetOverrides(ElementSpec e, NeoWidgetPreset p)
+        {
+            var o = new List<string>();
+            void S(string label, string ev, string pv) { if (!string.IsNullOrEmpty(ev) && ev != pv) o.Add(label); }
+            S("variant", e.variant, p.variant);
+            S("size", e.sizeVariant, p.sizeVariant);
+            S("textStyle", e.textStyle, p.textStyle);
+            S("style", e.style, p.shapeStyle);
+            S("background", e.background, p.background);
+            S("labelColor", e.labelColor, p.labelColor);
+            S("icon", e.icon, p.icon);
+            if (e.radius.HasValue && e.radius != p.RadiusOrNull) o.Add("radius");
+            if (e.padding.HasValue && e.padding != p.PaddingOrNull) o.Add("padding");
+            if (e.spacing.HasValue && e.spacing != p.SpacingOrNull) o.Add("spacing");
+            if (e.animations != null && !string.IsNullOrEmpty(e.animations.loop) && e.animations.loop != p.motion)
+                o.Add("motion");
+            return o;
+        }
 
         private void CreatePresetFromElement(ElementSpec element)
         {
@@ -244,6 +303,12 @@ namespace Neo.UI.Editor.Composer
             element.variant = null; element.sizeVariant = null; element.textStyle = null; element.style = null;
             element.background = null; element.labelColor = null; element.icon = null;
             element.radius = null; element.padding = null; element.spacing = null; element.padding4 = null;
+            // motion maps to the loop channel; clear only that, leaving the element's own hover/press intact.
+            if (element.animations != null)
+            {
+                element.animations.loop = null;
+                if (element.animations.IsEmpty) element.animations = null;
+            }
         }, "Reset To Preset");
 
         /// <summary> Copies the element's preset-governed styling fields onto a preset asset. </summary>
@@ -252,6 +317,7 @@ namespace Neo.UI.Editor.Composer
             p.variant = e.variant; p.sizeVariant = e.sizeVariant; p.textStyle = e.textStyle; p.shapeStyle = e.style;
             p.background = e.background; p.labelColor = e.labelColor; p.icon = e.icon; p.padding4 = e.padding4;
             p.radius = e.radius ?? -1f; p.padding = e.padding ?? -1f; p.spacing = e.spacing ?? -1f;
+            p.motion = e.animations?.loop; // the loop animation is the preset's "motion"
         }
 
         // ------------------------------------------------------------------ sections

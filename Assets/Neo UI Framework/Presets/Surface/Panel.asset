@@ -21,8 +21,8 @@ MonoBehaviour:
   textStyle: 
   shapeStyle: Panel
   motion: ShowDefault
-  background: 
-  labelColor: 
+  background: Surface
+  labelColor:
   icon: 
   radius: 12
   padding: 12

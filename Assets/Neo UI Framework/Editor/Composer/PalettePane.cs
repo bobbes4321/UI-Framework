@@ -24,7 +24,8 @@ namespace Neo.UI.Editor.Composer
         private const float SearchHeight = 20f;
         private const float SectionHeight = 18f;
 
-        private readonly System.Action<string> _addToView;   // click-to-add fallback (window wires it)
+        // click-to-add fallback (window wires it): (kind, presetOrNull). A Components tile passes its preset.
+        private readonly System.Action<string, string> _addToView;
 
         private string _filter = "";
         private Vector2 _scroll;
@@ -37,7 +38,7 @@ namespace Neo.UI.Editor.Composer
         // cached styles (built once)
         private GUIStyle _search, _section, _tile, _label;
 
-        public PalettePane(System.Action<string> addToView)
+        public PalettePane(System.Action<string, string> addToView)
         {
             _addToView = addToView;
         }
@@ -126,8 +127,12 @@ namespace Neo.UI.Editor.Composer
                 EditorGUI.DrawRect(new Rect(rect.x, rect.y, rect.width, 2f), accent.WithAlpha(0.85f));
 
                 var thumbRect = new Rect(rect.x + 4f, rect.y + 4f, CardThumb - 4f, CardThumb - 4f);
-                // cached in-memory render of the actual widget; null when headless → fall back to a glyph
-                Texture2D thumb = PresetThumbnailCache.GetOrRenderKind(entry.kind, (int)CardThumb);
+                // cached in-memory render of the actual widget; null when headless → fall back to a glyph.
+                // A Components tile renders its preset applied to the target kind ("Primary Button" looks
+                // primary), so the card previews the real component; a bare-kind tile renders the plain kind.
+                Texture2D thumb = entry.IsPreset && NeoWidgetPresets.TryGet(entry.preset, out NeoWidgetPreset p)
+                    ? PresetThumbnailCache.GetOrRender(p, (int)CardThumb)
+                    : PresetThumbnailCache.GetOrRenderKind(entry.kind, (int)CardThumb);
                 if (thumb != null)
                     GUI.DrawTexture(thumbRect, thumb, ScaleMode.ScaleToFit, alphaBlend: true);
                 else
@@ -137,33 +142,39 @@ namespace Neo.UI.Editor.Composer
                     new GUIContent(entry.label, entry.kind), false, false, false, false);
             }
 
-            // a press on the tile arms a drag; on the first drag the DragAndDrop session begins
+            // a press on the tile arms a drag; on the first drag the DragAndDrop session begins. A
+            // Components tile also carries its preset name (PresetDragKey) so the drop links the preset.
             if (e.type == EventType.MouseDown && e.button == 0 && rect.Contains(e.mousePosition))
             {
                 DragAndDrop.PrepareStartDrag();
                 DragAndDrop.SetGenericData(ComposerPalette.DragKey, entry.kind);
+                DragAndDrop.SetGenericData(ComposerPalette.PresetDragKey, entry.preset);
                 DragAndDrop.objectReferences = new Object[0];
                 _pendingDragKind = entry.kind;
+                _pendingDragPreset = entry.preset;
                 e.Use();
             }
             else if (e.type == EventType.MouseDrag && _pendingDragKind == entry.kind
-                     && rect.Contains(e.mousePosition))
+                     && _pendingDragPreset == entry.preset && rect.Contains(e.mousePosition))
             {
                 DragAndDrop.StartDrag($"Add {entry.label}");
                 _pendingDragKind = null;
+                _pendingDragPreset = null;
                 e.Use();
             }
             else if (e.type == EventType.MouseUp && e.button == 0 && rect.Contains(e.mousePosition)
-                     && _pendingDragKind == entry.kind)
+                     && _pendingDragKind == entry.kind && _pendingDragPreset == entry.preset)
             {
                 // a click with no drag → click-to-add fallback (append to the current view)
                 _pendingDragKind = null;
-                _addToView?.Invoke(entry.kind);
+                _pendingDragPreset = null;
+                _addToView?.Invoke(entry.kind, entry.preset);
                 e.Use();
             }
         }
 
         private string _pendingDragKind;
+        private string _pendingDragPreset;
 
         // ------------------------------------------------------------------ helpers
 

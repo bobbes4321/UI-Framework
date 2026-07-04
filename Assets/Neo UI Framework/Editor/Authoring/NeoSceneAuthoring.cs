@@ -31,11 +31,22 @@ namespace Neo.UI.Editor.Authoring
         /// suitable UI parent, otherwise under the resolved/created Canvas. Used by the overlay's "Add Widget"
         /// to drop into a specific element.
         /// </summary>
-        public static GameObject CreateWidget(string kind, GameObject parentSelection)
+        public static GameObject CreateWidget(string kind, GameObject parentSelection) =>
+            CreateWidget(kind, null, parentSelection);
+
+        /// <summary>
+        /// Creates a widget of <paramref name="kind"/> styled by a reusable <see cref="NeoWidgetPreset"/>
+        /// (<paramref name="presetName"/>, null/empty = a bare kind) under <paramref name="parentSelection"/>.
+        /// The preset rides on the element so the factory bakes it + stamps the link (a dragged "Primary
+        /// Button" palette tile / "More Widgets" preset entry lands as a real, round-tripping preset link).
+        /// </summary>
+        public static GameObject CreateWidget(string kind, string presetName, GameObject parentSelection)
         {
             if (string.IsNullOrEmpty(kind)) return null;
             ElementSpec element = ComposerFactory.NewElement(kind);
-            return Place(element, kind, parentSelection, $"Create Neo {Humanize(kind)}");
+            if (!string.IsNullOrEmpty(presetName)) element.preset = presetName;
+            string label = string.IsNullOrEmpty(presetName) ? Humanize(kind) : presetName;
+            return Place(element, kind, parentSelection, $"Create Neo {label}");
         }
 
         /// <summary>

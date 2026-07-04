@@ -326,7 +326,8 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   `WidgetStyleTag`), `preset` (name of a reusable `NeoWidgetPreset` — the Figma-style component layer:
   resolved at generate as the BASE with element fields overriding; exports as the preset name + only
   the override delta via `WidgetPresetTag`, so the link survives round-trip — see
-  `widget-presets-plan.md`), `icon` + `badge` on button/tab, `gradient` `{from,to,angle}` on shape/image
+  `widget-presets-plan.md`; the preset's `motion` field seeds the element's on-start `loop` animation
+  channel, stripped back out on export like any other delta), `icon` + `badge` on button/tab, `gradient` `{from,to,angle}` on shape/image
   (rides NeoGradient, tokens stay live), `src` on image (sprite asset path — rides an NeoShape
   texture fill so `radius` rounds the corners; full-rect sprites only, the shared material
   survives because the texture binds per CanvasRenderer; missing sprites report an issue),
@@ -441,7 +442,9 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   as a live preview, so everything round-trips losslessly by construction (the spec stays the single
   source of truth — never a scene-first editor). Tree · canvas · inspector panes, plus: a **widget
   palette** with drag-to-create onto canvas/tree (`ComposerPalette` registry — auto-includes
-  `NeoElementKinds`) and **layout templates** (`ComposerTemplates`, `Editor/Composer/Templates~/*`);
+  `NeoElementKinds` AND a **Components** category, one tile per discovered `NeoWidgetPreset`, so you drag
+  "Primary Button" not a bare "button"; tiles render the real widget via `PresetThumbnailCache`) and
+  **layout templates** (`ComposerTemplates`, `Editor/Composer/Templates~/*`);
   a **free, draggable/resizable viewport** with device presets (`ComposerDevicePresets` registry),
   rotate, zoom, and a CanvasScaler-equivalent so content scales like a real device
   (`SpecPreviewPane`, gated `RenderOptions.deviceScale` keeps agent renders byte-stable); a
@@ -450,8 +453,11 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   align/distribute, keyboard nudge/duplicate/delete; a **constraint-widget inspector**
   (`NeoConstraintWidget` in the EditorUI kit, Neo.UI-free) with Fixed/Hug/Fill sizing + auto-layout
   panel; **breakpoint authoring** (`BreakpointBar` — scope inspector edits to a breakpoint's override
-  delta); and **live preview** (theme recolor, sample rows in bound lists via `PreviewSampleData`,
-  breakpoint-override preview via an effective-spec merge). Every new fixed set is an extension seam.
+  delta); a **visual preset picker** (the inspector's Preset row opens `PresetPickerPopup` — a
+  thumbnail-card grid of kind-scoped `NeoWidgetPreset`s — plus Figma-style override indicators and
+  Create/Update/Reset-from-selection); and **live preview** (theme recolor, sample rows in bound lists
+  via `PreviewSampleData`, breakpoint-override preview via an effective-spec merge). Every new fixed set
+  is an extension seam.
   To improve the Composer's *feel*, drive it through the `composerSession` probe (above) rather than
   testing by hand — it captures a filmstrip + interaction telemetry an agent can critique and re-run.
 - Soft design lint (`AgentValidation.ValidateDesign`, surfaced as `designWarnings` by the bridge's

@@ -115,8 +115,10 @@ namespace Neo.UI.Editor
             new PresetDef("Filled Tab",  "Tab", "tab", variant: F.VariantPrimary, textStyle: F.TextStyleButtonLabel),
 
             // --- Surfaces & rows -----------------------------------------------------------------
-            new PresetDef("Card",        "Surface", "panel",  shapeStyle: F.StyleCard,  padding: 16f, spacing: 12f),
-            new PresetDef("Panel",       "Surface", "panel",  shapeStyle: F.StylePanel, padding: 12f, spacing: 8f),
+            // Surfaces carry a fill token too, else the shape style shapes nothing visible (a "Card" with
+            // no background reads as transparent). Elevated for the card, base surface for the flat panel.
+            new PresetDef("Card",        "Surface", "panel",  shapeStyle: F.StyleCard,  background: F.TokenSurfaceElevated, padding: 16f, spacing: 12f),
+            new PresetDef("Panel",       "Surface", "panel",  shapeStyle: F.StylePanel, background: F.TokenSurface,         padding: 12f, spacing: 8f),
             new PresetDef("List Row",    "Row",     "hstack", spacing: 12f, padding4: new[] { 16f, 12f, 16f, 12f }),
             new PresetDef("Compact Row", "Row",     "hstack", spacing: 8f,  padding4: new[] { 8f, 8f, 8f, 8f }),
             new PresetDef("Large Row",   "Row",     "hstack", spacing: 16f, padding4: new[] { 20f, 16f, 20f, 16f }),

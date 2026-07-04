@@ -699,9 +699,15 @@ namespace Neo.UI.Editor.Composer
             SelectAfter(CatalogPath(node.catalog));
         }
 
-        private void AddElementTo(List<ElementSpec> list, SpecNode parentNode, string kind)
+        private void AddElementTo(List<ElementSpec> list, SpecNode parentNode, string kind, string preset = null)
         {
-            _document.ApplyEdit(() => list.Add(ComposerFactory.NewElement(kind)), $"Add {kind}");
+            string label = string.IsNullOrEmpty(preset) ? kind : preset;
+            _document.ApplyEdit(() =>
+            {
+                ElementSpec el = ComposerFactory.NewElement(kind);
+                if (!string.IsNullOrEmpty(preset)) el.preset = preset; // a Components tile links its widget preset
+                list.Add(el);
+            }, $"Add {label}");
             if (parentNode != null) _expanded.Add(parentNode.path);
         }
 
@@ -720,6 +726,7 @@ namespace Neo.UI.Editor.Composer
 
             string kind = DragAndDrop.GetGenericData(ComposerPalette.DragKey) as string;
             if (string.IsNullOrEmpty(kind)) return;
+            string preset = DragAndDrop.GetGenericData(ComposerPalette.PresetDragKey) as string;
 
             List<ElementSpec> destination =
                 node.kind == SpecNodeKind.View ? node.view?.elements
@@ -732,7 +739,7 @@ namespace Neo.UI.Editor.Composer
             if (e.type == EventType.DragPerform)
             {
                 DragAndDrop.AcceptDrag();
-                AddElementTo(destination, node, kind);
+                AddElementTo(destination, node, kind, preset);
                 e.Use();
             }
         }

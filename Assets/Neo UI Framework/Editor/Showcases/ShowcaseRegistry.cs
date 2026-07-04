@@ -193,6 +193,17 @@ namespace Neo.UI.Editor
                 specPath = SpecsRoot + "/tabs-panels.json",
                 flowName = null,
             };
+            yield return new Showcase
+            {
+                id = "presets",
+                title = "Widget Presets",
+                description = "The design-system \"component\" layer — reusable widget styles (Primary " +
+                              "Button, Section Header, Card) referenced by name, with per-element overrides " +
+                              "on top. Run Setup → Create or Repair Widget Presets first to seed the library.",
+                category = "Widgets",
+                specPath = SpecsRoot + "/presets.json",
+                flowName = null,
+            };
 
             // --- Effects: the juice layer (shape effects + particles) ----------------------------
             yield return new Showcase

@@ -288,9 +288,21 @@ namespace Neo.UI.Editor.Composer
         //   • a selected view/popup         → append to that surface's elements;
         //   • nothing selected              → append to the first view (create one first, else warn).
         // Every branch routes through ApplyEdit and reselects the freshly added node.
-        private void AddKindToCurrentView(string kind)
+        private void AddKindToCurrentView(string kind) => AddKindToCurrentView(kind, null);
+
+        // Click-to-add fallback for the palette: appends a widget of `kind` (optionally linked to a
+        // widget `preset`, for a Components tile) next to / inside the current selection. The preset is
+        // baked + round-tripped by the generator/exporter exactly like a dragged tile.
+        private void AddKindToCurrentView(string kind, string preset)
         {
             if (string.IsNullOrEmpty(kind)) return;
+            string label = string.IsNullOrEmpty(preset) ? kind : preset;
+            ElementSpec Make()
+            {
+                ElementSpec el = ComposerFactory.NewElement(kind);
+                if (!string.IsNullOrEmpty(preset)) el.preset = preset;
+                return el;
+            }
             SpecNode node = _tree.Selected;
 
             if (node != null && node.kind == SpecNodeKind.Element && node.element != null)
@@ -298,14 +310,14 @@ namespace Neo.UI.Editor.Composer
                 if (ComposerCanvas.IsContainerKind(node.element.kind))
                 {
                     int childIndex = node.element.children.Count;
-                    _document.ApplyEdit(() => node.element.children.Add(ComposerFactory.NewElement(kind)), $"Add {kind}");
+                    _document.ApplyEdit(() => node.element.children.Add(Make()), $"Add {label}");
                     ReselectPath(node.path + $"/children[{childIndex}]");
                     return;
                 }
                 if (node.siblings != null)
                 {
                     int at = node.index + 1;
-                    _document.ApplyEdit(() => node.siblings.Insert(at, ComposerFactory.NewElement(kind)), $"Add {kind}");
+                    _document.ApplyEdit(() => node.siblings.Insert(at, Make()), $"Add {label}");
                     ReselectPath(ListPathOf(node.path) + $"[{at}]");
                     return;
                 }
@@ -314,7 +326,7 @@ namespace Neo.UI.Editor.Composer
             if (node != null && node.kind == SpecNodeKind.Popup && node.popup != null)
             {
                 PopupSpec popup = node.popup;
-                _document.ApplyEdit(() => popup.elements.Add(ComposerFactory.NewElement(kind)), $"Add {kind}");
+                _document.ApplyEdit(() => popup.elements.Add(Make()), $"Add {label}");
                 ReselectPath(node.path + $"/elements[{popup.elements.Count - 1}]");
                 return;
             }
@@ -325,7 +337,7 @@ namespace Neo.UI.Editor.Composer
                 Debug.LogWarning("[Composer] No view to add a widget to — create a view first.");
                 return;
             }
-            _document.ApplyEdit(() => view.elements.Add(ComposerFactory.NewElement(kind)), $"Add {kind}");
+            _document.ApplyEdit(() => view.elements.Add(Make()), $"Add {label}");
             ReselectPath(SpecPath.View(view.id) + $"/elements[{view.elements.Count - 1}]");
         }
 

@@ -48,7 +48,8 @@ namespace Neo.UI
         [Tooltip("Theme shape style name (NeoShape surface personality).")]
         public string shapeStyle;
 
-        [Tooltip("Animation preset name for the widget's default motion (show/hide). See PresetLibraryBootstrap.")]
+        [Tooltip("Animation preset name for the widget's default motion — seeds the element's on-start/loop " +
+                 "animation channel (a play-on-start UIAnimator). The element's own loop animation overrides it.")]
         public string motion;
 
         [Tooltip("Theme token for the widget background fill.")]

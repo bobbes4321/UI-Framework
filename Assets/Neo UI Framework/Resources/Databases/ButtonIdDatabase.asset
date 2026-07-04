@@ -209,6 +209,16 @@ MonoBehaviour:
     - Ghosted
     - Override
     - Plain
+  - category: Presets
+    names:
+    - CardAction
+    - Danger
+    - Ghost
+    - Primary
+    - PrimaryAsDanger
+    - PrimaryDefault
+    - PrimarySmall
+    - Secondary
   - category: Prev
     names:
     - Go

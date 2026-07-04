@@ -1162,6 +1162,25 @@ namespace Neo.UI.Editor
             if (!e.padding.HasValue) e.padding = p.PaddingOrNull;
             if (e.padding4 == null) e.padding4 = p.Padding4OrNull;
             if (!e.spacing.HasValue) e.spacing = p.SpacingOrNull;
+
+            // Motion: the preset's default on-start animation seeds the element's `loop` channel (a
+            // play-on-start UIAnimator — see ApplyElementAnimations), unless the element already names
+            // its own loop. ShallowClone shares the animations reference, so clone before mutating to
+            // avoid stomping the caller's spec. The exporter strips this loop again when it equals the
+            // preset's motion, so the link round-trips as a delta (see ApplyPresetDelta).
+            if (!string.IsNullOrEmpty(p.motion)
+                && (e.animations == null || string.IsNullOrEmpty(e.animations.loop)))
+            {
+                e.animations = e.animations == null
+                    ? new ElementAnimationsSpec()
+                    : new ElementAnimationsSpec
+                    {
+                        hover = e.animations.hover, press = e.animations.press,
+                        selected = e.animations.selected, disabled = e.animations.disabled,
+                        loop = e.animations.loop
+                    };
+                e.animations.loop = p.motion;
+            }
             return e;
         }
 

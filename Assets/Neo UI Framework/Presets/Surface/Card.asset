@@ -21,7 +21,7 @@ MonoBehaviour:
   textStyle: 
   shapeStyle: Card
   motion: ShowDefault
-  background: 
+  background: SurfaceElevated
   labelColor: 
   icon: 
   radius: 12

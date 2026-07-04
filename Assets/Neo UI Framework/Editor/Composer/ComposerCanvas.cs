@@ -1022,6 +1022,10 @@ namespace Neo.UI.Editor.Composer
             int insertAt = intoLayoutGroup ? InsertIndexAt(target, destination, dropMouse) : destination.Count;
 
             ElementSpec created = ComposerFactory.NewElement(kind);
+            // a Components tile also carries a widget-preset name → link it (baked + round-tripped at generate)
+            if (DragAndDrop.GetGenericData(ComposerPalette.PresetDragKey) is string dropPreset
+                && !string.IsNullOrEmpty(dropPreset))
+                created.preset = dropPreset;
             string parentPath = target != null && _index.TryGetValue(target, out Node tnode)
                 ? tnode.path : (_view != null ? SpecPath.View(_view.id)
                     : _popup != null ? SpecPath.Popup(_popup.name) : null);

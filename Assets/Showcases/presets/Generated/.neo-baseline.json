@@ -1,0 +1,364 @@
+{
+  "theme": {
+    "tokens": {
+      "Primary": "#3B82F6",
+      "Background": "#0B0D10",
+      "Accent": "#FCA311",
+      "TextDefault": "#C6CCD6",
+      "Panel": "#1D2D50",
+      "Surface": "#16191E",
+      "SurfaceElevated": "#21252C",
+      "Outline": "#343A44",
+      "PrimaryHover": "#5D98F8",
+      "PrimaryPressed": "#0F66F4",
+      "TextOnPrimary": "#FFFFFF",
+      "TextStrong": "#F5F7FA",
+      "TextMuted": "#8E96A4",
+      "Success": "#22C55E",
+      "Warning": "#F59E0B",
+      "Error": "#EF4444",
+      "Shadow": "#00000080",
+      "SuccessHover": "#30DB6F",
+      "SuccessPressed": "#1B9E4B",
+      "Danger": "#EF4444",
+      "DangerHover": "#F26565",
+      "DangerPressed": "#EB1A1A",
+      "TextDark": "#6B6390"
+    },
+    "variants": {
+      "Light": {
+        "Primary": "#2563EB",
+        "Background": "#F4F6F8",
+        "Accent": "#FCA311",
+        "TextDefault": "#303A49",
+        "Panel": "#1D2D50",
+        "Surface": "#FFFFFF",
+        "SurfaceElevated": "#EAEEF3",
+        "Outline": "#D3DAE3",
+        "PrimaryHover": "#467AEE",
+        "PrimaryPressed": "#134ECF",
+        "TextOnPrimary": "#FFFFFF",
+        "TextStrong": "#111827",
+        "TextMuted": "#5D6675",
+        "Success": "#15803D",
+        "Warning": "#B45309",
+        "Error": "#DC2626",
+        "Shadow": "#00000038",
+        "SuccessHover": "#1A9F4C",
+        "SuccessPressed": "#0F592A",
+        "Danger": "#DC2626",
+        "DangerHover": "#E14545",
+        "DangerPressed": "#B71D1D",
+        "TextDark": "#6B6390"
+      },
+      "Dark": {
+        "Primary": "#3B82F6",
+        "Background": "#0B0D10",
+        "Accent": "#FCA311",
+        "TextDefault": "#C6CCD6",
+        "Panel": "#1D2D50",
+        "Surface": "#16191E",
+        "SurfaceElevated": "#21252C",
+        "Outline": "#343A44",
+        "PrimaryHover": "#5D98F8",
+        "PrimaryPressed": "#0F66F4",
+        "TextOnPrimary": "#FFFFFF",
+        "TextStrong": "#F5F7FA",
+        "TextMuted": "#8E96A4",
+        "Success": "#22C55E",
+        "Warning": "#F59E0B",
+        "Error": "#EF4444",
+        "Shadow": "#00000080",
+        "SuccessHover": "#30DB6F",
+        "SuccessPressed": "#1B9E4B",
+        "Danger": "#EF4444",
+        "DangerHover": "#F26565",
+        "DangerPressed": "#EB1A1A",
+        "TextDark": "#6B6390"
+      },
+      "Custom": {
+        "Primary": "#3B82F6",
+        "Background": "#0B0D10",
+        "Accent": "#FCA311",
+        "TextDefault": "#C6CCD6",
+        "Panel": "#1D2D50",
+        "Surface": "#16191E",
+        "SurfaceElevated": "#21252C",
+        "Outline": "#343A44",
+        "PrimaryHover": "#5D98F8",
+        "PrimaryPressed": "#0F66F4",
+        "TextOnPrimary": "#FFFFFF",
+        "TextStrong": "#F5F7FA",
+        "TextMuted": "#8E96A4",
+        "Success": "#22C55E",
+        "Warning": "#F59E0B",
+        "Error": "#EF4444",
+        "Shadow": "#00000080",
+        "SuccessHover": "#30DB6F",
+        "SuccessPressed": "#1B9E4B",
+        "Danger": "#EF4444",
+        "DangerHover": "#F26565",
+        "DangerPressed": "#EB1A1A",
+        "TextDark": "#6B6390"
+      }
+    }
+  },
+  "views": [
+    {
+      "id": "Showcase/Presets",
+      "background": "Background",
+      "elements": [
+        {
+          "safearea": {
+            "anchor": "Stretch",
+            "children": [
+              {
+                "list": {
+                  "anchor": "Stretch",
+                  "spacing": 8,
+                  "children": [
+                    {
+                      "vstack": {
+                        "padding": 48,
+                        "spacing": 24,
+                        "children": [
+                          {
+                            "text": {
+                              "label": "Widget Presets",
+                              "color": "TextStrong",
+                              "textStyle": "Title",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "Reusable component styles. A widget references a preset BY NAME; the preset's styling resolves at generate, and per-element fields still override. Edit the preset asset, regenerate, every instance updates.",
+                              "color": "TextMuted",
+                              "textStyle": "Caption",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "BUTTON COMPONENTS",
+                              "color": "TextMuted",
+                              "textStyle": "Caption",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "hstack": {
+                              "padding": 0,
+                              "spacing": 16,
+                              "children": [
+                                {
+                                  "button": {
+                                    "id": "Presets/Primary",
+                                    "label": "Primary",
+                                    "labelColor": "TextOnPrimary",
+                                    "preset": "Primary Button",
+                                    "size": [
+                                      0,
+                                      56
+                                    ]
+                                  }
+                                },
+                                {
+                                  "button": {
+                                    "id": "Presets/Secondary",
+                                    "label": "Secondary",
+                                    "labelColor": "TextStrong",
+                                    "preset": "Secondary Button",
+                                    "size": [
+                                      0,
+                                      56
+                                    ]
+                                  }
+                                },
+                                {
+                                  "button": {
+                                    "id": "Presets/Ghost",
+                                    "label": "Ghost",
+                                    "labelColor": "Primary",
+                                    "preset": "Ghost Button",
+                                    "size": [
+                                      0,
+                                      56
+                                    ]
+                                  }
+                                },
+                                {
+                                  "button": {
+                                    "id": "Presets/Danger",
+                                    "label": "Danger",
+                                    "labelColor": "TextOnPrimary",
+                                    "preset": "Danger Button",
+                                    "size": [
+                                      0,
+                                      56
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "SAME PRESET, DIFFERENT SIZES (preset + override)",
+                              "color": "TextMuted",
+                              "textStyle": "Caption",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "hstack": {
+                              "padding": 0,
+                              "spacing": 16,
+                              "children": [
+                                {
+                                  "button": {
+                                    "id": "Presets/PrimaryDefault",
+                                    "label": "Default",
+                                    "labelColor": "TextOnPrimary",
+                                    "preset": "Primary Button",
+                                    "size": [
+                                      0,
+                                      56
+                                    ]
+                                  }
+                                },
+                                {
+                                  "button": {
+                                    "id": "Presets/PrimarySmall",
+                                    "label": "Small override",
+                                    "labelColor": "TextOnPrimary",
+                                    "preset": "Primary Button",
+                                    "size": "sm"
+                                  }
+                                },
+                                {
+                                  "button": {
+                                    "id": "Presets/PrimaryAsDanger",
+                                    "label": "Variant override",
+                                    "labelColor": "TextOnPrimary",
+                                    "variant": "danger",
+                                    "preset": "Primary Button",
+                                    "size": [
+                                      0,
+                                      56
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "TEXT COMPONENTS",
+                              "color": "TextMuted",
+                              "textStyle": "Caption",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "vstack": {
+                              "padding": 0,
+                              "spacing": 8,
+                              "children": [
+                                {
+                                  "text": {
+                                    "id": "Presets/Display",
+                                    "label": "Display Text",
+                                    "preset": "Display Text",
+                                    "align": "left"
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "id": "Presets/TitleP",
+                                    "label": "Title Text",
+                                    "preset": "Title Text",
+                                    "align": "left"
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "id": "Presets/Header",
+                                    "label": "Section Header",
+                                    "preset": "Section Header",
+                                    "align": "left"
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "id": "Presets/Body",
+                                    "label": "Body text reads at the body scale and color the preset assigns.",
+                                    "preset": "Body Text",
+                                    "align": "left"
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "id": "Presets/Cap",
+                                    "label": "Caption — muted, small.",
+                                    "preset": "Caption",
+                                    "align": "left"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "text": {
+                              "label": "SURFACE COMPONENT",
+                              "color": "TextMuted",
+                              "textStyle": "Caption",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "panel": {
+                              "id": "Presets/CardSurface",
+                              "preset": "Card",
+                              "children": [
+                                {
+                                  "text": {
+                                    "label": "Card",
+                                    "color": "TextStrong",
+                                    "textStyle": "Heading",
+                                    "align": "left"
+                                  }
+                                },
+                                {
+                                  "text": {
+                                    "label": "The “Card” preset carries the surface shape style, padding and child spacing — drop content in and it's themed.",
+                                    "color": "TextMuted",
+                                    "textStyle": "Body",
+                                    "align": "left"
+                                  }
+                                },
+                                {
+                                  "button": {
+                                    "id": "Presets/CardAction",
+                                    "label": "Action",
+                                    "labelColor": "TextOnPrimary",
+                                    "preset": "Primary Button",
+                                    "size": "sm"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
