@@ -3,24 +3,24 @@ using System.Collections.Generic;
 namespace Neo.UI.Editor
 {
     /// <summary>
-    /// A single device preset the Composer's viewport (and the headless agent
-    /// <c>preview</c>/<c>screenshot</c> matrix) can render at — a named width×height in portrait
-    /// device pixels. The package seeds a useful spread (phone S/M/L, tablet, desktop, ultrawide,
-    /// square, plus landscape variants) but a consuming project adds its own device — a specific
-    /// handheld, a kiosk aspect, a watch face — with one <see cref="ComposerDevicePresets.Register"/>
-    /// call from its own assembly, no fork.
+    /// A single device preset the headless agent <c>preview</c>/<c>screenshot</c> matrix (and the
+    /// Gallery window's resolution picker) can render at — a named width×height in portrait device
+    /// pixels. The package seeds a useful spread (phone S/M/L, tablet, desktop, ultrawide, square,
+    /// plus landscape variants) but a consuming project adds its own device — a specific handheld, a
+    /// kiosk aspect, a watch face — with one <see cref="ComposerDevicePresets.Register"/> call from
+    /// its own assembly, no fork.
     ///
     /// <para>This mirrors the shape of <see cref="CatalogKind"/> / <see cref="NeoCatalogKinds"/>
     /// (Pattern R — the Kinds Registry): a readonly value type plus a static replace-by-id registry,
-    /// so the viewport iterates <see cref="ComposerDevicePresets.All"/> instead of switching over a
+    /// so a caller iterates <see cref="ComposerDevicePresets.All"/> instead of switching over a
     /// fixed enum of aspect ratios — which was the user's #1 complaint.</para>
     /// </summary>
     public readonly struct DevicePreset
     {
-        /// <summary> Stable id used to address the preset (and persist a viewport selection). </summary>
+        /// <summary> Stable id used to address the preset (and persist a resolution-picker selection). </summary>
         public readonly string id;
 
-        /// <summary> Human label shown in the toolbar dropdown ("iPhone 15", "Desktop 16:9"). </summary>
+        /// <summary> Human label shown in a resolution dropdown ("iPhone 15", "Desktop 16:9"). </summary>
         public readonly string label;
 
         /// <summary> Portrait width in device px (the canvas render width). </summary>
@@ -50,16 +50,16 @@ namespace Neo.UI.Editor
     }
 
     /// <summary>
-    /// The single source of truth for the set of device presets the viewport offers. Seeded with the
-    /// package built-ins through <see cref="Register"/> (never a hardcoded switch); a consuming project
-    /// registers its own device once (e.g. from an <c>[InitializeOnLoad]</c> static ctor). The headless
-    /// <c>preview</c>/<c>screenshot</c> matrix re-sources its resolution list from here too
-    /// (see <see cref="UISpecPreview.DefaultResolutions"/>), so the Composer and the agent path always
-    /// agree on the device spread.
+    /// The single source of truth for the set of device presets the resolution matrix offers. Seeded
+    /// with the package built-ins through <see cref="Register"/> (never a hardcoded switch); a
+    /// consuming project registers its own device once (e.g. from an <c>[InitializeOnLoad]</c> static
+    /// ctor). The headless <c>preview</c>/<c>screenshot</c> matrix sources its resolution list from
+    /// here (see <see cref="UISpecPreview.DefaultResolutions"/>), so every consumer of that list agrees
+    /// on the device spread.
     /// <para>
     /// Wave 9: migrated onto <see cref="NeoKeyedRegistry{T}"/> (Pattern R's shared base) — this registry
     /// was mistakenly left off the Wave 4 migration list (the plan assumed it had been deleted with the
-    /// Composer; the Wave 2 kill-list had already established it survives as a real dependency of
+    /// retired Composer; the Wave 2 kill-list had already established it survives as a real dependency of
     /// <see cref="UISpecPreview.DefaultResolutions"/>). <see cref="Register"/> now warns-and-ignores an
     /// invalid (empty-id) entry instead of throwing — the exact audit A6 policy every sibling registry
     /// already had (a throw from a project's own <c>[InitializeOnLoad]</c> static ctor would poison the
@@ -74,7 +74,7 @@ namespace Neo.UI.Editor
             registryName: "ComposerDevicePresets");
 
         // Built-ins seeded THROUGH the registry (seam-first): a useful spread from small phones to
-        // ultrawide. Portrait px; the viewport's rotate toggle swaps w/h for landscape. The first
+        // ultrawide. Portrait px; landscape variants are separate entries with w/h swapped. The first
         // three intentionally match the old UISpecPreview.DefaultResolutions tuple so the agent
         // matrix and committed renders are unchanged.
         private static IEnumerable<DevicePreset> Builtins()
@@ -85,7 +85,7 @@ namespace Neo.UI.Editor
             yield return new DevicePreset("phone-landscape", "Phone Landscape", 1920, 1080);
             yield return new DevicePreset("tablet-portrait", "Tablet Portrait", 1536, 2048);
 
-            // a denser device spread for the free viewport (point logical sizes — DevTools style)
+            // a denser device spread (point logical sizes — DevTools style)
             yield return new DevicePreset("phone-s", "Phone S", 320, 568);    // small handset
             yield return new DevicePreset("phone-m", "Phone M", 375, 667);    // common handset
             yield return new DevicePreset("phone-l", "Phone L", 414, 896);    // large handset
@@ -106,8 +106,9 @@ namespace Neo.UI.Editor
 
         /// <summary>
         /// Registers (or replaces, by id) a device preset — the extension seam. A consuming project
-        /// calls this once to make a new device appear in the viewport dropdown and the agent matrix.
-        /// An entry with an empty id is warned-and-ignored, never thrown (see the type doc above).
+        /// calls this once to make a new device appear in the agent matrix and any resolution picker
+        /// that reads <see cref="All"/>. An entry with an empty id is warned-and-ignored, never thrown
+        /// (see the type doc above).
         /// </summary>
         public static void Register(DevicePreset preset) => _registry.Register(preset);
 

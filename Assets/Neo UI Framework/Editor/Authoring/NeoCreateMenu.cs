@@ -77,7 +77,7 @@ namespace Neo.UI.Editor.Authoring
                 menu.AddItem(new GUIContent($"{e.category}/{e.label}"), false,
                     () => NeoSceneAuthoring.CreateWidget(kind, preset, parent));
             }
-            menu.ShowAsContext();
+            ShowMenu(menu);
         }
 
         // --- Curated layout scaffolds (a small valid element tree, not a bare kind) ---
@@ -92,7 +92,39 @@ namespace Neo.UI.Editor.Authoring
                 menu.AddItem(new GUIContent(entry.label), false,
                     () => NeoSceneAuthoring.InsertTemplate(entry, parent));
             }
-            menu.ShowAsContext();
+            ShowMenu(menu);
+        }
+
+        // ---------------------------------------------------------------- OnGUI-context bridge
+        //
+        // GenericMenu.ShowAsContext()/DropDown() only work when called from inside an OnGUI pass —
+        // there's no active Event/GUIView for the popup to attach to otherwise. A GameObject-menu
+        // [MenuItem] handler runs OUTSIDE any OnGUI (confirmed: it builds items and returns cleanly,
+        // but no popup ever appears; wrapping in EditorApplication.delayCall doesn't help either,
+        // since that still isn't an OnGUI call). Route the show through a throwaway invisible
+        // EditorWindow so it genuinely executes inside that window's first OnGUI, then self-closes.
+        private static void ShowMenu(GenericMenu menu) => MenuBridgeWindow.Show(menu);
+
+        private class MenuBridgeWindow : EditorWindow
+        {
+            private GenericMenu _menu;
+
+            public static void Show(GenericMenu menu)
+            {
+                var bridge = CreateInstance<MenuBridgeWindow>();
+                bridge._menu = menu;
+                bridge.position = new Rect(Screen.width / 2f, Screen.height / 2f, 1, 1);
+                bridge.ShowPopup();
+            }
+
+            private void OnGUI()
+            {
+                if (_menu == null) return;
+                GenericMenu menu = _menu;
+                _menu = null;
+                Close();
+                menu.ShowAsContext();
+            }
         }
     }
 }

@@ -9,7 +9,7 @@ namespace Neo.UI
     /// A UI navigation graph: nodes + string-addressed edges, run by a <see cref="FlowController"/>.
     /// Nodes serialize with [SerializeReference] into this single force-text asset.
     /// </summary>
-    [CreateAssetMenu(menuName = "Neo/UI/Flow Graph", fileName = "FlowGraph")]
+    [CreateAssetMenu(menuName = "Neo UI/Flow Graph", fileName = "FlowGraph")]
     public class FlowGraph : ScriptableObject
     {
         public string graphName;

@@ -40,8 +40,8 @@ namespace Neo.UI.Editor
         private bool _nameFieldFocused;
 
         /// <summary> Raised after any edit that mutates the graph (connect/disconnect/move/delete,
-        /// rename, arrange, reroute). The Composer sets this to mirror flow edits made on a transient
-        /// graph back into its in-memory spec — null in normal asset-editing use. </summary>
+        /// rename, arrange, reroute). <see cref="OpenForSpec"/> sets this to mirror flow edits made on
+        /// a transient graph back into an in-memory spec — null in normal asset-editing use. </summary>
         internal System.Action externalGraphChanged;
 
         internal void RaiseExternalChanged() => externalGraphChanged?.Invoke();
@@ -57,8 +57,9 @@ namespace Neo.UI.Editor
 
         /// <summary>
         /// Opens the window on an externally-owned (often transient) graph and routes edits back to
-        /// <paramref name="onChanged"/>. The Neo Composer uses this so its "Flow" leaf edits the
-        /// document's flow without that flow ever becoming a committed asset.
+        /// <paramref name="onChanged"/>, so a caller can edit a flow without that flow ever becoming a
+        /// committed asset. (Originally used by the retired Composer's "Flow" leaf; kept as the seam
+        /// for any future in-memory/transient-graph editing surface.)
         /// </summary>
         public static FlowGraphWindow OpenForSpec(FlowGraph graph, System.Action onChanged)
         {

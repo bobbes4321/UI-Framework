@@ -16,13 +16,14 @@ namespace Neo.UI
     /// editor registry discovers it with no fork and no C#.
     /// </para>
     /// </summary>
-    [CreateAssetMenu(menuName = "Neo/UI/Widget Preset", fileName = "WidgetPreset", order = 120)]
+    [CreateAssetMenu(menuName = "Neo UI/Widget Preset", fileName = "WidgetPreset", order = 120)]
     public class NeoWidgetPreset : ScriptableObject
     {
         [Tooltip("The id used in specs, e.g. \"Primary Button\". Unique across all presets; matched ordinally.")]
         public string presetName;
 
-        [Tooltip("Grouping for the Composer palette/picker, e.g. Button / Text / Card.")]
+        [Tooltip("Grouping for the preset picker (scene-view overlay Apply Preset, Design System " +
+                 "window), e.g. Button / Text / Card.")]
         public string category = "Button";
 
         [Tooltip("Which element kind this preset styles (button, text, toggle, …). Drives which fields apply " +

@@ -429,6 +429,300 @@ namespace Neo.UI.Editor
             EditorUtility.SetDirty(settings.animationPresets);
         }
 
+        // ------------------------------------------------------------------ diff preview (B6)
+
+        /// <summary>
+        /// A structural, human-readable preview of what <see cref="Apply"/> WOULD change — computed
+        /// against the live theme BEFORE anything is written, so the Apply confirm can name the real
+        /// consequences (which tokens across which variants change, plus the shape/text/motion knobs the
+        /// bundle model actually drives) instead of a generic "this may overwrite edits" warning. This is
+        /// the B6 fix: a re-apply that would silently stomp Design-System token edits now surfaces them.
+        /// A zero-diff (<see cref="IsEmpty"/>) means the bundle is already applied. Pure — no side effects.
+        /// </summary>
+        public sealed class BundleDiff
+        {
+            public string bundleName;
+
+            /// <summary> One entry per affected theme/bundle variant (only variants with actual changes). </summary>
+            public readonly List<VariantTokenDiff> variants = new List<VariantTokenDiff>();
+
+            /// <summary> Human-readable shape/text/motion changes ("Card radius 12 → 20", …). </summary>
+            public readonly List<string> styleChanges = new List<string>();
+
+            /// <summary> Total token add+change count across every variant. </summary>
+            public int TokenChangeCount => variants.Sum(v => v.added.Count + v.changed.Count);
+
+            /// <summary> How many variants see at least one token change. </summary>
+            public int VariantsAffected => variants.Count;
+
+            /// <summary> True when applying the bundle would change nothing (already applied). </summary>
+            public bool IsEmpty => TokenChangeCount == 0 && styleChanges.Count == 0;
+
+            /// <summary> The first <paramref name="max"/> changed/added token names (variant-qualified), for the dialog. </summary>
+            public IEnumerable<string> SampleTokens(int max) => variants
+                .SelectMany(v => v.changed.Concat(v.added).Select(t => $"{v.variant}/{t}"))
+                .Take(max);
+
+            /// <summary> A one-paragraph summary suitable for a confirm dialog body. </summary>
+            public string Summarize()
+            {
+                if (IsEmpty) return "This bundle is already applied — no tokens or styles would change.";
+                var sb = new System.Text.StringBuilder();
+                if (TokenChangeCount > 0)
+                    sb.Append($"{TokenChangeCount} token(s) change across {VariantsAffected} variant(s)");
+                if (styleChanges.Count > 0)
+                    sb.Append(sb.Length > 0 ? $", plus {styleChanges.Count} shape/text/motion change(s)" :
+                                              $"{styleChanges.Count} shape/text/motion change(s)");
+                sb.Append(". The widget-preset library is reseeded & recolored to this bundle.");
+                var sample = SampleTokens(6).ToList();
+                if (sample.Count > 0)
+                    sb.Append("\n\nTokens: " + string.Join(", ", sample) +
+                              (TokenChangeCount > sample.Count ? ", …" : ""));
+                if (styleChanges.Count > 0)
+                    sb.Append("\n\nStyles: " + string.Join("; ", styleChanges.Take(6)) +
+                              (styleChanges.Count > 6 ? "; …" : ""));
+                return sb.ToString();
+            }
+        }
+
+        /// <summary> Per-variant token delta of a <see cref="BundleDiff"/>. </summary>
+        public sealed class VariantTokenDiff
+        {
+            public string variant;
+            /// <summary> True when the variant doesn't exist yet (the bundle would create it). </summary>
+            public bool isNewVariant;
+            /// <summary> Tokens the theme variant doesn't have (would be created). </summary>
+            public readonly List<string> added = new List<string>();
+            /// <summary> Tokens whose color differs from the bundle's incoming value. </summary>
+            public readonly List<string> changed = new List<string>();
+        }
+
+        // Bundle Colors are floats; a re-applied bundle stores them bit-identically, but a captured /
+        // round-tripped palette can drift by a rounding ULP — compare with a small tolerance so
+        // "already applied" reads as zero-diff.
+        private const float ColorEps = 1f / 512f;
+        private static bool ColorApprox(Color a, Color b) =>
+            Mathf.Abs(a.r - b.r) <= ColorEps && Mathf.Abs(a.g - b.g) <= ColorEps &&
+            Mathf.Abs(a.b - b.b) <= ColorEps && Mathf.Abs(a.a - b.a) <= ColorEps;
+
+        private static bool FloatApprox(float a, float b) => Mathf.Abs(a - b) <= 1e-3f;
+
+        /// <summary>
+        /// Computes what <see cref="Apply"/> would change on <paramref name="theme"/> (+ the motion
+        /// presets on <paramref name="settings"/>) — mirroring Apply's overwrite semantics exactly so the
+        /// diff reads zero right after a successful apply: each theme variant is compared to the bundle's
+        /// palette for that variant, or (as Apply does) to the bundle's FIRST palette when the bundle
+        /// doesn't define it. Reusable by both the window's Bundles tab and the
+        /// <see cref="ThemeBundleDefinition"/> inspector's Apply confirm.
+        /// </summary>
+        public static BundleDiff PreviewDiff(Bundle bundle, Theme theme, NeoUISettings settings)
+        {
+            var diff = new BundleDiff { bundleName = bundle?.name };
+            if (bundle == null || theme == null || bundle.palettes == null || bundle.palettes.Count == 0)
+                return diff;
+
+            Dictionary<string, Color> firstPalette = bundle.palettes[0].tokens;
+
+            // The variants Apply touches: every existing theme variant (gets its own or the first palette)
+            // PLUS any bundle-defined variant the theme doesn't have yet (Apply creates it).
+            var variantNames = theme.Variants.Select(v => v.name)
+                .Concat(bundle.palettes.Select(p => p.variant))
+                .Where(n => !string.IsNullOrEmpty(n))
+                .Distinct()
+                .ToList();
+
+            foreach (string variantName in variantNames)
+            {
+                Dictionary<string, Color> incoming = bundle.palettes
+                    .FirstOrDefault(p => p.variant == variantName).tokens ?? firstPalette;
+
+                Theme.ThemeVariant current = theme.GetVariant(variantName);
+                var vd = new VariantTokenDiff { variant = variantName, isNewVariant = current == null };
+                foreach (KeyValuePair<string, Color> tok in incoming)
+                {
+                    if (current == null || !current.TryGetColor(tok.Key, out Color have))
+                        vd.added.Add(tok.Key);
+                    else if (!ColorApprox(have, tok.Value))
+                        vd.changed.Add(tok.Key);
+                }
+                if (vd.added.Count > 0 || vd.changed.Count > 0) diff.variants.Add(vd);
+            }
+
+            AddShapeChanges(bundle, theme, diff);
+            AddTextChanges(bundle, theme, diff);
+            AddMotionChanges(bundle, settings, diff);
+            return diff;
+        }
+
+        private static void AddShapeChanges(Bundle bundle, Theme theme, BundleDiff diff)
+        {
+            RadiusChange(theme, UIWidgetFactory.StyleCard, "Card radius", bundle.cardRadius, diff);
+            RadiusChange(theme, UIWidgetFactory.StylePanel, "Panel radius", bundle.panelRadius, diff);
+            RadiusChange(theme, UIWidgetFactory.StyleControl, "Control radius", bundle.controlRadius, diff);
+
+            if (theme.TryGetShapeStyle(UIWidgetFactory.StyleShadow, out ShapeStyle shadow))
+            {
+                if (!FloatApprox(shadow.softness, bundle.shadowSoftness))
+                    diff.styleChanges.Add($"Shadow softness {shadow.softness:0} → {bundle.shadowSoftness:0}");
+            }
+            else diff.styleChanges.Add("Shadow style created");
+
+            bool wantGradient = bundle.cardGradientToToken != null;
+            if (theme.TryGetShapeStyle(UIWidgetFactory.StyleCard, out ShapeStyle card))
+            {
+                bool haveGradient = card.fillMode != ShapeFillMode.Solid;
+                if (haveGradient != wantGradient)
+                    diff.styleChanges.Add(wantGradient ? "Card gains a surface gradient" : "Card gradient removed");
+            }
+        }
+
+        private static void RadiusChange(Theme theme, string styleName, string label, float radius, BundleDiff diff)
+        {
+            if (!theme.TryGetShapeStyle(styleName, out ShapeStyle style)) { diff.styleChanges.Add($"{label}: style created"); return; }
+            if (!FloatApprox(style.radius, radius))
+                diff.styleChanges.Add($"{label} {style.radius:0} → {radius:0}");
+        }
+
+        private static void AddTextChanges(Bundle bundle, Theme theme, BundleDiff diff)
+        {
+            SpacingChange(theme, UIWidgetFactory.TextStyleDisplay, "Display tracking", bundle.headlineSpacing, diff);
+            SpacingChange(theme, UIWidgetFactory.TextStyleTitle, "Title tracking", bundle.headlineSpacing * 0.5f, diff);
+        }
+
+        private static void SpacingChange(Theme theme, string styleName, string label, float spacing, BundleDiff diff)
+        {
+            if (!theme.TryGetTextStyle(styleName, out TextStyle style)) return; // Apply seeds the full scale; only report the knob we drive
+            if (!FloatApprox(style.characterSpacing, spacing))
+                diff.styleChanges.Add($"{label} {style.characterSpacing:0.##} → {spacing:0.##}");
+        }
+
+        private static void AddMotionChanges(Bundle bundle, NeoUISettings settings, BundleDiff diff)
+        {
+            if (settings == null || settings.animationPresets == null) return;
+            UIAnimationPreset show = settings.animationPresets.Get("ShowDefault");
+            if (show == null) { diff.styleChanges.Add("ShowDefault motion created"); return; }
+            if (!FloatApprox(show.animation.fade.settings.duration, bundle.motionDuration))
+                diff.styleChanges.Add($"Motion duration {show.animation.fade.settings.duration:0.##} → {bundle.motionDuration:0.##}");
+            if (!string.Equals(show.animation.fade.settings.ease.ToString(), bundle.motionEase, StringComparison.Ordinal))
+                diff.styleChanges.Add($"Motion ease {show.animation.fade.settings.ease} → {bundle.motionEase}");
+        }
+
+        // ------------------------------------------------------------------ save current look as bundle
+
+        /// <summary> Default folder the "Save current look as bundle" flows drop new definitions into. </summary>
+        public const string DefaultThemesFolder = "Assets/Neo UI Themes";
+
+        /// <summary>
+        /// Captures the LIVE theme (+ motion presets) into an in-memory <see cref="Bundle"/> — the reverse
+        /// of <see cref="Apply"/>. All variants' tokens, the card/panel/control radii, card gradient,
+        /// shadow softness, headline tracking and the ShowDefault duration/ease are read back. The bundle
+        /// model is NARROWER than a theme (see the intersection caveat in the design-system-cohesion
+        /// plan): per-corner radii, per-style fills/borders/elevation, per-style softness, text fonts /
+        /// sizes / colors and non-fade motion channels are NOT captured — <see cref="Apply"/> reconstructs
+        /// a fixed type scale and fade+scale motion from the captured knobs. What IS captured round-trips:
+        /// capture → <see cref="ThemeBundleDefinition.ToBundle"/> → <see cref="PreviewDiff"/> reads ~zero.
+        /// </summary>
+        public static Bundle CaptureBundleFromTheme(string name, Theme theme, NeoUISettings settings,
+            string description = null)
+        {
+            var palettes = new List<(string variant, Dictionary<string, Color> tokens)>();
+            foreach (Theme.ThemeVariant variant in theme.Variants)
+            {
+                var tokens = new Dictionary<string, Color>();
+                foreach (Theme.TokenColor tc in variant.colors)
+                    if (!string.IsNullOrEmpty(tc.token)) tokens[tc.token] = tc.color;
+                palettes.Add((variant.name, tokens));
+            }
+
+            var bundle = new Bundle
+            {
+                name = string.IsNullOrWhiteSpace(name) ? "Custom" : name.Trim(),
+                description = description ?? "Captured from the current project look",
+                palettes = palettes,
+                cardRadius = RadiusOf(theme, UIWidgetFactory.StyleCard, 16f),
+                panelRadius = RadiusOf(theme, UIWidgetFactory.StylePanel, 16f),
+                controlRadius = RadiusOf(theme, UIWidgetFactory.StyleControl, 10f),
+                shadowSoftness = theme.TryGetShapeStyle(UIWidgetFactory.StyleShadow, out ShapeStyle sh) ? sh.softness : 18f,
+                headlineSpacing = theme.TryGetTextStyle(UIWidgetFactory.TextStyleDisplay, out TextStyle disp) ? disp.characterSpacing : -0.5f,
+            };
+
+            if (theme.TryGetShapeStyle(UIWidgetFactory.StyleCard, out ShapeStyle card) && card.fillMode != ShapeFillMode.Solid)
+                bundle.cardGradientToToken = card.fillColorB?.token;
+
+            if (settings != null && settings.animationPresets != null)
+            {
+                UIAnimationPreset show = settings.animationPresets.Get("ShowDefault");
+                if (show != null)
+                {
+                    bundle.motionDuration = show.animation.fade.settings.duration;
+                    bundle.motionEase = show.animation.fade.settings.ease.ToString();
+                }
+            }
+            return bundle;
+        }
+
+        private static float RadiusOf(Theme theme, string styleName, float fallback) =>
+            theme.TryGetShapeStyle(styleName, out ShapeStyle s) ? s.radius : fallback;
+
+        /// <summary>
+        /// Writes a <see cref="Bundle"/> to a <see cref="ThemeBundleDefinition"/> asset (raw per-variant
+        /// tokens, so re-applying reproduces it exactly) under <paramref name="folder"/>, refreshes the
+        /// registry discovery and returns the created asset. The shared core the New Project Setup wizard
+        /// and the Design System window both call — identical output for the same bundle.
+        /// </summary>
+        public static ThemeBundleDefinition SaveDefinition(Bundle bundle, string folder, string assetName = null)
+        {
+            EnsureFolder(string.IsNullOrEmpty(folder) ? DefaultThemesFolder : folder);
+            folder = string.IsNullOrEmpty(folder) ? DefaultThemesFolder : folder;
+
+            var def = ScriptableObject.CreateInstance<ThemeBundleDefinition>();
+            def.bundleName = bundle.name;
+            def.description = bundle.description;
+            def.cardRadius = bundle.cardRadius;
+            def.panelRadius = bundle.panelRadius;
+            def.controlRadius = bundle.controlRadius;
+            def.cardGradientToToken = bundle.cardGradientToToken;
+            def.shadowSoftness = bundle.shadowSoftness;
+            def.motionDuration = bundle.motionDuration;
+            def.motionEase = bundle.motionEase;
+            def.headlineSpacing = bundle.headlineSpacing;
+            def.variants = new List<ThemeBundleDefinition.Variant>();
+            foreach ((string variant, Dictionary<string, Color> tokens) palette in bundle.palettes)
+            {
+                var v = new ThemeBundleDefinition.Variant { name = palette.variant };
+                foreach (KeyValuePair<string, Color> t in palette.tokens)
+                    v.tokens.Add(new ThemeBundleDefinition.TokenColor { token = t.Key, color = t.Value });
+                def.variants.Add(v);
+            }
+
+            // Direct path (overwrites in place) — matches the wizard's original SaveCustomBundle so its
+            // output is byte-identical; the window's Save-flow guards overwrite via SaveFilePanelInProject.
+            string leaf = string.IsNullOrWhiteSpace(assetName) ? bundle.name : assetName.Trim();
+            AssetDatabase.CreateAsset(def, $"{folder}/{leaf}.asset");
+            ThemeBundleRegistry.InvalidateDiscovery();
+            return def;
+        }
+
+        /// <summary>
+        /// Captures the live theme (<see cref="CaptureBundleFromTheme"/>) and persists it as a reusable
+        /// <see cref="ThemeBundleDefinition"/> — the "Save current look as bundle" action.
+        /// </summary>
+        public static ThemeBundleDefinition SaveDefinitionFromTheme(string name, Theme theme,
+            NeoUISettings settings, string folder = null, string description = null) =>
+            SaveDefinition(CaptureBundleFromTheme(name, theme, settings, description), folder, name);
+
+        // Minimal recursive folder-ensure (kept local so ThemeBundles stays independent of the
+        // DesignSystem tab helpers). No-op when the folder already exists.
+        private static void EnsureFolder(string folder)
+        {
+            if (string.IsNullOrEmpty(folder) || AssetDatabase.IsValidFolder(folder)) return;
+            string parent = System.IO.Path.GetDirectoryName(folder)?.Replace('\\', '/');
+            string leaf = System.IO.Path.GetFileName(folder);
+            if (string.IsNullOrEmpty(parent) || string.IsNullOrEmpty(leaf)) return;
+            if (!AssetDatabase.IsValidFolder(parent)) EnsureFolder(parent);
+            AssetDatabase.CreateFolder(parent, leaf);
+        }
+
         // ------------------------------------------------------------------ menu
 
         // One picker over the registry instead of one [MenuItem] per built-in — a project's registered

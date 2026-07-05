@@ -7,7 +7,7 @@ namespace Neo.UI.Menus
     /// <see cref="UserSettingsService.SettingsCategory"/> stream so gameplay can react with
     /// <c>Signals.On&lt;float&gt;("Settings", "Audio/Master", ...)</c>.
     /// </summary>
-    [CreateAssetMenu(menuName = "Neo/UI/Menus/Settings Catalog", fileName = "SettingsCatalog")]
+    [CreateAssetMenu(menuName = "Neo UI/Menus/Settings Catalog", fileName = "SettingsCatalog")]
     public class SettingsCatalog : MenuCatalog
     {
         public override string ChangeSignalCategory => UserSettingsService.SettingsCategory;

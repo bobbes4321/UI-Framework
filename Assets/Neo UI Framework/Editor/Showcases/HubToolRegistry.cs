@@ -64,6 +64,20 @@ namespace Neo.UI.Editor
                 tooltip = "Visual flow graph editor — wire views, popups and triggers into app flow.",
                 invoke = FlowGraphWindow.Open,
             };
+            yield return new HubTool
+            {
+                id = "design-system", label = "Design System", category = Author,
+                tooltip = "Author the project's look — colors, buttons, shapes, presets and motion — " +
+                          "over the live settings + theme.",
+                invoke = NeoDesignSystemWindow.Open,
+            };
+            yield return new HubTool
+            {
+                id = "gallery", label = "Gallery", category = Author,
+                tooltip = "Visual gallery of every generated view/popup, rendered with the in-editor " +
+                          "screenshotter so you can see at a glance what the agent built.",
+                invoke = NeoGalleryWindow.Open,
+            };
 
             // --- Data: id databases ---------------------------------------------------------------
             yield return new HubTool
@@ -87,6 +101,10 @@ namespace Neo.UI.Editor
             yield return Menu("setup-fonts", "Create or Repair Fonts", Setup,
                 "Regenerate the Inter + Lucide icon TMP SDF font assets and wire the icon font.",
                 "Tools/Neo UI/Setup/Create or Repair Fonts");
+            yield return Menu("setup-presets", "Create or Repair Widget Presets", Setup,
+                "Seed the built-in NeoWidgetPreset library (Primary Button, Section Header, Card, …) — " +
+                "reusable named component styles referenced by an element's `preset` field.",
+                "Tools/Neo UI/Setup/Create or Repair Widget Presets");
             yield return Menu("setup-animations", "Create or Repair Animation Library", Setup,
                 "Seed the curated default animation presets (fades, four-way slides, scale-pop, button " +
                 "press, loop pulse) — auto-discovered, referenced by name from specs.",

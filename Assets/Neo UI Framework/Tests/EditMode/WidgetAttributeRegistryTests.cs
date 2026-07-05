@@ -29,25 +29,69 @@ namespace Neo.UI.Tests
         [Test]
         public void OptionSets_SeedExactlyTheBuiltIns()
         {
+            // ButtonVariants/ButtonSizes merge the CODE-registry seed with whatever names are
+            // authored on NeoUISettings.buttonVariants/buttonSizes (see WithSettingsNames): seed
+            // first, then any settings-authored name not already present (case-insensitive) is
+            // appended in list order. Since design-system-cohesion-plan.md Phase 2.6,
+            // StarterKitBootstrap.EnsureButtonVariants seeds a fifth, "success", into that list —
+            // and a project is free to hand-author further variants/sizes on top (the checked-in
+            // demo settings asset carries its own, e.g. a "Baller" variant and an "xl" size). None
+            // of that is a regression, so rather than hardcode a fixed count this test reproduces
+            // the merge from the live settings asset's raw data and asserts the result is EXACTLY
+            // that — the code-registry portion is pinned verbatim, and any settings-contributed
+            // extras are still checked for exact membership, de-dupe and order, just not hardcoded.
+            NeoUISettings settings = NeoUISettings.instance;
+            IEnumerable<string> variantNames = settings != null && settings.buttonVariants != null
+                ? settings.buttonVariants.Where(v => v != null).Select(v => v.name)
+                : Enumerable.Empty<string>();
+            IEnumerable<string> sizeNames = settings != null && settings.buttonSizes != null
+                ? settings.buttonSizes.Where(s => s != null).Select(s => s.name)
+                : Enumerable.Empty<string>();
+
             CollectionAssert.AreEqual(
-                new[] { "primary", "secondary", "ghost", "danger" }, NeoWidgetOptions.ButtonVariants);
-            CollectionAssert.AreEqual(new[] { "sm", "md", "lg" }, NeoWidgetOptions.ButtonSizes);
+                MergedExpectation(new[] { "primary", "secondary", "ghost", "danger" }, variantNames),
+                NeoWidgetOptions.ButtonVariants);
+            CollectionAssert.AreEqual(
+                MergedExpectation(new[] { "sm", "md", "lg" }, sizeNames),
+                NeoWidgetOptions.ButtonSizes);
+            // Aligns/ShapeNames are pure code registries (never merged with settings), so they stay
+            // exact built-in-only assertions.
             CollectionAssert.AreEqual(new[] { "left", "center", "right" }, NeoWidgetOptions.Aligns);
             CollectionAssert.AreEqual(
                 new[] { "roundedRect", "circle", "pill", "checkmark", "chevron", "cross", "ring", "arc" },
                 NeoWidgetOptions.ShapeNames);
         }
 
+        // Reproduces NeoWidgetOptions.WithSettingsNames's merge (seed first, then any not-already-
+        // present name appended in order, case-insensitive de-dupe) independently, from raw settings
+        // data, so OptionSets_SeedExactlyTheBuiltIns can assert an exact result without hardcoding
+        // whatever a project has authored on top of the package built-ins.
+        private static string[] MergedExpectation(string[] builtins, IEnumerable<string> settingsNames)
+        {
+            var list = new List<string>(builtins);
+            foreach (string name in settingsNames)
+            {
+                if (string.IsNullOrEmpty(name)) continue;
+                if (list.Any(existing => string.Equals(existing, name, System.StringComparison.OrdinalIgnoreCase))) continue;
+                list.Add(name);
+            }
+            return list.ToArray();
+        }
+
         [Test]
         public void Register_AppendsNewValue_AndIsIdempotent()
         {
+            // A guaranteed-novel name: "success" is no longer safe here — it's seeded into
+            // NeoUISettings.buttonVariants by StarterKitBootstrap.EnsureButtonVariants (Phase 2.6),
+            // and NeoWidgetOptions.ButtonVariants merges those names in, so it may already be present
+            // depending on which tests ran the starter kit first.
             int before = NeoWidgetOptions.ButtonVariants.Length;
-            NeoWidgetOptions.RegisterVariant("success");
-            CollectionAssert.Contains(NeoWidgetOptions.ButtonVariants, "success");
+            NeoWidgetOptions.RegisterVariant("test-novel-variant");
+            CollectionAssert.Contains(NeoWidgetOptions.ButtonVariants, "test-novel-variant");
             Assert.AreEqual(before + 1, NeoWidgetOptions.ButtonVariants.Length, "registering adds one");
 
             // case-insensitive no-op (built-in + re-register)
-            NeoWidgetOptions.RegisterVariant("success");
+            NeoWidgetOptions.RegisterVariant("test-novel-variant");
             NeoWidgetOptions.RegisterVariant("PRIMARY");
             Assert.AreEqual(before + 1, NeoWidgetOptions.ButtonVariants.Length,
                 "re-registering an existing id (any case) is a no-op");

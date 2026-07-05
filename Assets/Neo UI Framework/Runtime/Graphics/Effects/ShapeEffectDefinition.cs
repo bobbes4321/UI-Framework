@@ -41,7 +41,7 @@ namespace Neo.UI
     /// defaults) and an <see cref="NeoShapeVariant"/> referencing it to add a brand-new effect with
     /// no fork of the package. The set of effects stays open — there is no enum or switch to edit.</para>
     /// </summary>
-    [CreateAssetMenu(menuName = "Neo/UI/Shape Effect Definition", fileName = "NeoShapeEffect")]
+    [CreateAssetMenu(menuName = "Neo UI/Shape Effect Definition", fileName = "NeoShapeEffect")]
     public class ShapeEffectDefinition : ScriptableObject
     {
         [Tooltip("Stable, agent-addressable id (never a GUID). The variant stores this for round-trip " +

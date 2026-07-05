@@ -69,9 +69,16 @@ namespace Neo.UI.Tests
             NeoWidgetPresets.Register(_a);
             NeoWidgetPresets.Register(_b);
 
-            CollectionAssert.AreEquivalent(
-                new[] { "Btn" },
-                NeoWidgetPresets.ForKind("button").Select(p => p.presetName).ToArray());
+            // Set-membership semantics, not exact-set equality: a project can legitimately have its
+            // own discovered button presets (e.g. the committed demo/showcase widget presets)
+            // coexisting with our test-registered "Btn" here. Assert (1) our preset is returned,
+            // (2) the wrong-kind preset never leaks in, and (3) every returned preset actually
+            // matches the requested kind — that's the real contract ForKind promises.
+            var buttons = NeoWidgetPresets.ForKind("button").ToList();
+            CollectionAssert.Contains(buttons.Select(p => p.presetName).ToList(), "Btn",
+                "the test-registered button preset is returned");
+            Assert.IsFalse(buttons.Any(p => p.presetName == "Txt"), "a text-kind preset must not leak into a button filter");
+            Assert.IsTrue(buttons.All(p => p.targetKind == "button"), "every returned preset must target the requested kind");
         }
 
         [Test]

@@ -64,6 +64,22 @@ namespace Neo.UI.Editor
             window.Show();
         }
 
+        /// <summary>
+        /// Opens the Hub with the Showcases tab pre-filtered to a single showcase id — the "See it live"
+        /// jump from the Design System Overview tab (design-system-cohesion-plan Phase 4.2). Deliberately
+        /// cheap: reuses the existing search filter rather than adding new selection/highlight plumbing.
+        /// </summary>
+        internal static void OpenShowcase(string showcaseId)
+        {
+            SessionState.SetInt(TabKey, 0); // Showcases tab
+            var window = GetWindow<NeoUIHubWindow>("Neo UI Hub");
+            window.minSize = new Vector2(560f, 440f);
+            window._search = showcaseId ?? "";
+            window._categoryFilter = AllCategories;
+            window.Show();
+            window.Focus();
+        }
+
         private void OnEnable() => RecomputeSetup();
         private void OnFocus() => RecomputeSetup();
 
@@ -78,14 +94,12 @@ namespace Neo.UI.Editor
 
         private void RecomputeSetup()
         {
-            NeoUISettings settings =
-                AssetDatabase.LoadAssetAtPath<NeoUISettings>(NeoUISettingsBootstrap.SettingsAssetPath);
-            _settingsState = settings != null ? Tri.Present : Tri.Missing;
-            // starter kit: a factory-referenced token present on the theme = the kit was expanded
-            _starterState = settings != null && settings.theme != null
-                && settings.theme.HasToken(UIWidgetFactory.TokenPrimary) ? Tri.Present : Tri.Missing;
-            // fonts: the icon font wired onto settings is the canonical "fonts generated" signal
-            _fontsState = settings != null && settings.iconFont != null ? Tri.Present : Tri.Missing;
+            // shared with NeoSetupWizard (design-system-cohesion-plan Phase 1.2) so both windows report
+            // identical install state from one implementation
+            NeoSetupStatus.Snapshot snapshot = NeoSetupStatus.Compute();
+            _settingsState = snapshot.hasSettings ? Tri.Present : Tri.Missing;
+            _starterState = snapshot.hasStarterKit ? Tri.Present : Tri.Missing;
+            _fontsState = snapshot.hasFonts ? Tri.Present : Tri.Missing;
             Repaint();
         }
 
@@ -105,6 +119,15 @@ namespace Neo.UI.Editor
             EnsureStyles();
             NeoGUI.ComponentHeader("Neo UI Hub",
                 "The front door — every showcase and every tool, one click away", NeoColors.Containers);
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                GUILayout.FlexibleSpace();
+                if (GUILayout.Button(new GUIContent("Guide",
+                        "Open the one-page authoring guide (Assets/docs/authoring-guide.md)"),
+                        EditorStyles.linkLabel, GUILayout.Width(40f)))
+                    EditorUtility.OpenWithDefaultApp("Assets/docs/authoring-guide.md");
+            }
 
             GUILayout.Space(2f);
             int tab = NeoGUI.Tabs(TabKey, TabLabels);
@@ -129,7 +152,9 @@ namespace Neo.UI.Editor
                 GUILayout.FlexibleSpace();
                 GUILayout.Label(
                     ShowcaseRegistry.All.Count == 0
-                        ? "No showcases registered yet.\nDrop a ShowcaseDefinition asset, or seed built-ins."
+                        ? "No showcases registered yet.\nBuilt-ins should seed automatically — try Refresh, " +
+                          "or drop your own ShowcaseDefinition asset (right-click in Project → Create → " +
+                          "Neo UI → Showcase Definition)."
                         : "No showcases match the current filter / search.",
                     _placeholder);
                 GUILayout.FlexibleSpace();
@@ -159,7 +184,8 @@ namespace Neo.UI.Editor
             if (tools.Count == 0)
             {
                 GUILayout.FlexibleSpace();
-                GUILayout.Label("No tools registered.", _placeholder);
+                GUILayout.Label("No tools registered.\nBuilt-in tools should register automatically — try " +
+                    "reopening the window, or add your own via HubToolRegistry.Register(...).", _placeholder);
                 GUILayout.FlexibleSpace();
                 return;
             }

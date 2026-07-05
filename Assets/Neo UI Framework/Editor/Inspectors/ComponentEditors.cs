@@ -82,6 +82,8 @@ namespace Neo.UI.Editor
     [CustomEditor(typeof(UIButton)), CanEditMultipleObjects]
     public class UIButtonEditor : SelectableEditor
     {
+        private readonly PresetWorkflowGUI _preset = new PresetWorkflowGUI();
+
         public override void OnInspectorGUI()
         {
             var button = (UIButton)target;
@@ -96,6 +98,8 @@ namespace Neo.UI.Editor
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("behaviours"), includeChildren: true);
             serializedObject.ApplyModifiedProperties();
 
+            _preset.Draw(button.gameObject, targets.Length);
+
             if (NeoGUI.BeginFoldoutSection("NeoUI.UIButton.Selectable", "Selectable & Navigation"))
                 base.OnInspectorGUI();
             NeoGUI.EndFoldoutSection();
@@ -105,6 +109,8 @@ namespace Neo.UI.Editor
     [CustomEditor(typeof(UIToggle)), CanEditMultipleObjects]
     public class UIToggleEditor : SelectableEditor
     {
+        private readonly PresetWorkflowGUI _preset = new PresetWorkflowGUI();
+
         public override void OnInspectorGUI()
         {
             var toggle = (UIToggle)target;
@@ -125,6 +131,8 @@ namespace Neo.UI.Editor
             NeoGUI.EndFoldoutSection();
             serializedObject.ApplyModifiedProperties();
 
+            _preset.Draw(toggle.gameObject, targets.Length);
+
             if (NeoGUI.BeginFoldoutSection($"NeoUI.{target.GetType().Name}.Selectable", "Selectable & Navigation"))
                 base.OnInspectorGUI();
             NeoGUI.EndFoldoutSection();
@@ -143,6 +151,8 @@ namespace Neo.UI.Editor
     [CustomEditor(typeof(UISlider)), CanEditMultipleObjects]
     public class UISliderEditor : SliderEditor
     {
+        private readonly PresetWorkflowGUI _preset = new PresetWorkflowGUI();
+
         public override void OnInspectorGUI()
         {
             var slider = (UISlider)target;
@@ -160,6 +170,8 @@ namespace Neo.UI.Editor
             }
             NeoGUI.EndFoldoutSection();
             serializedObject.ApplyModifiedProperties();
+
+            _preset.Draw(slider.gameObject, targets.Length);
 
             if (NeoGUI.BeginFoldoutSection("NeoUI.UISlider.Base", "Slider"))
                 base.OnInspectorGUI();

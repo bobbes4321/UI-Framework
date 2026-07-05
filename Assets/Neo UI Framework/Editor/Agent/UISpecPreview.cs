@@ -6,8 +6,9 @@ namespace Neo.UI.Editor
     /// <summary>
     /// Gates the device-accurate <see cref="UnityEngine.UI.CanvasScaler"/>-equivalent in the shared
     /// render path. The agent <c>preview</c>/<c>screenshot</c> matrix and <c>BeautificationAcceptance</c>
-    /// pass the default (<see cref="None"/>, no scaler) so their renders stay byte-stable; the Composer
-    /// viewport passes <c>deviceScale = true</c> so content scales like the shipped game.
+    /// pass the default (<see cref="None"/>, no scaler) so their renders stay byte-stable; a caller wanting
+    /// a device-scaled preview (content scaled like the shipped game rather than pixel-for-pixel) passes
+    /// <c>deviceScale = true</c>.
     /// </summary>
     public readonly struct RenderOptions
     {
@@ -37,13 +38,12 @@ namespace Neo.UI.Editor
     public static class UISpecPreview
     {
         /// <summary>
-        /// The resolution matrix the headless <c>preview</c>/<c>screenshot</c> actions render across.
-        /// DERIVED from <see cref="ComposerDevicePresets.All"/> (the single source of truth) so the
-        /// Composer viewport and the agent path always agree on the device spread — a project that
-        /// registers a device sees it in both. Returns a fresh array per call (the registry can grow at
-        /// runtime); callers that index it should read it once. The legacy trio
-        /// (phone-portrait/landscape, tablet-portrait) stays first because the built-in registry seeds
-        /// them first, so existing renders/indices are unchanged.
+        /// The resolution matrix the headless <c>preview</c>/<c>screenshot</c> actions (and the Gallery
+        /// window's resolution picker) render across. DERIVED from <see cref="ComposerDevicePresets.All"/>
+        /// (the single source of truth) — a project that registers a device sees it here too. Returns a
+        /// fresh array per call (the registry can grow at runtime); callers that index it should read it
+        /// once. The legacy trio (phone-portrait/landscape, tablet-portrait) stays first because the
+        /// built-in registry seeds them first, so existing renders/indices are unchanged.
         /// </summary>
         public static (string name, int width, int height)[] DefaultResolutions
         {

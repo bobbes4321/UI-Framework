@@ -17,10 +17,12 @@ namespace Neo.UI.Editor
     /// snapshot/restore machinery — the real object, real size, real colors — and everything is
     /// restored untouched when the popup closes; only a click applies (undo-recorded by the caller).
     /// <para>
-    /// Pure IMGUI on the EditorUI palette, cached GUIStyles. Preview runs only for single selection
-    /// (the caller passes a null <c>previewTarget</c> on multi-edit; apply still hits every target).
-    /// The editor-update subscription lives strictly between OnOpen and OnClose — a transient popup
-    /// needs a dwell timer, but nothing survives the window.
+    /// The grouping/sort/expand/search logic lives in the shared <see cref="AnimationPresetBrowserModel"/>
+    /// (also driven by the Design System Motion tab's library browser) — this popup owns only its
+    /// rendering, preview and styles. Pure IMGUI on the EditorUI palette, cached GUIStyles. Preview runs
+    /// only for single selection (the caller passes a null <c>previewTarget</c> on multi-edit; apply still
+    /// hits every target). The editor-update subscription lives strictly between OnOpen and OnClose — a
+    /// transient popup needs a dwell timer, but nothing survives the window.
     /// </para>
     /// </summary>
     internal sealed class AnimationPresetBrowserPopup : PopupWindowContent
@@ -33,26 +35,11 @@ namespace Neo.UI.Editor
         private const float MaxHeight = 480f;
         private const double DwellSeconds = 0.02;
 
-        private sealed class Group
-        {
-            public string category;
-            public bool suggested;
-            public readonly List<UIAnimationPreset> presets = new List<UIAnimationPreset>();
-        }
-
-        private struct Row
-        {
-            public Group header;            // non-null → a category header row
-            public UIAnimationPreset preset; // non-null → a preset row
-        }
-
         private readonly string _roleLabel;
         private readonly string _current;                     // applied preset full name (null = none)
         private readonly Action<UIAnimationPreset> _onSelect; // null argument = clear the slot
         private readonly RectTransform _previewTarget;        // null = no live preview (multi-edit)
-        private readonly List<Group> _groups = new List<Group>();
-        private readonly HashSet<string> _expanded = new HashSet<string>();
-        private readonly List<Row> _rows = new List<Row>();
+        private readonly AnimationPresetBrowserModel _model;  // shared grouping/sort/expand/search
 
         private string _filter = "";
         private Vector2 _scroll;
@@ -76,39 +63,7 @@ namespace Neo.UI.Editor
             _roleLabel = info != null ? info.DisplayName : null;
             string[] suggested = info != null ? info.SuggestedCategories : Array.Empty<string>();
 
-            var byCategory = new Dictionary<string, Group>(StringComparer.Ordinal);
-            foreach (UIAnimationPreset preset in AnimationPresetRegistry.All)
-            {
-                if (preset == null || string.IsNullOrEmpty(preset.presetName)) continue;
-                string category = string.IsNullOrEmpty(preset.category) ? "Custom" : preset.category;
-                if (!byCategory.TryGetValue(category, out Group group))
-                {
-                    group = new Group { category = category, suggested = Array.IndexOf(suggested, category) >= 0 };
-                    byCategory[category] = group;
-                    _groups.Add(group);
-                }
-                group.presets.Add(preset);
-            }
-            foreach (Group group in _groups)
-                group.presets.Sort((a, b) => string.CompareOrdinal(a.presetName, b.presetName));
-            _groups.Sort((a, b) =>
-            {
-                if (a.suggested != b.suggested) return a.suggested ? -1 : 1;
-                if (a.suggested) return Array.IndexOf(suggested, a.category) - Array.IndexOf(suggested, b.category);
-                return string.CompareOrdinal(a.category, b.category);
-            });
-
-            foreach (Group group in _groups)
-                if (group.suggested) _expanded.Add(group.category);
-            // No role or no suggested category present: everything open beats a wall of closed folds.
-            if (_expanded.Count == 0)
-                foreach (Group group in _groups) _expanded.Add(group.category);
-            // The applied preset's own category is always worth seeing open.
-            if (_current != null)
-            {
-                int slash = _current.IndexOf('/');
-                if (slash > 0) _expanded.Add(_current.Substring(0, slash));
-            }
+            _model = new AnimationPresetBrowserModel(AnimationPresetRegistry.All, suggested, _current);
         }
 
         // ------------------------------------------------------------------ lifecycle
@@ -127,37 +82,11 @@ namespace Neo.UI.Editor
 
         // ------------------------------------------------------------------ layout
 
-        private void BuildRows()
-        {
-            _rows.Clear();
-            string needle = string.IsNullOrEmpty(_filter) ? null : _filter.ToLowerInvariant();
-            foreach (Group group in _groups)
-            {
-                if (needle != null)
-                {
-                    // Searching: flat matched rows under their (always-open) headers, expansion ignored.
-                    bool categoryHit = group.category.ToLowerInvariant().Contains(needle);
-                    int headerAt = -1;
-                    foreach (UIAnimationPreset preset in group.presets)
-                    {
-                        if (!categoryHit && !preset.presetName.ToLowerInvariant().Contains(needle)) continue;
-                        if (headerAt < 0) { headerAt = _rows.Count; _rows.Add(new Row { header = group }); }
-                        _rows.Add(new Row { preset = preset });
-                    }
-                    continue;
-                }
-                _rows.Add(new Row { header = group });
-                if (_expanded.Contains(group.category))
-                    foreach (UIAnimationPreset preset in group.presets)
-                        _rows.Add(new Row { preset = preset });
-            }
-        }
-
         public override Vector2 GetWindowSize()
         {
-            BuildRows();
+            IReadOnlyList<AnimationPresetBrowserModel.Row> rows = _model.BuildRows(_filter);
             float height = 8f + (_roleLabel != null ? RoleHeight : 0f) + SearchHeight + RowHeight; // chrome + None row
-            foreach (Row row in _rows) height += row.header != null ? HeaderHeight : RowHeight;
+            foreach (AnimationPresetBrowserModel.Row row in rows) height += row.header != null ? HeaderHeight : RowHeight;
             return new Vector2(Width, Mathf.Min(height + 8f, MaxHeight));
         }
 
@@ -182,10 +111,10 @@ namespace Neo.UI.Editor
             if (EditorGUI.EndChangeCheck()) _filter = next ?? "";
             y += SearchHeight;
 
-            BuildRows();
+            IReadOnlyList<AnimationPresetBrowserModel.Row> rows = _model.BuildRows(_filter);
             var listRect = new Rect(rect.x, y, rect.width, rect.yMax - y);
             float contentHeight = RowHeight; // None row
-            foreach (Row row in _rows) contentHeight += row.header != null ? HeaderHeight : RowHeight;
+            foreach (AnimationPresetBrowserModel.Row row in rows) contentHeight += row.header != null ? HeaderHeight : RowHeight;
             bool scrolling = contentHeight > listRect.height;
             var viewRect = new Rect(0, 0, listRect.width - (scrolling ? 16f : 0f), contentHeight);
             _scroll = GUI.BeginScrollView(listRect, _scroll, viewRect);
@@ -195,7 +124,7 @@ namespace Neo.UI.Editor
             DrawNoneRow(new Rect(0, rowY, viewRect.width, RowHeight));
             rowY += RowHeight;
 
-            foreach (Row row in _rows)
+            foreach (AnimationPresetBrowserModel.Row row in rows)
             {
                 if (row.header != null)
                 {
@@ -230,11 +159,11 @@ namespace Neo.UI.Editor
             HandleRowClick(rect, null, isNone: true);
         }
 
-        private void DrawHeaderRow(Rect rect, Group group)
+        private void DrawHeaderRow(Rect rect, AnimationPresetBrowserModel.Group group)
         {
             Event e = Event.current;
             bool searching = !string.IsNullOrEmpty(_filter);
-            bool open = searching || _expanded.Contains(group.category);
+            bool open = searching || _model.IsExpanded(group.category);
             if (e.type == EventType.Repaint)
             {
                 EditorGUI.DrawRect(rect, NeoColors.SectionBackground);
@@ -244,7 +173,7 @@ namespace Neo.UI.Editor
             }
             if (!searching && e.type == EventType.MouseDown && e.button == 0 && rect.Contains(e.mousePosition))
             {
-                if (!_expanded.Add(group.category)) _expanded.Remove(group.category);
+                _model.ToggleExpanded(group.category);
                 e.Use();
                 editorWindow.Repaint();
             }

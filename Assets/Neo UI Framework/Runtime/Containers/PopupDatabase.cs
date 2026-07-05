@@ -9,7 +9,7 @@ namespace Neo.UI
     /// Popup prefab lookup by name. One entry per popup prefab (the link-asset model collapsed
     /// into a single flat, agent-readable database).
     /// </summary>
-    [CreateAssetMenu(menuName = "Neo/UI/Databases/Popup Database", fileName = "PopupDatabase")]
+    [CreateAssetMenu(menuName = "Neo UI/Databases/Popup Database", fileName = "PopupDatabase")]
     public class PopupDatabase : ScriptableObject
     {
         [Serializable]

@@ -43,7 +43,8 @@ namespace Neo.UI.Editor.Authoring
     }
 
     /// <summary>
-    /// The single source of truth for the Composer widget palette — the package built-ins plus anything
+    /// The single source of truth for the widget palette — feeding the native
+    /// <c>GameObject → Neo UI → More Widgets…</c> create menu — the package built-ins plus anything
     /// a consuming project registers. Built-ins register every <see cref="ElementSpec.Kinds"/> entry into
     /// a sensible category; any project-registered <see cref="NeoElementKinds"/> kind not already covered
     /// is auto-synthesized into a "Custom" entry using its <see cref="INeoElementKind.Accent"/>, so a
@@ -57,12 +58,12 @@ namespace Neo.UI.Editor.Authoring
     public static class NeoWidgetPalette
     {
         /// <summary> The <see cref="UnityEditor.DragAndDrop.SetGenericData"/> key a palette drag carries
-        /// its element-kind string under. The canvas + tree drop handlers read this exact key. </summary>
+        /// its element-kind string under, for a drag-and-drop drop handler to read. </summary>
         public const string DragKey = "Neo.Composer.PaletteKind";
 
         /// <summary> The generic-data key a preset tile carries its <see cref="NeoWidgetPreset"/> name under
-        /// (alongside <see cref="DragKey"/> = the preset's target kind). The canvas + tree drop handlers
-        /// read it and set the created element's <c>preset</c> field. Null for a bare-kind tile. </summary>
+        /// (alongside <see cref="DragKey"/> = the preset's target kind), for a drop handler to read and
+        /// set the created element's <c>preset</c> field from. Null for a bare-kind tile. </summary>
         public const string PresetDragKey = "Neo.Composer.PalettePreset";
 
         /// <summary> The category preset tiles group under (the design-system "component" layer). </summary>

@@ -22,7 +22,7 @@ namespace Neo.UI.Editor
     {
         public const string LibraryRoot = "Assets/Neo UI Framework/Animations";
 
-        [MenuItem("Tools/Neo UI/Setup/Create or Repair Animation Library", priority = 103)]
+        [MenuItem("Tools/Neo UI/Setup/Create or Repair Animation Library", priority = 104)]
         public static void CreateOrRepairMenu()
         {
             int created = CreateOrRepair();

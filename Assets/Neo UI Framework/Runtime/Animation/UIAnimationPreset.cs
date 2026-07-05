@@ -6,7 +6,7 @@ namespace Neo.UI
     /// A named, reusable animation configuration ("Show: SlideInLeft") — the unit agents reference
     /// in UI specs. Copying a preset onto an animator copies the data; the asset is not linked.
     /// </summary>
-    [CreateAssetMenu(menuName = "Neo/UI/Animation Preset", fileName = "AnimationPreset")]
+    [CreateAssetMenu(menuName = "Neo UI/Animation Preset", fileName = "AnimationPreset")]
     public class UIAnimationPreset : ScriptableObject
     {
         [Tooltip("Preset category, e.g. Show / Hide / Button / Loop")]

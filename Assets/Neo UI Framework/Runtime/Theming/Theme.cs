@@ -10,7 +10,7 @@ namespace Neo.UI
     /// variants (Dark / Light / seasonal). One variant is active; switching it (runtime or editor)
     /// re-applies every bound <see cref="ThemeColorTarget"/> instantly.
     /// </summary>
-    [CreateAssetMenu(menuName = "Neo/UI/Theme", fileName = "Theme")]
+    [CreateAssetMenu(menuName = "Neo UI/Theme", fileName = "Theme")]
     public class Theme : ScriptableObject
     {
         [Serializable]
@@ -85,6 +85,15 @@ namespace Neo.UI
         public bool TryGetColor(string token, out Color color)
         {
             ThemeVariant variant = activeVariant;
+            if (variant != null && variant.TryGetColor(token, out color)) return true;
+            color = Color.white;
+            return false;
+        }
+
+        /// <summary> Resolves a token color in a SPECIFIC named variant (not the active one). </summary>
+        public bool TryGetColor(string token, out Color color, string variantName)
+        {
+            ThemeVariant variant = GetVariant(variantName);
             if (variant != null && variant.TryGetColor(token, out color)) return true;
             color = Color.white;
             return false;

@@ -33,6 +33,7 @@ namespace Neo.UI.Editor
             NeoUISettings settings = NeoUISettingsBootstrap.EnsureSettings();
 
             ExpandTheme(settings.theme, report);
+            EnsureButtonVariants(settings, report);
 
             EnsureFolder(StarterFolder);
             SavePrefab(report, settings, "Button",
@@ -234,6 +235,130 @@ namespace Neo.UI.Editor
             EditorUtility.SetDirty(theme);
             report.updated.Add($"Theme '{theme.name}': {Palette.Length} tokens × Dark/Light, " +
                                $"5 shape styles, {textStyles.Length} text styles");
+        }
+
+        // ------------------------------------------------------------------ button variants
+
+        /// <summary>
+        /// Seeds the five canonical button variants (primary/secondary/ghost/danger/success) into
+        /// <see cref="NeoUISettings.buttonVariants"/> as first-class, editable data (design-system-
+        /// cohesion-plan.md Phase 2.6 — root cause of "built-ins can't be edited": they previously
+        /// existed ONLY inside <c>UIWidgetFactory.VariantColors</c>'s fallback switch, so a fresh
+        /// project's `buttonVariants` list was empty and the Design System window's Buttons tab had
+        /// nothing to show). ADDITIVE, create-missing-only BY NAME (case-insensitive): an entry the
+        /// project already has — whether it's one of these five with hand-edited colors, or a
+        /// renamed/custom variant — is never touched, so both user edits and the committed repo
+        /// settings asset survive a repair.
+        /// <para/>
+        /// The four legacy entries mirror <c>UIWidgetFactory.VariantColors</c>'s switch exactly,
+        /// state for state. Most states are token-bound (<c>ThemeColorRef(token)</c>); the switch's
+        /// handful of raw, non-token colors have no matching theme token to bind to, so they are
+        /// reproduced as the same raw <c>ThemeColorRef(Color)</c> values instead (documented per
+        /// case below) rather than invented a token that doesn't exist. <c>success</c> is NEW — it
+        /// has no switch case at all, so it only ever resolves from this seeded data, proving the
+        /// data path (not the switch) is now the source of truth.
+        /// </summary>
+        public static void EnsureButtonVariants(NeoUISettings settings, GenerateReport report)
+        {
+            if (settings == null) return;
+            if (settings.buttonVariants == null) settings.buttonVariants = new List<ButtonVariantAsset>();
+
+            bool changed = false;
+            foreach (ButtonVariantAsset seed in BuiltInButtonVariants())
+            {
+                bool exists = false;
+                foreach (ButtonVariantAsset existing in settings.buttonVariants)
+                {
+                    if (existing != null && string.Equals(existing.name, seed.name, System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (exists) continue;
+
+                settings.buttonVariants.Add(seed);
+                report?.created.Add($"Button variant '{seed.name}'");
+                changed = true;
+            }
+
+            if (changed) EditorUtility.SetDirty(settings);
+        }
+
+        private static IEnumerable<ButtonVariantAsset> BuiltInButtonVariants()
+        {
+            yield return new ButtonVariantAsset
+            {
+                name = UIWidgetFactory.VariantPrimary,
+                contentToken = UIWidgetFactory.TokenTextOnPrimary,
+                colors = new SelectableColorSet
+                {
+                    normal = new ThemeColorRef(UIWidgetFactory.TokenPrimary),
+                    highlighted = new ThemeColorRef(UIWidgetFactory.TokenPrimaryHover),
+                    pressed = new ThemeColorRef(UIWidgetFactory.TokenPrimaryPressed),
+                    selected = new ThemeColorRef(UIWidgetFactory.TokenPrimaryHover),
+                    // no "disabled" token exists yet — same raw 50%-gray-at-50%-alpha the switch uses
+                    disabled = new ThemeColorRef(new Color(0.5f, 0.5f, 0.5f, 0.5f))
+                }
+            };
+            yield return new ButtonVariantAsset
+            {
+                name = UIWidgetFactory.VariantSecondary,
+                contentToken = UIWidgetFactory.TokenTextStrong,
+                colors = new SelectableColorSet
+                {
+                    normal = new ThemeColorRef(UIWidgetFactory.TokenSurface),
+                    highlighted = new ThemeColorRef(UIWidgetFactory.TokenSurfaceElevated),
+                    pressed = new ThemeColorRef(UIWidgetFactory.TokenBackground),
+                    selected = new ThemeColorRef(UIWidgetFactory.TokenSurfaceElevated),
+                    // raw, lighter-alpha disabled tint — no matching token, same value as the switch
+                    disabled = new ThemeColorRef(new Color(0.5f, 0.5f, 0.5f, 0.3f))
+                }
+            };
+            yield return new ButtonVariantAsset
+            {
+                name = UIWidgetFactory.VariantGhost,
+                contentToken = UIWidgetFactory.TokenPrimary,
+                colors = new SelectableColorSet
+                {
+                    // the switch's rest state is a raw fully-transparent white (no surface to token-
+                    // bind — ghost has no fill at rest); reproduced as the same raw color
+                    normal = new ThemeColorRef(new Color(1f, 1f, 1f, 0f)),
+                    highlighted = new ThemeColorRef(UIWidgetFactory.TokenSurfaceElevated),
+                    pressed = new ThemeColorRef(UIWidgetFactory.TokenSurface),
+                    selected = new ThemeColorRef(UIWidgetFactory.TokenSurfaceElevated),
+                    // raw, faint disabled tint — no matching token, same value as the switch
+                    disabled = new ThemeColorRef(new Color(0.5f, 0.5f, 0.5f, 0.15f))
+                }
+            };
+            yield return new ButtonVariantAsset
+            {
+                name = UIWidgetFactory.VariantDanger,
+                contentToken = UIWidgetFactory.TokenTextOnPrimary,
+                colors = new SelectableColorSet
+                {
+                    normal = new ThemeColorRef(UIWidgetFactory.TokenDanger),
+                    highlighted = new ThemeColorRef(UIWidgetFactory.TokenDangerHover),
+                    pressed = new ThemeColorRef(UIWidgetFactory.TokenDangerPressed),
+                    selected = new ThemeColorRef(UIWidgetFactory.TokenDangerHover),
+                    // no "disabled" token exists yet — same raw 50%-gray-at-50%-alpha the switch uses
+                    disabled = new ThemeColorRef(new Color(0.5f, 0.5f, 0.5f, 0.5f))
+                }
+            };
+            // NEW: no fallback-switch case at all — resolves purely from this seeded data.
+            yield return new ButtonVariantAsset
+            {
+                name = "success",
+                contentToken = UIWidgetFactory.TokenTextOnPrimary,
+                colors = new SelectableColorSet
+                {
+                    normal = new ThemeColorRef(UIWidgetFactory.TokenSuccess),
+                    highlighted = new ThemeColorRef(UIWidgetFactory.TokenSuccessHover),
+                    pressed = new ThemeColorRef(UIWidgetFactory.TokenSuccessPressed),
+                    selected = new ThemeColorRef(UIWidgetFactory.TokenSuccessHover),
+                    disabled = new ThemeColorRef(UIWidgetFactory.TokenOutline)
+                }
+            };
         }
 
         // ------------------------------------------------------------------ showcase view

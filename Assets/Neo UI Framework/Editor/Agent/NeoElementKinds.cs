@@ -52,9 +52,9 @@ namespace Neo.UI.Editor
     /// <summary>
     /// A project-defined element kind: how to build it, export it, edit it, color it, and what domain
     /// signal it publishes. Register one from <c>[InitializeOnLoad]</c> via <see cref="NeoElementKinds.Register"/>
-    /// and the Composer picker/inspector, the generator, the exporter and the binding manifest all pick it
-    /// up — with no package file edited. This is the keystone extensibility seam (Pattern R); see
-    /// <c>extensibility-seam-element-kinds-plan.md</c>.
+    /// and the native widget palette/create menu, the generator, the exporter and the binding manifest
+    /// all pick it up — with no package file edited. This is the keystone extensibility seam
+    /// (Pattern R); see <c>extensibility-seam-element-kinds-plan.md</c>.
     /// </summary>
     public interface INeoElementKind
     {
@@ -69,10 +69,11 @@ namespace Neo.UI.Editor
         /// Must match a marker component specific to this kind so it never hijacks a built-in. </summary>
         bool TryExport(GameObject go, out ElementSpec spec);
 
-        /// <summary> The inspector fields the Composer should expose for this kind. </summary>
+        /// <summary> The inspector fields a spec-authoring surface should expose for this kind. </summary>
         IEnumerable<SpecField> Fields { get; }
 
-        /// <summary> The Composer tree/inspector accent color for this kind. </summary>
+        /// <summary> The accent color for this kind — used by the native widget palette
+        /// (<c>NeoWidgetPalette</c>) for its auto-synthesized "Custom" tile. </summary>
         Color Accent { get; }
 
         /// <summary> The domain-signal value type this kind publishes via <c>element.signal</c>/
@@ -82,10 +83,11 @@ namespace Neo.UI.Editor
 
     /// <summary>
     /// Optional seam: a custom element kind that nests child elements (a layout container). When a
-    /// registered kind implements this and returns true, the Composer treats it like a built-in container
-    /// — the canvas accepts drops into it and palette click-to-add nests into it instead of appending to
-    /// the view root. Built-in containers are listed in <c>ComposerCanvas.IsContainerKind</c>; a project
-    /// kind carries the same fact here. Mirrors the <see cref="ITriggerKindIdDatabase"/> pattern.
+    /// registered kind implements this and returns true, it gets the same container treatment as a
+    /// built-in (e.g. <c>UISpecGenerator.IsPlainContainer</c>'s card-decor pass) instead of being
+    /// special-cased by kind string. Built-in containers are the fallback chain (<c>vstack</c>/
+    /// <c>hstack</c>/<c>grid</c>/<c>panel</c>/<c>overlay</c>); a project kind carries the same fact
+    /// here. Mirrors the <see cref="ITriggerKindIdDatabase"/> pattern.
     /// </summary>
     public interface IElementKindContainer
     {
@@ -94,10 +96,10 @@ namespace Neo.UI.Editor
     }
 
     /// <summary>
-    /// Optional seam: a custom element kind that is addressed by a Category/Name id and wants its Composer
-    /// id picker to autocomplete against a specific id database. Built-in kinds map this in
-    /// <c>IdDatabaseOptions.ForElementKind</c>; a project kind carries it here. Mirrors
-    /// <see cref="ITriggerKindIdDatabase"/> (the same seam, for triggers).
+    /// Optional seam: a custom element kind that is addressed by a Category/Name id and wants its
+    /// id picker (<see cref="IdDatabaseOptions"/>) to autocomplete against a specific id database.
+    /// Built-in kinds map this in <c>IdDatabaseOptions.ForElementKind</c>; a project kind carries it
+    /// here. Mirrors <see cref="ITriggerKindIdDatabase"/> (the same seam, for triggers).
     /// </summary>
     public interface IElementKindIdDatabase
     {

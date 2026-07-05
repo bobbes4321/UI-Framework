@@ -3,10 +3,10 @@ using System.Collections.Generic;
 namespace Neo.UI
 {
     /// <summary>
-    /// The preview-only hook Pillar C (free viewport / Composer preview) drives to force a
-    /// <see cref="UIResponsiveRoot"/> to a chosen breakpoint, decoupling the preview's selected
-    /// viewport from the live canvas size. Shipped in B-core so Pillar C compiles against it without a
-    /// dependency on B-core's internals. Implemented by <see cref="UIResponsiveRoot"/>.
+    /// The preview-only hook the scene-view overlay's "Preview Breakpoint" action (native authoring's
+    /// <c>NeoSceneAuthoring</c>) drives to force a <see cref="UIResponsiveRoot"/> to a chosen
+    /// breakpoint, decoupling the previewed viewport from the live canvas size. Implemented by
+    /// <see cref="UIResponsiveRoot"/>.
     /// </summary>
     public interface IActiveBreakpoint
     {

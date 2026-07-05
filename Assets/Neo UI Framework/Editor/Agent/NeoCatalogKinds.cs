@@ -6,11 +6,13 @@ using UnityEngine;
 namespace Neo.UI.Editor
 {
     /// <summary>
-    /// A single catalog kind the Composer can author — the package's built-ins (settings, cheats)
-    /// plus anything a consuming project registers. The Composer chrome (tree, toolbar picker,
-    /// context menu) iterates <see cref="NeoCatalogKinds.All"/> instead of hardcoding the two
-    /// built-in cases, so adding a third kind (debug, accessibility, key-bindings…) is one
-    /// <see cref="NeoCatalogKinds.Register"/> call from a project's own assembly — no fork.
+    /// A single catalog kind — the package's built-ins (settings, cheats) plus anything a consuming
+    /// project registers. The exporter resolves a catalog's kind id through <see cref="NeoCatalogKinds.KindOf"/>/
+    /// <see cref="NeoCatalogKinds.TryGet"/> instead of hardcoding the two built-in cases, so a project adds a third kind
+    /// (debug, accessibility, key-bindings…) with one <see cref="NeoCatalogKinds.Register"/> call from
+    /// its own assembly — no fork. Any future authoring surface that wants to list every registered
+    /// kind (a tree, a toolbar picker, a context menu) iterates <see cref="NeoCatalogKinds.All"/> rather
+    /// than switching over a fixed enum.
     ///
     /// <para>This is the <b>reference implementation of Pattern R</b> (the Kinds Registry) from the
     /// extensibility-seams master plan — every other registry in that family mirrors this shape.</para>
@@ -63,9 +65,9 @@ namespace Neo.UI.Editor
     }
 
     /// <summary>
-    /// The single source of truth the Composer reads for the set of catalog kinds. Seeded with the
-    /// package built-ins; a consuming project registers its own kind once (e.g. from an
-    /// <c>[InitializeOnLoad]</c> static ctor). See <see cref="CatalogKind"/>.
+    /// The single source of truth for the set of catalog kinds. Seeded with the package built-ins; a
+    /// consuming project registers its own kind once (e.g. from an <c>[InitializeOnLoad]</c> static
+    /// ctor). See <see cref="CatalogKind"/>.
     /// <para>
     /// Wave 4 Task 4.2: migrated onto <see cref="NeoKeyedRegistry{T}"/> (Pattern R's shared base). This
     /// is also where the audit's pre-made policy for this registry applies: an invalid <see cref="Register"/>
@@ -99,9 +101,10 @@ namespace Neo.UI.Editor
 
         /// <summary>
         /// Registers (or replaces, by id) a catalog kind. The extension seam: a consuming project
-        /// calls this once to make a new menu kind appear in the Composer's picker and tree. An entry
-        /// with an empty id or a null <see cref="CatalogKind.list"/> accessor is warned-and-ignored,
-        /// never thrown (see the type doc above).
+        /// calls this once to make a new menu kind resolvable by the exporter (and listable by any
+        /// authoring surface that reads <see cref="All"/>). An entry with an empty id or a null
+        /// <see cref="CatalogKind.list"/> accessor is warned-and-ignored, never thrown (see the type
+        /// doc above).
         /// </summary>
         public static void Register(CatalogKind kind) => _registry.Register(kind);
 

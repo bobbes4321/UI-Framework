@@ -73,10 +73,11 @@ namespace Neo.UI
         [Tooltip("Runtime tick FPS cap; 0 = uncapped")]
         public int runtimeFpsCap;
 
-        [Header("Composer Preview")]
-        [Tooltip("Reference resolution the Composer's device-scaled preview lays UI out against " +
-                 "(CanvasScaler ScaleWithScreenSize). Matches the shipped canvases' reference so the " +
-                 "preview scales like the real game. (0,0) = 1080×1920 default.")]
+        [Header("Preview")]
+        [Tooltip("Reference resolution the device-scaled preview (Gallery thumbnails, agent " +
+                 "screenshot/preview actions) lays UI out against (CanvasScaler ScaleWithScreenSize). " +
+                 "Matches the shipped canvases' reference so the preview scales like the real game. " +
+                 "(0,0) = 1080×1920 default.")]
         public Vector2 previewReferenceResolution = new Vector2(1080f, 1920f);
 
         [Range(0f, 1f)]
@@ -234,7 +235,7 @@ namespace Neo.UI
         }
 
         [Header("Design Lint")]
-        [Tooltip("The on-scale spacing/padding values the design lint blesses and the Composer snaps to. " +
+        [Tooltip("The on-scale spacing/padding values the design lint blesses. " +
                  "Override for a different design system (single source of truth for the blessed scale).")]
         public float[] spacingScale = { 0f, 4f, 8f, 12f, 16f, 24f, 32f, 48f, 64f };
 

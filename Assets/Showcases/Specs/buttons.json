@@ -113,6 +113,25 @@
 
                           {
                             "text": {
+                              "label": "SUCCESS",
+                              "color": "TextMuted",
+                              "textStyle": "Caption",
+                              "align": "left"
+                            }
+                          },
+                          {
+                            "hstack": {
+                              "spacing": 16,
+                              "children": [
+                                { "button": { "id": "Buttons/SuccessSm", "label": "Small", "variant": "success", "size": "sm" } },
+                                { "button": { "id": "Buttons/SuccessMd", "label": "Medium", "variant": "success", "size": "md" } },
+                                { "button": { "id": "Buttons/SuccessLg", "label": "Large", "variant": "success", "size": "lg" } }
+                              ]
+                            }
+                          },
+
+                          {
+                            "text": {
                               "label": "ICON + BADGE",
                               "color": "TextMuted",
                               "textStyle": "Caption",

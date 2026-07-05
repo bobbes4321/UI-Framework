@@ -18,7 +18,7 @@ namespace Neo.UI.Editor
     /// </summary>
     public static class PresetLibraryBootstrap
     {
-        [MenuItem("Tools/Neo UI/Setup/Create or Repair Widget Presets", priority = 102)]
+        [MenuItem("Tools/Neo UI/Setup/Create or Repair Widget Presets", priority = 103)]
         public static void CreateOrRepairMenu()
         {
             GenerateReport report = CreateOrRepair();

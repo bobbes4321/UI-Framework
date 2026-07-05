@@ -10,44 +10,46 @@ using UnityEngine.TestTools;
 namespace Neo.UI.Tests
 {
     /// <summary>
-    /// Coverage net for the Hub's Tools tab: every editor menu item under
-    /// <c>Tools/Neo UI/Setup/</c> and <c>Tools/Neo UI/Advanced/</c> must be surfaced as a
-    /// <see cref="HubTool"/> in <see cref="HubToolRegistry.All"/> — OR be on the explicit
-    /// <see cref="Allowlist"/> of deliberately-unsurfaced items below. This is exactly the bug that
-    /// shipped: <c>Create or Repair Effect Assets</c> existed as a menu item but no Hub tool surfaced
-    /// it, so it was invisible from the Hub. This test would have caught that.
+    /// Coverage net for the Hub's Tools tab: every editor menu item under <c>Tools/Neo UI/</c> —
+    /// including its top-level windows (Flow Graph Editor, ID Database Manager, Design System,
+    /// Gallery, …) and every item under <c>Tools/Neo UI/Setup/</c> / <c>Tools/Neo UI/Advanced/</c> —
+    /// must be surfaced as a <see cref="HubTool"/> in <see cref="HubToolRegistry.All"/>, OR be on the
+    /// explicit <see cref="Allowlist"/> of deliberately-unsurfaced items below. This is exactly the bug
+    /// that shipped twice: <c>Create or Repair Effect Assets</c> existed as a menu item but no Hub tool
+    /// surfaced it, and separately the Design System and Gallery windows were openable only via their
+    /// own menu items, invisible from the "every tool one click away" Hub. This test would have caught
+    /// both.
     ///
     /// <para><b>Matching strategy — leaf == label.</b> <see cref="HubTool"/> does NOT store the menu
     /// path it fires (it carries an opaque <c>invoke</c> delegate). The Hub's <c>Menu(...)</c> helper
-    /// always uses the menu LEAF (the substring after the last '/', including any trailing ellipsis)
-    /// verbatim as the tool's <see cref="HubTool.label"/>. So we match a menu item to a Hub tool by
-    /// comparing the menu leaf against <see cref="HubTool.label"/> (ordinal). This holds for every
-    /// current Setup/Advanced tool. If a future tool diverges leaf-from-label, this test would flag it
-    /// as "uncovered" — the fix then is to either align the label or store the path on HubTool.</para>
+    /// (and every window-open entry) always uses the menu LEAF (the substring after the last '/',
+    /// including any trailing ellipsis) verbatim as the tool's <see cref="HubTool.label"/>. So we match
+    /// a menu item to a Hub tool by comparing the menu leaf against <see cref="HubTool.label"/>
+    /// (ordinal). This holds for every current Neo UI tool. If a future tool diverges leaf-from-label,
+    /// this test would flag it as "uncovered" — the fix then is to either align the label or store the
+    /// path on HubTool.</para>
     /// </summary>
     public class HubToolCoverageTests
     {
-        private const string SetupRoot = "Tools/Neo UI/Setup/";
-        private const string AdvancedRoot = "Tools/Neo UI/Advanced/";
+        private const string Root = "Tools/Neo UI/";
 
         /// <summary>
-        /// Menu items under the Setup/Advanced roots that are deliberately NOT surfaced in the Hub.
-        /// Each entry is the EXACT menu path and must carry a reason. Keep this list as short as
-        /// possible — an item belongs here only when it is intentionally Hub-invisible, never as a way
-        /// to silence the test for a tool that should have a launcher.
+        /// Menu items under <c>Tools/Neo UI/</c> that are deliberately NOT surfaced in the Hub. Each
+        /// entry is the EXACT menu path and must carry a reason. Keep this list as short as possible —
+        /// an item belongs here only when it is intentionally Hub-invisible, never as a way to silence
+        /// the test for a tool that should have a launcher.
         /// </summary>
         private static readonly HashSet<string> Allowlist = new HashSet<string>
         {
-            // Legacy per-widget preset library bootstrap. Superseded by the Starter Kit / theme-bundle
-            // path in the Hub; left as a menu item for manual repair but intentionally not a Hub tool.
-            "Tools/Neo UI/Setup/Create or Repair Widget Presets",
+            // The Hub's own menu item — it doesn't need to launch itself as a tool inside itself.
+            "Tools/Neo UI/Hub",
         };
 
         [SetUp]
         public void ResetRegistry() => HubToolRegistry.ResetForTests();
 
         [Test]
-        public void EverySetupAndAdvancedMenuItem_IsSurfacedInTheHub_OrAllowlisted()
+        public void EveryNeoUIMenuItem_IsSurfacedInTheHub_OrAllowlisted()
         {
             // The set of menu leaves the Hub surfaces (leaf == label by the Hub's Menu(...) contract).
             var hubLabels = new HashSet<string>(
@@ -61,7 +63,7 @@ namespace Neo.UI.Tests
                 {
                     string path = attr.menuItem;
                     if (string.IsNullOrEmpty(path)) continue;
-                    if (!path.StartsWith(SetupRoot) && !path.StartsWith(AdvancedRoot)) continue;
+                    if (!path.StartsWith(Root)) continue;
 
                     // Validator entries gate another item's enabled state — they are not their own
                     // command, so they are never Hub tools.
@@ -82,12 +84,12 @@ namespace Neo.UI.Tests
             var distinct = uncovered.Distinct().OrderBy(p => p).ToList();
 
             Assert.IsEmpty(distinct,
-                "These Tools/Neo UI/Setup or /Advanced menu items have no Hub tool surfacing them " +
-                "(leaf must equal a HubTool.label) and are not on the documented allowlist:\n  " +
+                "These Tools/Neo UI/... menu items have no Hub tool surfacing them (leaf must equal a " +
+                "HubTool.label) and are not on the documented allowlist:\n  " +
                 string.Join("\n  ", distinct) +
-                "\nFix: add a Menu(...) entry in HubToolRegistryDefaults.Builtins() so the tool is " +
-                "reachable from the Hub (or add it to the test allowlist with a reason if it is " +
-                "intentionally Hub-invisible).");
+                "\nFix: add a Menu(...) entry (or window-open HubTool) in HubToolRegistryDefaults." +
+                "Builtins() so the tool is reachable from the Hub (or add it to the test allowlist with " +
+                "a reason if it is intentionally Hub-invisible).");
         }
 
         [Test]
@@ -98,6 +100,19 @@ namespace Neo.UI.Tests
             string leaf = path.Substring(path.LastIndexOf('/') + 1);
             Assert.IsTrue(HubToolRegistry.All.Any(t => t.label == leaf),
                 $"No HubTool surfaces '{path}'. Expected a tool whose label is '{leaf}'.");
+        }
+
+        [Test]
+        public void DesignSystemAndGalleryWindows_AreSurfacedInTheHub()
+        {
+            // Direct pin: the Design System and Gallery windows must both be one click away from the
+            // Hub, not just reachable via their own standalone menu items.
+            foreach (string path in new[] { "Tools/Neo UI/Design System", "Tools/Neo UI/Gallery" })
+            {
+                string leaf = path.Substring(path.LastIndexOf('/') + 1);
+                Assert.IsTrue(HubToolRegistry.All.Any(t => t.label == leaf),
+                    $"No HubTool surfaces '{path}'. Expected a tool whose label is '{leaf}'.");
+            }
         }
 
         // ------------------------------------------------------------------ Wave 4 Task 4.4:

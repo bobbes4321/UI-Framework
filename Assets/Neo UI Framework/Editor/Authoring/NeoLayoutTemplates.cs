@@ -1,21 +1,24 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 namespace Neo.UI.Editor.Authoring
 {
     /// <summary>
-    /// One curated scaffold the Composer can stamp into the current document — a small, valid
-    /// <see cref="UISpec"/> fragment (one or more views/popups, plus any breakpoints it relies on)
-    /// authored with the Figma-style <c>layout</c> model. <see cref="loadJson"/> is a lazy loader so a
-    /// built-in template reads its JSON from <c>Templates~</c> only when actually inserted (the tilde
-    /// folder is not imported as Unity assets — it's raw text on disk).
+    /// One curated scaffold the native <c>GameObject → Neo UI → Insert Template…</c> menu can stamp
+    /// into the current selection — a small, valid <see cref="UISpec"/> fragment (one or more
+    /// views/popups, plus any breakpoints it relies on) authored with the Figma-style <c>layout</c>
+    /// model. <see cref="loadJson"/> is a lazy loader so a built-in template reads its JSON from
+    /// <c>Templates~</c> only when actually inserted (the tilde folder is not imported as Unity
+    /// assets — it's raw text on disk).
     /// </summary>
     public readonly struct TemplateEntry
     {
         /// <summary> Stable id (also the picker key). </summary>
         public readonly string id;
-        /// <summary> Human label shown in the "New from template" picker. </summary>
+        /// <summary> Human label shown in the "Insert Template…" picker. </summary>
         public readonly string label;
         /// <summary> One-line description (tooltip). </summary>
         public readonly string description;
@@ -32,9 +35,12 @@ namespace Neo.UI.Editor.Authoring
     }
 
     /// <summary>
-    /// The registry of insertable templates (Pattern R): the package built-ins shipped under
-    /// <c>Editor/Authoring/Templates~/*.json</c> plus anything a consuming project registers via
-    /// <see cref="Register"/>. Insertion is performed by <see cref="Insert"/>, which merges the
+    /// The registry of insertable templates (Pattern R, hybrid): the package built-ins shipped under
+    /// <c>Editor/Authoring/Templates~/*.json</c>, plus anything a consuming project registers via
+    /// <see cref="Register"/> (the code seam), plus every <see cref="NeoLayoutTemplateDefinition"/> asset
+    /// dropped anywhere under <c>Assets/</c> (the no-C# seam — lazy-discovered like
+    /// <c>NeoWidgetPresets</c>/<c>ShowcaseRegistry</c>/<c>ThemeBundleRegistry</c>). Insertion is performed
+    /// by <see cref="Insert"/>, which merges the
     /// template's views/popups/breakpoints directly into a <see cref="UISpec"/>, with name-collision
     /// handling (warn + suffix, never silent overwrite). <see cref="NeoSceneAuthoring.InsertTemplate"/>
     /// is the native-authoring counterpart — it builds the template's elements live under a selected
@@ -42,12 +48,38 @@ namespace Neo.UI.Editor.Authoring
     /// </summary>
     public static class NeoLayoutTemplates
     {
-        // Pattern R (Wave 4 Task 4.2): migrated onto the shared keyed-registry base.
+        // Pattern R (Wave 4 Task 4.2): the code layer — package built-ins + explicit Register() calls,
+        // built-ins-first in a fixed order. Kept as its own NeoKeyedRegistry (rather than folded into the
+        // asset-backed base) so the built-ins keep their exact order and Register stays byte-identical; the
+        // asset-discovery layer below appends AFTER these.
         private static readonly NeoKeyedRegistry<TemplateEntry> _registry = new NeoKeyedRegistry<TemplateEntry>(
             t => t.id,
             builtins: BuiltinEntries,
             validate: t => t.loadJson != null,
             registryName: "NeoLayoutTemplates");
+
+        // Pattern R "Shape B" (Phase 3.1): lazy discovery of dropped NeoLayoutTemplateDefinition assets —
+        // the no-C# seam that makes templates a first-class extension point like every sibling registry
+        // (NeoWidgetPresets / ShowcaseRegistry / ThemeBundleRegistry). It carries NO built-ins of its own
+        // (those live in _registry, so they keep their fixed order); this holds ONLY discovered definitions,
+        // which the merged All appends after the built-ins/registrations, sorted by label. The shared
+        // NeoAssetRegistryPostprocessor invalidates it on asset import/delete/move.
+        private static readonly NeoAssetRegistry<NeoLayoutTemplateDefinition, TemplateEntry> _discovery =
+            new NeoAssetRegistry<NeoLayoutTemplateDefinition, TemplateEntry>(
+                key: t => t.id,
+                project: def => def.ToEntry(),
+                validate: t => t.loadJson != null,
+                registryName: "NeoLayoutTemplates(discovered)");
+
+        // Cached merge of _registry (built-ins + registered) + _discovery (sorted by label). Cached so the
+        // per-collision warning fires once per discovery generation (not once per All access — the Overview
+        // tab reads the count every repaint) and so the merge isn't rebuilt on every menu open. Invalidated
+        // by Register(), ResetForTests(), InvalidateDiscovery() and — for a dropped/edited/deleted asset —
+        // the shared postprocessor (enrolled in the static ctor).
+        private static IReadOnlyList<TemplateEntry> _merged;
+
+        static NeoLayoutTemplates() =>
+            NeoAssetRegistryPostprocessor.Enroll(typeof(NeoLayoutTemplateDefinition), () => _merged = null);
 
         // built-in template files (under Templates~, loaded by File.ReadAllText)
         private static readonly (string id, string label, string file, string desc)[] Builtins =
@@ -68,19 +100,69 @@ namespace Neo.UI.Editor.Authoring
             }
         }
 
-        /// <summary> Every registered template (built-ins first, then project additions). </summary>
-        public static IReadOnlyList<TemplateEntry> All => _registry.All;
+        /// <summary>
+        /// Every insertable template: built-ins first (in their fixed order), then code
+        /// <see cref="Register"/>ations, then discovered <see cref="NeoLayoutTemplateDefinition"/> assets
+        /// (sorted by label). A discovered id that collides with a built-in/registered id is dropped with a
+        /// warning — the earlier one wins, never a silent overwrite.
+        /// </summary>
+        public static IReadOnlyList<TemplateEntry> All => _merged ??= BuildMerged();
 
-        /// <summary> Finds a template by id. </summary>
-        public static bool TryGet(string id, out TemplateEntry entry) => _registry.TryGet(id, out entry);
+        /// <summary> Finds a template by id (built-ins/registered win over a discovered same-id asset). </summary>
+        public static bool TryGet(string id, out TemplateEntry entry)
+        {
+            if (!string.IsNullOrEmpty(id))
+                foreach (TemplateEntry e in All)
+                    if (string.Equals(e.id, id, StringComparison.Ordinal)) { entry = e; return true; }
+            entry = default;
+            return false;
+        }
 
-        /// <summary> Registers (or replaces, by id) a template. The extension seam: a project adds its own
-        /// scaffolds with one call. An entry with an empty id or a null loader is warned-and-ignored,
-        /// never thrown. </summary>
-        public static void Register(TemplateEntry entry) => _registry.Register(entry);
+        /// <summary> Registers (or replaces, by id) a template. The CODE extension seam: a project adds its
+        /// own scaffolds with one call (dropping a <see cref="NeoLayoutTemplateDefinition"/> asset is the
+        /// no-C# seam). An entry with an empty id or a null loader is warned-and-ignored, never thrown. </summary>
+        public static void Register(TemplateEntry entry)
+        {
+            _registry.Register(entry);
+            _merged = null;
+        }
 
-        /// <summary> Test-only: clears project registrations and re-seeds the built-ins on next access. </summary>
-        internal static void ResetForTests() => _registry.ResetForTests();
+        /// <summary> Marks discovered <see cref="NeoLayoutTemplateDefinition"/> assets stale so the next
+        /// <see cref="All"/>/<see cref="TryGet"/> re-scans. Called automatically by the shared
+        /// <see cref="NeoAssetRegistryPostprocessor"/>; exposed for explicit callers/tests. </summary>
+        public static void InvalidateDiscovery()
+        {
+            _discovery.InvalidateDiscovery();
+            _merged = null;
+        }
+
+        /// <summary> Test-only: clears project registrations + discovery and re-seeds the built-ins on next access. </summary>
+        internal static void ResetForTests()
+        {
+            _registry.ResetForTests();
+            _discovery.ResetForTests();
+            _merged = null;
+        }
+
+        // Built-ins + registrations (already in the right order), then discovered assets appended after,
+        // sorted by label (stable). A discovered id already present is dropped-with-warning (earlier wins).
+        private static IReadOnlyList<TemplateEntry> BuildMerged()
+        {
+            var result = new List<TemplateEntry>(_registry.All);
+            var seen = new HashSet<string>(result.Select(e => e.id), StringComparer.Ordinal);
+
+            foreach (TemplateEntry e in _discovery.All.OrderBy(t => t.label, StringComparer.Ordinal))
+            {
+                if (!seen.Add(e.id))
+                {
+                    Debug.LogWarning($"[NeoLayoutTemplates] Discovered layout template id '{e.id}' collides " +
+                                     "with a built-in or code-registered template — keeping the earlier one.");
+                    continue;
+                }
+                result.Add(e);
+            }
+            return result;
+        }
 
         /// <summary>
         /// Merges the template's views, popups and breakpoints directly into <paramref name="spec"/>.
@@ -171,7 +253,7 @@ namespace Neo.UI.Editor.Authoring
         {
             string path = Path.Combine(TemplatesDir, file);
             if (!File.Exists(path))
-                throw new FileNotFoundException($"Composer template not found at '{path}'.");
+                throw new FileNotFoundException($"Layout template not found at '{path}'.");
             return File.ReadAllText(path);
         }
 

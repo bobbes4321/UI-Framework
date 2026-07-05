@@ -49,8 +49,8 @@ namespace Neo.UI.Editor
         }
 
         /// <summary>
-        /// The ID database a spec element's Category/Name picker should offer, by element kind — the
-        /// Composer's <c>id</c> field uses this so the dropdown autocompletes against the same database the
+        /// The ID database a spec element's Category/Name picker should offer, by element kind — an
+        /// element's <c>id</c> field dropdown uses this so it autocompletes against the same database the
         /// generator registers that kind into (button/stepper → buttonIds, toggle/switch/tab → toggleIds,
         /// slider → sliderIds, dropdown → dropdownIds). A project-registered kind that implements
         /// <see cref="IElementKindIdDatabase"/> carries its own preference (the extension seam, exactly as

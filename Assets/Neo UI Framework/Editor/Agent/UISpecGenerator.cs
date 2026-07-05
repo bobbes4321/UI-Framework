@@ -80,18 +80,18 @@ namespace Neo.UI.Editor
         public static string PresetsFolder => $"{GeneratedRoot}/Presets";
 
         /// <summary>
-        /// Optional sink populated ONLY by the Composer's live preview: records every element's built
-        /// GameObject keyed by its <see cref="ElementSpec"/> instance (reference equality). The
-        /// Composer reuses the document's own ElementSpec instances when it asks the generator to build
-        /// a preview, so this hands the WYSIWYG canvas an exact element→object map for hit-testing and
-        /// drag manipulation — no name-matching, no path reconstruction. Null and zero-cost during
-        /// normal generation; the Composer sets it, builds, then clears it.
+        /// Optional sink for a live-preview caller: when set, records every element's built
+        /// GameObject keyed by its <see cref="ElementSpec"/> instance (reference equality). A caller
+        /// that reuses its own in-memory ElementSpec instances when asking the generator to build a
+        /// preview gets an exact element→object map for hit-testing and drag manipulation back — no
+        /// name-matching, no path reconstruction. Null and zero-cost during normal generation; a
+        /// caller sets it, builds, then clears it.
         /// </summary>
         internal static Dictionary<ElementSpec, GameObject> ElementObjectSink;
 
         /// <summary> Pillar B: the spec's top-level breakpoints for the current generate, consulted by
-        /// the per-view responsive baking pass. Set for the duration of <see cref="Generate"/>; the
-        /// Composer preview may set it directly around a <see cref="BuildViewGameObject"/> call. Null/
+        /// the per-view responsive baking pass. Set for the duration of <see cref="Generate"/>; a
+        /// live-preview caller may set it directly around a <see cref="BuildViewGameObject"/> call. Null/
         /// empty ⇒ no responsive baking (legacy specs and override-less views stay untouched). </summary>
         internal static List<BreakpointSpec> s_activeBreakpoints;
 

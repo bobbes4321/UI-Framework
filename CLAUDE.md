@@ -4,7 +4,9 @@ Unity 6 (6000.4.10f1) clean-room rebuild of Doozy UI Manager 4 into a fully fled
 package. Full feature spec: `Assets/docs/neo-ui-package-feature-spec.md`. Editor UX design
 rationale + field catalog: `Assets/docs/editor-ux-analysis.md`. Visual-polish roadmap (typography,
 icons, variants, theme bundles, juice — phased, with acceptance criteria):
-`Assets/docs/ui-beautification-plan.md`.
+`Assets/docs/ui-beautification-plan.md`. New to the editor tooling? Start with
+`Assets/docs/authoring-guide.md` (one page: Hub → Setup → Design System → native authoring → assets
+→ agents), also linked from the Hub's "Guide" button.
 
 > Formerly "AlterEyes UI" — rebranded to **Neo UI Framework** (namespaces `Neo.*`, type prefix
 > `Neo`). Older commits/issues that say AlterEyes / `AE*` map to the current Neo names.
@@ -148,18 +150,31 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   include (Starter Kit / Fonts / Widget Presets / **Animation Library** / Effect Assets), then one click
   orchestrates the existing idempotent bootstraps in order and applies the look last. Also picks **Motion
   defaults** (optional) — a preset per headline animator role (View show/hide, Button hover/press) written
-  to `NeoUISettings.animatorDefaults` so new widgets feel like the project by default. Surfaced in the Hub
-  Tools tab; covered by `HubToolCoverageTests` (every Setup/Advanced menu item must have a Hub tool).
+  to `NeoUISettings.animatorDefaults` so new widgets feel like the project by default. Safe to re-run:
+  every step is create-or-repair, and reopening the wizard reloads the CURRENT project state into its
+  fields (custom-color swatches, motion-role dropdowns) plus a per-include-toggle installed-✓ indicator
+  (`NeoSetupStatus`, shared with the Hub's setup strip) — it never silently reverts to neutral defaults.
+  Surfaced in the Hub Tools tab; covered by `HubToolCoverageTests` (every Setup/Advanced menu item must
+  have a Hub tool).
 - **Design System editor** (`Tools → Neo UI → Design System`, `Editor/NeoDesignSystemWindow.cs`) is the
-  ongoing authoring window over the live `NeoUISettings` + `Theme`: tabs for **Colors** (variant tokens +
-  derive hover/pressed), **Buttons** (`ButtonVariantAsset` per-state colors + `contentToken` + sizes),
-  **Shapes** (`ShapeStyle` radius/outline/softness), **Presets** (create/select `NeoWidgetPreset`s incl. a
-  one-click "Primary Button"), **Motion** (default animation preset per animator role —
-  `NeoUISettings.animatorDefaults`, the same data the Setup wizard seeds and animator `Reset()`/the factory
-  consume). The Buttons tab shows a REAL rendered sample button (re-rendered on change
-  via `UIScreenshotter.RenderToTexture` — the extracted texture core of `CaptureLive`); Shapes shows a faux
-  fill/outline swatch. Edits the exact structures the factory consults, so they flow into generated and
-  native-built UI.
+  ongoing authoring window over the live `NeoUISettings` + `Theme`: **Overview** (dashboard — counts +
+  provenance + jump buttons + "See it live" showcase links, the default tab), **Colors** (variant tokens +
+  derive hover/pressed, bundle-provenance tags), **Typography** (CRUD over `Theme.TextStyles` with a
+  rendered sample line), **Buttons** (`ButtonVariantAsset` per-state colors + `contentToken` + sizes, all
+  five seeded variants incl. success, real rendered preview), **Shapes** (full `ShapeStyle` fidelity —
+  uniform/per-corner radius, fill mode/gradient, elevation — with a real `NeoShape` render),
+  **Presets** (thumbnail-card grid + an embedded editor sharing the `NeoWidgetPresetEditor` form + create/
+  duplicate/delete/from-selection), **Motion** (role defaults + the full preset library as a searchable
+  browser + an embedded channel editor + live preview — `NeoUISettings.animatorDefaults`, the same data
+  the Setup wizard seeds and animator `Reset()`/the factory consume), **Bundles** (apply with a diff
+  preview before it overwrites edits, "save current look as bundle"). Edits the exact structures the
+  factory consults, so they flow into generated and native-built UI. The tab set is the extensibility
+  seam: `NeoDesignSystemTabs` (a `NeoKeyedRegistry<DesignSystemTabDescriptor>`, the built-in EIGHT each in
+  their own `Editor/DesignSystem/*Tab.cs` file over shared `DesignSystemGUI` helpers) — a project adds its
+  own design-system tab via `NeoDesignSystemTabs.Register` without forking the window. Surfaced in the Hub
+  Tools tab alongside the Gallery window (`Tools → Neo UI → Gallery`, `Editor/Gallery/NeoGalleryWindow.cs`
+  — a read-only visual gallery of every generated view/popup prefab) and the Widget Presets bootstrap;
+  `HubToolCoverageTests` requires every `Tools/Neo UI` window to have a Hub tool.
 - **Animation presets** — the motion system, designer- and agent-authorable end to end. A `UIAnimation`
   has FIVE independent channels: Move / Rotate / Scale / Fade / **Color** (the color/tint channel reuses
   the existing `ColorAnimation` — endpoints resolve to a theme token, a `#hex`, or the start/current color;
@@ -340,7 +355,11 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   icon (Lucide name via `IconMap`), counter, input, stepper, safearea (SafeAreaFitter container
   with free-anchored children). Styling fields: `textStyle` (theme TextStyle by name — owns the
   size, raw `fontSize` is the styleless fallback), button `variant` (primary/secondary/ghost/
-  danger) + string-form `size` (sm/md/lg — polymorphic with the `[w,h]` array, read back from
+  danger/success — seeded as editable `NeoUISettings.buttonVariants` entries by
+  `StarterKitBootstrap.EnsureButtonVariants`, not a closed enum; `UIWidgetFactory.VariantColors`'s
+  4-case switch is only the last-resort fallback for pre-seeding assets, so a project adds its own
+  variant by adding a `ButtonVariantAsset`, no package edit) + string-form `size` (sm/md/lg —
+  polymorphic with the `[w,h]` array, read back from
   `WidgetStyleTag`), `preset` (name of a reusable `NeoWidgetPreset` — the Figma-style component layer:
   resolved at generate as the BASE with element fields overriding; exports as the preset name + only
   the override delta via `WidgetPresetTag`, so the link survives round-trip — see
@@ -449,7 +468,11 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   `NeoElementKinds` appear for free (rehomed off the Composer in Wave 2 Task 2.1, along with
   `NeoLayoutTemplates` — the curated layout-scaffold registry, `Editor/Authoring/Templates~/*.json` —
   and `NeoCatalogKinds`/`NeoWidgetOptions`, its `Editor/Agent/` spec-tooling siblings). The menu's
-  "Insert Template…" lists `NeoLayoutTemplates.All` and instantiates the chosen scaffold's top-level
+  "Insert Template…" lists `NeoLayoutTemplates.All` — the built-in `Templates~/*.json` scaffolds PLUS
+  every `NeoLayoutTemplateDefinition` asset a project drops (Phase 3.1: lazy-discovered via the shared
+  `NeoAssetRegistry`/postprocessor like `NeoWidgetPresets`/`ShowcaseRegistry`, so templates are no longer
+  the one seam that requires C# `Register`; discovered ids sort after built-ins and a built-in-colliding
+  id is dropped-with-warning) — and instantiates the chosen scaffold's top-level
   elements (every view/popup's `elements`) under the selection via `NeoSceneAuthoring.InsertTemplate`
   — the SAME `BuildElementLive` path, all created roots under one undo step; a template's own
   title/message/close popup chrome is out of scope (only its `elements` insert) — proven by

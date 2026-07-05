@@ -59,6 +59,121 @@ MonoBehaviour:
         token: Outline
         color: {r: 1, g: 1, b: 1, a: 1}
     contentToken: TextDefault
+  - name: primary
+    colors:
+      normal:
+        useToken: 1
+        token: Primary
+        color: {r: 1, g: 1, b: 1, a: 1}
+      highlighted:
+        useToken: 1
+        token: PrimaryHover
+        color: {r: 1, g: 1, b: 1, a: 1}
+      pressed:
+        useToken: 1
+        token: PrimaryPressed
+        color: {r: 1, g: 1, b: 1, a: 1}
+      selected:
+        useToken: 1
+        token: PrimaryHover
+        color: {r: 1, g: 1, b: 1, a: 1}
+      disabled:
+        useToken: 0
+        token: 
+        color: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
+    contentToken: TextOnPrimary
+  - name: secondary
+    colors:
+      normal:
+        useToken: 1
+        token: Surface
+        color: {r: 1, g: 1, b: 1, a: 1}
+      highlighted:
+        useToken: 1
+        token: SurfaceElevated
+        color: {r: 1, g: 1, b: 1, a: 1}
+      pressed:
+        useToken: 1
+        token: Background
+        color: {r: 1, g: 1, b: 1, a: 1}
+      selected:
+        useToken: 1
+        token: SurfaceElevated
+        color: {r: 1, g: 1, b: 1, a: 1}
+      disabled:
+        useToken: 0
+        token: 
+        color: {r: 0.5, g: 0.5, b: 0.5, a: 0.3}
+    contentToken: TextStrong
+  - name: ghost
+    colors:
+      normal:
+        useToken: 0
+        token: 
+        color: {r: 0.14509805, g: 0.16470589, b: 0.20392157, a: 0}
+      highlighted:
+        useToken: 1
+        token: SurfaceElevated
+        color: {r: 1, g: 1, b: 1, a: 1}
+      pressed:
+        useToken: 1
+        token: Surface
+        color: {r: 1, g: 1, b: 1, a: 1}
+      selected:
+        useToken: 1
+        token: SurfaceElevated
+        color: {r: 1, g: 1, b: 1, a: 1}
+      disabled:
+        useToken: 0
+        token: 
+        color: {r: 0.5, g: 0.5, b: 0.5, a: 0.15}
+    contentToken: Primary
+  - name: danger
+    colors:
+      normal:
+        useToken: 1
+        token: Danger
+        color: {r: 1, g: 1, b: 1, a: 1}
+      highlighted:
+        useToken: 1
+        token: DangerHover
+        color: {r: 1, g: 1, b: 1, a: 1}
+      pressed:
+        useToken: 1
+        token: DangerPressed
+        color: {r: 1, g: 1, b: 1, a: 1}
+      selected:
+        useToken: 1
+        token: DangerHover
+        color: {r: 1, g: 1, b: 1, a: 1}
+      disabled:
+        useToken: 0
+        token: 
+        color: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
+    contentToken: TextOnPrimary
+  - name: success
+    colors:
+      normal:
+        useToken: 1
+        token: Success
+        color: {r: 1, g: 1, b: 1, a: 1}
+      highlighted:
+        useToken: 1
+        token: SuccessHover
+        color: {r: 1, g: 1, b: 1, a: 1}
+      pressed:
+        useToken: 1
+        token: SuccessPressed
+        color: {r: 1, g: 1, b: 1, a: 1}
+      selected:
+        useToken: 1
+        token: SuccessHover
+        color: {r: 1, g: 1, b: 1, a: 1}
+      disabled:
+        useToken: 1
+        token: Outline
+        color: {r: 1, g: 1, b: 1, a: 1}
+    contentToken: TextOnPrimary
   buttonSizes:
   - name: xl
     height: 64

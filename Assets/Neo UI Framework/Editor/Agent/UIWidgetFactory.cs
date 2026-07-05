@@ -525,13 +525,20 @@ namespace Neo.UI.Editor
             }
         }
 
-        /// <summary> Per-variant state colors; contentToken colors the label and icon. A project
-        /// variant on the settings asset is consulted first (Pattern A); the built-in 4-case switch
-        /// is the unchanged fallback. </summary>
+        /// <summary> Per-variant state colors; contentToken colors the label and icon.
+        /// <c>NeoUISettings.buttonVariants</c> is consulted first and is now the PRIMARY source for
+        /// the canonical variants too — <c>StarterKitBootstrap.EnsureButtonVariants</c> seeds
+        /// primary/secondary/ghost/danger/success into it (token-bound, editable in the Design
+        /// System window's Buttons tab) on every "Create or Repair Starter Kit" run. The built-in
+        /// 4-case switch below survives only as a last-resort fallback for assets created before
+        /// that seeding existed (or that never ran the starter kit) — it is intentionally NOT given
+        /// a `success` case, since that variant only ever comes from seeded data (design-system-
+        /// cohesion-plan.md Phase 2.6). </summary>
         private static SelectableColorSet VariantColors(string variant, out string contentToken)
         {
             // Pattern A seam (extensibility-seam-widget-attributes-plan.md): project-authored
-            // variant wins; the built-in switch below is byte-identical fallback.
+            // variant wins; the built-in switch below is byte-identical fallback, kept only for
+            // settings assets that predate StarterKitBootstrap.EnsureButtonVariants.
             NeoUISettings settings = NeoUISettings.instance;
             if (settings != null && settings.TryGetVariantColors(variant, out SelectableColorSet projectColors,
                     out string projectToken))
@@ -1005,7 +1012,11 @@ namespace Neo.UI.Editor
         /// Builds the standardized drop-shadow sibling (a stretched soft NeoShape behind the
         /// widget's surface) for an elevation level 1-3; level 0 builds nothing. The shadow is
         /// inserted as the FIRST child so it always renders behind. Idempotent: an existing
-        /// Shadow child is reconfigured, not duplicated.
+        /// Shadow child is reconfigured, not duplicated. Bake-time only (called from editor widget
+        /// construction, e.g. <see cref="CreateCard"/> via <see cref="ResolveElevation"/>) — never
+        /// invoked at runtime, so a theme edit never spawns/destroys GameObjects on a live scene;
+        /// <see cref="ThemeShapeStyleTarget"/> intentionally does not read
+        /// <see cref="ShapeStyle.elevation"/> for that reason.
         /// </summary>
         public static GameObject WithElevation(GameObject go, int level)
         {
@@ -1036,12 +1047,33 @@ namespace Neo.UI.Editor
             return shadow;
         }
 
+        /// <summary>
+        /// Resolves the shadow level a style-governed composite widget should bake: the active
+        /// theme's <c>styleName</c> <see cref="ShapeStyle.elevation"/> when a project has explicitly
+        /// raised it above 0, else <paramref name="fallbackLevel"/> (the widget's built-in default —
+        /// e.g. Card's classic level-2 shadow). Elevation defaults to 0 on every style until a project
+        /// authors otherwise (Design System → Shapes), and 0 is indistinguishable from "never touched"
+        /// for this int field, so 0 always defers to the widget's own default rather than stripping its
+        /// shadow — a project that wants a genuinely flat card should drop the shadow structurally
+        /// (its own composite via <see cref="WithElevation"/> at level 0), not via this field.
+        /// </summary>
+        public static int ResolveElevation(string styleName, int fallbackLevel)
+        {
+            Theme theme = NeoUISettings.instance != null ? NeoUISettings.instance.theme : null;
+            if (theme != null && !string.IsNullOrEmpty(styleName)
+                && theme.TryGetShapeStyle(styleName, out ShapeStyle style) && style.elevation > 0)
+                return style.elevation;
+            return fallbackLevel;
+        }
+
         /// <summary> Soft-shadow + surface + padded vertical content stack. </summary>
         public static GameObject CreateCard(RectTransform parent, Vector2 size)
         {
             GameObject go = CreateRect(parent, CardName, size);
 
-            WithElevation(go, 2); // the canonical card shadow
+            // the canonical card shadow — level 2 by default, overridden when the theme's "Card"
+            // ShapeStyle sets elevation > 0 (ResolveElevation)
+            WithElevation(go, ResolveElevation(StyleCard, fallbackLevel: 2));
 
             GameObject surface = CreateRect((RectTransform)go.transform, SurfaceName, Vector2.zero, "Stretch");
             AddShape(surface, ShapeType.RoundedRect, 16f, fillToken: TokenSurface, style: StyleCard, styleOwnsFill: false);

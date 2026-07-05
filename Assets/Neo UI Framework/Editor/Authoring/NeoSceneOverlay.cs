@@ -8,8 +8,9 @@ using UnityEngine.UIElements;
 namespace Neo.UI.Editor.Authoring
 {
     /// <summary>
-    /// The scene-view "back to spec" overlay — the in-context counterpart to the agent/Composer flows,
-    /// modelled on the one-click affordance tools like the Odin Validator put in the scene view. When a
+    /// The scene-view "back to spec" overlay — the in-context counterpart to editing a spec via the
+    /// agent bridge, modelled on the one-click affordance tools like the Odin Validator put in the
+    /// scene view. When a
     /// Neo <see cref="UIView"/> is selected it surfaces a drift-status dot (green = in sync, yellow = safe
     /// drift, red = off-spec) plus one-click Capture-to-Spec / Validate / Check-Drift, and an Add-Widget
     /// menu that drops a widget into the selection through the SAME native path as the GameObject menu.
@@ -173,8 +174,11 @@ namespace Neo.UI.Editor.Authoring
         // cached _presetCaptured (refreshed on selection change, never re-exported per repaint).
         private void DrawPresetWorkflowRow()
         {
-            bool hasWidget = _presetCaptured != null;
-            bool hasPreset = hasWidget && !string.IsNullOrEmpty(_presetCaptured.preset);
+            // Same enable/disable gate the widget-root inspectors use (PresetWorkflowGUI, Task 3.2) — one
+            // definition of "can I preset this?" shared by both surfaces.
+            var gating = new PresetGating(_presetCaptured);
+            bool hasWidget = gating.hasWidget;
+            bool hasPreset = gating.hasPreset;
 
             using (new EditorGUILayout.HorizontalScope())
             {

@@ -57,6 +57,16 @@ namespace Neo.UI.Editor
         private string _summary;
         private Vector2 _scroll;
 
+        // Cached "what's already installed" snapshot (NeoSetupStatus, shared with NeoUIHubWindow) —
+        // recomputed on open/focus only, never per-OnGUI (CLAUDE.md editor-perf rules).
+        private NeoSetupStatus.Snapshot _status;
+
+        // Guards the one-time load of current-project state into the fields below: OnEnable also fires
+        // after a domain reload while the window stays open, and re-loading then would stomp whatever
+        // the user had already typed. This bool is a plain field so Unity's window serialization keeps
+        // it true across that reload.
+        private bool _loadedFromProject;
+
         [MenuItem("Tools/Neo UI/Setup/New Project Setup…", priority = 90)]
         public static void Open()
         {
@@ -65,7 +75,20 @@ namespace Neo.UI.Editor
             window.RefreshBundleOptions();
         }
 
-        private void OnEnable() => RefreshBundleOptions();
+        private void OnEnable()
+        {
+            RefreshBundleOptions();
+            RecomputeStatus();
+            if (!_loadedFromProject)
+            {
+                LoadFromCurrentState();
+                _loadedFromProject = true;
+            }
+        }
+
+        private void OnFocus() => RecomputeStatus();
+
+        private void RecomputeStatus() => _status = NeoSetupStatus.Compute();
 
         private void RefreshBundleOptions()
         {
@@ -73,6 +96,74 @@ namespace Neo.UI.Editor
             list.AddRange(ThemeBundles.Names);
             _bundleOptions = list.ToArray();
             if (_bundle >= _bundleOptions.Length) _bundle = 0;
+        }
+
+        // ---------------------------------------------------------------- load current state
+
+        /// <summary>
+        /// Pre-fills the custom-color fields, shape sliders and motion-role dropdowns from the CURRENT
+        /// project state (design-system-cohesion-plan Phase 1.2) so reopening the wizard reads as "here's
+        /// what you have" instead of silently reverting to neutral defaults. Strictly read-only — never
+        /// creates or mutates an asset. Only covers inverse mappings that are unambiguous:
+        /// <list type="bullet">
+        /// <item>a palette token maps to exactly one intent field (the same map
+        /// <see cref="ThemeBundles.BuildPalette"/> writes, inverted);</item>
+        /// <item>the Card/Control shape styles' plain radius maps to exactly one slider each;</item>
+        /// <item>the "ShowDefault" preset — the exact asset <see cref="ThemeBundles"/> seeds — maps to the
+        /// motion-duration slider.</item>
+        /// </list>
+        /// Anything else (theme-bundle provenance, per-channel ease/offsets, …) isn't a 1:1 field on this
+        /// wizard, so it's deliberately left alone rather than guessed. Missing pieces (fresh project, no
+        /// theme yet) simply keep the wizard's neutral-dark defaults.
+        /// </summary>
+        private void LoadFromCurrentState()
+        {
+            Theme theme = _status.settings != null ? _status.settings.theme : null;
+            if (theme != null)
+            {
+                Dictionary<string, Color> palette = NeoSetupPalette.ReadFrom(theme);
+                if (palette.TryGetValue("background", out Color background)) _background = background;
+                if (palette.TryGetValue("surface", out Color surface)) _surface = surface;
+                if (palette.TryGetValue("surfaceElevated", out Color surfaceElevated)) _surfaceElevated = surfaceElevated;
+                if (palette.TryGetValue("outline", out Color outline)) _outline = outline;
+                if (palette.TryGetValue("primary", out Color primary)) _primary = primary;
+                if (palette.TryGetValue("textOnPrimary", out Color textOnPrimary)) _textOnPrimary = textOnPrimary;
+                if (palette.TryGetValue("textStrong", out Color textStrong)) _textStrong = textStrong;
+                if (palette.TryGetValue("textDefault", out Color textDefault)) _textDefault = textDefault;
+                if (palette.TryGetValue("textMuted", out Color textMuted)) _textMuted = textMuted;
+                if (palette.TryGetValue("success", out Color success)) _success = success;
+                if (palette.TryGetValue("warning", out Color warning)) _warning = warning;
+                if (palette.TryGetValue("error", out Color error)) _error = error;
+                if (palette.TryGetValue("shadow", out Color shadow)) _shadow = shadow;
+
+                if (theme.TryGetShapeStyle(UIWidgetFactory.StyleCard, out ShapeStyle card))
+                    _cardRadius = card.radius;
+                if (theme.TryGetShapeStyle(UIWidgetFactory.StyleControl, out ShapeStyle control))
+                    _controlRadius = control.radius;
+            }
+
+            // Motion duration: ShowDefault is the exact preset ThemeBundles.ApplyMotion seeds, so its
+            // fade (or scale, if fade is off) duration is an unambiguous read-back — every other
+            // per-channel field (ease, offsets, …) has no 1:1 slider here, so it's left untouched.
+            UIAnimationPreset showDefault = AnimationPresetRegistry.GetByFullName("Show/ShowDefault");
+            if (showDefault?.animation != null)
+            {
+                if (showDefault.animation.fade != null && showDefault.animation.fade.enabled)
+                    _motionDuration = showDefault.animation.fade.settings.duration;
+                else if (showDefault.animation.scale != null && showDefault.animation.scale.enabled)
+                    _motionDuration = showDefault.animation.scale.settings.duration;
+            }
+
+            // Motion-role defaults: mirror the project's current animatorDefaults into the dropdown rows.
+            if (_status.settings != null)
+            {
+                foreach (string role in MotionRoles)
+                {
+                    if (_status.settings.TryGetDefaultAnimation(role, out UIAnimationPreset preset)
+                        && preset != null)
+                        _motionDefaults[role] = preset.fullName;
+                }
+            }
         }
 
         private void OnGUI()
@@ -107,6 +198,9 @@ namespace Neo.UI.Editor
                 }
                 EditorGUILayout.LabelField("Next: GameObject → Neo UI → View to start building.",
                     EditorStyles.miniLabel);
+                EditorGUILayout.LabelField(
+                    "Refine colors, buttons, shapes and motion anytime in the Design System window.",
+                    EditorStyles.wordWrappedMiniLabel);
             }
 
             EditorGUILayout.EndScrollView();
@@ -116,23 +210,17 @@ namespace Neo.UI.Editor
 
         private void DrawDetectedState()
         {
-            NeoUISettings settings =
-                AssetDatabase.LoadAssetAtPath<NeoUISettings>(NeoUISettingsBootstrap.SettingsAssetPath);
-            bool hasSettings = settings != null;
-            bool hasStarter = hasSettings && settings.theme != null
-                && settings.theme.HasToken(UIWidgetFactory.TokenPrimary);
-            bool hasFonts = hasSettings && settings.iconFont != null;
-
             using (new EditorGUILayout.HorizontalScope())
             {
                 EditorGUILayout.LabelField("Detected:", GUILayout.Width(60f));
-                Dot("Settings", hasSettings);
-                Dot("Starter Kit", hasStarter);
-                Dot("Fonts", hasFonts);
-                Dot("Presets", NeoWidgetPresets.All.Count > 0);
-                Dot("Anims", AnimationPresetRegistry.All.Count > 0);
+                Dot("Settings", _status.hasSettings);
+                Dot("Starter Kit", _status.hasStarterKit);
+                Dot("Fonts", _status.hasFonts);
+                Dot("Presets", _status.hasPresets);
+                Dot("Anims", _status.hasAnimations);
+                Dot("Effects", _status.hasEffects);
             }
-            if (hasSettings)
+            if (_status.hasSettings)
                 EditorGUILayout.LabelField("A project is already set up — re-running only repairs/fills gaps.",
                     EditorStyles.miniLabel);
         }
@@ -212,18 +300,37 @@ namespace Neo.UI.Editor
         {
             EditorGUILayout.LabelField("Include", EditorStyles.boldLabel);
             using (new EditorGUI.DisabledScope(true))
-                EditorGUILayout.ToggleLeft("Core settings + databases (required)", true);
-            _starterKit = EditorGUILayout.ToggleLeft(new GUIContent("Widget prefab library (Starter Kit)",
-                "Themed button/toggle/slider/… prefabs + Dark/Light palette + type scale"), _starterKit);
-            _fonts = EditorGUILayout.ToggleLeft(new GUIContent("Fonts (Inter + Lucide icons)",
-                "TMP SDF font assets; wires the icon font"), _fonts);
-            _presets = EditorGUILayout.ToggleLeft(new GUIContent("Widget preset library",
-                "Named component styles (Primary Button, Section Header…)"), _presets);
-            _animations = EditorGUILayout.ToggleLeft(new GUIContent("Default animation library",
+                IncludeToggle(new GUIContent("Core settings + databases (required)"), true, _status.hasSettings);
+            _starterKit = IncludeToggle(new GUIContent("Widget prefab library (Starter Kit)",
+                "Themed button/toggle/slider/… prefabs + Dark/Light palette + type scale"),
+                _starterKit, _status.hasStarterKit);
+            _fonts = IncludeToggle(new GUIContent("Fonts (Inter + Lucide icons)",
+                "TMP SDF font assets; wires the icon font"), _fonts, _status.hasFonts);
+            _presets = IncludeToggle(new GUIContent("Widget preset library",
+                "Named component styles (Primary Button, Section Header…)"), _presets, _status.hasPresets);
+            _animations = IncludeToggle(new GUIContent("Default animation library",
                 "Curated fade / slide / scale-pop / button / loop presets, referenced by name from specs"),
-                _animations);
-            _effects = EditorGUILayout.ToggleLeft(new GUIContent("Effect assets (Tier-2 materials)",
-                "Noise/ramp textures + dissolve/holo/glitch materials for variant shape effects"), _effects);
+                _animations, _status.hasAnimations);
+            _effects = IncludeToggle(new GUIContent("Effect assets (Tier-2 materials)",
+                "Noise/ramp textures + dissolve/holo/glitch materials for variant shape effects"),
+                _effects, _status.hasEffects);
+        }
+
+        /// <summary> A toggle row with a trailing "installed ✓" / "not set up yet" status so a returning
+        /// user can see what their project already has, per design-system-cohesion-plan Phase 1.2. </summary>
+        private static bool IncludeToggle(GUIContent content, bool value, bool installed)
+        {
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                value = EditorGUILayout.ToggleLeft(content, value, GUILayout.ExpandWidth(true));
+                GUILayout.FlexibleSpace();
+                Color prev = GUI.contentColor;
+                GUI.contentColor = installed ? NeoColors.Add : NeoColors.TextSubtle;
+                GUILayout.Label(installed ? "installed ✓" : "not set up yet", EditorStyles.miniLabel,
+                    GUILayout.Width(96f));
+                GUI.contentColor = prev;
+            }
+            return value;
         }
 
         // ---------------------------------------------------------------- motion defaults
@@ -334,6 +441,7 @@ namespace Neo.UI.Editor
             AssetDatabase.SaveAssets();
             _summary = "Set up: " + string.Join(", ", steps) + ".";
             Debug.Log($"[Neo.UI] New Project Setup — {_summary}");
+            RecomputeStatus(); // refresh the "installed" indicators to reflect what just ran
             Repaint();
         }
 
@@ -358,28 +466,12 @@ namespace Neo.UI.Editor
         }
 
         // Persist the derived palette as raw tokens so re-applying the definition reproduces it exactly.
+        // Rehomed (Phase 2.8) into the shared ThemeBundles.SaveDefinition so the Design System window's
+        // "Save current look as bundle" and this wizard write the identical asset — the wizard's custom
+        // bundle is a single-variant Bundle, so the shared writer produces byte-identical output.
         private void SaveCustomBundle(ThemeBundles.Bundle custom)
         {
-            if (!AssetDatabase.IsValidFolder(CustomThemesRoot))
-                AssetDatabase.CreateFolder("Assets", "Neo UI Themes");
-
-            var def = ScriptableObject.CreateInstance<ThemeBundleDefinition>();
-            def.bundleName = custom.name;
-            def.description = custom.description;
-            def.cardRadius = custom.cardRadius;
-            def.panelRadius = custom.panelRadius;
-            def.controlRadius = custom.controlRadius;
-            def.shadowSoftness = custom.shadowSoftness;
-            def.motionDuration = custom.motionDuration;
-            def.motionEase = custom.motionEase;
-            def.headlineSpacing = custom.headlineSpacing;
-            var variant = new ThemeBundleDefinition.Variant { name = "Custom" };
-            foreach (KeyValuePair<string, Color> t in custom.palettes[0].tokens)
-                variant.tokens.Add(new ThemeBundleDefinition.TokenColor { token = t.Key, color = t.Value });
-            def.variants.Add(variant);
-
-            AssetDatabase.CreateAsset(def, $"{CustomThemesRoot}/{custom.name}.asset");
-            ThemeBundleRegistry.InvalidateDiscovery();
+            ThemeBundles.SaveDefinition(custom, CustomThemesRoot);
             RefreshBundleOptions();
         }
 

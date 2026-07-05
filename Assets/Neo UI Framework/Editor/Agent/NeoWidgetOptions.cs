@@ -5,11 +5,9 @@ using UnityEngine;
 namespace Neo.UI.Editor
 {
     /// <summary>
-    /// Option providers for the Composer's dropdowns. Lists are built when a dropdown opens (never
-    /// per frame) — every method here is a one-shot gather. Theme tokens come from BOTH the live
-    /// document (the Composer can add tokens that aren't on the project theme yet) and the project
-    /// theme; everything else (styles, anchors) comes from the project theme / factory since the
-    /// document doesn't redefine those.
+    /// Option providers for spec-authoring dropdowns (the widget preset inspector, and any future
+    /// authoring surface). Lists are built when a dropdown opens (never per frame) — every method
+    /// here is a one-shot gather, sourced from the project theme / factory / registered attributes.
     /// </summary>
     public static class NeoWidgetOptions
     {
@@ -101,19 +99,19 @@ namespace Neo.UI.Editor
             return list;
         }
 
-        /// <summary> Registers a button variant id for the Composer picker (append if new,
+        /// <summary> Registers a button variant id for the picker (append if new,
         /// case-insensitive no-op if already present). Author the variant's colors as a
         /// <see cref="ButtonVariantAsset"/> on <c>NeoUISettings.buttonVariants</c>. </summary>
         public static void RegisterVariant(string variant) => _buttonVariants.Register(variant);
 
-        /// <summary> Registers a button size id for the Composer picker. Author its
+        /// <summary> Registers a button size id for the picker. Author its
         /// dimensions as a <see cref="ButtonSizeAsset"/> on <c>NeoUISettings.buttonSizes</c>. </summary>
         public static void RegisterSize(string size) => _buttonSizes.Register(size);
 
-        /// <summary> Registers a text-align id for the Composer picker. </summary>
+        /// <summary> Registers a text-align id for the picker. </summary>
         public static void RegisterAlign(string align) => _aligns.Register(align);
 
-        /// <summary> Registers a shape NAME for the Composer picker. A new primitive also needs the
+        /// <summary> Registers a shape NAME for the picker. A new primitive also needs the
         /// NeoShape graphics seam (mesh + shader) — out of scope for this seam. </summary>
         public static void RegisterShape(string shape) => _shapeNames.Register(shape);
 
@@ -143,9 +141,9 @@ namespace Neo.UI.Editor
         internal static void ResetForTests() => ResetAttributeRegistriesForTests();
 
         /// <summary> The on-scale spacing/padding snap values the design lint blesses. Single source
-        /// of truth: reads <see cref="NeoUISettings.spacingScale"/> so the Composer snap and the
-        /// design lint always agree (a project overrides the scale once, on settings). Falls back to
-        /// the package default when there is no settings asset. </summary>
+        /// of truth: reads <see cref="NeoUISettings.spacingScale"/> so every spacing-snap consumer and
+        /// the design lint always agree (a project overrides the scale once, on settings). Falls back
+        /// to the package default when there is no settings asset. </summary>
         public static float[] SpacingScale
         {
             get

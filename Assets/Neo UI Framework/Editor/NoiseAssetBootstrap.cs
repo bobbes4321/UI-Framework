@@ -78,7 +78,7 @@ namespace Neo.UI.Editor
         private const int RampWidth = 256;
         private const int RampHeight = 4;
 
-        [MenuItem("Tools/Neo UI/Setup/Create or Repair Effect Assets", priority = 104)]
+        [MenuItem("Tools/Neo UI/Setup/Create or Repair Effect Assets", priority = 106)]
         public static void CreateOrRepairMenu()
         {
             Material material = CreateOrRepair();

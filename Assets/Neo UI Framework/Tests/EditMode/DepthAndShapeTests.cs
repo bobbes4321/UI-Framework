@@ -178,6 +178,108 @@ namespace Neo.UI.Tests
         }
 
         [Test]
+        public void ShapeStyle_Elevation_OverridesCardDefault_WhenSetAboveZero()
+        {
+            NeoUISettings previousInstance = NeoUISettings.instance;
+            NeoUISettings settings = ScriptableObject.CreateInstance<NeoUISettings>();
+            Theme theme = ScriptableObject.CreateInstance<Theme>();
+            GameObject card = null;
+            try
+            {
+                theme.SetShapeStyle(new ShapeStyle { name = UIWidgetFactory.StyleCard, elevation = 3 });
+                settings.theme = theme;
+                NeoUISettings.instance = settings;
+
+                card = UIWidgetFactory.CreateCard(null, new Vector2(360f, 240f));
+
+                Transform shadow = card.transform.Find(UIWidgetFactory.ShadowName);
+                Assert.IsNotNull(shadow, "an elevated Card style must still bake a shadow");
+                Assert.AreEqual(ElevationRecipe.Get(3).softness, shadow.GetComponent<NeoShape>().edgeSoftness,
+                    "style.elevation (3) must override CreateCard's built-in level-2 default");
+            }
+            finally
+            {
+                if (card != null) Object.DestroyImmediate(card);
+                NeoUISettings.instance = previousInstance;
+                Object.DestroyImmediate(settings);
+                Object.DestroyImmediate(theme);
+            }
+        }
+
+        [Test]
+        public void ShapeStyle_Elevation_AtZero_DefersToCardDefault()
+        {
+            // 0 is both the field's default and a legitimate "no shadow" value — indistinguishable
+            // for an int, so CreateCard treats 0 as "not authored" and keeps its own level-2 default
+            // rather than stripping the shadow (see UIWidgetFactory.ResolveElevation).
+            NeoUISettings previousInstance = NeoUISettings.instance;
+            NeoUISettings settings = ScriptableObject.CreateInstance<NeoUISettings>();
+            Theme theme = ScriptableObject.CreateInstance<Theme>();
+            GameObject card = null;
+            try
+            {
+                theme.SetShapeStyle(new ShapeStyle { name = UIWidgetFactory.StyleCard, elevation = 0 });
+                settings.theme = theme;
+                NeoUISettings.instance = settings;
+
+                card = UIWidgetFactory.CreateCard(null, new Vector2(360f, 240f));
+
+                Transform shadow = card.transform.Find(UIWidgetFactory.ShadowName);
+                Assert.IsNotNull(shadow, "elevation 0 (unset) must not strip Card's own default shadow");
+                Assert.AreEqual(ElevationRecipe.Get(2).softness, shadow.GetComponent<NeoShape>().edgeSoftness);
+            }
+            finally
+            {
+                if (card != null) Object.DestroyImmediate(card);
+                NeoUISettings.instance = previousInstance;
+                Object.DestroyImmediate(settings);
+                Object.DestroyImmediate(theme);
+            }
+        }
+
+        [Test]
+        public void ElevatedCardStyle_NeverLeaksIntoPopupExport()
+        {
+            // Popups are built from CreateCard (CreatePopupShell). The Shadow/Surface siblings it
+            // adds were already invisible to UISpecExporter.ExportPopup (it only Finds "Content"/
+            // "Close" by name — see UISpecExporter.ExportPopup) before this task; prove that raising
+            // elevation — which only reconfigures/adds that same Shadow sibling — still can't leak a
+            // new field into the exported spec, so export -> generate -> export stays a fixed point.
+            // Uses the real project theme (mutated in place, then restored) rather than a scratch
+            // NeoUISettings so CreatePopup's button/label machinery resolves its usual project data.
+            const string PopupName = "ElevationProbe";
+            Theme theme = NeoUISettings.instance != null ? NeoUISettings.instance.theme : null;
+            Assert.IsNotNull(theme, "the project theme must be assigned (Resources/NeoUISettings) for this test");
+            Assert.IsTrue(theme.TryGetShapeStyle(UIWidgetFactory.StyleCard, out ShapeStyle card));
+            int originalElevation = card.elevation;
+            GameObject popupFlat = null, popupElevated = null;
+            try
+            {
+                card.elevation = 0;
+                popupFlat = UIWidgetFactory.CreatePopup(PopupName, "Title", "Message");
+                PopupSpec flatSpec = UISpecExporter.ExportPopup(popupFlat.GetComponent<UIPopup>());
+
+                card.elevation = 3;
+                popupElevated = UIWidgetFactory.CreatePopup(PopupName, "Title", "Message");
+                PopupSpec elevatedSpec = UISpecExporter.ExportPopup(popupElevated.GetComponent<UIPopup>());
+
+                Assert.AreEqual(flatSpec.name, elevatedSpec.name);
+                Assert.AreEqual(flatSpec.title, elevatedSpec.title);
+                Assert.AreEqual(flatSpec.message, elevatedSpec.message);
+                Assert.AreEqual(flatSpec.close, elevatedSpec.close);
+                Assert.AreEqual(flatSpec.size, elevatedSpec.size);
+                Assert.AreEqual(flatSpec.elements.Count, elevatedSpec.elements.Count,
+                    "the Shadow child must never surface as an exported element");
+            }
+            finally
+            {
+                if (popupFlat != null) Object.DestroyImmediate(popupFlat);
+                if (popupElevated != null) Object.DestroyImmediate(popupElevated);
+                card.elevation = originalElevation;
+            }
+        }
+
+        [Test]
         public void ShapeStyle_Gradient_AppliesToShape()
         {
             Theme theme = ScriptableObject.CreateInstance<Theme>();

@@ -12,6 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 202bf77ffb876604f87ad7176569404e, type: 3}
   m_Name: AnimationPresetDatabase
   m_EditorClassIdentifier: Neo.UI::Neo.UI.AnimationPresetDatabase
-  presets:
-  - {fileID: 11400000, guid: a5d0e3f1eb1776f4fae5732c55527844, type: 2}
-  - {fileID: 11400000, guid: 694cc6dcc70d9a847955fbb946853706, type: 2}
+  presets: []

@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Neo.UI
 {
     /// <summary> Registry of animation presets addressable by name (and optionally category). </summary>
-    [CreateAssetMenu(menuName = "Neo/UI/Databases/Animation Preset Database", fileName = "AnimationPresetDatabase")]
+    [CreateAssetMenu(menuName = "Neo UI/Databases/Animation Preset Database", fileName = "AnimationPresetDatabase")]
     public class AnimationPresetDatabase : ScriptableObject
     {
         [SerializeField] private List<UIAnimationPreset> presets = new List<UIAnimationPreset>();

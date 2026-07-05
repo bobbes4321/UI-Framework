@@ -179,7 +179,7 @@ The unifying idea: **dropping an asset is enough** — no manual registration, n
 - **What changed:** you no longer have to add a `UIAnimationPreset` to the
   `AnimationPresetDatabase.presets` list for it to resolve. Dropping the asset is enough.
 - **Test:**
-  1. `Assets → Create → Neo/UI/Animation Preset`. Set **Preset Name** to e.g. `SlideInLeft`, configure
+  1. `Assets → Create → Neo UI/Animation Preset`. Set **Preset Name** to e.g. `SlideInLeft`, configure
      a move/fade, and save it anywhere under `Assets/`.
   2. In a spec (or a showcase spec), set a view's `"showAnimation": "SlideInLeft"` — **without** adding
      the preset to any database — and generate/regenerate.

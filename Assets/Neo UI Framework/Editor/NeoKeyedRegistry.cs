@@ -15,8 +15,9 @@ namespace Neo.UI.Editor
     /// same-key registration always REPLACES in place, never duplicates, so a project can override a
     /// built-in by re-registering its id. Invalid registrations (null value, empty/null key, or a value
     /// that fails <c>validate</c>) are warned-and-ignored — never thrown — because several adopters
-    /// (e.g. Composer catalog registries) register from <c>[InitializeOnLoad]</c> static constructors,
-    /// where a thrown exception poisons the whole domain with a <see cref="TypeInitializationException"/>.
+    /// (e.g. the spec-authoring catalog registries) register from <c>[InitializeOnLoad]</c> static
+    /// constructors, where a thrown exception poisons the whole domain with a
+    /// <see cref="TypeInitializationException"/>.
     /// </para>
     /// </summary>
     /// <typeparam name="T">The entry type held by the registry.</typeparam>

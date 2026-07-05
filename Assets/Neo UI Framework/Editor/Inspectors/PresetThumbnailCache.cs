@@ -8,8 +8,7 @@ namespace Neo.UI.Editor
     /// <summary>
     /// A static, editor-only cache of preset/kind thumbnails so no caller ever renders one per
     /// <c>OnGUI</c> pass (the "no editor-tick visuals" performance rule) — used by the scene-view
-    /// overlay's <c>PresetPickerPopup</c>/palette tiles and, while it lives, the Composer's palette and
-    /// picker. Each entry is rendered once via
+    /// overlay's <c>PresetPickerPopup</c>/palette tiles. Each entry is rendered once via
     /// <see cref="PresetThumbnailRenderer"/> and reused; the cache OWNS the textures (callers never
     /// destroy them). Entries are keyed by (preset name OR element kind) + requested size + the active
     /// theme variant name + a content hash of the preset's styling fields, so editing a preset, resizing,
@@ -102,8 +101,8 @@ namespace Neo.UI.Editor
         public static void Invalidate() => ReleaseAll();
 
         /// <summary>
-        /// Releases every cached texture and empties the cache (call on Composer window close so the
-        /// ~tens-of-KB-per-thumb textures don't linger).
+        /// Releases every cached texture and empties the cache (call on a preset-picker window's close
+        /// so the ~tens-of-KB-per-thumb textures don't linger).
         /// </summary>
         public static void Clear() => ReleaseAll();
 

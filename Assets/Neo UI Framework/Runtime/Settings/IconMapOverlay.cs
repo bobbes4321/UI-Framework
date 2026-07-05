@@ -12,7 +12,7 @@ namespace Neo.UI
     /// them) without forking <c>IconMap</c>. The built-in ~170-glyph dict and alias table are left
     /// untouched — this only blends in.
     /// </summary>
-    [CreateAssetMenu(menuName = "Neo/UI/Icon Map Overlay", fileName = "IconMapOverlay")]
+    [CreateAssetMenu(menuName = "Neo UI/Icon Map Overlay", fileName = "IconMapOverlay")]
     public class IconMapOverlay : ScriptableObject
     {
         [Serializable]

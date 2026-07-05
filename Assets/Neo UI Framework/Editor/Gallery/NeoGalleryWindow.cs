@@ -16,6 +16,7 @@ namespace Neo.UI.Editor
     /// <see cref="UIScreenshotter.Capture(GameObject,string,int,int)"/> and cached as throwaway PNGs
     /// under <c>Temp/neo-gallery</c>, so re-opening the window is cheap and the project stays clean.
     /// Click a tile to select + ping its prefab; double-click to open it; right-click for more.
+    /// Reachable both from its own <c>Tools → Neo UI → Gallery</c> menu item and from the Hub.
     /// </summary>
     public sealed class NeoGalleryWindow : EditorWindow
     {
@@ -59,9 +60,7 @@ namespace Neo.UI.Editor
         private GUIStyle _placeholder;
         private GUIStyle _wrap;
 
-        // The Gallery's standalone menu item was folded into the Hub (Tools → Neo UI → Hub), which
-        // hosts the showcase gallery. The window class is kept (still openable via this Open()) so the
-        // thumbnail/validation machinery stays reusable, but it no longer adds its own menu entry.
+        [MenuItem("Tools/Neo UI/Gallery", priority = 11)]
         public static void Open()
         {
             var window = GetWindow<NeoGalleryWindow>("Neo UI Gallery");
@@ -102,7 +101,9 @@ namespace Neo.UI.Editor
             string root = UISpecGenerator.GeneratedRoot;
             if (!AssetDatabase.IsValidFolder(root))
             {
-                _status = $"No generated UI found at '{root}'.\nGenerate a spec first, then Refresh.";
+                _status = $"No generated UI found at '{root}'.\nBuild something first: open a showcase from " +
+                    "the Hub, build natively (GameObject → Neo UI, then Capture to Spec), or run the agent " +
+                    "bridge's \"generate\"/\"sync\" action. Then Refresh.";
                 return;
             }
 
@@ -242,7 +243,8 @@ namespace Neo.UI.Editor
             if (_items.Count == 0)
             {
                 GUILayout.FlexibleSpace();
-                GUILayout.Label(_status ?? "Nothing generated yet.", _placeholder);
+                GUILayout.Label(_status ?? "Nothing generated yet.\nOpen a showcase from the Hub, or build/" +
+                    "generate UI, then Refresh.", _placeholder);
                 using (new EditorGUILayout.HorizontalScope())
                 {
                     GUILayout.FlexibleSpace();

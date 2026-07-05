@@ -9,7 +9,7 @@ namespace Neo.UI
     /// <see cref="UIAnimationPreset"/>. Apply it onto a live <see cref="NeoParticleEmitter"/> with
     /// <see cref="NeoParticleEmitter.ApplyPreset"/>; the data is copied, the asset is not linked.
     /// </summary>
-    [CreateAssetMenu(menuName = "Neo/UI/Particle Emitter Preset", fileName = "ParticleEmitterPreset")]
+    [CreateAssetMenu(menuName = "Neo UI/Particle Emitter Preset", fileName = "ParticleEmitterPreset")]
     public class NeoParticleEmitterPreset : ScriptableObject
     {
         [Tooltip("Preset category, e.g. Confetti / Sparkle / Coins.")]

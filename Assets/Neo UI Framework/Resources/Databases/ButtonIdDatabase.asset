@@ -82,6 +82,9 @@ MonoBehaviour:
     - SecondarySm
     - Settings
     - Shop
+    - SuccessLg
+    - SuccessMd
+    - SuccessSm
   - category: Cheats
     names:
     - Close

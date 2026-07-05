@@ -35,11 +35,21 @@ namespace Neo.UI
         [Range(0f, 360f)]
         public float gradientAngle = 90f;
 
-        [Tooltip("Drop-shadow level 0-3 — consumed by the widget factory at build time (see ElevationRecipe)")]
+        [Tooltip("Drop-shadow level 0-3. Consumed at EDITOR BUILD TIME by composite widgets that call " +
+                 "UIWidgetFactory.WithElevation (currently: Card, and popups since they're built from " +
+                 "a Card) — it overrides that widget's own default level when set > 0; 0 defers to the " +
+                 "widget's default rather than forcing 'no shadow' (0 and 'never authored' are the same " +
+                 "value here). Shape styles bound to a plain NeoShape via ThemeShapeStyleTarget do NOT " +
+                 "grow a shadow from this field: ApplyTo/ApplyStyle only recolor/reshape the ONE shape " +
+                 "they're attached to, and — per the WYSIWYG + no-runtime-GameObject-churn rules — must " +
+                 "never structurally add a shadow sibling on a theme change.")]
         [Range(0, 3)]
         public int elevation;
 
-        /// <summary> Copies every styling field of this style onto a shape (not the fill color). </summary>
+        /// <summary>
+        /// Copies every styling field of this style onto a shape (not the fill color, not elevation —
+        /// elevation is a bake-time widget-construction concern, see <see cref="elevation"/>).
+        /// </summary>
         public void ApplyTo(NeoShape shape, Theme theme = null)
         {
             if (shape == null) return;

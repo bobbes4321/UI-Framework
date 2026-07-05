@@ -1045,7 +1045,7 @@ namespace Neo.UI.Editor
                     Debug.LogWarning($"[ID Rename] {error}");
                 if (applied.FilesChanged > 0)
                     Debug.Log($"[ID Rename] Updated {applied.TotalReferences} reference(s) across {applied.FilesChanged} UISpec file(s). " +
-                              "Composer (if open) — reload it to see the change.");
+                              "Prefabs/scenes are not rewritten — run Sync/regenerate to materialize the change.");
             }
             renameDb();
             MarkEdited(); // the rename changed reference data — counts are now stale until a rescan
