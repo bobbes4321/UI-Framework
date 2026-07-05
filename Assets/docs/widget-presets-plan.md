@@ -1,5 +1,17 @@
 # Plan — Widget Presets (reusable component styles, à la Figma)
 
+> **Status (2026-07): Waves 1–2 implemented and shipped; this doc is historical design record, not
+> current architecture.** `NeoWidgetPreset` + the `NeoWidgetPresets` registry, `ElementSpec.preset`
+> resolve/override, `WidgetPresetTag` + override-delta export, `PresetLibraryBootstrap`, and the §6
+> motion hookup all exist. What changed since this plan was written: the Composer (its palette/
+> inspector CRUD, thumbnail cache, visual picker) was retired — that authoring surface is now native
+> scene-view (`Editor/Authoring/PresetPickerPopup.cs`, `NeoSceneAuthoring.CreatePresetFromWidget`/
+> `UpdatePresetFromWidget`/`ResetWidgetToPreset`/`ApplyPreset`), and the registry lives at
+> `Editor/Agent/NeoWidgetPresets.cs`, not `Editor/Composer/`. See CLAUDE.md's "Spec element kinds"
+> (`preset` field) and "Native-Unity authoring" entries for the current source of truth; Wave 5's
+> `Editor/Agent/PresetFields.cs` is the current seam for which fields a preset governs (superseding
+> this doc's per-call-site field lists).
+>
 > A new **top layer** of the design system: named, reusable styling bundles ("Primary Button",
 > "Section Header") that a widget references **by name** and that resolve at generate time. Pattern
 > **A** (a `NeoWidgetPreset` ScriptableObject the project authors) + Pattern **R** (a code-seeded +
@@ -85,7 +97,7 @@ public class NeoWidgetPreset : ScriptableObject
 
 ### 2. The registry (Pattern R) — mirror `ShowcaseRegistry` exactly
 
-`Editor/Composer/NeoWidgetPresets.cs` (editor — uses `AssetDatabase`): code-seeded built-ins **plus**
+`Editor/Agent/NeoWidgetPresets.cs` (rehomed off the Composer in Wave 2; editor — uses `AssetDatabase`): code-seeded built-ins **plus**
 lazy discovery of every `NeoWidgetPreset` asset, with an `AssetPostprocessor` invalidating discovery
 on import. Same `All` / `TryGet` / `Register` / `EnsureDiscovered` / `InvalidateDiscovery` shape as
 `ShowcaseRegistry.cs:20-109`; a discovered asset overrides a built-in of the same name; a project adds
@@ -159,11 +171,14 @@ built-in seed is unchanged; `RegisterVariant` stays for code-only additions.
 
 ### 6. Motion as a referenceable default
 
-`NeoWidgetPreset.motion` references an `AnimationPresetDatabase` entry. Phase 1 wires it where a
-widget-level animation attach point already exists (view show/hide for view-root presets, button press
-feedback where present). A genuine *per-widget interaction* animation channel (hover/press/focus on
-arbitrary widgets) is a larger runtime addition — call it out as the Phase-3 extension rather than
-faking it. This keeps the "default animations/transitions" promise honest about today's attach points.
+**Shipped, resolved differently than originally planned.** `NeoWidgetPreset.motion` references an
+animation preset by name (via `AnimationPresetRegistry`, not the `AnimationPresetDatabase` lookup this
+plan originally assumed). Rather than wiring only into a pre-existing view show/hide or button-press
+attach point, it seeds the element's own **loop animation channel** — the same `"animations": {
+"loop": "..." }` per-element spec field described in CLAUDE.md's "Animation presets" entry — so a
+preset can give *any* target kind, not just views/buttons, a play-on-start `UIAnimator`. The applied
+name is stripped back out on export like any other preset-governed field (delta compare against the
+preset's resolved value), so it round-trips exactly like `variant`/`textStyle`/etc.
 
 ### 7. Visual previews in the Composer (UX goal #2)
 

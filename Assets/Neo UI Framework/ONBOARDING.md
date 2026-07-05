@@ -432,7 +432,9 @@ Under **`Tools → Neo UI`**:
   also wires `NeoUISettings.iconFont`).
 - **Apply Theme Bundle** — applies a curated bundle (CleanSlate / NeonArcade / SoftFantasy: complete
   token/type/shape/motion systems). Also available via a spec's `"theme": { "bundle": "..." }`.
-- **Build Scene From Generated UI** — same as the `buildScene` bridge action.
+- (Retired: **Build Scene From Generated UI** / **Create Demo Scene** / **Build Showcase Scene** — all
+  folded into **`Tools → Neo UI → Hub`**, which opens/regenerates a showcase's scene one click at a
+  time; still reachable programmatically via the `buildScene` bridge action.)
 
 ---
 

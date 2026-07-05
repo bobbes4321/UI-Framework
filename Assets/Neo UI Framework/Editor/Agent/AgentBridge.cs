@@ -8,7 +8,7 @@ namespace Neo.UI.Editor
 {
     /// <summary>
     /// File-based request bridge for agents while the editor is open (opt-in via
-    /// "Tools → Neo UI → Agent Bridge"). Drop JSON at <c>Temp/neo-request.json</c>; the
+    /// "Tools → Neo UI → Advanced → Agent Bridge"). Drop JSON at <c>Temp/neo-request.json</c>; the
     /// result lands at <c>Temp/neo-result.json</c>. One request at a time, polled cheaply
     /// (one File.Exists per ~100 editor updates).
     ///
@@ -245,7 +245,7 @@ namespace Neo.UI.Editor
                 result["ok"] = true;
                 result["changes"] = new List<object>();
                 result["offSpecWarnings"] = new List<object>();
-                result["note"] = "no baseline — establish one (Tools/Neo UI/Check For Drift, or export) before diffing";
+                result["note"] = "no baseline — establish one (Tools/Neo UI/Advanced/Check For Drift, or export) before diffing";
                 return;
             }
 

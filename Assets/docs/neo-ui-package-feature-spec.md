@@ -252,7 +252,13 @@ Cut: sub-graphs (Enter/Exit nodes), multiplayer per-player flows.
 
 These are requirements, not aspirations — they are the reason this package exists:
 
-- **Instant inspectors.** Plain UIToolkit inspectors; no animated headers/icons; no per-frame sprite art anywhere in the package; no reflection-heavy database scans triggered by selection. Target: selecting any component is imperceptible (<100 ms to fully drawn inspector).
+- **Instant inspectors.** ~~Plain UIToolkit inspectors~~ — **reversed during implementation**: the
+  shipped `Neo.EditorUI` kit (see `editor-ux-analysis.md` §2) is flat **IMGUI** with cached styles,
+  not UIToolkit — IMGUI also works unmodified inside PropertyDrawers and the flow graph window's
+  `IMGUIContainer`, which UIToolkit's per-window model doesn't give for free. No animated headers/
+  icons; no per-frame sprite art anywhere in the package; no reflection-heavy database scans
+  triggered by selection. Target: selecting any component is imperceptible (<100 ms to fully drawn
+  inspector).
 - **Edit-mode preview controls on every animator inspector:** Play / Play Reverse / Stop / jump-to-From / jump-to-To, driven by the editor ticker, SceneView repaint while previewing, clean revert of object state on stop.
 - **Fast category/name pickers** with inline "add new" — no codegen, no roaming-database scanning machinery (a major source of Doozy's selection lag).
 - No dashboard window. No editor-chrome theming engine. No auto-generated styles. **One settings asset, max.**

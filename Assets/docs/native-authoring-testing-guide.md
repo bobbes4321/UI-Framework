@@ -214,7 +214,7 @@ The unifying idea: **dropping an asset is enough** — no manual registration, n
 
 ## 4. Design System editor — author your look (`Tools → Neo UI → Design System`)
 
-The ongoing home for your design system, editing the live `NeoUISettings` + `Theme`. Four tabs, plus a
+The ongoing home for your design system, editing the live `NeoUISettings` + `Theme`. Five tabs, plus a
 **Save Assets** button at the bottom. (Edits mark the assets dirty; Save Assets writes them to disk.)
 
 - **Colors:** pick the active variant; edit each token's color; **Add token** / **New variant**;
@@ -232,6 +232,11 @@ The ongoing home for your design system, editing the live `NeoUISettings` + `The
   Button" preset** creates a ready preset wired to `variant=primary, size=md`; **Create** makes a named one.
   - *Test:* create a "Primary Button" preset, then reference it from an element (`"preset":"Primary Button"`)
     or via the scene overlay's preset flow.
+- **Motion:** pick a default animation preset per animator role (View Show/Hide, Button Hover/Press,
+  Toggle On/Off, Loop, OneShot — `NeoUISettings.animatorDefaults`), the same data the Setup wizard's
+  Motion Defaults step seeds and an animator's `Reset()`/the factory's hover-and-press feel consume.
+  - *Test:* set a Button/Hover default, then create a native button — its hover slot should be seeded
+    from that default.
 
 Expected throughout: changes persist after **Save Assets**, and a created-then-generated widget reflects
 them (the window edits the same structures the factory reads).
@@ -245,9 +250,9 @@ them (the window edits the same structures the factory reads).
 - **Capture makes a snapshot, not a live prefab link.** After Capture, the scene instance stays a plain
   GameObject (it is not converted into a prefab instance of the generated view). Re-capturing picks up
   your latest scene edits; that's the intended v1 flow.
-- **The Composer still exists.** It's intentionally kept until the native flow is confirmed at parity in
-  real use. This testing pass is exactly that confirmation — note anything the Composer let you do that
-  the native flow doesn't.
+- **The Composer is gone.** It was retired 2026-07 once this native flow reached parity (`Editor/Composer/`
+  removed; surviving pieces rehomed — see CLAUDE.md's "Native-Unity authoring" entry for the full list
+  of where each moved). This guide's testing pass was the parity confirmation that green-lit the removal.
 
 ---
 
@@ -295,5 +300,6 @@ them (the window edits the same structures the factory reads).
 | Theme bundle asset | `Assets → Create → Neo UI/Theme Bundle Definition` | `Editor/ThemeBundleDefinition.cs` |
 | Custom inspectors | select the asset | `Editor/Inspectors/AuthoringInspectors.cs`, `ComponentEditors.cs` |
 
-Automated coverage: `NativeAuthoringRoundTripTests`, `NativeCaptureTests`, `Phase4ExtensibilityTests`
-(all green; the one unrelated red in CI is `ComposerProbeTests`, which needs a live graphics editor).
+Automated coverage: `NativeAuthoringRoundTripTests`, `NativeCaptureTests`, `Phase4ExtensibilityTests`,
+`NativePresetWorkflowTests` (all green; see CLAUDE.md's known pre-existing-failures note for the
+current unrelated red in CI — the Composer and its probe tests are gone, not just headless-flaky).

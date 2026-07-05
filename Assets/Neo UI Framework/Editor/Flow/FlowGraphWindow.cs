@@ -83,18 +83,33 @@ namespace Neo.UI.Editor
         private void OnEnable()
         {
             BuildUI();
-            EditorApplication.update += PollRuntimeState;
+            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+            if (Application.isPlaying) EditorApplication.update += PollRuntimeState;
             Undo.undoRedoPerformed += OnUndoRedo;
             UnityEditor.Selection.selectionChanged += OnGlobalSelectionChanged;
         }
 
         private void OnDisable()
         {
+            EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
             EditorApplication.update -= PollRuntimeState;
             Undo.undoRedoPerformed -= OnUndoRedo;
             UnityEditor.Selection.selectionChanged -= OnGlobalSelectionChanged;
             _serializedGraph?.Dispose();
             _serializedGraph = null;
+        }
+
+        // Only pay the per-frame poll cost while actually playing — an editor-tick subscription for
+        // live highlight has no work to do in edit mode.
+        private void OnPlayModeStateChanged(PlayModeStateChange change)
+        {
+            if (change == PlayModeStateChange.EnteredPlayMode)
+                EditorApplication.update += PollRuntimeState;
+            else if (change == PlayModeStateChange.ExitingPlayMode)
+            {
+                EditorApplication.update -= PollRuntimeState;
+                PollRuntimeState(); // clear any live highlight left over from the play session
+            }
         }
 
         private void BuildUI()

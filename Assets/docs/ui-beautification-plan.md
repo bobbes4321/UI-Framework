@@ -1,13 +1,13 @@
 # UI Beautification Plan
 
-> **Status (2026-06-11): P1–P6 implemented.** TextStyles + Inter (P1), Lucide icons + IconMap
+> **Status (2026-07, supersedes the 2026-06-11 note below): P1–P6 implemented, tab panels also
+> shipped (see "Done after the plan").** TextStyles + Inter (P1), Lucide icons + IconMap
 > (P3), button variants/sizes + WidgetStyleTag (P2), Ring/Arc + gradients + elevation + radial
 > progress (P4), CleanSlate/NeonArcade/SoftFantasy bundles + design lint (P5), press-scale /
 > spring knobs / cascade / counter / badge / UISoundRelay (P6). Acceptance renders:
 > `neo-screenshots/beautification/` (demo spec × starter + 3 bundles), regenerate via
 > `-executeMethod Neo.UI.Editor.BeautificationAcceptance.Run`. Still open from P6:
-> segmented progress, rarity frame, real-art support (sprites/9-slice); tab panels remain
-> explicitly deferred.
+> segmented progress, rarity frame, real-art support (sprites/9-slice).
 
 Goal: agent-generated UI that looks professionally designed — web-app-grade polish first, then
 game-grade "juice." Companion to `neo-ui-package-feature-spec.md` and
@@ -150,9 +150,12 @@ plan works.
 
 ## Explicitly deferred / out of scope for now
 
-- `dropdown` widget (TMP_Dropdown template hierarchy — revisit when a real need appears).
 - Backdrop blur / glassmorphism (grab-pass cost on mobile; decide per-project).
-- Particle/FX element kind; localization-aware text styles; reference-image diff loop.
+- Localization-aware text styles; reference-image diff loop.
+
+(No longer deferred: the `dropdown` element kind shipped — `UIWidgetFactory.CreateDropdown` +
+runtime `UIDropdown`, `case "dropdown"` in `UISpecGenerator`. Particle/FX shipped as the shape
+effects + UI particles system — see CLAUDE.md's "Shape effects + UI particles" entry.)
 
 ## Suggested execution order
 

@@ -61,6 +61,12 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
 - The flow graph window keeps ONE cached SerializedObject (foldout state lives there — recreating
   it per frame breaks expansion) and never fully repopulates the view on value edits (that destroys
   the GraphView selection). Renames must propagate to `FlowEdge.toNode` and `FlowGraph.startNode`.
+- The graph's "Create Node/…" context menu is keyed by kind through `Editor/Flow/FlowNodeKinds.cs`
+  (`NeoKeyedRegistry<FlowNodeDescriptor>`, Wave 7 Task 7.2) instead of `FlowGraphWindow`'s old
+  hand-listed `AddCreateEntry<T>()` calls and `node is UINode || node is PortalNode || …` type-check
+  chain — a descriptor owns its menu label, bare-instance factory and default-output-seeding policy,
+  so a project's registered `FlowNode` subtype appears in the create menu via `FlowNodeKinds.Register`
+  without forking this file.
 
 ## Runtime robustness rules (learned from the first playable generated scene)
 
@@ -187,7 +193,9 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   (named component styles like "Primary Button"/"Section Header" — `NeoWidgetPreset` SOs referenced by
   an element's `preset`) is seeded via `Tools → Neo UI → Setup → Create or Repair Widget Presets`
   (`PresetLibraryBootstrap`); the `NeoWidgetPresets` registry is the seam — a project adds one by
-  dropping a `NeoWidgetPreset` asset (lazy discovery, no fork). Curated theme bundles
+  dropping a `NeoWidgetPreset` asset (lazy discovery, no fork). Demoed by the `presets` showcase
+  (`Assets/Showcases/Specs/presets.json`) — the "Widget Presets" catalog of the seeded library plus
+  elements that reference one via `"preset": "..."`. Curated theme bundles
   (CleanSlate/NeonArcade/SoftFantasy — complete token/type/shape/motion systems) apply via
   `Tools → Neo UI → Setup → Apply Theme Bundle` or spec `"theme": { "bundle": "..." }`
   (`Editor/ThemeBundles.cs`) and ALSO seed/recolor the preset library to that personality (so a bundle

@@ -22,11 +22,25 @@
         }
       }
     },
+    "presets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/preset"
+      }
+    },
     "views": {
       "type": "array",
       "items": {
         "$ref": "#/definitions/view"
       }
+    },
+    "settings": {
+      "type": "array",
+      "description": "Settings menu catalogs — see Editor/Agent/Menus (MenuCatalogSpec/NeoMenuItemKinds)."
+    },
+    "cheats": {
+      "type": "array",
+      "description": "Cheat menu catalogs — see Editor/Agent/Menus (MenuCatalogSpec/NeoMenuItemKinds)."
     },
     "popups": {
       "type": "array",
@@ -34,71 +48,667 @@
         "$ref": "#/definitions/popup"
       }
     },
-    "presets": {
-      "type": "array"
+    "breakpoints": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/breakpoint"
+      }
     },
     "flow": {
       "type": "object"
     }
   },
   "definitions": {
-    "view": {
+    "gradient": {
       "type": "object",
-      "required": [
-        "id"
-      ],
+      "description": "Two-stop gradient; from/to are theme tokens or #hex (rides NeoGradient — tokens stay live).",
+      "properties": {
+        "from": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        },
+        "angle": {
+          "type": "number",
+          "description": "degrees, 0 = left-to-right, 90 = bottom-to-top"
+        }
+      }
+    },
+    "effect": {
+      "type": "object",
+      "description": "Open-bag shape effect (ShapeEffectRegistry owns parse/bake/export — a project registers its own id without forking the spec). params is descriptor-owned and opaque to the core spec, but every descriptor shares: duration/loop/pingPong/ease/restingPhase (the timeline); an optional pointer gate trigger (\"hover\"|\"press\"|\"always\") + triggerMode (\"hold\"|\"playOnce\"); an optional live bindings array [{ \"signal\":\"Cat/Name\", \"param\":\"...\", \"min\":0, \"max\":1 }] (param \"enabled\" toggles the whole effect, optional \"invert\"). A Tier-2 \"variant\" additionally takes \"definition\" (a ShapeEffectDefinition id) and optionally animate/from/to (a material float).",
       "properties": {
         "id": {
-          "type": "string",
-          "description": "\"Category/Name\""
+          "enum": [
+            "glowPulse",
+            "sheenSweep",
+            "gradientCycle",
+            "variant",
+            "arcSpinner",
+            "cornerMorph",
+            "borderPulse",
+            "hueShift",
+            "transformJuice"
+          ]
         },
-        "showAnimation": {
-          "type": "string"
+        "params": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "particleModule": {
+      "type": "object",
+      "description": "One particle module (ParticleEffectRegistry owns parse/export). params is module-owned.",
+      "properties": {
+        "id": {
+          "enum": [
+            "gravity",
+            "drag",
+            "colorOverLife",
+            "sizeOverLife"
+          ]
         },
-        "hideAnimation": {
-          "type": "string"
+        "params": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "particles": {
+      "type": "object",
+      "description": "UI particle emitter (NeoParticleEmitter, pooled NeoShape instances on the shared material).",
+      "properties": {
+        "capacity": {
+          "type": "integer"
         },
-        "background": {
-          "type": "string",
-          "description": "theme token"
+        "burstCount": {
+          "type": "integer"
         },
-        "elements": {
+        "rate": {
+          "type": "number",
+          "description": "0 = burst-only; >0 enables continuous emission"
+        },
+        "emitOnEnable": {
+          "type": "boolean"
+        },
+        "particleShape": {
+          "enum": [
+            "RoundedRect",
+            "Circle",
+            "Pill",
+            "Checkmark",
+            "Chevron",
+            "Cross",
+            "Ring",
+            "Arc"
+          ]
+        },
+        "cornerRadiusPercent": {
+          "type": "number"
+        },
+        "sizeRange": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/element"
+            "type": "number"
+          },
+          "description": "[min,max]"
+        },
+        "lifetimeRange": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "[min,max]"
+        },
+        "speedRange": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "[min,max]"
+        },
+        "emitAngle": {
+          "type": "number"
+        },
+        "emitSpread": {
+          "type": "number"
+        },
+        "angularVelocityRange": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "[min,max]"
+        },
+        "preset": {
+          "type": "string",
+          "description": "\"Category/Name\" of a NeoParticleEmitterPreset seeding the emitter before inline fields apply"
+        },
+        "modules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/particleModule"
+          }
+        },
+        "signal": {
+          "type": "object",
+          "description": "adds a NeoParticleBurstOnSignal trigger",
+          "properties": {
+            "category": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "count": {
+              "type": "integer",
+              "description": "burst count on the signal; <=0 = emitter default"
+            }
+          }
+        },
+        "atPointer": {
+          "type": "boolean",
+          "description": "burst at the click point on pointer-down (NeoParticlePointerBurst)"
+        }
+      }
+    },
+    "pointerGlow": {
+      "type": "object",
+      "description": "Pointer-follow glow (NeoPointerReactor) — a soft highlight under the cursor while hovered.",
+      "properties": {
+        "color": {
+          "type": "string",
+          "description": "hex (#RRGGBB / #RRGGBBAA) or theme token \"Category/Name\""
+        },
+        "size": {
+          "type": "number",
+          "description": "follower diameter px"
+        },
+        "softness": {
+          "type": "number",
+          "description": "follower edge softness px"
+        }
+      }
+    },
+    "animations": {
+      "type": "object",
+      "description": "Per-element animation presets (preset names): hover/press/selected/disabled drive a selectable animator (element should be a button/tab/toggle), loop adds a play-on-start animator.",
+      "properties": {
+        "hover": {
+          "type": "string"
+        },
+        "press": {
+          "type": "string"
+        },
+        "selected": {
+          "type": "string"
+        },
+        "disabled": {
+          "type": "string"
+        },
+        "loop": {
+          "type": "string"
+        }
+      }
+    },
+    "layoutSpec": {
+      "type": "object",
+      "description": "Figma-style per-axis constraint+offset placement; WINS over anchor/position/size/flex when present. h defaults to \"left\", v defaults to \"top\" when omitted.",
+      "properties": {
+        "h": {
+          "enum": [
+            "left",
+            "right",
+            "center",
+            "leftRight",
+            "scale"
+          ]
+        },
+        "v": {
+          "enum": [
+            "top",
+            "bottom",
+            "center",
+            "topBottom",
+            "scale"
+          ]
+        },
+        "offset": {
+          "type": "object",
+          "description": "Per-constraint offsets keyed BY CONSTRAINT (left/right/top/bottom = edge distance; h/v = signed center offset; leftRight/topBottom reuse left/right/top/bottom as [start,end] insets; scale reuses them as [startFraction,endFraction]).",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "size": {
+          "type": "object",
+          "description": "Fixed-axis size; ignored on a stretched axis.",
+          "properties": {
+            "w": {
+              "type": "number"
+            },
+            "h": {
+              "type": "number"
+            }
+          }
+        },
+        "sizing": {
+          "type": "object",
+          "description": "Per-child sizing mode in a layout-group parent.",
+          "properties": {
+            "w": {
+              "enum": [
+                "fixed",
+                "hug",
+                "fill"
+              ]
+            },
+            "h": {
+              "enum": [
+                "fixed",
+                "hug",
+                "fill"
+              ]
+            }
           }
         }
       }
     },
-    "popup": {
+    "presetChannel": {
+      "type": "object",
+      "description": "from/to are a direction name, a number, \"x,y,z\", a theme token, \"#hex\", or the keywords \"start\"/\"current\" — meaning depends on the channel (move: direction/vector; color: token/hex/start/current).",
+      "properties": {
+        "from": {},
+        "to": {},
+        "duration": {
+          "type": "number"
+        },
+        "ease": {
+          "type": "string"
+        }
+      }
+    },
+    "preset": {
       "type": "object",
       "required": [
         "name"
       ],
+      "description": "A named, reusable UIAnimation (top-level \"presets\" array) — referenced by a view's showAnimation/hideAnimation or an element's \"animations\"/\"preset\".motion.",
       "properties": {
         "name": {
           "type": "string"
         },
-        "title": {
+        "type": {
+          "enum": [
+            "Show",
+            "Hide",
+            "Loop",
+            "Button",
+            "State",
+            "Custom"
+          ]
+        },
+        "duration": {
+          "type": "number"
+        },
+        "ease": {
           "type": "string"
         },
-        "message": {
+        "move": {
+          "$ref": "#/definitions/presetChannel"
+        },
+        "rotate": {
+          "$ref": "#/definitions/presetChannel"
+        },
+        "scale": {
+          "$ref": "#/definitions/presetChannel"
+        },
+        "fade": {
+          "$ref": "#/definitions/presetChannel"
+        },
+        "color": {
+          "$ref": "#/definitions/presetChannel"
+        }
+      }
+    },
+    "breakpointCondition": {
+      "type": "object",
+      "description": "Exactly one kind is normally set. Built-ins shown; a project can register new kinds via BreakpointConditions without forking the package.",
+      "properties": {
+        "orientation": {
+          "enum": [
+            "portrait",
+            "landscape"
+          ]
+        },
+        "minAspect": {
+          "type": "number",
+          "description": "width/height >="
+        },
+        "maxAspect": {
+          "type": "number",
+          "description": "width/height <="
+        },
+        "minWidth": {
+          "type": "number",
+          "description": "reference-px width >="
+        },
+        "maxWidth": {
+          "type": "number",
+          "description": "reference-px width <="
+        }
+      }
+    },
+    "breakpoint": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "description": "One named, ordered responsive breakpoint; first whose \"when\" matches the viewport wins at runtime. \"name\" is the key an element's \"overrides\" dict uses.",
+      "properties": {
+        "name": {
           "type": "string"
         },
-        "size": {
+        "when": {
+          "$ref": "#/definitions/breakpointCondition"
+        }
+      }
+    },
+    "elementBody": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "align": {
+          "enum": [
+            "left",
+            "center",
+            "right"
+          ]
+        },
+        "anchor": {
+          "enum": [
+            "TopLeft",
+            "Top",
+            "TopRight",
+            "Left",
+            "Center",
+            "Right",
+            "BottomLeft",
+            "Bottom",
+            "BottomRight",
+            "Stretch",
+            "StretchTop",
+            "StretchBottom",
+            "StretchLeft",
+            "StretchRight",
+            "StretchHorizontal",
+            "StretchVertical"
+          ]
+        },
+        "animations": {
+          "$ref": "#/definitions/animations"
+        },
+        "arcStart": {
+          "type": "number"
+        },
+        "arcSweep": {
+          "type": "number"
+        },
+        "background": {
+          "type": "string",
+          "description": "theme token or #hex"
+        },
+        "badge": {
+          "type": "number"
+        },
+        "bind": {
+          "type": "string",
+          "description": "list/grid: UIData source id feeding rows at runtime"
+        },
+        "cascade": {
+          "type": "boolean"
+        },
+        "catalog": {
+          "type": "string",
+          "description": "settings/cheats: id of the menu catalog this element presents"
+        },
+        "cellSize": {
           "type": "array",
           "items": {
             "type": "number"
           }
         },
-        "close": {
-          "type": "boolean",
-          "description": "X dismiss button on the card corner"
+        "columns": {
+          "type": "integer"
         },
-        "elements": {
+        "controls": {
+          "type": "string",
+          "description": "tab: id of the sibling panel it shows/hides"
+        },
+        "effect": {
+          "$ref": "#/definitions/effect"
+        },
+        "fit": {
+          "enum": [
+            "cover"
+          ],
+          "description": "image: \"cover\" crops a centered sub-rect to fill the rect (preserves art aspect); absent = stretch"
+        },
+        "flex": {
+          "type": "number",
+          "description": "stacks: share of leftover space on the parent's main axis (size becomes the minimum)"
+        },
+        "fontSize": {
+          "type": "number"
+        },
+        "gradient": {
+          "$ref": "#/definitions/gradient"
+        },
+        "group": {
+          "type": "string",
+          "description": "tab: shared toggle-group name — standalone tabs sharing it get one-on exclusivity"
+        },
+        "icon": {
+          "type": "string",
+          "description": "Lucide icon name (see the Icons section of spec-reference.md); a project can register more via NeoUISettings.iconOverlay"
+        },
+        "name": {
+          "type": "string",
+          "description": "Lucide icon name (see the Icons section of spec-reference.md); a project can register more via NeoUISettings.iconOverlay"
+        },
+        "id": {
+          "type": "string",
+          "description": "\"Category/Name\""
+        },
+        "label": {
+          "type": "string"
+        },
+        "labelColor": {
+          "type": "string",
+          "description": "theme token (JSON key \"labelColor\"; \"color\" on kind text/icon)"
+        },
+        "color": {
+          "type": "string",
+          "description": "theme token (JSON key \"labelColor\"; \"color\" on kind text/icon)"
+        },
+        "layout": {
+          "$ref": "#/definitions/layoutSpec"
+        },
+        "max": {
+          "type": "number"
+        },
+        "min": {
+          "type": "number"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "dropdown: option labels in order (value = selected index)"
+        },
+        "outlineColor": {
+          "type": "string",
+          "description": "text: SDF outline color, hex or theme token"
+        },
+        "outlineWidth": {
+          "type": "number",
+          "description": "text: SDF outline width 0..1 (default 0.25 when only the color is given)"
+        },
+        "overrides": {
+          "type": "object",
+          "description": "Breakpoint name → delta LayoutSpec; merges OVER the base \"layout\" at runtime.",
+          "additionalProperties": {
+            "$ref": "#/definitions/layoutSpec"
+          }
+        },
+        "padding": {
+          "type": "number"
+        },
+        "padding4": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "containers: per-side [left, top, right, bottom]; wins over uniform \"padding\""
+        },
+        "particles": {
+          "$ref": "#/definitions/particles"
+        },
+        "pointerGlow": {
+          "$ref": "#/definitions/pointerGlow"
+        },
+        "position": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "preset": {
+          "type": "string",
+          "description": "name of a reusable NeoWidgetPreset; resolved at generate as the base, element fields override"
+        },
+        "radius": {
+          "type": "number"
+        },
+        "rotation": {
+          "type": "number",
+          "description": "z rotation in degrees"
+        },
+        "shape": {
+          "enum": [
+            "RoundedRect",
+            "Circle",
+            "Pill",
+            "Checkmark",
+            "Chevron",
+            "Cross",
+            "Ring",
+            "Arc"
+          ]
+        },
+        "signal": {
+          "description": "toggle/slider/dropdown: domain signal (\"Cat/Name\" or { category, name }) the widget publishes its typed value to, IN ADDITION to its standard \"…/Behaviour\" stream"
+        },
+        "size": {
+          "description": "button: size variant name. icon: scalar number (square) or [w,h]. others: [w,h]. All share this one JSON key (polymorphic).",
+          "oneOf": [
+            {
+              "enum": [
+                "lg",
+                "md",
+                "sm"
+              ]
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          ]
+        },
+        "spacing": {
+          "type": "number"
+        },
+        "src": {
+          "type": "string",
+          "description": "image: sprite asset path (\"Assets/...\"); radius rounds the corners"
+        },
+        "step": {
+          "type": "number"
+        },
+        "style": {
+          "enum": [
+            "Card",
+            "Control",
+            "ControlPill",
+            "Panel",
+            "ShadowSoft",
+            "radial"
+          ],
+          "description": "shape style name for most kinds; \"radial\" is progress-only (arc dial)"
+        },
+        "textStyle": {
+          "enum": [
+            "Body",
+            "ButtonLabel",
+            "ButtonLabelLarge",
+            "ButtonLabelSmall",
+            "Caption",
+            "Display",
+            "Heading",
+            "Title"
+          ]
+        },
+        "thickness": {
+          "type": "number"
+        },
+        "value": {
+          "type": "number"
+        },
+        "variant": {
+          "enum": [
+            "danger",
+            "ghost",
+            "light",
+            "primary",
+            "secondary"
+          ]
+        },
+        "item": {
+          "$ref": "#/definitions/element"
+        },
+        "children": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/element"
+          }
+        },
+        "onClick": {
+          "type": "object",
+          "properties": {
+            "signal": {
+              "description": "\"Cat/Name\" or { category, name }"
+            },
+            "showView": {
+              "type": "string"
+            },
+            "hideView": {
+              "type": "string"
+            },
+            "popup": {
+              "type": "string"
+            },
+            "close": {
+              "type": "boolean",
+              "description": "hides the enclosing popup/view"
+            }
           }
         }
       }
@@ -189,609 +799,60 @@
         }
       }
     },
-    "elementBody": {
+    "view": {
       "type": "object",
-      "additionalProperties": true,
+      "required": [
+        "id"
+      ],
       "properties": {
         "id": {
           "type": "string",
           "description": "\"Category/Name\""
         },
-        "label": {
+        "showAnimation": {
           "type": "string"
         },
-        "color": {
-          "type": "string",
-          "description": "theme token or #hex"
-        },
-        "labelColor": {
-          "type": "string",
-          "description": "theme token"
+        "hideAnimation": {
+          "type": "string"
         },
         "background": {
           "type": "string",
-          "description": "theme token or #hex"
+          "description": "theme token"
         },
-        "controls": {
-          "type": "string",
-          "description": "tab: id of the sibling panel it shows/hides"
-        },
-        "src": {
-          "type": "string",
-          "description": "image: sprite asset path (\"Assets/...\"); radius rounds the corners"
-        },
-        "bind": {
-          "type": "string",
-          "description": "list/grid: UIData source id feeding rows at runtime"
-        },
-        "item": {
-          "$ref": "#/definitions/element"
-        },
-        "align": {
-          "enum": [
-            "left",
-            "center",
-            "right"
-          ]
-        },
-        "anchor": {
-          "enum": [
-            "TopLeft",
-            "Top",
-            "TopRight",
-            "Left",
-            "Center",
-            "Right",
-            "BottomLeft",
-            "Bottom",
-            "BottomRight",
-            "Stretch",
-            "StretchTop",
-            "StretchBottom",
-            "StretchLeft",
-            "StretchRight",
-            "StretchHorizontal",
-            "StretchVertical"
-          ]
-        },
-        "shape": {
-          "enum": [
-            "RoundedRect",
-            "Circle",
-            "Pill",
-            "Checkmark",
-            "Chevron",
-            "Cross",
-            "Ring",
-            "Arc"
-          ]
-        },
-        "variant": {
-          "enum": [
-            "danger",
-            "ghost",
-            "light",
-            "primary",
-            "secondary"
-          ]
-        },
-        "style": {
-          "enum": [
-            "Card",
-            "Control",
-            "ControlPill",
-            "Panel",
-            "ShadowSoft"
-          ]
-        },
-        "textStyle": {
-          "enum": [
-            "Body",
-            "ButtonLabel",
-            "ButtonLabelLarge",
-            "ButtonLabelSmall",
-            "Caption",
-            "Display",
-            "Heading",
-            "Title"
-          ]
-        },
-        "preset": {
-          "type": "string",
-          "description": "name of a reusable NeoWidgetPreset; resolved at generate as the base, element fields override"
-        },
-        "icon": {
-          "enum": [
-            "play",
-            "pause",
-            "square",
-            "skip-forward",
-            "skip-back",
-            "fast-forward",
-            "rewind",
-            "settings",
-            "settings-2",
-            "sliders-horizontal",
-            "x",
-            "check",
-            "check-check",
-            "chevron-up",
-            "chevron-down",
-            "chevron-left",
-            "chevron-right",
-            "chevrons-up",
-            "chevrons-down",
-            "chevrons-left",
-            "chevrons-right",
-            "arrow-up",
-            "arrow-down",
-            "arrow-left",
-            "arrow-right",
-            "arrow-up-right",
-            "undo-2",
-            "redo-2",
-            "heart",
-            "heart-crack",
-            "star",
-            "star-half",
-            "sparkles",
-            "coins",
-            "gem",
-            "diamond",
-            "shield",
-            "shield-check",
-            "shield-alert",
-            "sword",
-            "swords",
-            "axe",
-            "crosshair",
-            "target",
-            "wand-sparkles",
-            "shopping-bag",
-            "shopping-cart",
-            "backpack",
-            "package",
-            "gift",
-            "lock",
-            "lock-open",
-            "key",
-            "volume",
-            "volume-1",
-            "volume-2",
-            "volume-x",
-            "volume-off",
-            "music",
-            "mic",
-            "mic-off",
-            "bell",
-            "bell-off",
-            "user",
-            "users",
-            "user-plus",
-            "circle-user",
-            "smile",
-            "frown",
-            "trash",
-            "trash-2",
-            "pencil",
-            "plus",
-            "minus",
-            "circle-plus",
-            "circle-minus",
-            "info",
-            "circle-alert",
-            "triangle-alert",
-            "circle-help",
-            "circle-check",
-            "circle-x",
-            "octagon-alert",
-            "house",
-            "search",
-            "zoom-in",
-            "zoom-out",
-            "refresh-cw",
-            "refresh-ccw",
-            "rotate-cw",
-            "rotate-ccw",
-            "share-2",
-            "external-link",
-            "download",
-            "upload",
-            "save",
-            "trophy",
-            "medal",
-            "crown",
-            "award",
-            "map",
-            "map-pin",
-            "compass",
-            "flag",
-            "clock",
-            "timer",
-            "hourglass",
-            "calendar",
-            "zap",
-            "flame",
-            "droplet",
-            "snowflake",
-            "sun",
-            "moon",
-            "cloud",
-            "eye",
-            "eye-off",
-            "camera",
-            "image",
-            "video",
-            "film",
-            "gamepad-2",
-            "dice-5",
-            "puzzle",
-            "ghost",
-            "skull",
-            "bot",
-            "rocket",
-            "wrench",
-            "hammer",
-            "menu",
-            "ellipsis",
-            "ellipsis-vertical",
-            "list",
-            "layout-grid",
-            "filter",
-            "send",
-            "mail",
-            "message-circle",
-            "message-square",
-            "phone",
-            "wifi",
-            "wifi-off",
-            "battery",
-            "battery-charging",
-            "battery-low",
-            "bluetooth",
-            "power",
-            "log-in",
-            "log-out",
-            "maximize",
-            "minimize",
-            "copy",
-            "clipboard",
-            "link",
-            "paperclip",
-            "pin",
-            "bookmark",
-            "tag",
-            "folder",
-            "file",
-            "file-text",
-            "book",
-            "book-open",
-            "lightbulb",
-            "palette",
-            "brush",
-            "pipette",
-            "move",
-            "hand",
-            "pointer",
-            "thumbs-up",
-            "thumbs-down",
-            "banknote",
-            "wallet",
-            "credit-card",
-            "scale",
-            "leaf",
-            "mountain",
-            "anchor",
-            "plane",
-            "car",
-            "bike",
-            "footprints",
-            "castle"
-          ]
-        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/element"
+          }
+        }
+      }
+    },
+    "popup": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
         "name": {
-          "enum": [
-            "play",
-            "pause",
-            "square",
-            "skip-forward",
-            "skip-back",
-            "fast-forward",
-            "rewind",
-            "settings",
-            "settings-2",
-            "sliders-horizontal",
-            "x",
-            "check",
-            "check-check",
-            "chevron-up",
-            "chevron-down",
-            "chevron-left",
-            "chevron-right",
-            "chevrons-up",
-            "chevrons-down",
-            "chevrons-left",
-            "chevrons-right",
-            "arrow-up",
-            "arrow-down",
-            "arrow-left",
-            "arrow-right",
-            "arrow-up-right",
-            "undo-2",
-            "redo-2",
-            "heart",
-            "heart-crack",
-            "star",
-            "star-half",
-            "sparkles",
-            "coins",
-            "gem",
-            "diamond",
-            "shield",
-            "shield-check",
-            "shield-alert",
-            "sword",
-            "swords",
-            "axe",
-            "crosshair",
-            "target",
-            "wand-sparkles",
-            "shopping-bag",
-            "shopping-cart",
-            "backpack",
-            "package",
-            "gift",
-            "lock",
-            "lock-open",
-            "key",
-            "volume",
-            "volume-1",
-            "volume-2",
-            "volume-x",
-            "volume-off",
-            "music",
-            "mic",
-            "mic-off",
-            "bell",
-            "bell-off",
-            "user",
-            "users",
-            "user-plus",
-            "circle-user",
-            "smile",
-            "frown",
-            "trash",
-            "trash-2",
-            "pencil",
-            "plus",
-            "minus",
-            "circle-plus",
-            "circle-minus",
-            "info",
-            "circle-alert",
-            "triangle-alert",
-            "circle-help",
-            "circle-check",
-            "circle-x",
-            "octagon-alert",
-            "house",
-            "search",
-            "zoom-in",
-            "zoom-out",
-            "refresh-cw",
-            "refresh-ccw",
-            "rotate-cw",
-            "rotate-ccw",
-            "share-2",
-            "external-link",
-            "download",
-            "upload",
-            "save",
-            "trophy",
-            "medal",
-            "crown",
-            "award",
-            "map",
-            "map-pin",
-            "compass",
-            "flag",
-            "clock",
-            "timer",
-            "hourglass",
-            "calendar",
-            "zap",
-            "flame",
-            "droplet",
-            "snowflake",
-            "sun",
-            "moon",
-            "cloud",
-            "eye",
-            "eye-off",
-            "camera",
-            "image",
-            "video",
-            "film",
-            "gamepad-2",
-            "dice-5",
-            "puzzle",
-            "ghost",
-            "skull",
-            "bot",
-            "rocket",
-            "wrench",
-            "hammer",
-            "menu",
-            "ellipsis",
-            "ellipsis-vertical",
-            "list",
-            "layout-grid",
-            "filter",
-            "send",
-            "mail",
-            "message-circle",
-            "message-square",
-            "phone",
-            "wifi",
-            "wifi-off",
-            "battery",
-            "battery-charging",
-            "battery-low",
-            "bluetooth",
-            "power",
-            "log-in",
-            "log-out",
-            "maximize",
-            "minimize",
-            "copy",
-            "clipboard",
-            "link",
-            "paperclip",
-            "pin",
-            "bookmark",
-            "tag",
-            "folder",
-            "file",
-            "file-text",
-            "book",
-            "book-open",
-            "lightbulb",
-            "palette",
-            "brush",
-            "pipette",
-            "move",
-            "hand",
-            "pointer",
-            "thumbs-up",
-            "thumbs-down",
-            "banknote",
-            "wallet",
-            "credit-card",
-            "scale",
-            "leaf",
-            "mountain",
-            "anchor",
-            "plane",
-            "car",
-            "bike",
-            "footprints",
-            "castle"
-          ]
+          "type": "string"
         },
-        "radius": {
-          "type": "number"
+        "title": {
+          "type": "string"
         },
-        "padding": {
-          "type": "number"
-        },
-        "spacing": {
-          "type": "number"
-        },
-        "min": {
-          "type": "number"
-        },
-        "max": {
-          "type": "number"
-        },
-        "value": {
-          "type": "number"
-        },
-        "step": {
-          "type": "number"
-        },
-        "fontSize": {
-          "type": "number"
-        },
-        "badge": {
-          "type": "number"
-        },
-        "thickness": {
-          "type": "number"
-        },
-        "arcStart": {
-          "type": "number"
-        },
-        "arcSweep": {
-          "type": "number"
-        },
-        "columns": {
-          "type": "integer"
+        "message": {
+          "type": "string"
         },
         "size": {
-          "description": "button size variant (sm/md/lg) or [w,h]"
-        },
-        "position": {
           "type": "array",
           "items": {
             "type": "number"
           }
         },
-        "cellSize": {
-          "type": "array",
-          "items": {
-            "type": "number"
-          }
+        "close": {
+          "type": "boolean",
+          "description": "X dismiss button on the card corner"
         },
-        "cascade": {
-          "type": "boolean"
-        },
-        "gradient": {
-          "type": "object",
-          "properties": {
-            "from": {
-              "type": "string"
-            },
-            "to": {
-              "type": "string"
-            },
-            "angle": {
-              "type": "number"
-            }
-          }
-        },
-        "onClick": {
-          "type": "object",
-          "properties": {
-            "signal": {
-              "description": "\"Cat/Name\" or { category, name }"
-            },
-            "showView": {
-              "type": "string"
-            },
-            "hideView": {
-              "type": "string"
-            },
-            "popup": {
-              "type": "string"
-            },
-            "close": {
-              "type": "boolean",
-              "description": "hides the enclosing popup/view"
-            }
-          }
-        },
-        "animations": {
-          "type": "object",
-          "description": "per-element animation presets (preset names): hover/press/selected/disabled drive a selectable animator, loop adds a play-on-start animator",
-          "properties": {
-            "hover": {
-              "type": "string"
-            },
-            "press": {
-              "type": "string"
-            },
-            "selected": {
-              "type": "string"
-            },
-            "disabled": {
-              "type": "string"
-            },
-            "loop": {
-              "type": "string"
-            }
-          }
-        },
-        "children": {
+        "elements": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/element"

@@ -328,7 +328,6 @@ namespace Neo.UI.Editor
 
         private void DrawShowcaseRow(Showcase s)
         {
-            bool selected = string.Equals(s.id, _selectedId, StringComparison.Ordinal);
             using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
             {
                 using (new EditorGUILayout.HorizontalScope())
@@ -365,7 +364,6 @@ namespace Neo.UI.Editor
                     if (GUILayout.Button("Regenerate", GUILayout.Height(22f))) Regenerate(s);
                     if (GUILayout.Button("Check Drift", GUILayout.Height(22f))) CheckDrift(s);
                 }
-                _ = selected;
             }
         }
 

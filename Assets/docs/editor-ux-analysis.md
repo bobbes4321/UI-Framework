@@ -19,7 +19,7 @@ Its slowness came from the delivery mechanism, not the patterns: UIToolkit Fluid
 heartbeat ticking `SetDirty`/`RepaintAll` per active reaction, pooled UXML/USS template cloning, and
 generated style/color/font databases loaded from ScriptableObjects.
 
-**Decision: keep the patterns, drop the machinery.** The AE suite is flat IMGUI with cached styles:
+**Decision: keep the patterns, drop the machinery.** The Neo suite is flat IMGUI with cached styles:
 no animation, no heartbeat, no asset/template loading, no codegen, no reflection scans on selection.
 IMGUI also means the same components work in PropertyDrawers (so they apply inside *any* list,
 including the flow node inspector) and in the graph window's IMGUIContainer.
@@ -99,10 +99,14 @@ IdDatabases), flow (FlowController with runtime controls, FlowGraph asset).
 
 ## 4. Future opportunities (not done)
 
-- **Theme editor**: variant/token matrix grid with color swatches per variant; rename-token
-  refactoring across ThemeColorRef users.
-- **Animation preset picker**: dropdown of `AnimationPresetDatabase` entries on UIAnimation fields
-  ("apply preset…"), reusing `NeoSearchablePopup`.
+- ~~**Theme editor**: variant/token matrix grid with color swatches per variant; rename-token
+  refactoring across ThemeColorRef users.~~ Done: `Editor/Inspectors/ComponentEditors.cs`'s
+  sectioned `ThemeEditor` (Colors/Buttons/Shapes/Presets/Motion tabs, see `CLAUDE.md`'s Design
+  System editor entry). Rename-token refactoring across `ThemeColorRef` users is still not done.
+- ~~**Animation preset picker**: dropdown of `AnimationPresetDatabase` entries on UIAnimation fields
+  ("apply preset…"), reusing `NeoSearchablePopup`.~~ Done: `AnimationPreviewEditor.cs` +
+  `AnimatorEditorGUI.PresetPicker` — a per-slot searchable dropdown sourced from
+  `AnimationPresetRegistry.FullNamesForRole`/`GetByFullName`.
 - **UIAnimation channel drawer**: per-channel enable pills (M/R/S/F) on one row, Doozy-style.
 - **Popup name dropdown** for `UIPopup.popupName` / `ShowPopupOnClick.popupName` backed by
   `PopupDatabase` (popup database is name→prefab, slightly different shape than IdDatabase).
