@@ -90,6 +90,12 @@ namespace Neo.UI
         // re-implementing color tweening.
         public ColorAnimation color = new ColorAnimation { enabled = false };
 
+        // Editor bookkeeping: the "Category/Name" of the library preset this animation was last
+        // seeded from — stamped by UIAnimationPreset.CopyTo, cleared when the slot is reset, empty
+        // for hand-built animations. Lets the inspector's preset picker show and highlight what's
+        // applied; never read at runtime.
+        [HideInInspector] public string sourcePreset;
+
         [NonSerialized] private RectTransform _rectTransform;
         [NonSerialized] private CanvasGroup _canvasGroup;
         [NonSerialized] private Vector3Tween _moveTween;

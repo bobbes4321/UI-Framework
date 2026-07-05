@@ -119,6 +119,11 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!224 &22925944 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 841216428303790930, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+  m_PrefabInstance: {fileID: 938609391}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &47503804
 GameObject:
   m_ObjectHideFlags: 0
@@ -198,6 +203,1692 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &462841606
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 462841607}
+  - component: {fileID: 462841619}
+  - component: {fileID: 462841618}
+  - component: {fileID: 462841617}
+  - component: {fileID: 462841616}
+  - component: {fileID: 462841615}
+  - component: {fileID: 462841614}
+  - component: {fileID: 462841613}
+  - component: {fileID: 462841612}
+  - component: {fileID: 462841611}
+  - component: {fileID: 462841610}
+  - component: {fileID: 462841609}
+  - component: {fileID: 462841608}
+  m_Layer: 0
+  m_Name: Button (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &462841607
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462841606}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1439098814}
+  m_Father: {fileID: 22925944}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 280, y: -104}
+  m_SizeDelta: {x: 0, y: 56}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!225 &462841608
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462841606}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &462841609
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462841606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14a70ba4eadcb2e47a72bb1cb91ec403, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.WidgetPresetTag
+  presetName: CaCButton
+--- !u!114 &462841610
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462841606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: 56
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: 0
+  m_LayoutPriority: 1
+--- !u!114 &462841611
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462841606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ContentSizeFitter
+  m_HorizontalFit: 2
+  m_VerticalFit: 0
+--- !u!114 &462841612
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462841606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.HorizontalLayoutGroup
+  m_Padding:
+    m_Left: 20
+    m_Right: 20
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 4
+  m_Spacing: 0
+  m_ChildForceExpandWidth: 0
+  m_ChildForceExpandHeight: 0
+  m_ChildControlWidth: 1
+  m_ChildControlHeight: 1
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
+--- !u!114 &462841613
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462841606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aced857fadac33540ac74646c41983c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.UISelectableUIAnimator
+  controller: {fileID: 0}
+  normalAnimation:
+    purpose: 5
+    move:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromDirection: 13
+      toDirection: 13
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 0, y: 0, z: 0}
+      toCustomValue: {x: 0, y: 0, z: 0}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    rotate:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 0, y: 0, z: 0}
+      toCustomValue: {x: 0, y: 0, z: 0}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    scale:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 1, y: 1, z: 1}
+      toCustomValue: {x: 1, y: 1, z: 1}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    fade:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 2
+      toReference: 2
+      fromCustomValue: 0
+      toCustomValue: 1
+      fromOffset: 0
+      toOffset: 0
+    color:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 5
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.2
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      from:
+        reference: 1
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+      to:
+        reference: 2
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+    sourcePreset: 
+  highlightedAnimation:
+    purpose: 4
+    move:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromDirection: 13
+      toDirection: 13
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 0, y: 0, z: 0}
+      toCustomValue: {x: 0, y: 0, z: 0}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    rotate:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 0, y: 0, z: 0}
+      toCustomValue: {x: 0, y: 0, z: 0}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    scale:
+      enabled: 1
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 5
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.12
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 0
+      toReference: 2
+      fromCustomValue: {x: 1, y: 1, z: 1}
+      toCustomValue: {x: 1.05, y: 1.05, z: 1}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    fade:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 2
+      toReference: 2
+      fromCustomValue: 0
+      toCustomValue: 1
+      fromOffset: 0
+      toOffset: 0
+    color:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 5
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.2
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      from:
+        reference: 1
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+      to:
+        reference: 2
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+    sourcePreset: 
+  pressedAnimation:
+    purpose: 4
+    move:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromDirection: 13
+      toDirection: 13
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 0, y: 0, z: 0}
+      toCustomValue: {x: 0, y: 0, z: 0}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    rotate:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 0, y: 0, z: 0}
+      toCustomValue: {x: 0, y: 0, z: 0}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    scale:
+      enabled: 1
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 5
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.08
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 0
+      toReference: 2
+      fromCustomValue: {x: 1, y: 1, z: 1}
+      toCustomValue: {x: 0.96, y: 0.96, z: 1}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    fade:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 2
+      toReference: 2
+      fromCustomValue: 0
+      toCustomValue: 1
+      fromOffset: 0
+      toOffset: 0
+    color:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 5
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.2
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      from:
+        reference: 1
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+      to:
+        reference: 2
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+    sourcePreset: 
+  selectedAnimation:
+    purpose: 4
+    move:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromDirection: 13
+      toDirection: 13
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 0, y: 0, z: 0}
+      toCustomValue: {x: 0, y: 0, z: 0}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    rotate:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 0, y: 0, z: 0}
+      toCustomValue: {x: 0, y: 0, z: 0}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    scale:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 1, y: 1, z: 1}
+      toCustomValue: {x: 1, y: 1, z: 1}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    fade:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 2
+      toReference: 2
+      fromCustomValue: 0
+      toCustomValue: 1
+      fromOffset: 0
+      toOffset: 0
+    color:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 5
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.2
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      from:
+        reference: 1
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+      to:
+        reference: 2
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+    sourcePreset: 
+  disabledAnimation:
+    purpose: 4
+    move:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromDirection: 13
+      toDirection: 13
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 0, y: 0, z: 0}
+      toCustomValue: {x: 0, y: 0, z: 0}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    rotate:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 0, y: 0, z: 0}
+      toCustomValue: {x: 0, y: 0, z: 0}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    scale:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 1, y: 1, z: 1}
+      toCustomValue: {x: 1, y: 1, z: 1}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    fade:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 2
+      toReference: 2
+      fromCustomValue: 0
+      toCustomValue: 1
+      fromOffset: 0
+      toOffset: 0
+    color:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 5
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.2
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      from:
+        reference: 1
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+      to:
+        reference: 2
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+    sourcePreset: 
+--- !u!114 &462841614
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462841606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e500f22d8cdd2c40a918feea9d3e296, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.UISelectableColorAnimator
+  controller: {fileID: 0}
+  colors:
+    normal:
+      useToken: 1
+      token: Primary
+      color: {r: 1, g: 1, b: 1, a: 1}
+    highlighted:
+      useToken: 1
+      token: PrimaryHover
+      color: {r: 1, g: 1, b: 1, a: 1}
+    pressed:
+      useToken: 1
+      token: PrimaryPressed
+      color: {r: 1, g: 1, b: 1, a: 1}
+    selected:
+      useToken: 1
+      token: PrimaryHover
+      color: {r: 1, g: 1, b: 1, a: 1}
+    disabled:
+      useToken: 0
+      token: 
+      color: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
+  transitionSettings:
+    playMode: 0
+    easeMode: 0
+    ease: 5
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    duration: 0.15
+    useRandomDuration: 0
+    randomDuration: {x: 0.2, y: 0.5}
+    startDelay: 0
+    useRandomStartDelay: 0
+    randomStartDelay: {x: 0, y: 0.2}
+    loops: 0
+    useRandomLoops: 0
+    randomLoops: {x: 0, y: 2}
+    loopDelay: 0
+    useRandomLoopDelay: 0
+    randomLoopDelay: {x: 0, y: 0.2}
+    strength: 1
+    vibration: 8
+    elasticity: 1
+    fadeOutShake: 0
+--- !u!114 &462841615
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462841606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49b3f8beec950744683ad9b59384686a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.WidgetStyleTag
+  variant: primary
+  size: md
+--- !u!114 &462841616
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462841606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3810648612612ae43806caf3c0c412ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.UIButton
+  m_Navigation:
+    m_Mode: 3
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
+  m_Transition: 0
+  m_Colors:
+    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0.1
+  m_SpriteState:
+    m_HighlightedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 0}
+    m_DisabledSprite: {fileID: 0}
+  m_AnimationTriggers:
+    m_NormalTrigger: Normal
+    m_HighlightedTrigger: Highlighted
+    m_PressedTrigger: Pressed
+    m_SelectedTrigger: Selected
+    m_DisabledTrigger: Disabled
+  m_Interactable: 1
+  m_TargetGraphic: {fileID: 462841618}
+  id:
+    category: Player
+    name: GiveGold
+  behaviours:
+  - trigger: 4
+    Event:
+      m_PersistentCalls:
+        m_Calls: []
+    sendSignal: 0
+    signalStream:
+      category: None
+      name: None
+    cooldown: 0
+--- !u!114 &462841617
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462841606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 803bfc8bf97d4121b50a3763962bdcef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.ThemeShapeStyleTarget
+  style: Control
+  themeOverride: {fileID: 0}
+  applyFillColor: 0
+--- !u!114 &462841618
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462841606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ced6d6f35eed4b009ea309bf32174e4b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.NeoShape
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.23137255, g: 0.50980395, b: 0.9647059, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  shapeType: 0
+  radiusUnit: 0
+  uniformRadius: 1
+  radius: 10
+  radiusPerCorner: {x: 12, y: 12, z: 12, w: 12}
+  fillMode: 0
+  fillColorB: {r: 1, g: 1, b: 1, a: 1}
+  gradientAngle: 90
+  borderWidth: 1
+  borderColor: {r: 0.20392157, g: 0.22745098, b: 0.26666668, a: 1}
+  softness: 0
+  thickness: 8
+  arcStartAngle: 0
+  arcSweepAngle: 270
+  fillSprite: {fileID: 0}
+  textureFit: 0
+--- !u!222 &462841619
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462841606}
+  m_CullTransparentMesh: 1
 --- !u!1 &695232756
 GameObject:
   m_ObjectHideFlags: 0
@@ -406,9 +2097,81 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 798603074766162912, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 798603074766162912, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 910806025137991731, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
       propertyPath: useCustomStartPosition
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1556828365281611676, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1556828365281611676, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1556828365281611676, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1556828365281611676, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1556828365281611676, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1556828365281611676, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1556828365281611676, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1556828365281611676, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1755871976821242918, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1755871976821242918, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1755871976821242918, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1755871976821242918, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1755871976821242918, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1755871976821242918, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1755871976821242918, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1755871976821242918, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2038293613536938182, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
       propertyPath: m_AnchorMax.x
@@ -441,6 +2204,10 @@ PrefabInstance:
     - target: {fileID: 2038293613536938182, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2175281039804377825, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
       objectReference: {fileID: 0}
     - target: {fileID: 3176661729869638089, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
       propertyPath: m_Name
@@ -514,9 +2281,17 @@ PrefabInstance:
       propertyPath: m_TextStyleHashCode
       value: -1183493901
       objectReference: {fileID: 0}
-    - target: {fileID: 5344303054953957457, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+    - target: {fileID: 5281997469896074933, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
       propertyPath: m_fontColor32.rgba
       value: 4294637557
+      objectReference: {fileID: 0}
+    - target: {fileID: 5281997469896074933, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 5344303054953957457, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4294967295
       objectReference: {fileID: 0}
     - target: {fileID: 5344303054953957457, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
       propertyPath: m_TextStyleHashCode
@@ -554,6 +2329,14 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6113307295293956661, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4294637557
+      objectReference: {fileID: 0}
+    - target: {fileID: 6113307295293956661, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
     - target: {fileID: 7059132704506915213, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
       propertyPath: m_fontColor32.rgba
       value: 4294637557
@@ -584,6 +2367,42 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7323506182571943136, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
       propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7323506182571943136, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7323506182571943136, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7792830167170248895, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7792830167170248895, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7792830167170248895, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7792830167170248895, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7792830167170248895, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7792830167170248895, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7792830167170248895, guid: 489366b6250fb6d4481d9f69b1fd6e00, type: 3}
+      propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -682,6 +2501,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 123632829255967401, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
     - target: {fileID: 754182882441714530, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
       propertyPath: m_fontColor32.rgba
       value: 4292267206
@@ -712,6 +2535,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 841216428303790930, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
       propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 841216428303790930, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 841216428303790930, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1701630540400418245, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
@@ -754,6 +2585,74 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2242927333539980195, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2267001831434813493, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2267001831434813493, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2267001831434813493, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2267001831434813493, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2267001831434813493, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2267001831434813493, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2267001831434813493, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2275661437118167402, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 2345863018608357761, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2345863018608357761, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2345863018608357761, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2345863018608357761, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2345863018608357761, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2345863018608357761, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2345863018608357761, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2747256223652467997, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
     - target: {fileID: 3073566036667478727, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
@@ -783,6 +2682,34 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3073566036667478727, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3143819470933147113, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3143819470933147113, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3143819470933147113, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3143819470933147113, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3143819470933147113, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3143819470933147113, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3143819470933147113, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
@@ -798,6 +2725,46 @@ PrefabInstance:
       propertyPath: m_TextStyleHashCode
       value: -1183493901
       objectReference: {fileID: 0}
+    - target: {fileID: 3705110334901148502, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4292267206
+      objectReference: {fileID: 0}
+    - target: {fileID: 3705110334901148502, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 3957473349164792284, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3957473349164792284, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3957473349164792284, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3957473349164792284, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3957473349164792284, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3957473349164792284, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3957473349164792284, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3957473349164792284, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3983686507835233090, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
@@ -827,6 +2794,38 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3983686507835233090, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4082264572824880511, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4082264572824880511, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4082264572824880511, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4082264572824880511, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4082264572824880511, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4082264572824880511, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4082264572824880511, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4082264572824880511, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
@@ -885,6 +2884,22 @@ PrefabInstance:
     - target: {fileID: 4773408349949926097, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4773408349949926097, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4773408349949926097, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4888410558559355394, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4292267206
+      objectReference: {fileID: 0}
+    - target: {fileID: 4888410558559355394, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
       objectReference: {fileID: 0}
     - target: {fileID: 5175288882205755163, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
       propertyPath: m_Name
@@ -936,7 +2951,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5506042005669804035, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5506042005669804035, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
       propertyPath: m_AnchorMin.x
@@ -944,7 +2959,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5506042005669804035, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5506042005669804035, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
       propertyPath: m_SizeDelta.x
@@ -952,15 +2967,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5506042005669804035, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 56
       objectReference: {fileID: 0}
     - target: {fileID: 5506042005669804035, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 280
       objectReference: {fileID: 0}
     - target: {fileID: 5506042005669804035, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -40
       objectReference: {fileID: 0}
     - target: {fileID: 5729839638151654872, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
       propertyPath: m_fontColor32.rgba
@@ -969,6 +2984,34 @@ PrefabInstance:
     - target: {fileID: 5729839638151654872, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
       propertyPath: m_TextStyleHashCode
       value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 5929266204977537361, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5929266204977537361, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5929266204977537361, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5929266204977537361, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5929266204977537361, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5929266204977537361, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5929266204977537361, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6022804503463117009, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
       propertyPath: m_AnchorMax.x
@@ -1006,6 +3049,14 @@ PrefabInstance:
       propertyPath: m_TextStyleHashCode
       value: -1183493901
       objectReference: {fileID: 0}
+    - target: {fileID: 6413592009735985999, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4294637557
+      objectReference: {fileID: 0}
+    - target: {fileID: 6413592009735985999, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
     - target: {fileID: 6837560274156964038, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
       propertyPath: useCustomStartPosition
       value: 1
@@ -1025,6 +3076,38 @@ PrefabInstance:
     - target: {fileID: 7090247169528851792, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
       propertyPath: m_TextStyleHashCode
       value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 7948029963814543276, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8051957080979802952, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8051957080979802952, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8051957080979802952, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8051957080979802952, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8051957080979802952, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8051957080979802952, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8051957080979802952, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8105275488733561012, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
       propertyPath: m_TextStyleHashCode
@@ -1146,9 +3229,64 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8499895739898773617, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8499895739898773617, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8499895739898773617, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8499895739898773617, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8499895739898773617, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8499895739898773617, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8499895739898773617, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8557721888852018317, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4292267206
+      objectReference: {fileID: 0}
+    - target: {fileID: 8557721888852018317, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 8584371265456822817, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9204012891820255547, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4294345275
+      objectReference: {fileID: 0}
+    - target: {fileID: 9204012891820255547, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 5128219406617108692, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 841216428303790930, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      insertIndex: 0
+      addedObject: {fileID: 1077874335}
+    - targetCorrespondingSourceObject: {fileID: 841216428303790930, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
+      insertIndex: 1
+      addedObject: {fileID: 462841607}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
 --- !u!224 &938609392 stripped
@@ -1156,6 +3294,1692 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 8398382268593455359, guid: 196f701967583f747bd2ae89c190e7fc, type: 3}
   m_PrefabInstance: {fileID: 938609391}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1077874334
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1077874335}
+  - component: {fileID: 1077874347}
+  - component: {fileID: 1077874346}
+  - component: {fileID: 1077874345}
+  - component: {fileID: 1077874344}
+  - component: {fileID: 1077874343}
+  - component: {fileID: 1077874342}
+  - component: {fileID: 1077874341}
+  - component: {fileID: 1077874340}
+  - component: {fileID: 1077874339}
+  - component: {fileID: 1077874338}
+  - component: {fileID: 1077874337}
+  - component: {fileID: 1077874336}
+  m_Layer: 0
+  m_Name: Button
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1077874335
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1077874334}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1556247541}
+  m_Father: {fileID: 22925944}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 280, y: -40}
+  m_SizeDelta: {x: 0, y: 56}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!225 &1077874336
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1077874334}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &1077874337
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1077874334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14a70ba4eadcb2e47a72bb1cb91ec403, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.WidgetPresetTag
+  presetName: CaCButton
+--- !u!114 &1077874338
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1077874334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: 56
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: 0
+  m_LayoutPriority: 1
+--- !u!114 &1077874339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1077874334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ContentSizeFitter
+  m_HorizontalFit: 2
+  m_VerticalFit: 0
+--- !u!114 &1077874340
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1077874334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.HorizontalLayoutGroup
+  m_Padding:
+    m_Left: 20
+    m_Right: 20
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 4
+  m_Spacing: 0
+  m_ChildForceExpandWidth: 0
+  m_ChildForceExpandHeight: 0
+  m_ChildControlWidth: 1
+  m_ChildControlHeight: 1
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
+--- !u!114 &1077874341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1077874334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aced857fadac33540ac74646c41983c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.UISelectableUIAnimator
+  controller: {fileID: 0}
+  normalAnimation:
+    purpose: 4
+    move:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromDirection: 13
+      toDirection: 13
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 0, y: 0, z: 0}
+      toCustomValue: {x: 0, y: 0, z: 0}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    rotate:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 0, y: 0, z: 0}
+      toCustomValue: {x: 0, y: 0, z: 0}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    scale:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 1, y: 1, z: 1}
+      toCustomValue: {x: 1, y: 1, z: 1}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    fade:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 2
+      toReference: 2
+      fromCustomValue: 0
+      toCustomValue: 1
+      fromOffset: 0
+      toOffset: 0
+    color:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 5
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.2
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      from:
+        reference: 1
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+      to:
+        reference: 2
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+    sourcePreset: 
+  highlightedAnimation:
+    purpose: 4
+    move:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromDirection: 13
+      toDirection: 13
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 0, y: 0, z: 0}
+      toCustomValue: {x: 0, y: 0, z: 0}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    rotate:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 0, y: 0, z: 0}
+      toCustomValue: {x: 0, y: 0, z: 0}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    scale:
+      enabled: 1
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 5
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.12
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 0
+      toReference: 2
+      fromCustomValue: {x: 1, y: 1, z: 1}
+      toCustomValue: {x: 1.05, y: 1.05, z: 1}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    fade:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 2
+      toReference: 2
+      fromCustomValue: 0
+      toCustomValue: 1
+      fromOffset: 0
+      toOffset: 0
+    color:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 5
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.2
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      from:
+        reference: 1
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+      to:
+        reference: 2
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+    sourcePreset: 
+  pressedAnimation:
+    purpose: 4
+    move:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromDirection: 13
+      toDirection: 13
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 0, y: 0, z: 0}
+      toCustomValue: {x: 0, y: 0, z: 0}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    rotate:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 0, y: 0, z: 0}
+      toCustomValue: {x: 0, y: 0, z: 0}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    scale:
+      enabled: 1
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 5
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.08
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 0
+      toReference: 2
+      fromCustomValue: {x: 1, y: 1, z: 1}
+      toCustomValue: {x: 0.96, y: 0.96, z: 1}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    fade:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 2
+      toReference: 2
+      fromCustomValue: 0
+      toCustomValue: 1
+      fromOffset: 0
+      toOffset: 0
+    color:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 5
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.2
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      from:
+        reference: 1
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+      to:
+        reference: 2
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+    sourcePreset: 
+  selectedAnimation:
+    purpose: 4
+    move:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromDirection: 13
+      toDirection: 13
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 0, y: 0, z: 0}
+      toCustomValue: {x: 0, y: 0, z: 0}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    rotate:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 0, y: 0, z: 0}
+      toCustomValue: {x: 0, y: 0, z: 0}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    scale:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 1, y: 1, z: 1}
+      toCustomValue: {x: 1, y: 1, z: 1}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    fade:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 2
+      toReference: 2
+      fromCustomValue: 0
+      toCustomValue: 1
+      fromOffset: 0
+      toOffset: 0
+    color:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 5
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.2
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      from:
+        reference: 1
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+      to:
+        reference: 2
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+    sourcePreset: 
+  disabledAnimation:
+    purpose: 4
+    move:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromDirection: 13
+      toDirection: 13
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 0, y: 0, z: 0}
+      toCustomValue: {x: 0, y: 0, z: 0}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    rotate:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 0, y: 0, z: 0}
+      toCustomValue: {x: 0, y: 0, z: 0}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    scale:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 0
+      toReference: 0
+      fromCustomValue: {x: 1, y: 1, z: 1}
+      toCustomValue: {x: 1, y: 1, z: 1}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    fade:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 8
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.3
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 2
+      toReference: 2
+      fromCustomValue: 0
+      toCustomValue: 1
+      fromOffset: 0
+      toOffset: 0
+    color:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 5
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.2
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      from:
+        reference: 1
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+      to:
+        reference: 2
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+    sourcePreset: 
+--- !u!114 &1077874342
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1077874334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e500f22d8cdd2c40a918feea9d3e296, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.UISelectableColorAnimator
+  controller: {fileID: 0}
+  colors:
+    normal:
+      useToken: 1
+      token: Primary
+      color: {r: 1, g: 1, b: 1, a: 1}
+    highlighted:
+      useToken: 1
+      token: PrimaryHover
+      color: {r: 1, g: 1, b: 1, a: 1}
+    pressed:
+      useToken: 1
+      token: PrimaryPressed
+      color: {r: 1, g: 1, b: 1, a: 1}
+    selected:
+      useToken: 1
+      token: PrimaryHover
+      color: {r: 1, g: 1, b: 1, a: 1}
+    disabled:
+      useToken: 0
+      token: 
+      color: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
+  transitionSettings:
+    playMode: 0
+    easeMode: 0
+    ease: 5
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    duration: 0.15
+    useRandomDuration: 0
+    randomDuration: {x: 0.2, y: 0.5}
+    startDelay: 0
+    useRandomStartDelay: 0
+    randomStartDelay: {x: 0, y: 0.2}
+    loops: 0
+    useRandomLoops: 0
+    randomLoops: {x: 0, y: 2}
+    loopDelay: 0
+    useRandomLoopDelay: 0
+    randomLoopDelay: {x: 0, y: 0.2}
+    strength: 1
+    vibration: 8
+    elasticity: 1
+    fadeOutShake: 0
+--- !u!114 &1077874343
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1077874334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49b3f8beec950744683ad9b59384686a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.WidgetStyleTag
+  variant: primary
+  size: md
+--- !u!114 &1077874344
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1077874334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3810648612612ae43806caf3c0c412ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.UIButton
+  m_Navigation:
+    m_Mode: 3
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
+  m_Transition: 0
+  m_Colors:
+    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0.1
+  m_SpriteState:
+    m_HighlightedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 0}
+    m_DisabledSprite: {fileID: 0}
+  m_AnimationTriggers:
+    m_NormalTrigger: Normal
+    m_HighlightedTrigger: Highlighted
+    m_PressedTrigger: Pressed
+    m_SelectedTrigger: Selected
+    m_DisabledTrigger: Disabled
+  m_Interactable: 1
+  m_TargetGraphic: {fileID: 1077874346}
+  id:
+    category: Player
+    name: GiveGold
+  behaviours:
+  - trigger: 4
+    Event:
+      m_PersistentCalls:
+        m_Calls: []
+    sendSignal: 0
+    signalStream:
+      category: None
+      name: None
+    cooldown: 0
+--- !u!114 &1077874345
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1077874334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 803bfc8bf97d4121b50a3763962bdcef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.ThemeShapeStyleTarget
+  style: Control
+  themeOverride: {fileID: 0}
+  applyFillColor: 0
+--- !u!114 &1077874346
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1077874334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ced6d6f35eed4b009ea309bf32174e4b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.NeoShape
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 0.7885943, b: 0.28773582, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  shapeType: 0
+  radiusUnit: 0
+  uniformRadius: 1
+  radius: 10
+  radiusPerCorner: {x: 12, y: 12, z: 12, w: 12}
+  fillMode: 0
+  fillColorB: {r: 1, g: 1, b: 1, a: 1}
+  gradientAngle: 90
+  borderWidth: 1
+  borderColor: {r: 0.20392157, g: 0.22745098, b: 0.26666668, a: 1}
+  softness: 0
+  thickness: 8
+  arcStartAngle: 0
+  arcSweepAngle: 270
+  fillSprite: {fileID: 0}
+  textureFit: 0
+--- !u!222 &1077874347
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1077874334}
+  m_CullTransparentMesh: 1
 --- !u!1 &1332174281
 GameObject:
   m_ObjectHideFlags: 0
@@ -1261,6 +5085,176 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &1439098813
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1439098814}
+  - component: {fileID: 1439098818}
+  - component: {fileID: 1439098817}
+  - component: {fileID: 1439098816}
+  - component: {fileID: 1439098815}
+  m_Layer: 0
+  m_Name: Label
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1439098814
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1439098813}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 462841607}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1439098815
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1439098813}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64f2314303b057d4488f46f606e1fb36, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.ThemeTextStyleTarget
+  style: ButtonLabel
+  themeOverride: {fileID: 0}
+  applyColor: 0
+--- !u!114 &1439098816
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1439098813}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 694856ef5d85d304f86b08412f8c495e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.ThemeColorTarget
+  token: TextOnPrimary
+  outlineToken: 
+  themeOverride: {fileID: 0}
+  tint: {r: 1, g: 1, b: 1, a: 1}
+--- !u!114 &1439098817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1439098813}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_text: Give 100 Gold
+  m_isRightToLeft: 0
+  m_fontAsset: {fileID: 11400000, guid: b9ae1e09a6e6caa4498f353e671fe7c1, type: 2}
+  m_sharedMaterial: {fileID: 566993618584813147, guid: b9ae1e09a6e6caa4498f353e671fe7c1, type: 2}
+  m_fontSharedMaterials: []
+  m_fontMaterial: {fileID: 0}
+  m_fontMaterials: []
+  m_fontColor32:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_enableVertexGradient: 0
+  m_colorMode: 3
+  m_fontColorGradient:
+    topLeft: {r: 1, g: 1, b: 1, a: 1}
+    topRight: {r: 1, g: 1, b: 1, a: 1}
+    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
+    bottomRight: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColorGradientPreset: {fileID: 0}
+  m_spriteAsset: {fileID: 0}
+  m_tintAllSprites: 0
+  m_StyleSheet: {fileID: 0}
+  m_TextStyleHashCode: -1183493901
+  m_overrideHtmlColors: 0
+  m_faceColor:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontSize: 24
+  m_fontSizeBase: 24
+  m_fontWeight: 400
+  m_enableAutoSizing: 0
+  m_fontSizeMin: 18
+  m_fontSizeMax: 72
+  m_fontStyle: 0
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
+  m_textAlignment: 65535
+  m_characterSpacing: 0
+  m_characterHorizontalScale: 1
+  m_wordSpacing: 0
+  m_lineSpacing: 0
+  m_lineSpacingMax: 0
+  m_paragraphSpacing: 0
+  m_charWidthMaxAdj: 0
+  m_TextWrappingMode: 0
+  m_wordWrappingRatios: 0.4
+  m_overflowMode: 0
+  m_linkedTextComponent: {fileID: 0}
+  parentLinkedComponent: {fileID: 0}
+  m_enableKerning: 0
+  m_ActiveFontFeatures: 6e72656b
+  m_enableExtraPadding: 0
+  checkPaddingRequired: 0
+  m_isRichText: 1
+  m_EmojiFallbackSupport: 1
+  m_parseCtrlCharacters: 1
+  m_isOrthographic: 1
+  m_isCullingEnabled: 0
+  m_horizontalMapping: 0
+  m_verticalMapping: 0
+  m_uvLineOffset: 0
+  m_geometrySortingOrder: 0
+  m_IsTextObjectScaleStatic: 0
+  m_VertexBufferAutoSizeReduction: 0
+  m_useMaxVisibleDescender: 1
+  m_pageToDisplay: 1
+  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_isUsingLegacyAnimationComponent: 0
+  m_isVolumetricText: 0
+  m_hasFontAssetChanged: 0
+  m_baseMaterial: {fileID: 0}
+  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!222 &1439098818
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1439098813}
+  m_CullTransparentMesh: 1
 --- !u!1001 &1500671776
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1269,6 +5263,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1332174285}
     m_Modifications:
+    - target: {fileID: 28134626801504315, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 28134626801504315, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 96416396941951815, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
@@ -1329,6 +5331,22 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 341554676497559878, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 341554676497559878, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 341554676497559878, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 341554676497559878, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 369139898552600409, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
       propertyPath: m_Interactable
       value: 0
@@ -1345,9 +5363,69 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 512275833950349055, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 512275833950349055, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 512275833950349055, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 512275833950349055, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 512275833950349055, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 512275833950349055, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 512275833950349055, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 512275833950349055, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 890237296731820317, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
       propertyPath: m_Name
       value: Menu_Settings
+      objectReference: {fileID: 0}
+    - target: {fileID: 1027350778642905331, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1027350778642905331, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1027350778642905331, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1027350778642905331, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1027350778642905331, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1027350778642905331, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1027350778642905331, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1062722711225965672, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
       propertyPath: m_fontColor32.rgba
@@ -1389,6 +5467,14 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1539770828192041206, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4292267206
+      objectReference: {fileID: 0}
+    - target: {fileID: 1539770828192041206, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
     - target: {fileID: 1581604355517255384, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
       propertyPath: m_fontColor32.rgba
       value: 4292267206
@@ -1401,6 +5487,42 @@ PrefabInstance:
       propertyPath: useCustomStartPosition
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2067183272822129526, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2067183272822129526, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2067183272822129526, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2067183272822129526, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2067183272822129526, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2067183272822129526, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2067183272822129526, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2457845002951915360, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4292267206
+      objectReference: {fileID: 0}
+    - target: {fileID: 2457845002951915360, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
     - target: {fileID: 2487350689513350879, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
       propertyPath: m_fontColor32.rgba
       value: 4292267206
@@ -1408,6 +5530,62 @@ PrefabInstance:
     - target: {fileID: 2487350689513350879, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
       propertyPath: m_TextStyleHashCode
       value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 2738234088577786146, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2738234088577786146, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2738234088577786146, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2738234088577786146, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2738234088577786146, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2738234088577786146, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2738234088577786146, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2902417153132054556, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2902417153132054556, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2902417153132054556, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2902417153132054556, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2902417153132054556, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2902417153132054556, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2902417153132054556, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2972273373684087987, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
       propertyPath: m_fontColor32.rgba
@@ -1425,6 +5603,38 @@ PrefabInstance:
       propertyPath: m_BlocksRaycasts
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3150430469369895792, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150430469369895792, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150430469369895792, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150430469369895792, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150430469369895792, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150430469369895792, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150430469369895792, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150430469369895792, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3206334489855241696, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
@@ -1491,19 +5701,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3448954470878655004, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 3448954470878655004, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3448954470878655004, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
       propertyPath: m_AnchorMin.x
-      value: 0
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 3448954470878655004, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 24
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3549791218790794737, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
       propertyPath: m_AnchorMax.x
@@ -1569,6 +5779,14 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4936303025604494439, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4292267206
+      objectReference: {fileID: 0}
+    - target: {fileID: 4936303025604494439, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
     - target: {fileID: 5489520749116046873, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
@@ -1591,6 +5809,46 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5489520749116046873, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
       propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5489520749116046873, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5489520749116046873, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5562079037226399549, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5562079037226399549, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5562079037226399549, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5562079037226399549, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5562079037226399549, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5562079037226399549, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5562079037226399549, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5562079037226399549, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5952784928520600783, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
@@ -1664,6 +5922,14 @@ PrefabInstance:
     - target: {fileID: 6741302787860323580, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6812472989601432469, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4294345275
+      objectReference: {fileID: 0}
+    - target: {fileID: 6812472989601432469, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
       objectReference: {fileID: 0}
     - target: {fileID: 6909913017833748331, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
       propertyPath: m_fontColor32.rgba
@@ -1704,6 +5970,18 @@ PrefabInstance:
     - target: {fileID: 7134664094341747204, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7635114646646254217, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 8173240326616892347, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4292267206
+      objectReference: {fileID: 0}
+    - target: {fileID: 8173240326616892347, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
       objectReference: {fileID: 0}
     - target: {fileID: 8185950432977569819, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
       propertyPath: m_fontColor32.rgba
@@ -1793,6 +6071,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8281111351069239421, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8532045023322661578, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
@@ -1815,6 +6097,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8532045023322661578, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
       propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8532045023322661578, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8532045023322661578, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8737125965780277465, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
@@ -1860,6 +6150,14 @@ PrefabInstance:
     - target: {fileID: 8831036139082186842, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
       propertyPath: m_SizeDelta.x
       value: 24
+      objectReference: {fileID: 0}
+    - target: {fileID: 8876896452263851830, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4292267206
+      objectReference: {fileID: 0}
+    - target: {fileID: 8876896452263851830, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
       objectReference: {fileID: 0}
     - target: {fileID: 9107682445064909035, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
       propertyPath: m_fontColor32.rgba
@@ -1911,6 +6209,176 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 8257032478253759469, guid: a0db9ef11e5279841b6f73edbb7edb68, type: 3}
   m_PrefabInstance: {fileID: 1500671776}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1556247540
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1556247541}
+  - component: {fileID: 1556247545}
+  - component: {fileID: 1556247544}
+  - component: {fileID: 1556247543}
+  - component: {fileID: 1556247542}
+  m_Layer: 0
+  m_Name: Label
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1556247541
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1556247540}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1077874335}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1556247542
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1556247540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64f2314303b057d4488f46f606e1fb36, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.ThemeTextStyleTarget
+  style: ButtonLabel
+  themeOverride: {fileID: 0}
+  applyColor: 0
+--- !u!114 &1556247543
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1556247540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 694856ef5d85d304f86b08412f8c495e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.ThemeColorTarget
+  token: TextOnPrimary
+  outlineToken: 
+  themeOverride: {fileID: 0}
+  tint: {r: 1, g: 1, b: 1, a: 1}
+--- !u!114 &1556247544
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1556247540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_text: Give 100 Gold
+  m_isRightToLeft: 0
+  m_fontAsset: {fileID: 11400000, guid: b9ae1e09a6e6caa4498f353e671fe7c1, type: 2}
+  m_sharedMaterial: {fileID: 566993618584813147, guid: b9ae1e09a6e6caa4498f353e671fe7c1, type: 2}
+  m_fontSharedMaterials: []
+  m_fontMaterial: {fileID: 0}
+  m_fontMaterials: []
+  m_fontColor32:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_enableVertexGradient: 0
+  m_colorMode: 3
+  m_fontColorGradient:
+    topLeft: {r: 1, g: 1, b: 1, a: 1}
+    topRight: {r: 1, g: 1, b: 1, a: 1}
+    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
+    bottomRight: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColorGradientPreset: {fileID: 0}
+  m_spriteAsset: {fileID: 0}
+  m_tintAllSprites: 0
+  m_StyleSheet: {fileID: 0}
+  m_TextStyleHashCode: -1183493901
+  m_overrideHtmlColors: 0
+  m_faceColor:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontSize: 24
+  m_fontSizeBase: 24
+  m_fontWeight: 400
+  m_enableAutoSizing: 0
+  m_fontSizeMin: 18
+  m_fontSizeMax: 72
+  m_fontStyle: 0
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
+  m_textAlignment: 65535
+  m_characterSpacing: 0
+  m_characterHorizontalScale: 1
+  m_wordSpacing: 0
+  m_lineSpacing: 0
+  m_lineSpacingMax: 0
+  m_paragraphSpacing: 0
+  m_charWidthMaxAdj: 0
+  m_TextWrappingMode: 0
+  m_wordWrappingRatios: 0.4
+  m_overflowMode: 0
+  m_linkedTextComponent: {fileID: 0}
+  parentLinkedComponent: {fileID: 0}
+  m_enableKerning: 0
+  m_ActiveFontFeatures: 6e72656b
+  m_enableExtraPadding: 0
+  checkPaddingRequired: 0
+  m_isRichText: 1
+  m_EmojiFallbackSupport: 1
+  m_parseCtrlCharacters: 1
+  m_isOrthographic: 1
+  m_isCullingEnabled: 0
+  m_horizontalMapping: 0
+  m_verticalMapping: 0
+  m_uvLineOffset: 0
+  m_geometrySortingOrder: 0
+  m_IsTextObjectScaleStatic: 0
+  m_VertexBufferAutoSizeReduction: 0
+  m_useMaxVisibleDescender: 1
+  m_pageToDisplay: 1
+  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_isUsingLegacyAnimationComponent: 0
+  m_isVolumetricText: 0
+  m_hasFontAssetChanged: 0
+  m_baseMaterial: {fileID: 0}
+  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!222 &1556247545
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1556247540}
+  m_CullTransparentMesh: 1
 --- !u!1 &1751483320
 GameObject:
   m_ObjectHideFlags: 0

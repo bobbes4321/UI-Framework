@@ -90,6 +90,41 @@ namespace Neo.UI.Tests
         public void Roles_BuiltInsPresent()
         {
             Assert.IsTrue(NeoAnimatorRoles.TryGet(NeoAnimatorRoles.ButtonHover, out _));
+            // The per-state picker maps every selectable state to a role — these must always exist.
+            Assert.IsTrue(NeoAnimatorRoles.TryGet(NeoAnimatorRoles.SelectableNormal, out _));
+            Assert.IsTrue(NeoAnimatorRoles.TryGet(NeoAnimatorRoles.SelectableSelected, out _));
+            Assert.IsTrue(NeoAnimatorRoles.TryGet(NeoAnimatorRoles.SelectableDisabled, out _));
+        }
+
+        [Test]
+        public void CopyTo_StampsSourcePreset()
+        {
+            var target = new UIAnimation();
+            Assert.IsTrue(string.IsNullOrEmpty(target.sourcePreset), "a hand-built animation has no source");
+
+            _preset.CopyTo(target);
+            Assert.AreEqual("Hover/TestHover", target.sourcePreset,
+                "CopyTo stamps the preset full name so the inspector can show what's applied");
+        }
+
+        [Test]
+        public void SelectableAnimator_Reset_SeedsSelectedAndDisabledFromDefaults()
+        {
+            _settings.SetDefaultAnimation(NeoAnimatorRoles.SelectableSelected, _preset);
+            _settings.SetDefaultAnimation(NeoAnimatorRoles.SelectableDisabled, _preset);
+            var go = new GameObject("Btn", typeof(RectTransform));
+            try
+            {
+                var animator = go.AddComponent<UISelectableUIAnimator>();
+                InvokeReset(animator);
+                Assert.IsTrue(animator.selectedAnimation.scale.enabled,
+                    "Reset seeds the selected slot from the Selectable/Selected default");
+                Assert.IsTrue(animator.disabledAnimation.scale.enabled,
+                    "Reset seeds the disabled slot from the Selectable/Disabled default");
+                Assert.IsFalse(animator.normalAnimation.scale.enabled,
+                    "an unset role leaves its slot untouched");
+            }
+            finally { Object.DestroyImmediate(go); }
         }
 
         [Test]

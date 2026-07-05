@@ -19,10 +19,15 @@ namespace Neo.UI
 
         public string fullName => $"{category}/{presetName}";
 
-        /// <summary> Deep-copies this preset's channels into the given animation (target binding untouched). </summary>
+        /// <summary>
+        /// Deep-copies this preset's channels into the given animation (target binding untouched) and
+        /// stamps <see cref="UIAnimation.sourcePreset"/> with this preset's full name so the inspector
+        /// can show where a slot's data came from.
+        /// </summary>
         public void CopyTo(UIAnimation targetAnimation)
         {
             if (targetAnimation == null) return;
+            targetAnimation.sourcePreset = fullName;
             targetAnimation.purpose = animation.purpose;
             CopyMove(animation.move, targetAnimation.move);
             CopyRotate(animation.rotate, targetAnimation.rotate);

@@ -427,6 +427,7 @@ MonoBehaviour:
         reference: 2
         customColor: {r: 1, g: 1, b: 1, a: 1}
         themeToken: 
+    sourcePreset: 
   offAnimation:
     purpose: 4
     move:
@@ -693,6 +694,7 @@ MonoBehaviour:
         reference: 2
         customColor: {r: 1, g: 1, b: 1, a: 1}
         themeToken: 
+    sourcePreset: 
 --- !u!1 &175874818703116572
 GameObject:
   m_ObjectHideFlags: 0

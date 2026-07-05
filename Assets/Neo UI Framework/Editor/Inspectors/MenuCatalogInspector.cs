@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using Neo.EditorUI;
 using Neo.UI.Menus;
 using UnityEditor;
-using UnityEditorInternal;
 using UnityEngine;
 
 namespace Neo.UI.Editor
@@ -16,7 +14,8 @@ namespace Neo.UI.Editor
     /// ground: identity fields, group list add/remove/reorder, item list add/remove/reorder with a
     /// per-item kind picker + kind-specific value fields, and the cheats-only favourites toggle.
     /// Catalogs are plain <see cref="ScriptableObject"/>s, so this is a standard EditorUI-kit inspector —
-    /// no bespoke window required.
+    /// items render as <see cref="NeoListView.DrawForm"/> cards whose rows are described ONCE in
+    /// <see cref="ItemRows"/> (height and drawing both derive from it via <see cref="NeoForm"/>).
     /// </summary>
     [CustomEditor(typeof(MenuCatalog), true)]
     public class MenuCatalogInspector : NeoUIEditor
@@ -24,15 +23,6 @@ namespace Neo.UI.Editor
         protected override string HeaderTitle => target is CheatCatalog ? "Cheat Catalog" : "Settings Catalog";
         protected override string HeaderSubtitle => ((MenuCatalog)target).Id;
         protected override Color Accent => NeoColors.Data;
-
-        // The "items" ReorderableList is cached by NeoListView (keyed on the SerializedObject +
-        // propertyPath), but its draw/height callbacks default to generic recursive PropertyField
-        // drawing. We swap in the kind-aware callbacks once per list instance — never rebuild the list,
-        // never reassign the callbacks every OnGUI pass (IMGUI rule: no per-frame allocation churn).
-        private static readonly ConditionalWeakTable<ReorderableList, object> CustomizedItemLists =
-            new ConditionalWeakTable<ReorderableList, object>();
-
-        private static float LineHeight => EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
 
         protected override void DrawBody()
         {
@@ -53,7 +43,7 @@ namespace Neo.UI.Editor
             NeoGUI.EndFoldoutSection();
 
             if (NeoGUI.BeginFoldoutSection("NeoUI.MenuCatalog.Items", "Items", defaultOpen: true))
-                DrawItems();
+                NeoListView.DrawForm(serializedObject.FindProperty("items"), "Items", ItemRows, NeoColors.Data);
             NeoGUI.EndFoldoutSection();
         }
 
@@ -90,111 +80,72 @@ namespace Neo.UI.Editor
 
         // ------------------------------------------------------------------ items
 
-        private void DrawItems()
+        /// <summary>
+        /// The single description of an item card — <see cref="NeoForm"/> runs it once to measure and
+        /// once per repaint to draw, so the element height can never drift from what's drawn.
+        /// </summary>
+        private void ItemRows(NeoForm form, SerializedProperty item)
         {
-            SerializedProperty itemsProperty = serializedObject.FindProperty("items");
-            ReorderableList list = NeoListView.Get(itemsProperty, "Items");
-            if (!CustomizedItemLists.TryGetValue(list, out _))
-            {
-                CustomizedItemLists.Add(list, null);
-                list.elementHeightCallback = index => ElementHeight(itemsProperty, index);
-                list.drawElementCallback = (rect, index, active, focused) => DrawElement(itemsProperty, rect, index);
-            }
-            list.DoLayoutList();
-        }
-
-        private float ElementHeight(SerializedProperty itemsProperty, int index)
-        {
-            if (index >= itemsProperty.arraySize) return EditorGUIUtility.singleLineHeight;
-            SerializedProperty item = itemsProperty.GetArrayElementAtIndex(index);
-            string kind = CurrentKind(item);
-            return LineHeight * 3f + ExtraHeight(item, kind) + 8f;
-        }
-
-        private float ExtraHeight(SerializedProperty item, string kind)
-        {
-            switch (kind)
-            {
-                case "toggle":
-                case "switch":
-                    return 0f; // Default On toggle already lives in the base "persisted" row
-                case "slider":
-                case "stepper":
-                    return LineHeight * 2f;
-                case "dropdown":
-                    SerializedProperty options = item.FindPropertyRelative("options");
-                    return options != null
-                        ? EditorGUI.GetPropertyHeight(options, includeChildren: true)
-                        : EditorGUIUtility.singleLineHeight;
-                case "rebind":
-                    return LineHeight;
-                default:
-                    return 0f;
-            }
-        }
-
-        private void DrawElement(SerializedProperty itemsProperty, Rect rect, int index)
-        {
-            if (index >= itemsProperty.arraySize) return;
-            SerializedProperty item = itemsProperty.GetArrayElementAtIndex(index);
             string kind = CurrentKind(item);
 
-            rect.y += 2f;
-            Rect line = new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight);
+            // Identity row: kind | category | name
+            form.Line(rect =>
+            {
+                NeoGUI.SplitHorizontal(rect, out Rect kindRect, out Rect idRect, 0.28f);
+                DrawKindPopup(kindRect, item);
+                NeoGUI.SplitHorizontal(idRect, out Rect categoryRect, out Rect nameRect);
+                EditorGUI.PropertyField(categoryRect, item.FindPropertyRelative("category"), GUIContent.none);
+                EditorGUI.PropertyField(nameRect, item.FindPropertyRelative("name"), GUIContent.none);
+            });
+            form.Gap();
 
-            // Row 1: kind | category | name
-            NeoGUI.SplitHorizontal(line, out Rect kindRect, out Rect idRect, 0.28f);
-            DrawKindPopup(kindRect, item);
-            NeoGUI.SplitHorizontal(idRect, out Rect categoryRect, out Rect nameRect);
-            EditorGUI.PropertyField(categoryRect, item.FindPropertyRelative("category"), GUIContent.none);
-            EditorGUI.PropertyField(nameRect, item.FindPropertyRelative("name"), GUIContent.none);
-            NeoGUI.NextLine(ref line);
+            // Label and group each get a full-width line: room to read/edit the text, long group
+            // names aren't clipped.
+            form.Field(item.FindPropertyRelative("label"), "Label");
+            form.Line(rect =>
+            {
+                Rect field = EditorGUI.PrefixLabel(rect, new GUIContent("Group"));
+                NeoDropdown.StringPopup(field, item.FindPropertyRelative("group"), GroupOptions, "(none)", onAddNew: AddGroup);
+            });
+            form.Gap();
 
-            // Row 2: label | group
-            NeoGUI.SplitHorizontal(line, out Rect labelRect, out Rect groupRect);
-            EditorGUI.PropertyField(labelRect, item.FindPropertyRelative("label"), new GUIContent("Label"));
-            SerializedProperty groupProperty = item.FindPropertyRelative("group");
-            Rect groupField = EditorGUI.PrefixLabel(groupRect, new GUIContent("Group"));
-            NeoDropdown.StringPopup(groupField, groupProperty, GroupOptions, "(none)", onAddNew: AddGroup);
-            NeoGUI.NextLine(ref line);
+            // Persisted | default-value (kind-dependent control)
+            form.Line(rect =>
+            {
+                NeoGUI.SplitHorizontal(rect, out Rect persistedRect, out Rect defaultRect);
+                NeoGUI.LabeledField(persistedRect, item.FindPropertyRelative("persisted"), "Persisted", 60f);
+                DrawDefaultValue(defaultRect, item, kind);
+            });
 
-            // Row 3: persisted | default-value (kind-dependent control)
-            NeoGUI.SplitHorizontal(line, out Rect persistedRect, out Rect defaultRect);
-            EditorGUI.PropertyField(persistedRect, item.FindPropertyRelative("persisted"), new GUIContent("Persisted"));
-            DrawDefaultValue(defaultRect, item, kind);
-            NeoGUI.NextLine(ref line);
-
-            // Row 4+: kind-specific fields
+            // Kind-specific rows
             switch (kind)
             {
                 case "slider":
-                    NeoGUI.SplitHorizontal(line, out Rect minRect, out Rect maxRect);
-                    EditorGUI.PropertyField(minRect, item.FindPropertyRelative("min"), new GUIContent("Min"));
-                    EditorGUI.PropertyField(maxRect, item.FindPropertyRelative("max"), new GUIContent("Max"));
-                    NeoGUI.NextLine(ref line);
-                    EditorGUI.PropertyField(line, item.FindPropertyRelative("wholeNumbers"), new GUIContent("Whole Numbers"));
+                    form.Gap();
+                    form.Pair(item.FindPropertyRelative("min"), "Min", 30f,
+                        item.FindPropertyRelative("max"), "Max", 30f);
+                    form.Line(rect =>
+                        NeoGUI.LabeledField(rect, item.FindPropertyRelative("wholeNumbers"), "Whole Numbers", 90f));
                     break;
                 case "stepper":
-                    NeoGUI.SplitHorizontal(line, out Rect sMinRect, out Rect sMaxRect);
-                    EditorGUI.PropertyField(sMinRect, item.FindPropertyRelative("min"), new GUIContent("Min"));
-                    EditorGUI.PropertyField(sMaxRect, item.FindPropertyRelative("max"), new GUIContent("Max"));
-                    NeoGUI.NextLine(ref line);
-                    NeoGUI.SplitHorizontal(line, out Rect stepRect, out Rect wholeRect);
-                    EditorGUI.PropertyField(stepRect, item.FindPropertyRelative("step"), new GUIContent("Step"));
-                    EditorGUI.PropertyField(wholeRect, item.FindPropertyRelative("wholeNumbers"), new GUIContent("Whole Numbers"));
+                    form.Gap();
+                    form.Pair(item.FindPropertyRelative("min"), "Min", 30f,
+                        item.FindPropertyRelative("max"), "Max", 30f);
+                    form.Pair(item.FindPropertyRelative("step"), "Step", 30f,
+                        item.FindPropertyRelative("wholeNumbers"), "Whole Numbers", 90f);
                     break;
                 case "dropdown":
                     SerializedProperty options = item.FindPropertyRelative("options");
-                    float optionsHeight = options != null
-                        ? EditorGUI.GetPropertyHeight(options, includeChildren: true)
-                        : EditorGUIUtility.singleLineHeight;
-                    Rect optionsRect = new Rect(line.x, line.y, line.width, optionsHeight);
-                    EditorGUI.PropertyField(optionsRect, options, new GUIContent("Options"), includeChildren: true);
+                    if (options != null)
+                    {
+                        form.Gap();
+                        form.Field(options, "Options");
+                    }
                     break;
                 case "rebind":
-                    NeoGUI.SplitHorizontal(line, out Rect actionRect, out Rect bindingRect);
-                    EditorGUI.PropertyField(actionRect, item.FindPropertyRelative("inputAction"), new GUIContent("Input Action"));
-                    EditorGUI.PropertyField(bindingRect, item.FindPropertyRelative("bindingIndex"), new GUIContent("Binding Index"));
+                    form.Gap();
+                    form.Pair(item.FindPropertyRelative("inputAction"), "Input Action", 80f,
+                        item.FindPropertyRelative("bindingIndex"), "Binding Index", 90f);
                     break;
             }
         }
@@ -216,7 +167,7 @@ namespace Neo.UI.Editor
                     // no persisted value for these kinds
                     break;
                 default:
-                    EditorGUI.PropertyField(rect, defaultValue, new GUIContent("Default"));
+                    NeoGUI.LabeledField(rect, defaultValue, "Default", 45f);
                     break;
             }
         }

@@ -161,31 +161,61 @@ namespace Neo.UI.Editor
         }
 
         /// <summary>
-        /// A "copy a library preset into this slot" row: a searchable dropdown of every discovered
-        /// <see cref="UIAnimationPreset"/> (those whose category suits the slot's <paramref name="role"/>
-        /// listed first), applied via <see cref="UIAnimationPreset.CopyTo"/> to every selected target so
-        /// the slot is seeded then freely tweaked. <paramref name="getSlot"/> picks the UIAnimation for a
-        /// given target (the currently-selected state/show-hide/on-off slot). <paramref name="role"/> may
-        /// be null (no suggested grouping — just shows every preset).
+        /// The "seed this slot from a library preset" row. The button shows the slot's applied preset
+        /// (<see cref="UIAnimation.sourcePreset"/>, stamped by <see cref="UIAnimationPreset.CopyTo"/>)
+        /// and opens <see cref="AnimationPresetBrowserPopup"/> — presets grouped by category with the
+        /// role's suggested categories expanded first, a "None" row that clears the slot, and
+        /// hover-to-preview on the actual selected widget (single selection only). The ✕ button clears
+        /// the slot without opening the popup. <paramref name="getSlot"/> picks the UIAnimation for a
+        /// given target (the currently-selected state/show-hide/on-off slot); <paramref name="role"/>
+        /// may be null (no suggested grouping).
         /// </summary>
         public static void PresetPicker(SerializedObject so, string role, System.Func<Object, UIAnimation> getSlot)
         {
             using (new EditorGUILayout.HorizontalScope())
             {
                 string tooltip = string.IsNullOrEmpty(role)
-                    ? "Copy a library preset into this slot, then tweak it."
-                    : $"Copy a preset into this slot ({NeoAnimatorRoles.DisplayName(role)}), then tweak it.";
+                    ? "Seed this slot from a library preset, then tweak it freely."
+                    : $"Seed this slot ({NeoAnimatorRoles.DisplayName(role)}) from a library preset, then tweak it freely.";
                 GUILayout.Label(new GUIContent("Preset", tooltip), GUILayout.Width(52f));
+
+                UIAnimation first = so.targetObjects.Length > 0 ? getSlot(so.targetObjects[0]) : null;
+                string current = string.IsNullOrEmpty(first?.sourcePreset) ? null : first.sourcePreset;
+                bool mixed = false;
+                for (int i = 1; i < so.targetObjects.Length && !mixed; i++)
+                {
+                    string other = getSlot(so.targetObjects[i])?.sourcePreset;
+                    mixed = !string.Equals(string.IsNullOrEmpty(other) ? null : other, current, System.StringComparison.Ordinal);
+                }
+
                 Rect rect = GUILayoutUtility.GetRect(GUIContent.none, EditorStyles.popup);
-                NeoDropdown.ValuePopup(rect, "", () => AnimationPresetRegistry.FullNamesForRole(role),
-                    chosen => ApplyPreset(so, getSlot, chosen), emptyLabel: "Apply preset…");
+                string label = mixed ? "—" : current ?? "Apply preset…";
+                if (GUI.Button(rect, new GUIContent(label, tooltip), EditorStyles.popup))
+                {
+                    // Live hover-preview only makes sense on a single, concrete widget.
+                    RectTransform previewTarget = so.targetObjects.Length == 1 && so.targetObject is Component component
+                        ? component.transform as RectTransform : null;
+                    PopupWindow.Show(rect, new AnimationPresetBrowserPopup(role, mixed ? null : current,
+                        chosen =>
+                        {
+                            if (chosen == null) ClearSlot(so, getSlot);
+                            else ApplyPreset(so, getSlot, chosen);
+                        }, previewTarget));
+                }
+
+                bool clearable = mixed || (first != null && (first.hasEnabledChannels || current != null));
+                using (new EditorGUI.DisabledScope(!clearable))
+                {
+                    if (GUILayout.Button(new GUIContent("✕", "Clear this slot — disables every channel."),
+                            EditorStyles.miniButton, GUILayout.Width(22f)))
+                        ClearSlot(so, getSlot);
+                }
             }
             GUILayout.Space(NeoGUI.Spacing);
         }
 
-        private static void ApplyPreset(SerializedObject so, System.Func<Object, UIAnimation> getSlot, string fullName)
+        private static void ApplyPreset(SerializedObject so, System.Func<Object, UIAnimation> getSlot, UIAnimationPreset chosen)
         {
-            UIAnimationPreset chosen = AnimationPresetRegistry.GetByFullName(fullName);
             if (chosen == null) return;
 
             try
@@ -196,6 +226,37 @@ namespace Neo.UI.Editor
                     if (slot == null) continue;
                     Undo.RecordObject(target, "Apply Animation Preset");
                     chosen.CopyTo(slot);
+                    EditorUtility.SetDirty(target);
+                }
+                if (so.targetObject != null) so.Update();
+            }
+            catch (System.Exception)
+            {
+                // the inspector (and its SerializedObject) may have gone away while the popup was open
+            }
+        }
+
+        // A cached, never-saved blank preset: "clear" = copy fresh defaults (every channel disabled)
+        // through the ONE copy path, then drop the stamp CopyTo just wrote — a cleared slot has no source.
+        private static UIAnimationPreset s_emptyPreset;
+
+        private static void ClearSlot(SerializedObject so, System.Func<Object, UIAnimation> getSlot)
+        {
+            if (s_emptyPreset == null)
+            {
+                s_emptyPreset = ScriptableObject.CreateInstance<UIAnimationPreset>();
+                s_emptyPreset.hideFlags = HideFlags.HideAndDontSave;
+            }
+
+            try
+            {
+                foreach (Object target in so.targetObjects)
+                {
+                    UIAnimation slot = getSlot(target);
+                    if (slot == null) continue;
+                    Undo.RecordObject(target, "Clear Animation Slot");
+                    s_emptyPreset.CopyTo(slot);
+                    slot.sourcePreset = null;
                     EditorUtility.SetDirty(target);
                 }
                 if (so.targetObject != null) so.Update();
@@ -275,10 +336,12 @@ namespace Neo.UI.Editor
                 hasChannels[i] = animator.GetAnimation((UISelectionState)i).hasEnabledChannels;
 
             int index = AnimatorEditorGUI.AnimationTabBar("Neo.SelectableAnim.tab", StateNames, hasChannels);
-            // Hover/Press map to project roles; Normal/Selected/Disabled have no shipped role (null →
-            // the picker just lists every preset).
+            // Every state maps to a project role, so the browser can suggest and defaults can seed.
             string role = index == 1 ? NeoAnimatorRoles.ButtonHover
-                : index == 2 ? NeoAnimatorRoles.ButtonPress : null;
+                : index == 2 ? NeoAnimatorRoles.ButtonPress
+                : index == 3 ? NeoAnimatorRoles.SelectableSelected
+                : index == 4 ? NeoAnimatorRoles.SelectableDisabled
+                : NeoAnimatorRoles.SelectableNormal;
             AnimatorEditorGUI.PresetPicker(serializedObject, role,
                 o => ((UISelectableUIAnimator)o).GetAnimation((UISelectionState)index));
             EditorGUILayout.PropertyField(serializedObject.FindProperty(Props[index]), GUIContent.none);

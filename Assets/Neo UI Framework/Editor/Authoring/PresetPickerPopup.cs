@@ -92,10 +92,13 @@ namespace Neo.UI.Editor.Authoring
         {
             bool selected = string.IsNullOrEmpty(_current);
             DrawCardChrome(rect, NeoColors.TextSubtle, selected);
-            var thumbRect = new Rect(rect.x + 4f, rect.y + 4f, rect.width - 8f, CardThumb - 4f);
-            _fallback.Draw(thumbRect, new GUIContent("∅"), false, false, false, false);
-            _label.Draw(new Rect(rect.x + 2f, rect.yMax - CardLabel, rect.width - 4f, CardLabel),
-                new GUIContent("(none)"), false, false, false, false);
+            if (Event.current.type == EventType.Repaint)
+            {
+                var thumbRect = new Rect(rect.x + 4f, rect.y + 4f, rect.width - 8f, CardThumb - 4f);
+                _fallback.Draw(thumbRect, new GUIContent("∅"), false, false, false, false);
+                _label.Draw(new Rect(rect.x + 2f, rect.yMax - CardLabel, rect.width - 4f, CardLabel),
+                    new GUIContent("(none)"), false, false, false, false);
+            }
             HandleClick(rect, null);
         }
 
@@ -104,13 +107,16 @@ namespace Neo.UI.Editor.Authoring
             bool selected = string.Equals(_current, preset.presetName, StringComparison.Ordinal);
             DrawCardChrome(rect, NeoColors.Theming, selected);
 
-            var thumbRect = new Rect(rect.x + 4f, rect.y + 4f, rect.width - 8f, CardThumb - 4f);
-            Texture2D thumb = PresetThumbnailCache.GetOrRender(preset, (int)CardThumb);
-            if (thumb != null) GUI.DrawTexture(thumbRect, thumb, ScaleMode.ScaleToFit, alphaBlend: true);
-            else _fallback.Draw(thumbRect, new GUIContent(preset.presetName), false, false, false, false);
+            if (Event.current.type == EventType.Repaint)
+            {
+                var thumbRect = new Rect(rect.x + 4f, rect.y + 4f, rect.width - 8f, CardThumb - 4f);
+                Texture2D thumb = PresetThumbnailCache.GetOrRender(preset, (int)CardThumb);
+                if (thumb != null) GUI.DrawTexture(thumbRect, thumb, ScaleMode.ScaleToFit, alphaBlend: true);
+                else _fallback.Draw(thumbRect, new GUIContent(preset.presetName), false, false, false, false);
 
-            _label.Draw(new Rect(rect.x + 2f, rect.yMax - CardLabel, rect.width - 4f, CardLabel),
-                new GUIContent(preset.presetName, preset.description), false, false, false, false);
+                _label.Draw(new Rect(rect.x + 2f, rect.yMax - CardLabel, rect.width - 4f, CardLabel),
+                    new GUIContent(preset.presetName, preset.description), false, false, false, false);
+            }
             HandleClick(rect, preset.presetName);
         }
 

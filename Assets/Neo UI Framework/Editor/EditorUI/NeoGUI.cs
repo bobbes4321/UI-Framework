@@ -169,6 +169,18 @@ namespace Neo.EditorUI
             return false;
         }
 
+        /// <summary>
+        /// PropertyField with a temporarily narrowed label — for half-width paired fields where the
+        /// default ~150px label width would leave almost no room for the value itself.
+        /// </summary>
+        public static void LabeledField(Rect rect, SerializedProperty property, string label, float labelWidth)
+        {
+            float previousLabelWidth = EditorGUIUtility.labelWidth;
+            EditorGUIUtility.labelWidth = labelWidth;
+            EditorGUI.PropertyField(rect, property, Temp(label));
+            EditorGUIUtility.labelWidth = previousLabelWidth;
+        }
+
         // ------------------------------------------------------------------ rect helpers
 
         /// <summary> Splits a rect into two horizontal halves with a small gutter. </summary>

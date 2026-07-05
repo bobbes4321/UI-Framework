@@ -30,6 +30,13 @@ namespace Neo.UI.Editor
         public const int PickerSize = 180;
 
         /// <summary>
+        /// Canvas edge (canvas units = px) the widget lays out on before capture — generously larger
+        /// than any widget's natural size so nothing is squeezed; the camera then zooms to fit the
+        /// content bounds (see <see cref="Capture"/>), so the texture size only sets output resolution.
+        /// </summary>
+        private const int LayoutCanvasSize = 1024;
+
+        /// <summary>
         /// Renders <paramref name="preset"/> applied to its target kind to a <paramref name="size"/>×
         /// <paramref name="size"/> texture. Returns null (graceful) when headless, when the preset is
         /// null/name-less, or when rendering throws.
@@ -58,8 +65,10 @@ namespace Neo.UI.Editor
 
         /// <summary>
         /// A minimal one-element spec: a single view holding one element of <paramref name="kind"/>,
-        /// centered with a small fixed layout box so it reads inside a square thumbnail. Text-bearing
-        /// kinds get <paramref name="label"/> so the card isn't blank.
+        /// centered with NO layout size so the factory's natural widget size stands (the capture camera
+        /// zooms to fit — forcing a thumbnail-proportional box squeezed real widgets to a fraction of
+        /// their designed width and wrapped their labels). Text-bearing kinds get <paramref name="label"/>
+        /// so the card isn't blank.
         /// </summary>
         private static ElementSpec BuildElement(string kind, string presetName, string label)
         {
@@ -68,12 +77,7 @@ namespace Neo.UI.Editor
             {
                 kind = kind,
                 preset = string.IsNullOrEmpty(presetName) ? null : presetName,
-                layout = new LayoutSpec
-                {
-                    h = "center",
-                    v = "center",
-                    size = new LayoutSize { w = 220f, h = 96f }
-                }
+                layout = new LayoutSpec { h = "center", v = "center" }
             };
             if (WantsLabel(kind) && !string.IsNullOrEmpty(label)) element.label = label;
             return element;
@@ -130,10 +134,13 @@ namespace Neo.UI.Editor
         }
 
         /// <summary>
-        /// Renders an already-built root into an isolated preview scene and reads it back to a square
-        /// Texture2D — the same world-space-canvas / orthographic-camera recipe as the shared screenshot
-        /// path, scaled like a device so the widget reads proportionally inside the thumbnail. The root is
-        /// moved into the throwaway scene; the scene + camera + RenderTexture are destroyed in finally.
+        /// Renders an already-built root into an isolated preview scene and reads it back to a square,
+        /// alpha-transparent Texture2D — the same world-space-canvas / orthographic-camera recipe as the
+        /// shared screenshot path. The widget lays out at its NATURAL size on a large 1:1 canvas
+        /// (<see cref="LayoutCanvasSize"/>) and the camera zooms to fit the settled content bounds plus a
+        /// small margin — so a 240px-wide button scales down into a 116px thumbnail intact instead of
+        /// being label-wrapped by a thumbnail-sized layout box. The root is moved into the throwaway
+        /// scene; the scene + camera + RenderTexture are destroyed in finally.
         /// </summary>
         private static Texture2D Capture(GameObject root, int size)
         {
@@ -150,10 +157,11 @@ namespace Neo.UI.Editor
                 camera.transform.position = new Vector3(0f, 0f, -100f);
                 camera.nearClipPlane = 0.1f;
                 camera.farClipPlane = 1000f;
+                // transparent clear — the card chrome (accent/hover/selected tint) is drawn underneath by
+                // the picker's OnGUI, so the thumbnail composites over it instead of stamping an opaque
+                // app-theme background color over that tint
                 camera.clearFlags = CameraClearFlags.SolidColor;
-                camera.backgroundColor = ThemeService.TryGetColor(UIWidgetFactory.TokenBackground, out Color bg)
-                    ? bg
-                    : new Color(0.07f, 0.08f, 0.1f);
+                camera.backgroundColor = Color.clear;
 
                 var canvasGo = new GameObject("NeoUI Preset Thumb Canvas", typeof(RectTransform));
                 SceneManager.MoveGameObjectToScene(canvasGo, scene);
@@ -161,8 +169,9 @@ namespace Neo.UI.Editor
                 canvas.renderMode = RenderMode.WorldSpace;
                 canvas.worldCamera = camera;
                 var canvasRect = (RectTransform)canvasGo.transform;
-                // scale like a device so the fixed-size widget reads proportionally at any thumb edge
-                UIScreenshotter.ApplyDeviceScale(canvasRect, size, size, deviceScale: true);
+                // 1 canvas unit = 1 px, no device-scaler emulation — the widget lays out at natural
+                // size on a canvas big enough that nothing is squeezed; the camera frames it below
+                UIScreenshotter.ApplyDeviceScale(canvasRect, LayoutCanvasSize, LayoutCanvasSize, deviceScale: false);
                 canvasRect.position = Vector3.zero;
 
                 SceneManager.MoveGameObjectToScene(root, scene);
@@ -175,6 +184,8 @@ namespace Neo.UI.Editor
                 Canvas.ForceUpdateCanvases();
                 UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)root.transform);
                 Canvas.ForceUpdateCanvases();
+
+                FrameContent(camera, canvasRect, (RectTransform)root.transform, size);
 
                 renderTexture = new RenderTexture(size, size, 24, RenderTextureFormat.ARGB32);
                 camera.targetTexture = renderTexture;
@@ -198,6 +209,36 @@ namespace Neo.UI.Editor
                 }
                 EditorSceneManager.ClosePreviewScene(scene);
             }
+        }
+
+        /// <summary>
+        /// Centers the camera on the widget's settled bounds and sets the orthographic size so the
+        /// content fills the square capture with a small margin. Bounds come from the view root's
+        /// CHILDREN (the element subtree) — the view root itself stretches to the full layout canvas,
+        /// so including it would frame the whole canvas and shrink the widget to a speck.
+        /// </summary>
+        private static void FrameContent(Camera camera, RectTransform canvasRect, RectTransform viewRoot, int size)
+        {
+            bool any = false;
+            var bounds = new Bounds();
+            for (int i = 0; i < viewRoot.childCount; i++)
+            {
+                if (!(viewRoot.GetChild(i) is RectTransform child) || !child.gameObject.activeInHierarchy) continue;
+                Bounds b = RectTransformUtility.CalculateRelativeRectTransformBounds(canvasRect, child);
+                if (!any) { bounds = b; any = true; }
+                else bounds.Encapsulate(b);
+            }
+
+            float extent = any ? Mathf.Max(bounds.extents.x, bounds.extents.y) : 0f;
+            if (extent < 1f)
+            {
+                camera.orthographicSize = size * 0.5f; // degenerate content: keep the legacy full-canvas frame
+                return;
+            }
+
+            // canvas is centered at the world origin at scale 1, so canvas-relative bounds are world units
+            camera.transform.position = new Vector3(bounds.center.x, bounds.center.y, -100f);
+            camera.orthographicSize = extent * 1.1f; // square target: half-width == half-height == ortho size
         }
     }
 }

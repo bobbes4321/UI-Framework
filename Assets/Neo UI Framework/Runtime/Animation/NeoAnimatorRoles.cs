@@ -50,6 +50,9 @@ namespace Neo.UI
         public const string ViewHide = "View/Hide";
         public const string ButtonHover = "Button/Hover";
         public const string ButtonPress = "Button/Press";
+        public const string SelectableNormal = "Selectable/Normal";
+        public const string SelectableSelected = "Selectable/Selected";
+        public const string SelectableDisabled = "Selectable/Disabled";
         public const string ToggleOn = "Toggle/On";
         public const string ToggleOff = "Toggle/Off";
         public const string Loop = "Loop";
@@ -67,6 +70,9 @@ namespace Neo.UI
             yield return new NeoAnimatorRole(ViewHide, "View — Hide", "Plays when a view/container is hidden.", "Hide");
             yield return new NeoAnimatorRole(ButtonHover, "Button — Hover", "Plays while a button/selectable is hovered (highlighted).", "Hover");
             yield return new NeoAnimatorRole(ButtonPress, "Button — Press", "Plays when a button/selectable is pressed or clicked.", "Press", "Click");
+            yield return new NeoAnimatorRole(SelectableNormal, "Selectable — Normal", "Plays when a selectable returns to its rest state (un-hover, release).", "Hover");
+            yield return new NeoAnimatorRole(SelectableSelected, "Selectable — Selected", "Plays when a selectable becomes selected (focus, active tab).", "Toggle", "Hover");
+            yield return new NeoAnimatorRole(SelectableDisabled, "Selectable — Disabled", "Plays when a selectable becomes non-interactable.", "Toggle", "Hide");
             yield return new NeoAnimatorRole(ToggleOn, "Toggle — On", "Plays when a toggle/switch turns on.", "Toggle", "Show");
             yield return new NeoAnimatorRole(ToggleOff, "Toggle — Off", "Plays when a toggle/switch turns off.", "Toggle", "Hide");
             yield return new NeoAnimatorRole(Loop, "Loop", "Continuous ambient motion (idle pulse, spinner).", "Loop");

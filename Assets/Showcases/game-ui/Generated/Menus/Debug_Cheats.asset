@@ -40,7 +40,7 @@ MonoBehaviour:
     bindingIndex: 0
   - category: Player
     name: InfiniteBoost
-    kind: 2
+    kind: 5
     label: Infinite Boost
     tooltip: 
     group: Player

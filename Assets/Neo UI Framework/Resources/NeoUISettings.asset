@@ -36,30 +36,33 @@ MonoBehaviour:
   dropdownIds: {fileID: 0}
   menuWidgets: {fileID: 11400000, guid: d72f57cb1ab5b8d4dbdbac0bf88d9c8e, type: 2}
   buttonVariants:
-  - name: Important
+  - name: Baller
     colors:
       normal:
-        useToken: 1
+        useToken: 0
         token: Primary
-        color: {r: 1, g: 1, b: 1, a: 1}
+        color: {r: 0.8396226, g: 0.07524917, b: 0.8001264, a: 1}
       highlighted:
-        useToken: 1
+        useToken: 0
         token: PrimaryHover
-        color: {r: 1, g: 1, b: 1, a: 1}
+        color: {r: 0.9528302, g: 0.4719206, b: 0.92816824, a: 1}
       pressed:
-        useToken: 1
+        useToken: 0
         token: PrimaryPressed
-        color: {r: 1, g: 1, b: 1, a: 1}
+        color: {r: 0.6320754, g: 0.11627804, b: 0.6056243, a: 1}
       selected:
-        useToken: 1
+        useToken: 0
         token: PrimaryHover
-        color: {r: 1, g: 1, b: 1, a: 1}
+        color: {r: 0.6313726, g: 0.11764707, b: 0.6039216, a: 1}
       disabled:
         useToken: 1
         token: Outline
         color: {r: 1, g: 1, b: 1, a: 1}
     contentToken: TextDefault
-  buttonSizes: []
+  buttonSizes:
+  - name: xl
+    height: 64
+    labelStyle: ButtonLabel
   iconOverlay: {fileID: 0}
   spacingScale:
   - 0

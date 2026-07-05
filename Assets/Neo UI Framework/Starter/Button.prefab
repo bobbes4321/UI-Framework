@@ -531,6 +531,7 @@ MonoBehaviour:
         reference: 2
         customColor: {r: 1, g: 1, b: 1, a: 1}
         themeToken: 
+    sourcePreset: 
   highlightedAnimation:
     purpose: 4
     move:
@@ -797,6 +798,7 @@ MonoBehaviour:
         reference: 2
         customColor: {r: 1, g: 1, b: 1, a: 1}
         themeToken: 
+    sourcePreset: 
   pressedAnimation:
     purpose: 4
     move:
@@ -1063,6 +1065,7 @@ MonoBehaviour:
         reference: 2
         customColor: {r: 1, g: 1, b: 1, a: 1}
         themeToken: 
+    sourcePreset: 
   selectedAnimation:
     purpose: 4
     move:
@@ -1329,6 +1332,7 @@ MonoBehaviour:
         reference: 2
         customColor: {r: 1, g: 1, b: 1, a: 1}
         themeToken: 
+    sourcePreset: 
   disabledAnimation:
     purpose: 4
     move:
@@ -1595,6 +1599,7 @@ MonoBehaviour:
         reference: 2
         customColor: {r: 1, g: 1, b: 1, a: 1}
         themeToken: 
+    sourcePreset: 
 --- !u!114 &6068283290798254870
 MonoBehaviour:
   m_ObjectHideFlags: 0

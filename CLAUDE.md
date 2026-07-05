@@ -19,7 +19,9 @@ icons, variants, theme bundles, juice — phased, with acceptance criteria):
 - `Assets/Neo UI Framework/Editor` — asmdef `Neo.UI.Editor` (inspectors in `Inspectors/`,
   property drawers in `Drawers/`, flow graph window in `Flow/`, agent spec tooling in `Agent/`).
 - `Assets/Neo UI Framework/Editor/EditorUI` — asmdef `Neo.EditorUI`: **standalone** editor
-  tooling kit (NeoGUI, NeoColors, NeoStyles, NeoSearchablePopup, NeoDropdown, NeoListView). It must keep
+  tooling kit (NeoGUI, NeoColors, NeoStyles, NeoSearchablePopup, NeoDropdown, NeoListView, NeoForm —
+  the measure/draw form layout for multi-row list elements; describe rows once, height and drawing both
+  derive from it, rendered as padded cards via `NeoListView.DrawForm`). It must keep
   zero references to Neo.UI so it stays liftable into other projects.
 - `Assets/Neo UI Framework/Tests` — EditMode + PlayMode test asmdefs.
 - `Assets/References/Doozy~` — Doozy 4 reference source (tilde = not imported). Port math/behavior
@@ -175,9 +177,18 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
     AND hand-added widgets all honor the one project choice. Edit defaults in the Setup wizard or the Design
     System **Motion** tab.
   - **Per-state inspector picker:** every animator inspector (`AnimationPreviewEditor.cs`,
-    `AnimatorEditorGUI.PresetPicker`) shows a searchable dropdown per slot — presets whose category suits the
-    slot's role first — that copies a preset into that state (`AnimationPresetRegistry.FullNamesForRole`/
-    `GetByFullName` are the shared option source for the picker, wizard and Motion tab).
+    `AnimatorEditorGUI.PresetPicker`) shows a Preset row per slot that opens
+    `AnimationPresetBrowserPopup` (the motion sibling of `PresetPickerPopup`): presets grouped by
+    category with the slot role's `SuggestedCategories` expanded on top and every other category
+    collapsed-but-reachable (relevance is a sort, never a hard filter), a search field, a "None" row +
+    a ✕ button that clear the slot, and **hover-to-preview** — dwelling on a preset plays it live on
+    the actual selected widget via the `AnimationPreview` snapshot/restore machinery, restored
+    untouched on close (single selection only; click applies via `UIAnimationPreset.CopyTo`, which
+    stamps `UIAnimation.sourcePreset` so the row shows/highlights what's applied). Every selectable
+    state maps to a role — `Selectable/Normal`/`Selected`/`Disabled` joined the built-ins, and
+    `UISelectableUIAnimator.Reset()` seeds all five slots from `animatorDefaults`.
+    (`AnimationPresetRegistry.FullNamesForRole`/`GetByFullName` remain the shared option source for
+    the wizard and Motion tab.)
   - **Per-element spec field** `"animations": { "hover", "press", "selected", "disabled", "loop" }` (preset
     NAMES, like a view's `showAnimation`): hover/press/selected/disabled drive a `UISelectableUIAnimator`,
     `loop` adds a play-on-start `UIAnimator`. The applied names are stamped on a `NeoAnimationSourceTag` so

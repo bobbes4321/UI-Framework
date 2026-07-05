@@ -51,6 +51,10 @@ MonoBehaviour:
     - Spin360
     - SquashStretch
     - Wobble
+  - category: Audio
+    names:
+    - Tonya_Minus
+    - Tonya_Plus
   - category: B
     names:
     - Go

@@ -40,13 +40,16 @@ namespace Neo.UI
             }
         }
 
-        // Editor-only: fired when the component is added (or context-menu Reset). Seeds the hover/press
-        // slots from the project's chosen defaults (Setup wizard / Design System), so a freshly-added
-        // animator already feels like the rest of the project. No-op when no defaults are configured.
+        // Editor-only: fired when the component is added (or context-menu Reset). Seeds every state
+        // slot from the project's chosen defaults (Setup wizard / Design System), so a freshly-added
+        // animator already feels like the rest of the project. No-op per slot when no default is set.
         protected virtual void Reset()
         {
+            NeoUISettings.ApplyDefaultAnimation(NeoAnimatorRoles.SelectableNormal, normalAnimation);
             NeoUISettings.ApplyDefaultAnimation(NeoAnimatorRoles.ButtonHover, highlightedAnimation);
             NeoUISettings.ApplyDefaultAnimation(NeoAnimatorRoles.ButtonPress, pressedAnimation);
+            NeoUISettings.ApplyDefaultAnimation(NeoAnimatorRoles.SelectableSelected, selectedAnimation);
+            NeoUISettings.ApplyDefaultAnimation(NeoAnimatorRoles.SelectableDisabled, disabledAnimation);
         }
 
         protected virtual void Awake()
