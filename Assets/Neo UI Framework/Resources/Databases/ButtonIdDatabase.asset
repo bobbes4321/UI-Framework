@@ -176,9 +176,16 @@ MonoBehaviour:
     - PaintModel
     - PlayFree
     - Quit
+  - category: None
+    names:
+    - None
   - category: Options
     names:
     - Back
+  - category: PM
+    names:
+    - OwnLoop
+    - Plain
   - category: Palette
     names:
     - Next
@@ -222,6 +229,9 @@ MonoBehaviour:
   - category: Prev
     names:
     - Go
+  - category: RT
+    names:
+    - DualNav
   - category: Reg
     names:
     - Del
@@ -236,6 +246,9 @@ MonoBehaviour:
     names:
     - Pick
   - category: Run
+    names:
+    - Play
+  - category: Scratch
     names:
     - Play
   - category: Settings

@@ -20,6 +20,7 @@ MonoBehaviour:
     - Press
   - category: Bp
     names:
+    - Anchor
     - Card
     - Plain
   - category: Cheats

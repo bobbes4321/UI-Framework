@@ -67,6 +67,14 @@ MonoBehaviour:
   - category: Playground
     names:
     - OnCtl
+  - category: RT
+    names:
+    - Agree
+    - TabOne
+  - category: Reg
+    names:
+    - Light
+    - Sidebar
   - category: Set
     names:
     - AutoRotate

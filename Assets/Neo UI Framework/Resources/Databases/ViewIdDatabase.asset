@@ -47,6 +47,9 @@ MonoBehaviour:
   - category: Dialog
     names:
     - Confirm
+  - category: Extra
+    names:
+    - Unused
   - category: Fx
     names:
     - Particles
@@ -106,6 +109,12 @@ MonoBehaviour:
     names:
     - Broken
     - Card
+  - category: OutlineRoot
+    names:
+    - Screen
+  - category: PM
+    names:
+    - Screen
   - category: Pre
     names:
     - Screen
@@ -113,17 +122,25 @@ MonoBehaviour:
     names:
     - Unknown
     - View
+  - category: RT
+    names:
+    - Screen
   - category: Race
     names:
     - Victory
   - category: Reg
     names:
     - Danger
+    - LightTab
     - Screen
+    - TabScreen
   - category: Round
     names:
     - Main
   - category: Run
+    names:
+    - Main
+  - category: Scratch
     names:
     - Main
   - category: Settings
@@ -143,6 +160,11 @@ MonoBehaviour:
     - Presets
     - TabsPanels
     - TogglesSwitches
+  - category: Sort
+    names:
+    - Alpha
+    - Mike
+    - Zebra
   - category: Spec
     names:
     - Bound
@@ -156,6 +178,7 @@ MonoBehaviour:
     - PaddingUniform4
     - Settings
     - Sizing
+    - Spacer
     - VFix
   - category: Starter
     names:
