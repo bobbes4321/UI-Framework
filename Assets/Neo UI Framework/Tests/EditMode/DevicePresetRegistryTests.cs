@@ -1,18 +1,29 @@
 using System.Collections.Generic;
 using Neo.UI.Editor;
 using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace Neo.UI.Tests
 {
     /// <summary>
-    /// Pillar C's device-preset registry (Pattern R, mirroring <see cref="ComposerCatalogKindsTests"/>):
+    /// Pillar C's device-preset registry (Pattern R, mirroring <see cref="NeoCatalogKindsTests"/>):
     /// <see cref="ComposerDevicePresets"/> ships a useful built-in spread through the seam,
     /// <see cref="ComposerDevicePresets.Register"/> adds/replaces a preset by id, and
     /// <see cref="UISpecPreview.DefaultResolutions"/> is a DERIVED view of the registry (single source
     /// of truth) so the headless agent matrix and the Composer viewport always agree.
+    /// <para>
+    /// Wave 9: <see cref="ComposerDevicePresets"/> migrated onto <see cref="NeoKeyedRegistry{T}"/> — a
+    /// Wave 4 migration it was mistakenly skipped for (audit A6's throw-in-<c>Register</c> bug lived
+    /// here until now). Added <see cref="Reset"/> plus the standard invalid-register-warns-never-throws
+    /// case every other migrated registry's mirror test already had.
+    /// </para>
     /// </summary>
     public class DevicePresetRegistryTests
     {
+        [TearDown]
+        public void Reset() => ComposerDevicePresets.ResetForTests();
+
         [Test]
         public void All_ShipsTheBuiltInSpread()
         {
@@ -54,6 +65,15 @@ namespace Neo.UI.Tests
         {
             Assert.IsFalse(ComposerDevicePresets.TryGet("nope-not-a-device", out _));
             Assert.IsFalse(ComposerDevicePresets.TryGet(null, out _));
+        }
+
+        [Test]
+        public void Register_EmptyId_WarnsAndIgnores_NeverThrows()
+        {
+            int before = ComposerDevicePresets.All.Count;
+            LogAssert.Expect(LogType.Warning, new System.Text.RegularExpressions.Regex(".*ComposerDevicePresets.*"));
+            Assert.DoesNotThrow(() => ComposerDevicePresets.Register(new DevicePreset("", "Bad", 100, 100)));
+            Assert.AreEqual(before, ComposerDevicePresets.All.Count, "an invalid entry must never be added");
         }
 
         [Test]
