@@ -24,7 +24,14 @@ namespace Neo.UI.Editor
 
         private static readonly Dictionary<RectTransform, Snapshot> Snapshots = new Dictionary<RectTransform, Snapshot>();
 
+        // After-Effects-style scrub: presence of a target's key IS the "scrub session active" flag
+        // (mirrors how Snapshots doubles as the Play/Stop session flag above), value is the last
+        // scrubbed progress (0..1) so the slider/playhead redraw at the same spot between repaints.
+        private static readonly Dictionary<RectTransform, float> ScrubProgress = new Dictionary<RectTransform, float>();
+
         public static bool IsPreviewing(RectTransform target) => target != null && Snapshots.ContainsKey(target);
+
+        public static bool IsScrubbing(RectTransform target) => target != null && ScrubProgress.ContainsKey(target);
 
         public static void BeginPreview(RectTransform target)
         {
@@ -89,9 +96,129 @@ namespace Neo.UI.Editor
                     if (GUILayout.Button("■ Stop", EditorStyles.miniButtonRight))
                     {
                         StopPreview(animation, target);
+                        ScrubProgress.Remove(target);
                     }
                 }
             }
+
+            DrawScrubber(animation, target);
+            DrawChannelLanes(animation, target);
+        }
+
+        // ------------------------------------------------------------------ scrub bar
+
+        /// <summary> Horizontal 0..1 progress slider that poses the animation without playing it. </summary>
+        private static void DrawScrubber(UIAnimation animation, RectTransform target)
+        {
+            bool disabled = target == null || !animation.hasEnabledChannels;
+            float total = animation.totalDuration;
+            float progress = ScrubProgress.TryGetValue(target, out float stored) ? stored : 0f;
+
+            using (new EditorGUI.DisabledScope(disabled))
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                s_scrubLabelContent.tooltip = disabled
+                    ? "Enable at least one channel to scrub."
+                    : "Drag to pose the animation at any point in time — stays posed until Stop or a new scrub.";
+                GUILayout.Label(s_scrubLabelContent, GUILayout.Width(38f));
+
+                EditorGUI.BeginChangeCheck();
+                float next = GUILayout.HorizontalSlider(progress, 0f, 1f);
+                bool changed = EditorGUI.EndChangeCheck();
+
+                GUILayout.Label($"{next * total:0.00}s / {total:0.00}s", EditorStyles.miniLabel, GUILayout.Width(90f));
+
+                if (changed && !disabled) BeginOrContinueScrub(animation, target, next);
+            }
+        }
+
+        /// <summary>
+        /// First value-change of a scrub session halts any running tween and prepares the animation
+        /// exactly like the Play/Reverse/From/To buttons (<see cref="PreparePreview"/>) so the scrub
+        /// starts from a known, snapshot-restorable pose; every later change just re-poses.
+        /// </summary>
+        private static void BeginOrContinueScrub(UIAnimation animation, RectTransform target, float progress)
+        {
+            if (!ScrubProgress.ContainsKey(target))
+            {
+                if (animation.isActive) animation.Stop(silent: true);
+                PreparePreview(animation, target);
+            }
+            ScrubProgress[target] = progress;
+            animation.SetProgressAt(progress);
+            SceneView.RepaintAll();
+        }
+
+        // ------------------------------------------------------------------ channel lanes
+
+        private static readonly GUIContent s_scrubLabelContent = new GUIContent("Scrub");
+        private static readonly GUIContent s_laneHoverContent = new GUIContent(string.Empty);
+        private static GUIStyle s_laneLabelStyle;
+
+        private static GUIStyle LaneLabelStyle => s_laneLabelStyle ?? (s_laneLabelStyle = new GUIStyle(EditorStyles.miniLabel)
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontStyle = FontStyle.Bold
+        });
+
+        /// <summary>
+        /// Read-only strip below the scrubber: one thin bar per enabled channel spanning
+        /// [startDelay, startDelay+duration] over the animation's total duration, plus a playhead
+        /// while a scrub session is active. Draws nothing when no channel is enabled.
+        /// </summary>
+        private static void DrawChannelLanes(UIAnimation animation, RectTransform target)
+        {
+            if (!animation.hasEnabledChannels) return;
+
+            float total = animation.totalDuration;
+            bool showPlayhead = IsScrubbing(target);
+            float scrubSeconds = showPlayhead && ScrubProgress.TryGetValue(target, out float p) ? p * total : 0f;
+
+            GUILayout.Space(2f);
+            DrawChannelLane('M', animation.move.enabled, animation.move.settings, NeoColors.Animation, total, scrubSeconds, showPlayhead);
+            DrawChannelLane('R', animation.rotate.enabled, animation.rotate.settings, NeoColors.Data, total, scrubSeconds, showPlayhead);
+            DrawChannelLane('S', animation.scale.enabled, animation.scale.settings, NeoColors.Rendering, total, scrubSeconds, showPlayhead);
+            DrawChannelLane('F', animation.fade.enabled, animation.fade.settings, NeoColors.Interactive, total, scrubSeconds, showPlayhead);
+            DrawChannelLane('C', animation.color.enabled, animation.color.settings, NeoColors.Theming, total, scrubSeconds, showPlayhead);
+        }
+
+        private static void DrawChannelLane(char label, bool enabled, TweenSettings settings, Color tint,
+            float total, float scrubSeconds, bool showPlayhead)
+        {
+            if (!enabled) return;
+
+            const float labelWidth = 14f;
+            Rect row = GUILayoutUtility.GetRect(10f, 12f, GUILayout.ExpandWidth(true));
+            var labelRect = new Rect(row.x, row.y, labelWidth, row.height);
+            var barRect = new Rect(row.x + labelWidth, row.y + 1f, row.width - labelWidth, row.height - 2f);
+
+            GUI.Label(labelRect, label.ToString(), LaneLabelStyle);
+            EditorGUI.DrawRect(barRect, NeoColors.TextDim.WithAlpha(0.18f));
+
+            float delay = settings.startDelay;
+            float duration = settings.duration;
+            if (total > 0f)
+            {
+                float startFrac = Mathf.Clamp01(delay / total);
+                float endFrac = Mathf.Clamp01((delay + duration) / total);
+                if (endFrac > startFrac)
+                {
+                    var segment = new Rect(barRect.x + barRect.width * startFrac, barRect.y,
+                        barRect.width * (endFrac - startFrac), barRect.height);
+                    EditorGUI.DrawRect(segment, tint);
+                }
+            }
+
+            if (showPlayhead && total > 0f)
+            {
+                float x = barRect.x + barRect.width * Mathf.Clamp01(scrubSeconds / total);
+                EditorGUI.DrawRect(new Rect(x, row.y, 1.5f, row.height), NeoColors.TextTitle);
+            }
+
+            // Invisible label over the bar purely to surface a tooltip on hover — cheap (no texture/
+            // style allocation) and the GUIContent instance is reused across every lane/repaint.
+            s_laneHoverContent.tooltip = $"delay {delay:0.00}s · duration {duration:0.00}s · {settings.ease}";
+            GUI.Label(barRect, s_laneHoverContent);
         }
 
         private static void PreparePreview(UIAnimation animation, RectTransform target)

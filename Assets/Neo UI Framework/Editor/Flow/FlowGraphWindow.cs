@@ -12,9 +12,10 @@ using UnityEngine.UIElements;
 namespace Neo.UI.Editor
 {
     /// <summary>
-    /// Flow graph editor: pan/zoom/grid, node create menu, minimap, side inspector for the selected
-    /// node, undo-aware editing — and runtime debugging: in play mode the active node and its
-    /// traversal trail highlight live.
+    /// Flow graph editor: pan/zoom/grid, search-as-you-type + drag-off-port node creation,
+    /// organizational groups, minimap, side inspector for the selected node, undo-aware editing —
+    /// and runtime debugging: in play mode the active node highlights live, traversed edges flash,
+    /// and a breadcrumb strip tracks the controller's history.
     ///
     /// The node inspector uses ONE cached SerializedObject (so foldout/expansion state survives
     /// between frames) and never rebuilds the graph view on value edits (so typing in the name field
@@ -28,9 +29,9 @@ namespace Neo.UI.Editor
         [SerializeField] private FlowGraph _graph; // serialized: survives domain reloads
         private FlowGraphView _graphView;
         private IMGUIContainer _inspector;
+        private VisualElement _breadcrumbRoot;
         private FlowController _liveController;
-        private string _liveActiveNode;
-        private readonly List<string> _liveTrail = new List<string>();
+        private string _liveActiveNodeName;
 
         // node inspector state — cached so IMGUI state (foldouts, list expansion) survives frames
         private SerializedObject _serializedGraph;
@@ -85,7 +86,7 @@ namespace Neo.UI.Editor
         {
             BuildUI();
             EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
-            if (Application.isPlaying) EditorApplication.update += PollRuntimeState;
+            if (Application.isPlaying) TryBindLiveController(); // window opened mid-play-session
             Undo.undoRedoPerformed += OnUndoRedo;
             UnityEditor.Selection.selectionChanged += OnGlobalSelectionChanged;
         }
@@ -93,24 +94,34 @@ namespace Neo.UI.Editor
         private void OnDisable()
         {
             EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
-            EditorApplication.update -= PollRuntimeState;
             Undo.undoRedoPerformed -= OnUndoRedo;
             UnityEditor.Selection.selectionChanged -= OnGlobalSelectionChanged;
+            UnbindLiveController();
             _serializedGraph?.Dispose();
             _serializedGraph = null;
         }
 
-        // Only pay the per-frame poll cost while actually playing — an editor-tick subscription for
-        // live highlight has no work to do in edit mode.
+        // Runtime debugging is entirely event-driven (FlowController.OnActiveNodeChanged/OnAdvanced)
+        // — no editor-tick subscription, in play mode or otherwise.
         private void OnPlayModeStateChanged(PlayModeStateChange change)
         {
             if (change == PlayModeStateChange.EnteredPlayMode)
-                EditorApplication.update += PollRuntimeState;
+            {
+                TryBindLiveController();
+                // a dynamically-instantiated controller (e.g. spawned from a bootstrap prefab) may
+                // not be registered yet the instant play mode is entered — one deferred retry, not a
+                // recurring poll, catches that without an ongoing tick subscription.
+                if (_liveController == null) EditorApplication.delayCall += RetryBindLiveControllerOnce;
+            }
             else if (change == PlayModeStateChange.ExitingPlayMode)
             {
-                EditorApplication.update -= PollRuntimeState;
-                PollRuntimeState(); // clear any live highlight left over from the play session
+                UnbindLiveController();
             }
+        }
+
+        private void RetryBindLiveControllerOnce()
+        {
+            if (Application.isPlaying) TryBindLiveController();
         }
 
         private void BuildUI()
@@ -160,14 +171,31 @@ namespace Neo.UI.Editor
             inspectorRoot.Add(_inspector);
             split.Add(inspectorRoot);
 
+            // play-mode breadcrumb strip — hidden until a live controller is bound, updated only on
+            // node-change events (never per frame)
+            _breadcrumbRoot = new VisualElement
+            {
+                style =
+                {
+                    flexDirection = FlexDirection.Row,
+                    height = 22f,
+                    paddingLeft = 6f,
+                    paddingRight = 6f,
+                    alignItems = Align.Center,
+                    borderTopWidth = 1f,
+                    borderTopColor = new Color(0f, 0f, 0f, 0.35f),
+                    display = DisplayStyle.None,
+                }
+            };
+            rootVisualElement.Add(_breadcrumbRoot);
+
             if (_graph != null) _graphView.Populate(_graph);
         }
 
         public void SetGraph(FlowGraph graph)
         {
             _graph = graph;
-            _liveController = null;
-            _liveTrail.Clear();
+            UnbindLiveController();
             _inspectedNode = null;
             _inspectedSignature = null;
             _serializedGraph?.Dispose();
@@ -175,6 +203,7 @@ namespace Neo.UI.Editor
             // populate even when null so clearing the field empties the view (a stale view would
             // keep writing into the unloaded asset)
             _graphView?.Populate(graph);
+            if (Application.isPlaying) TryBindLiveController();
         }
 
         private void OnUndoRedo()
@@ -227,8 +256,8 @@ namespace Neo.UI.Editor
             if (UnityEditor.Selection.activeGameObject == null) return;
             var controller = UnityEditor.Selection.activeGameObject.GetComponent<FlowController>();
             if (controller == null || controller.flow == null) return;
-            if (_graph != controller.flow) SetGraph(controller.flow);
-            _liveController = controller;
+            if (_graph != controller.flow) SetGraph(controller.flow); // rebinds via TryBindLiveController
+            BindLiveController(controller); // pins the SPECIFIC selected controller (several may share a flow)
         }
 
         private void DrawSelectedNodeInspector()
@@ -422,46 +451,131 @@ namespace Neo.UI.Editor
         }
 
         // ------------------------------------------------------------------ runtime debugging
+        //
+        // Entirely event-driven off FlowController.OnActiveNodeChanged/OnAdvanced — no editor-tick
+        // polling. TryBindLiveController runs once on entering play mode, on SetGraph, and (via
+        // OnGlobalSelectionChanged) when the user selects a FlowController GameObject.
 
-        private void PollRuntimeState()
+        /// <summary> Finds the FlowController running the window's graph and binds to it. If several
+        /// controllers share the same flow asset this silently takes the first — TODO: surface a
+        /// controller picker instead once that's a real scenario (selecting the GameObject directly
+        /// still pins the exact one via <see cref="OnGlobalSelectionChanged"/>). </summary>
+        private void TryBindLiveController()
         {
-            if (!Application.isPlaying || _graph == null || _graphView == null)
+            if (_graph == null || !Application.isPlaying)
             {
-                if (_liveActiveNode != null)
-                {
-                    _liveActiveNode = null;
-                    _liveTrail.Clear();
-                    _graphView?.UpdateLiveHighlight(null, _liveTrail);
-                }
+                UnbindLiveController();
                 return;
             }
+            FlowController found = FlowController.allControllers.FirstOrDefault(c => c.flow == _graph);
+            if (found != _liveController) BindLiveController(found);
+        }
 
-            if (_liveController == null || _liveController.flow != _graph)
-                _liveController = FlowController.allControllers.FirstOrDefault(c => c.flow == _graph);
+        private void BindLiveController(FlowController controller)
+        {
+            UnbindLiveController();
+            _liveController = controller;
+            if (_liveController == null) return;
+            _liveController.OnActiveNodeChanged += OnLiveActiveNodeChanged;
+            _liveController.OnAdvanced += OnLiveAdvanced;
+            OnLiveActiveNodeChanged(_liveController.activeNode); // sync current state immediately
+        }
 
-            string active = _liveController != null && _liveController.activeNode != null
-                ? _liveController.activeNode.name
-                : null;
-
-            if (active == _liveActiveNode) return;
-            if (_liveActiveNode != null)
+        private void UnbindLiveController()
+        {
+            if (_liveController != null)
             {
-                _liveTrail.Add(_liveActiveNode);
-                if (_liveTrail.Count > 10) _liveTrail.RemoveAt(0);
+                _liveController.OnActiveNodeChanged -= OnLiveActiveNodeChanged;
+                _liveController.OnAdvanced -= OnLiveAdvanced;
             }
-            _liveActiveNode = active;
-            _graphView.UpdateLiveHighlight(active, _liveTrail);
+            _liveController = null;
+            ClearLiveVisuals();
+        }
+
+        private void ClearLiveVisuals()
+        {
+            if (_liveActiveNodeName != null) _graphView?.GetViewByName(_liveActiveNodeName)?.ClearHighlight();
+            _liveActiveNodeName = null;
+            UpdateBreadcrumb();
+        }
+
+        /// <summary> Restyles in place — no Populate — matching the runtime clone's active node back
+        /// to this window's design-time view by NAME (never by reference: the controller runs a
+        /// clone of the asset graph). </summary>
+        private void OnLiveActiveNodeChanged(FlowNode node)
+        {
+            if (_graphView == null) return;
+            if (_liveActiveNodeName != null) _graphView.GetViewByName(_liveActiveNodeName)?.ClearHighlight();
+            _liveActiveNodeName = node != null ? node.name : null;
+            if (_liveActiveNodeName != null) _graphView.GetViewByName(_liveActiveNodeName)?.SetHighlight(NeoColors.Flow, 2f);
+            UpdateBreadcrumb();
+        }
+
+        /// <summary> Flashes the edge the flow just traversed (matched by the FROM node's name +
+        /// output index — the runtime edge is a clone, never the design-time one). Jumps
+        /// (<c>viaEdge == null</c>) have nothing to flash. </summary>
+        private void OnLiveAdvanced(FlowNode node, FlowEdge edge)
+        {
+            if (edge == null || _liveController == null || _graphView == null) return;
+            FlowNode fromNode = _liveController.previousNode;
+            if (fromNode == null) return;
+            int portIndex = fromNode.outputs.IndexOf(edge);
+            if (portIndex < 0) return;
+            FlowNodeView fromView = _graphView.GetViewByName(fromNode.name);
+            if (fromView != null) _graphView.FlashEdge(fromView, portIndex);
+        }
+
+        /// <summary> Rebuilds the play-mode breadcrumb strip from the live controller's history —
+        /// only called from node-change events, never per frame. </summary>
+        private void UpdateBreadcrumb()
+        {
+            if (_breadcrumbRoot == null) return;
+            if (_liveController == null)
+            {
+                _breadcrumbRoot.style.display = DisplayStyle.None;
+                _breadcrumbRoot.Clear();
+                return;
+            }
+            _breadcrumbRoot.style.display = DisplayStyle.Flex;
+            _breadcrumbRoot.Clear();
+
+            // history is a stack (most-recent first) — walk it oldest-to-newest so the strip reads
+            // left-to-right like a breadcrumb trail, capped to the last 8 entries plus the active node
+            var trail = _liveController.history.Take(8).Reverse().ToList();
+            if (_liveActiveNodeName != null) trail.Add(_liveActiveNodeName);
+
+            for (int i = 0; i < trail.Count; i++)
+            {
+                if (i > 0)
+                    _breadcrumbRoot.Add(new Label(">")
+                        { style = { color = new Color(1f, 1f, 1f, 0.35f), marginLeft = 3f, marginRight = 3f } });
+
+                string nodeName = trail[i];
+                bool isActive = i == trail.Count - 1;
+                var crumb = new Label(nodeName)
+                    { style = { color = isActive ? NeoColors.Flow : new Color(0.85f, 0.85f, 0.88f) } };
+                if (isActive) crumb.style.unityFontStyleAndWeight = FontStyle.Bold;
+                crumb.RegisterCallback<MouseDownEvent>(_ => JumpToNode(nodeName));
+                _breadcrumbRoot.Add(crumb);
+            }
         }
     }
 
-    /// <summary> The GraphView surface: nodes, edges, create menu, minimap, live highlight. </summary>
+    /// <summary> The GraphView surface: nodes, edges, groups, search-as-you-type + drag-off-port
+    /// creation, minimap, live highlight. </summary>
     public class FlowGraphView : GraphView
     {
-        private static readonly Color ActiveColor = new Color(0.2f, 0.9f, 0.3f);
-        private static readonly Color TrailColor = new Color(0.2f, 0.5f, 0.9f);
-
         private readonly FlowGraphWindow _window;
         private FlowGraph _graph;
+        private readonly FlowNodeSearchWindowProvider _searchWindowProvider;
+
+        /// <summary> The graph asset currently rendered — read-only outside this file (the search
+        /// window provider needs it to list "Go To Node" targets). </summary>
+        internal FlowGraph Graph => _graph;
+
+        /// <summary> Shared with every output port's <see cref="FlowPortConnectorListener"/> so a
+        /// drag-off-port opens the SAME search window instance as the canvas's create menu. </summary>
+        internal FlowNodeSearchWindowProvider SearchProvider => _searchWindowProvider;
 
         public FlowGraphView(FlowGraphWindow window)
         {
@@ -483,7 +597,24 @@ namespace Neo.UI.Editor
             StyleSheet sheet = LoadStyleSheet();
             if (sheet != null) styleSheets.Add(sheet);
 
+            _searchWindowProvider = ScriptableObject.CreateInstance<FlowNodeSearchWindowProvider>();
+            _searchWindowProvider.Initialize(this, window);
+            nodeCreationRequest = OnNodeCreationRequest;
+            elementsAddedToGroup = OnElementsAddedToGroup;
+            elementsRemovedFromGroup = OnElementsRemovedFromGroup;
+            groupTitleChanged = OnGroupTitleChanged;
+
             graphViewChanged = OnGraphViewChanged;
+        }
+
+        /// <summary> The canvas's native "Create Node" entry point (right-click empty space / the
+        /// stock node-creation shortcut) — opens the same search-as-you-type window a drag-off-port
+        /// does, with no source port to wire. </summary>
+        private void OnNodeCreationRequest(NodeCreationContext ctx)
+        {
+            if (_graph == null) return;
+            _searchWindowProvider.PrepareGeneralCreate();
+            SearchWindow.Open(new SearchWindowContext(ctx.screenMousePosition), _searchWindowProvider);
         }
 
         private const string StyleSheetPath = "Assets/Neo UI Framework/Editor/Flow/FlowGraph.uss";
@@ -555,10 +686,24 @@ namespace Neo.UI.Editor
             if (graph == null) return;
 
             foreach (FlowNode node in graph.nodes.Where(n => n != null))
-                AddElement(new FlowNodeView(node, graph));
+                AddElement(new FlowNodeView(node, graph, this));
 
             foreach (FlowNodeView nodeView in nodes.OfType<FlowNodeView>().ToList())
                 CreateEdgesFor(nodeView);
+
+            // groups are pure organizational metadata (Blender-frame style) — render last so their
+            // frames wrap around already-placed node views; a group referencing a since-deleted node
+            // name just skips it rather than throwing
+            foreach (FlowGroup group in graph.groups)
+            {
+                var groupView = new FlowGroupView(group);
+                AddElement(groupView);
+                foreach (string nodeName in group.nodeNames.ToList())
+                {
+                    FlowNodeView memberView = GetViewByName(nodeName);
+                    if (memberView != null) groupView.AddElement(memberView);
+                }
+            }
 
             RefreshEdgeFocus();
         }
@@ -589,6 +734,11 @@ namespace Neo.UI.Editor
         public FlowNodeView GetView(FlowNode node) =>
             nodes.OfType<FlowNodeView>().FirstOrDefault(v => v.node == node);
 
+        /// <summary> Matches by node NAME, never by reference — the play-mode debugging hooks only
+        /// ever have a runtime clone's node, never the design-time asset's. </summary>
+        public FlowNodeView GetViewByName(string name) =>
+            nodes.OfType<FlowNodeView>().FirstOrDefault(v => v.node.name == name);
+
         private void CreateEdgesFor(FlowNodeView nodeView)
         {
             for (int i = 0; i < nodeView.node.outputs.Count && i < nodeView.outputPorts.Count; i++)
@@ -602,14 +752,17 @@ namespace Neo.UI.Editor
             }
         }
 
-        public void UpdateLiveHighlight(string activeNodeName, List<string> trail)
+        /// <summary> Briefly highlights the edge leaving <paramref name="fromView"/>'s output port at
+        /// <paramref name="portIndex"/> — the play-mode "flow just crossed this edge" pulse. Restores
+        /// itself via a one-shot scheduled callback, not a tick subscription. </summary>
+        public void FlashEdge(FlowNodeView fromView, int portIndex)
         {
-            foreach (FlowNodeView view in nodes.OfType<FlowNodeView>())
-            {
-                if (view.node.name == activeNodeName) view.SetHighlight(ActiveColor, 3f);
-                else if (trail.Contains(view.node.name)) view.SetHighlight(TrailColor, 1.5f);
-                else view.ClearHighlight();
-            }
+            if (fromView == null || portIndex < 0 || portIndex >= fromView.outputPorts.Count) return;
+            Port outputPort = fromView.outputPorts[portIndex];
+            Edge target = edges.ToList().FirstOrDefault(e => e.output == outputPort);
+            if (target == null) return;
+            target.AddToClassList("flow-edge--pulse");
+            target.schedule.Execute(() => target.RemoveFromClassList("flow-edge--pulse")).StartingIn(600);
         }
 
         public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
@@ -633,6 +786,16 @@ namespace Neo.UI.Editor
                     AddCreateEntry(evt, graphPosition, descriptor);
                 evt.menu.AppendSeparator();
             }
+
+            List<FlowNodeView> selectedNodes = selection.OfType<FlowNodeView>().ToList();
+            if (_graph != null && selectedNodes.Count > 0)
+            {
+                evt.menu.AppendAction("Group Selection", _ => GroupSelection(selectedNodes));
+                evt.menu.AppendSeparator();
+            }
+
+            // the base implementation is also what turns on the "Create Node" entry it wires to
+            // nodeCreationRequest — keep it last so cut/copy/paste/delete stay at the menu's tail
             base.BuildContextualMenu(evt);
         }
 
@@ -640,15 +803,72 @@ namespace Neo.UI.Editor
         {
             evt.menu.AppendAction($"Create Node/{descriptor.menuLabel}", _ =>
             {
-                Undo.RecordObject(_graph, "Create Flow Node");
-                FlowNode node = descriptor.create();
-                node.name = _graph.MakeUniqueNodeName(descriptor.menuLabel);
-                node.position = position;
-                _graph.nodes.Add(node);
-                descriptor.seedDefaultOutputs(node);
-                EditorUtility.SetDirty(_graph);
+                CreateNodeAt(descriptor, position, "Create Flow Node");
                 PopulatePreservingSelection();
+                _window.RaiseExternalChanged();
             });
+        }
+
+        /// <summary> Core node-creation recipe shared by the right-click menu, the search-as-you-type
+        /// window and drag-off-port creation: instantiate, uniquely name, position, add to the
+        /// graph, seed default outputs. Callers repopulate afterward (batching in any edge wiring
+        /// first, so port-drag creation is one undo step, not two). </summary>
+        private FlowNode CreateNodeAt(FlowNodeDescriptor descriptor, Vector2 position, string undoLabel)
+        {
+            Undo.RecordObject(_graph, undoLabel);
+            FlowNode node = descriptor.create();
+            node.name = _graph.MakeUniqueNodeName(descriptor.menuLabel);
+            node.position = position;
+            _graph.nodes.Add(node);
+            descriptor.seedDefaultOutputs(node);
+            EditorUtility.SetDirty(_graph);
+            return node;
+        }
+
+        /// <summary> Node creation from the Blueprint-style search window opened on empty canvas —
+        /// no source port to wire. </summary>
+        internal void CreateNodeFromSearch(FlowNodeDescriptor descriptor, Vector2 position)
+        {
+            if (_graph == null) return;
+            CreateNodeAt(descriptor, position, "Create Flow Node");
+            PopulatePreservingSelection();
+            _window.RaiseExternalChanged();
+        }
+
+        /// <summary> Node creation from dragging a connection off an output port into empty space:
+        /// creates the node AND wires the source port's edge to it, one undo step. </summary>
+        internal void CreateNodeFromPortDrag(FlowNodeDescriptor descriptor, Vector2 position, FlowNodeView sourceView, int sourcePortIndex)
+        {
+            if (_graph == null || sourceView == null) return;
+            FlowNode node = CreateNodeAt(descriptor, position, "Create Flow Node");
+            if (sourcePortIndex >= 0 && sourcePortIndex < sourceView.node.outputs.Count)
+                sourceView.node.outputs[sourcePortIndex].toNode = node.name;
+            PopulatePreservingSelection();
+            _window.RaiseExternalChanged();
+        }
+
+        /// <summary> Selects and frames an existing node by name — the "Go To Node" half of the
+        /// search window. </summary>
+        internal void JumpToNodeByName(string name)
+        {
+            FlowNode node = _graph?.GetNode(name);
+            if (node != null) FrameNode(node);
+        }
+
+        /// <summary> Wraps the current node selection in a new organizational <see cref="FlowGroup"/>
+        /// (Blender-frame style — zero execution semantics, default title "Group", default tint). </summary>
+        private void GroupSelection(List<FlowNodeView> selectedNodes)
+        {
+            if (_graph == null || selectedNodes.Count == 0) return;
+            Undo.RecordObject(_graph, "Group Flow Nodes");
+            var group = new FlowGroup();
+            foreach (FlowNodeView view in selectedNodes)
+                if (!group.nodeNames.Contains(view.node.name))
+                    group.nodeNames.Add(view.node.name);
+            _graph.groups.Add(group);
+            EditorUtility.SetDirty(_graph);
+            PopulatePreservingSelection();
+            _window.RaiseExternalChanged();
         }
 
         /// <summary>
@@ -720,12 +940,22 @@ namespace Neo.UI.Editor
                             _graph.RemoveNode(nodeView.node.name);
                             dirty = true;
                             break;
+                        case FlowGroupView groupView:
+                            // deletes the organizational frame only — its member nodes are untouched,
+                            // matching Blender-frame semantics
+                            Undo.RecordObject(_graph, "Delete Flow Group");
+                            _graph.groups.Remove(groupView.data);
+                            dirty = true;
+                            break;
                     }
                 }
             }
 
             if (change.movedElements != null)
             {
+                // GraphView bundles a dragged group's contained nodes into the same movedElements
+                // batch as the group itself, so this generic "any FlowNodeView" loop already
+                // persists positions for grouped nodes with no special-casing needed.
                 foreach (GraphElement element in change.movedElements)
                 {
                     if (element is FlowNodeView nodeView)
@@ -744,6 +974,113 @@ namespace Neo.UI.Editor
             }
             return change;
         }
+
+        // ---- group membership / rename — GraphView-level callbacks, no Group subclass needed ----
+
+        private void OnElementsAddedToGroup(Group group, IEnumerable<GraphElement> elements)
+        {
+            if (_graph == null || !(group is FlowGroupView groupView)) return;
+            List<string> toAdd = elements.OfType<FlowNodeView>().Select(v => v.node.name)
+                .Where(name => !groupView.data.nodeNames.Contains(name)).ToList();
+            if (toAdd.Count == 0) return; // e.g. Populate() reparenting nodes that already belong
+            Undo.RecordObject(_graph, "Add To Flow Group");
+            groupView.data.nodeNames.AddRange(toAdd);
+            EditorUtility.SetDirty(_graph);
+            _window.RaiseExternalChanged();
+        }
+
+        private void OnElementsRemovedFromGroup(Group group, IEnumerable<GraphElement> elements)
+        {
+            if (_graph == null || !(group is FlowGroupView groupView)) return;
+            List<string> toRemove = elements.OfType<FlowNodeView>().Select(v => v.node.name)
+                .Where(name => groupView.data.nodeNames.Contains(name)).ToList();
+            if (toRemove.Count == 0) return;
+            Undo.RecordObject(_graph, "Remove From Flow Group");
+            foreach (string name in toRemove) groupView.data.nodeNames.Remove(name);
+            EditorUtility.SetDirty(_graph);
+            _window.RaiseExternalChanged();
+        }
+
+        private void OnGroupTitleChanged(Group group, string newTitle)
+        {
+            if (_graph == null || !(group is FlowGroupView groupView) || groupView.data.title == newTitle) return;
+            Undo.RecordObject(_graph, "Rename Flow Group");
+            groupView.data.title = newTitle;
+            EditorUtility.SetDirty(_graph);
+            _window.RaiseExternalChanged();
+        }
+    }
+
+    /// <summary> Visual group frame for a <see cref="FlowGroup"/> — pure organizational metadata,
+    /// zero execution semantics (Blender-frame style). Owns the backing data so the GraphView-level
+    /// membership/rename callbacks (<see cref="FlowGraphView"/>) can write straight back into the
+    /// asset without a lookup table. </summary>
+    public class FlowGroupView : Group
+    {
+        public readonly FlowGroup data;
+
+        public FlowGroupView(FlowGroup group)
+        {
+            data = group;
+            title = group.title;
+            // a translucent wash of the group's tint over the whole frame — simplest robust option
+            // since Group's internal chrome (Scope-based) doesn't expose a dedicated tint hook
+            style.backgroundColor = new Color(group.tint.r, group.tint.g, group.tint.b, 0.18f);
+        }
+    }
+
+    /// <summary>
+    /// Wired onto every output port in place of its default edge connector (Blueprint-style
+    /// "drag off a pin to create a node"). A normal port-to-port drop still writes the edge through
+    /// <see cref="FlowGraphView.OnGraphViewChanged"/> exactly like the connector it replaces — this
+    /// class's <see cref="OnDrop"/> reimplements <c>Port.DefaultEdgeConnectorListener.OnDrop</c>
+    /// (single-capacity cleanup + the standard graphViewChanged round trip) rather than bypassing it,
+    /// so swapping the manipulator never changes existing drag-to-connect behavior. Dropping in empty
+    /// space instead opens the search window remembering the source port, wiring the new node's
+    /// inbound edge once a kind is picked.
+    /// </summary>
+    internal class FlowPortConnectorListener : IEdgeConnectorListener
+    {
+        private readonly FlowGraphView _view;
+        private readonly FlowNodeView _sourceNodeView;
+        private readonly int _sourcePortIndex;
+
+        public FlowPortConnectorListener(FlowGraphView view, FlowNodeView sourceNodeView, int sourcePortIndex)
+        {
+            _view = view;
+            _sourceNodeView = sourceNodeView;
+            _sourcePortIndex = sourcePortIndex;
+        }
+
+        public void OnDrop(GraphView graphView, Edge edge)
+        {
+            var edgesToCreate = new List<Edge> { edge };
+            var edgesToDelete = new List<GraphElement>();
+            if (edge.input != null && edge.input.capacity == Port.Capacity.Single)
+                foreach (Edge existing in edge.input.connections)
+                    if (existing != edge) edgesToDelete.Add(existing);
+            if (edge.output != null && edge.output.capacity == Port.Capacity.Single)
+                foreach (Edge existing in edge.output.connections)
+                    if (existing != edge) edgesToDelete.Add(existing);
+            if (edgesToDelete.Count > 0) graphView.DeleteElements(edgesToDelete);
+
+            List<Edge> created = edgesToCreate;
+            if (graphView.graphViewChanged != null)
+                created = graphView.graphViewChanged(new GraphViewChange { edgesToCreate = edgesToCreate }).edgesToCreate;
+
+            foreach (Edge createdEdge in created)
+            {
+                graphView.AddElement(createdEdge);
+                createdEdge.input?.Connect(createdEdge);
+                createdEdge.output?.Connect(createdEdge);
+            }
+        }
+
+        public void OnDropOutsidePort(Edge edge, Vector2 position)
+        {
+            _view.SearchProvider.PrepareForPortDrag(_sourceNodeView, _sourcePortIndex);
+            SearchWindow.Open(new SearchWindowContext(GUIUtility.GUIToScreenPoint(position)), _view.SearchProvider);
+        }
     }
 
     /// <summary> Visual node: one input port, one output port per FlowEdge. </summary>
@@ -754,11 +1091,13 @@ namespace Neo.UI.Editor
         public readonly List<Port> outputPorts = new List<Port>();
 
         private readonly FlowGraph _graph;
+        private readonly FlowGraphView _graphView;
 
-        public FlowNodeView(FlowNode flowNode, FlowGraph graph)
+        public FlowNodeView(FlowNode flowNode, FlowGraph graph, FlowGraphView graphView)
         {
             node = flowNode;
             _graph = graph;
+            _graphView = graphView;
 
             bool reroute = FlowNodeStyle.IsReroute(flowNode);
             AddToClassList("flow-node");
@@ -823,8 +1162,21 @@ namespace Neo.UI.Editor
         {
             Port port = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(bool));
             port.portName = FlowNodeStyle.IsReroute(node) ? "" : DescribePort(edge);
+            int portIndex = outputPorts.Count;
             outputPorts.Add(port);
             outputContainer.Add(port);
+            WirePortDragToSearch(port, portIndex);
+        }
+
+        /// <summary> Replaces the port's default edge connector with one that opens the node-creation
+        /// search window (remembering this port) when a drag ends outside any port. See
+        /// <see cref="FlowPortConnectorListener"/> for why normal port-to-port drags are unaffected. </summary>
+        private void WirePortDragToSearch(Port port, int portIndex)
+        {
+            if (_graphView == null) return; // defensive — always set by FlowGraphView.Populate in practice
+            port.RemoveManipulator(port.edgeConnector);
+            var listener = new FlowPortConnectorListener(_graphView, this, portIndex);
+            port.AddManipulator(new EdgeConnector<Edge>(listener));
         }
 
         private static string DescribePort(FlowEdge edge)

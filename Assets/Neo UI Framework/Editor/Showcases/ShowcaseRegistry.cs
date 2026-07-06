@@ -197,6 +197,17 @@ namespace Neo.UI.Editor
                 specPath = SpecsRoot + "/animations.json",
                 flowName = null,
             };
+            yield return new Showcase
+            {
+                id = "transitions",
+                title = "View Transitions",
+                description = "Cross-screen navigation choreography — fades, directional pushes, modal " +
+                              "zoom/sheet and a shared-element hero — assigned per flow edge via the spec's " +
+                              "\"transition\" field. Enter Play mode and navigate to feel each one.",
+                category = "Effects",
+                specPath = SpecsRoot + "/transitions.json",
+                flowName = "Transitions",
+            };
         }
     }
 }

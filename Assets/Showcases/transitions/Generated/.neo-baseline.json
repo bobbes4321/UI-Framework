@@ -1,0 +1,647 @@
+{
+  "theme": {
+    "tokens": {
+      "Primary": "#E8B04B",
+      "Background": "#101B14",
+      "Accent": "#FCA311",
+      "TextDefault": "#CFC9B4",
+      "Panel": "#1D2D50",
+      "Surface": "#18261C",
+      "SurfaceElevated": "#24362A",
+      "Outline": "#3A523F",
+      "PrimaryHover": "#ECBE6B",
+      "PrimaryPressed": "#E39E22",
+      "TextOnPrimary": "#241A05",
+      "TextStrong": "#F3EEDC",
+      "TextMuted": "#9D957C",
+      "Success": "#7BC47F",
+      "Warning": "#E8B04B",
+      "Error": "#D9776B",
+      "Shadow": "#000D0073",
+      "SuccessHover": "#94CF97",
+      "SuccessPressed": "#5BB660",
+      "Danger": "#D9776B",
+      "DangerHover": "#E09187",
+      "DangerPressed": "#D05546",
+      "TextDark": "#6B6390"
+    },
+    "variants": {
+      "Light": {
+        "Primary": "#7A5C2E",
+        "Background": "#F1E8D4",
+        "Accent": "#FCA311",
+        "TextDefault": "#44392A",
+        "Panel": "#1D2D50",
+        "Surface": "#FAF4E6",
+        "SurfaceElevated": "#E7DCC2",
+        "Outline": "#CDBF9F",
+        "PrimaryHover": "#947038",
+        "PrimaryPressed": "#594321",
+        "TextOnPrimary": "#FFF8E7",
+        "TextStrong": "#2A2113",
+        "TextMuted": "#6E6147",
+        "Success": "#4C7A3F",
+        "Warning": "#9A6A1B",
+        "Error": "#A84632",
+        "Shadow": "#3D290A4C",
+        "SuccessHover": "#5B924B",
+        "SuccessPressed": "#395C2F",
+        "Danger": "#A84632",
+        "DangerHover": "#C4513A",
+        "DangerPressed": "#853727",
+        "TextDark": "#6B6390"
+      },
+      "Dark": {
+        "Primary": "#E8B04B",
+        "Background": "#101B14",
+        "Accent": "#FCA311",
+        "TextDefault": "#CFC9B4",
+        "Panel": "#1D2D50",
+        "Surface": "#18261C",
+        "SurfaceElevated": "#24362A",
+        "Outline": "#3A523F",
+        "PrimaryHover": "#ECBE6B",
+        "PrimaryPressed": "#E39E22",
+        "TextOnPrimary": "#241A05",
+        "TextStrong": "#F3EEDC",
+        "TextMuted": "#9D957C",
+        "Success": "#7BC47F",
+        "Warning": "#E8B04B",
+        "Error": "#D9776B",
+        "Shadow": "#000D0073",
+        "SuccessHover": "#94CF97",
+        "SuccessPressed": "#5BB660",
+        "Danger": "#D9776B",
+        "DangerHover": "#E09187",
+        "DangerPressed": "#D05546",
+        "TextDark": "#6B6390"
+      },
+      "Custom": {
+        "Primary": "#E8B04B",
+        "Background": "#101B14",
+        "Accent": "#FCA311",
+        "TextDefault": "#CFC9B4",
+        "Panel": "#1D2D50",
+        "Surface": "#18261C",
+        "SurfaceElevated": "#24362A",
+        "Outline": "#3A523F",
+        "PrimaryHover": "#ECBE6B",
+        "PrimaryPressed": "#E39E22",
+        "TextOnPrimary": "#241A05",
+        "TextStrong": "#F3EEDC",
+        "TextMuted": "#9D957C",
+        "Success": "#7BC47F",
+        "Warning": "#E8B04B",
+        "Error": "#D9776B",
+        "Shadow": "#000D0073",
+        "SuccessHover": "#94CF97",
+        "SuccessPressed": "#5BB660",
+        "Danger": "#D9776B",
+        "DangerHover": "#E09187",
+        "DangerPressed": "#D05546",
+        "TextDark": "#6B6390"
+      }
+    }
+  },
+  "presets": [
+    {
+      "name": "ShowDefault",
+      "type": "Show",
+      "duration": 0.31999999284744263,
+      "ease": "OutCubic",
+      "scale": {
+        "from": "0.96,0.96,1",
+        "to": "1,1,1",
+        "duration": 0.31999999284744263,
+        "ease": "OutQuad"
+      },
+      "fade": {
+        "from": 0,
+        "to": 1,
+        "duration": 0.31999999284744263,
+        "ease": "OutQuad"
+      }
+    },
+    {
+      "name": "HideDefault",
+      "type": "Hide",
+      "duration": 0.31999999284744263,
+      "ease": "OutCubic",
+      "scale": {
+        "from": "1,1,1",
+        "to": "0.96,0.96,1",
+        "duration": 0.31999999284744263,
+        "ease": "OutQuad"
+      },
+      "fade": {
+        "from": 1,
+        "to": 0,
+        "duration": 0.31999999284744263,
+        "ease": "OutQuad"
+      }
+    }
+  ],
+  "views": [
+    {
+      "id": "Transitions/Detail",
+      "background": "Background",
+      "elements": [
+        {
+          "text": {
+            "label": "Detail",
+            "color": "TextStrong",
+            "anchor": "Top",
+            "size": [
+              640,
+              60
+            ],
+            "position": [
+              0,
+              -52
+            ],
+            "textStyle": "Title"
+          }
+        },
+        {
+          "text": {
+            "label": "The hero card below shares its key with Home's — a hero-capable transition flies it across the cut instead of cross-fading.",
+            "color": "TextMuted",
+            "anchor": "Top",
+            "size": [
+              560,
+              48
+            ],
+            "position": [
+              0,
+              -120
+            ],
+            "textStyle": "Caption"
+          }
+        },
+        {
+          "overlay": {
+            "anchor": "Center",
+            "size": [
+              280,
+              280
+            ],
+            "children": [
+              {
+                "shape": {
+                  "shape": "RoundedRect",
+                  "gradient": {
+                    "from": "Primary",
+                    "to": "PrimaryPressed",
+                    "angle": 60
+                  },
+                  "sharedElement": "hero",
+                  "radius": 28,
+                  "anchor": "Stretch"
+                }
+              },
+              {
+                "icon": {
+                  "name": "image",
+                  "color": "TextOnPrimary",
+                  "anchor": "Center",
+                  "size": [
+                    72,
+                    72
+                  ],
+                  "position": [
+                    0,
+                    14
+                  ]
+                }
+              },
+              {
+                "overlay": {
+                  "anchor": "Bottom",
+                  "size": [
+                    140,
+                    24
+                  ],
+                  "position": [
+                    0,
+                    16
+                  ],
+                  "children": [
+                    {
+                      "shape": {
+                        "background": "Shadow",
+                        "shape": "Pill",
+                        "anchor": "Stretch"
+                      }
+                    },
+                    {
+                      "text": {
+                        "label": "HERO CARD",
+                        "color": "TextStrong",
+                        "anchor": "Stretch",
+                        "textStyle": "Caption"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "button": {
+            "id": "Transitions/DetailBack",
+            "label": "Back",
+            "icon": "arrow-left",
+            "labelColor": "Primary",
+            "variant": "ghost",
+            "anchor": "BottomLeft",
+            "size": [
+              240,
+              56
+            ],
+            "position": [
+              110,
+              56
+            ],
+            "textStyle": "ButtonLabel"
+          }
+        }
+      ]
+    },
+    {
+      "id": "Transitions/Gallery",
+      "background": "Background",
+      "elements": [
+        {
+          "text": {
+            "label": "Gallery",
+            "color": "TextStrong",
+            "anchor": "Top",
+            "size": [
+              640,
+              60
+            ],
+            "position": [
+              0,
+              -52
+            ],
+            "textStyle": "Title"
+          }
+        },
+        {
+          "text": {
+            "label": "Arrived via a Fade or Push transition — the edge that led here named it explicitly.",
+            "color": "TextMuted",
+            "anchor": "Center",
+            "size": [
+              420,
+              40
+            ],
+            "textStyle": "Caption"
+          }
+        },
+        {
+          "button": {
+            "id": "Transitions/GalleryBack",
+            "label": "Back",
+            "icon": "arrow-left",
+            "labelColor": "Primary",
+            "variant": "ghost",
+            "anchor": "BottomLeft",
+            "size": [
+              240,
+              56
+            ],
+            "position": [
+              110,
+              56
+            ],
+            "textStyle": "ButtonLabel"
+          }
+        }
+      ]
+    },
+    {
+      "id": "Transitions/Home",
+      "background": "Background",
+      "elements": [
+        {
+          "text": {
+            "label": "View Transitions",
+            "color": "TextStrong",
+            "anchor": "Top",
+            "size": [
+              640,
+              60
+            ],
+            "position": [
+              0,
+              -52
+            ],
+            "textStyle": "Title"
+          }
+        },
+        {
+          "text": {
+            "label": "Each button navigates with a different named transition, wired on the flow edge via \"transition\". Detail-bound buttons fly the hero card across the cut. Enter Play mode and click through.",
+            "color": "TextMuted",
+            "anchor": "Top",
+            "size": [
+              560,
+              60
+            ],
+            "position": [
+              0,
+              -124
+            ],
+            "textStyle": "Caption"
+          }
+        },
+        {
+          "vstack": {
+            "anchor": "Left",
+            "size": [
+              300,
+              560
+            ],
+            "position": [
+              40,
+              0
+            ],
+            "padding": 8,
+            "spacing": 10,
+            "children": [
+              {
+                "button": {
+                  "id": "Transitions/GoFadeCross",
+                  "label": "Fade — Cross",
+                  "labelColor": "TextStrong",
+                  "variant": "secondary",
+                  "size": [
+                    272,
+                    52
+                  ],
+                  "textStyle": "ButtonLabel"
+                }
+              },
+              {
+                "button": {
+                  "id": "Transitions/GoFadeBlack",
+                  "label": "Fade — Through Black",
+                  "labelColor": "TextStrong",
+                  "variant": "secondary",
+                  "size": [
+                    272,
+                    52
+                  ],
+                  "textStyle": "ButtonLabel"
+                }
+              },
+              {
+                "button": {
+                  "id": "Transitions/GoSlideLeft",
+                  "label": "Push — Slide Left",
+                  "labelColor": "TextStrong",
+                  "variant": "secondary",
+                  "size": [
+                    272,
+                    52
+                  ],
+                  "textStyle": "ButtonLabel"
+                }
+              },
+              {
+                "button": {
+                  "id": "Transitions/GoSlideRight",
+                  "label": "Push — Slide Right",
+                  "labelColor": "TextStrong",
+                  "variant": "secondary",
+                  "size": [
+                    272,
+                    52
+                  ],
+                  "textStyle": "ButtonLabel"
+                }
+              },
+              {
+                "button": {
+                  "id": "Transitions/GoSlideUp",
+                  "label": "Push — Slide Up",
+                  "labelColor": "TextStrong",
+                  "variant": "secondary",
+                  "size": [
+                    272,
+                    52
+                  ],
+                  "textStyle": "ButtonLabel"
+                }
+              },
+              {
+                "button": {
+                  "id": "Transitions/GoSlideDown",
+                  "label": "Push — Slide Down",
+                  "labelColor": "TextStrong",
+                  "variant": "secondary",
+                  "size": [
+                    272,
+                    52
+                  ],
+                  "textStyle": "ButtonLabel"
+                }
+              },
+              {
+                "button": {
+                  "id": "Transitions/GoZoomIn",
+                  "label": "Modal — Zoom In",
+                  "labelColor": "TextOnPrimary",
+                  "size": [
+                    272,
+                    52
+                  ],
+                  "textStyle": "ButtonLabel"
+                }
+              },
+              {
+                "button": {
+                  "id": "Transitions/GoSheetUp",
+                  "label": "Modal — Sheet Up",
+                  "labelColor": "TextOnPrimary",
+                  "size": [
+                    272,
+                    52
+                  ],
+                  "textStyle": "ButtonLabel"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "overlay": {
+            "anchor": "Right",
+            "size": [
+              160,
+              160
+            ],
+            "position": [
+              -60,
+              0
+            ],
+            "children": [
+              {
+                "shape": {
+                  "shape": "RoundedRect",
+                  "gradient": {
+                    "from": "Primary",
+                    "to": "PrimaryPressed",
+                    "angle": 60
+                  },
+                  "sharedElement": "hero",
+                  "radius": 20,
+                  "anchor": "Stretch"
+                }
+              },
+              {
+                "icon": {
+                  "name": "image",
+                  "color": "TextOnPrimary",
+                  "anchor": "Center",
+                  "size": [
+                    44,
+                    44
+                  ],
+                  "position": [
+                    0,
+                    10
+                  ]
+                }
+              },
+              {
+                "overlay": {
+                  "anchor": "Bottom",
+                  "size": [
+                    140,
+                    24
+                  ],
+                  "position": [
+                    0,
+                    10
+                  ],
+                  "children": [
+                    {
+                      "shape": {
+                        "background": "Shadow",
+                        "shape": "Pill",
+                        "anchor": "Stretch"
+                      }
+                    },
+                    {
+                      "text": {
+                        "label": "HERO CARD",
+                        "color": "TextStrong",
+                        "anchor": "Stretch",
+                        "textStyle": "Caption"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "flow": {
+    "name": "Transitions",
+    "start": "Home",
+    "nodes": [
+      {
+        "name": "Home",
+        "view": "Transitions/Home",
+        "next": [
+          {
+            "to": "Gallery",
+            "transition": "Fade/Cross",
+            "on": {
+              "button": "Transitions/GoFadeCross"
+            }
+          },
+          {
+            "to": "Gallery",
+            "transition": "Fade/ThroughBlack",
+            "on": {
+              "button": "Transitions/GoFadeBlack"
+            }
+          },
+          {
+            "to": "Gallery",
+            "transition": "Push/SlideLeft",
+            "on": {
+              "button": "Transitions/GoSlideLeft"
+            }
+          },
+          {
+            "to": "Gallery",
+            "transition": "Push/SlideRight",
+            "on": {
+              "button": "Transitions/GoSlideRight"
+            }
+          },
+          {
+            "to": "Detail",
+            "transition": "Push/SlideUp",
+            "on": {
+              "button": "Transitions/GoSlideUp"
+            }
+          },
+          {
+            "to": "Detail",
+            "transition": "Push/SlideDown",
+            "on": {
+              "button": "Transitions/GoSlideDown"
+            }
+          },
+          {
+            "to": "Detail",
+            "transition": "Modal/ZoomIn",
+            "on": {
+              "button": "Transitions/GoZoomIn"
+            }
+          },
+          {
+            "to": "Detail",
+            "transition": "Modal/SheetUp",
+            "on": {
+              "button": "Transitions/GoSheetUp"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Gallery",
+        "view": "Transitions/Gallery",
+        "next": [
+          {
+            "to": "Home",
+            "on": {
+              "button": "Transitions/GalleryBack"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Detail",
+        "view": "Transitions/Detail",
+        "next": [
+          {
+            "to": "Home",
+            "on": {
+              "button": "Transitions/DetailBack"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

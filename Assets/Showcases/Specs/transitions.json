@@ -1,0 +1,85 @@
+{
+  "theme": { "bundle": "CleanSlate" },
+
+  "views": [
+    {
+      "id": "Transitions/Home",
+      "background": "Background",
+      "elements": [
+        { "text": { "label": "View Transitions", "color": "TextStrong", "textStyle": "Title", "anchor": "Top", "position": [0, -52], "size": [640, 60] } },
+        { "text": { "label": "Each button navigates with a different named transition, wired on the flow edge via \"transition\". Detail-bound buttons fly the hero card across the cut. Enter Play mode and click through.", "color": "TextMuted", "textStyle": "Caption", "align": "center", "anchor": "Top", "position": [0, -124], "size": [560, 60] } },
+
+        { "vstack": { "anchor": "Left", "position": [40, 0], "size": [300, 560], "spacing": 10, "padding": 8, "children": [
+          { "button": { "id": "Transitions/GoFadeCross",   "label": "Fade — Cross",         "variant": "secondary", "size": [272, 52] } },
+          { "button": { "id": "Transitions/GoFadeBlack",   "label": "Fade — Through Black", "variant": "secondary", "size": [272, 52] } },
+          { "button": { "id": "Transitions/GoSlideLeft",   "label": "Push — Slide Left",    "variant": "secondary", "size": [272, 52] } },
+          { "button": { "id": "Transitions/GoSlideRight",  "label": "Push — Slide Right",   "variant": "secondary", "size": [272, 52] } },
+          { "button": { "id": "Transitions/GoSlideUp",     "label": "Push — Slide Up",      "variant": "secondary", "size": [272, 52] } },
+          { "button": { "id": "Transitions/GoSlideDown",   "label": "Push — Slide Down",    "variant": "secondary", "size": [272, 52] } },
+          { "button": { "id": "Transitions/GoZoomIn",      "label": "Modal — Zoom In",      "variant": "primary",   "size": [272, 52] } },
+          { "button": { "id": "Transitions/GoSheetUp",     "label": "Modal — Sheet Up",     "variant": "primary",   "size": [272, 52] } }
+        ] } },
+
+        { "overlay": { "anchor": "Right", "position": [-60, 0], "size": [160, 160], "children": [
+          { "shape": { "sharedElement": "hero", "anchor": "Stretch", "radius": 20, "gradient": { "from": "Primary", "to": "PrimaryPressed", "angle": 60 } } },
+          { "icon": { "name": "image", "anchor": "Center", "position": [0, 10], "size": [44, 44], "color": "TextOnPrimary" } },
+          { "overlay": { "anchor": "Bottom", "size": [140, 24], "position": [0, 10], "children": [
+            { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+            { "text": { "label": "HERO CARD", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } }
+          ] } }
+        ] } }
+      ]
+    },
+    {
+      "id": "Transitions/Gallery",
+      "background": "Background",
+      "elements": [
+        { "text": { "label": "Gallery", "color": "TextStrong", "textStyle": "Title", "anchor": "Top", "position": [0, -52], "size": [640, 60] } },
+        { "text": { "label": "Arrived via a Fade or Push transition — the edge that led here named it explicitly.", "color": "TextMuted", "textStyle": "Caption", "align": "center", "anchor": "Center", "size": [420, 40] } },
+        { "button": { "id": "Transitions/GalleryBack", "label": "Back", "icon": "arrow-left", "variant": "ghost", "anchor": "BottomLeft", "position": [110, 56] } }
+      ]
+    },
+    {
+      "id": "Transitions/Detail",
+      "background": "Background",
+      "elements": [
+        { "text": { "label": "Detail", "color": "TextStrong", "textStyle": "Title", "anchor": "Top", "position": [0, -52], "size": [640, 60] } },
+        { "text": { "label": "The hero card below shares its key with Home's — a hero-capable transition flies it across the cut instead of cross-fading.", "color": "TextMuted", "textStyle": "Caption", "align": "center", "anchor": "Top", "position": [0, -120], "size": [560, 48] } },
+
+        { "overlay": { "anchor": "Center", "size": [280, 280], "children": [
+          { "shape": { "sharedElement": "hero", "anchor": "Stretch", "radius": 28, "gradient": { "from": "Primary", "to": "PrimaryPressed", "angle": 60 } } },
+          { "icon": { "name": "image", "anchor": "Center", "position": [0, 14], "size": [72, 72], "color": "TextOnPrimary" } },
+          { "overlay": { "anchor": "Bottom", "size": [140, 24], "position": [0, 16], "children": [
+            { "shape": { "shape": "Pill", "anchor": "Stretch", "background": "Shadow" } },
+            { "text": { "label": "HERO CARD", "anchor": "Stretch", "textStyle": "Caption", "color": "TextStrong" } }
+          ] } }
+        ] } },
+
+        { "button": { "id": "Transitions/DetailBack", "label": "Back", "icon": "arrow-left", "variant": "ghost", "anchor": "BottomLeft", "position": [110, 56] } }
+      ]
+    }
+  ],
+
+  "flow": {
+    "name": "Transitions",
+    "start": "Home",
+    "nodes": [
+      { "name": "Home", "view": "Transitions/Home", "next": [
+        { "on": { "button": "Transitions/GoFadeCross" },  "to": "Gallery", "transition": "Fade/Cross" },
+        { "on": { "button": "Transitions/GoFadeBlack" },  "to": "Gallery", "transition": "Fade/ThroughBlack" },
+        { "on": { "button": "Transitions/GoSlideLeft" },  "to": "Gallery", "transition": "Push/SlideLeft" },
+        { "on": { "button": "Transitions/GoSlideRight" }, "to": "Gallery", "transition": "Push/SlideRight" },
+        { "on": { "button": "Transitions/GoSlideUp" },    "to": "Detail",  "transition": "Push/SlideUp" },
+        { "on": { "button": "Transitions/GoSlideDown" },  "to": "Detail",  "transition": "Push/SlideDown" },
+        { "on": { "button": "Transitions/GoZoomIn" },     "to": "Detail",  "transition": "Modal/ZoomIn" },
+        { "on": { "button": "Transitions/GoSheetUp" },    "to": "Detail",  "transition": "Modal/SheetUp" }
+      ] },
+      { "name": "Gallery", "view": "Transitions/Gallery", "next": [
+        { "on": { "button": "Transitions/GalleryBack" }, "to": "Home" }
+      ] },
+      { "name": "Detail", "view": "Transitions/Detail", "next": [
+        { "on": { "button": "Transitions/DetailBack" }, "to": "Home" }
+      ] }
+    ]
+  }
+}

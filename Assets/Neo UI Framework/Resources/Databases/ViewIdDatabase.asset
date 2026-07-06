@@ -125,6 +125,7 @@ MonoBehaviour:
   - category: RT
     names:
     - Screen
+    - Screen2
   - category: Race
     names:
     - Victory
@@ -186,6 +187,11 @@ MonoBehaviour:
   - category: Sync
     names:
     - Main
+  - category: Transitions
+    names:
+    - Detail
+    - Gallery
+    - Home
   - category: Typo
     names:
     - Screen

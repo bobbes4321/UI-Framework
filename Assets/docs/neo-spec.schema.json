@@ -55,7 +55,22 @@
       }
     },
     "flow": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "start": {
+          "type": "string",
+          "description": "name of the starting flow node"
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/flowNode"
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -416,6 +431,64 @@
         }
       }
     },
+    "flowEdge": {
+      "type": "object",
+      "required": [
+        "to"
+      ],
+      "description": "One outgoing edge ('next' entry) on a flow node.",
+      "properties": {
+        "to": {
+          "type": "string",
+          "description": "target flow node name"
+        },
+        "allowsBack": {
+          "type": "boolean",
+          "description": "default true; whether the Back trigger can return along this edge"
+        },
+        "transition": {
+          "type": "string",
+          "description": "view transition full name (\"Category/Name\", e.g. \"Push/SlideLeft\") played on this navigation cut — resolves via ViewTransitionRegistry / ViewTransitionAsset full names; empty/absent = the project default (NeoUISettings.defaultViewTransition)"
+        },
+        "on": {
+          "type": "object",
+          "description": "the trigger that fires this edge — see the Flow triggers section"
+        }
+      }
+    },
+    "flowNode": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "view": {
+          "type": "string",
+          "description": "single shown view (\"Category/Name\"); alternative to \"views\""
+        },
+        "views": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "hide": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "next": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/flowEdge"
+          }
+        }
+      }
+    },
     "elementBody": {
       "type": "object",
       "additionalProperties": true,
@@ -608,6 +681,10 @@
             "Ring",
             "Arc"
           ]
+        },
+        "sharedElement": {
+          "type": "string",
+          "description": "hero-transition match key (NeoSharedElement) — an element with the same key on both sides of a navigation cut is matched/morphed by a hero-capable ViewTransitionAsset instead of cutting/crossfading normally"
         },
         "signal": {
           "description": "toggle/slider/dropdown: domain signal (\"Cat/Name\" or { category, name }) the widget publishes its typed value to, IN ADDITION to its standard \"…/Behaviour\" stream"

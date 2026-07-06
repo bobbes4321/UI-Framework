@@ -49,6 +49,18 @@ namespace Neo.UI
                  "See NeoAnimatorRoles for the role ids; edit via the Setup wizard or Design System window.")]
         public List<AnimatorDefault> animatorDefaults = new List<AnimatorDefault>();
 
+        [Header("View Transitions")]
+        [Tooltip("View transitions resolvable at runtime by full name (\"Push/SlideLeft\") — flow edges " +
+                 "reference transitions by name, and this explicit list is how the name resolves in a " +
+                 "player build (the generator/sync keeps it in step with what specs use; editor pickers " +
+                 "discover assets independently via ViewTransitionRegistry).")]
+        public List<ViewTransitionAsset> viewTransitions = new List<ViewTransitionAsset>();
+
+        [Tooltip("Full name of the transition used by flow edges whose own transition field is empty — " +
+                 "the project's navigation feel. Empty = edges without a transition keep the views' own " +
+                 "show/hide animations (legacy behavior).")]
+        public string defaultViewTransition;
+
         [Header("Popups")]
         public PopupDatabase popupDatabase;
         [Tooltip("Name of the GameObject acting as the dedicated popups canvas")]
@@ -194,6 +206,25 @@ namespace Neo.UI
                     return;
                 }
             animatorDefaults.Add(new AnimatorDefault { role = role, preset = preset });
+        }
+
+        /// <summary>
+        /// Resolves a view transition by full name ("Push/SlideLeft") from the explicit
+        /// <see cref="viewTransitions"/> list — the runtime resolution path for
+        /// <see cref="FlowEdge.transition"/>. Returns false on empty/miss; the CALLER owns the
+        /// no-silent-failure warning (it knows the edge/node context worth naming).
+        /// </summary>
+        public bool TryGetViewTransition(string fullName, out ViewTransitionAsset transition)
+        {
+            transition = null;
+            if (string.IsNullOrEmpty(fullName) || viewTransitions == null) return false;
+            foreach (ViewTransitionAsset candidate in viewTransitions)
+                if (candidate != null && string.Equals(candidate.fullName, fullName, System.StringComparison.Ordinal))
+                {
+                    transition = candidate;
+                    return true;
+                }
+            return false;
         }
 
         /// <summary>

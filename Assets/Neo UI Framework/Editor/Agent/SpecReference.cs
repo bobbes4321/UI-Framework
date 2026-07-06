@@ -271,6 +271,39 @@ namespace Neo.UI.Editor
                         ["name"] = Typed("string"),
                         ["when"] = Ref("breakpointCondition")
                     }
+                },
+                ["flowEdge"] = new Dictionary<string, object>
+                {
+                    ["type"] = "object",
+                    ["required"] = new List<object> { "to" },
+                    ["description"] = "One outgoing edge ('next' entry) on a flow node.",
+                    ["properties"] = new Dictionary<string, object>
+                    {
+                        ["to"] = Typed("string", "target flow node name"),
+                        ["allowsBack"] = Typed("boolean", "default true; whether the Back trigger can return along this edge"),
+                        ["transition"] = Typed("string", "view transition full name (\"Category/Name\", e.g. \"Push/SlideLeft\") " +
+                                                          "played on this navigation cut — resolves via ViewTransitionRegistry / " +
+                                                          "ViewTransitionAsset full names; empty/absent = the project default " +
+                                                          "(NeoUISettings.defaultViewTransition)"),
+                        ["on"] = new Dictionary<string, object>
+                        {
+                            ["type"] = "object",
+                            ["description"] = "the trigger that fires this edge — see the Flow triggers section"
+                        }
+                    }
+                },
+                ["flowNode"] = new Dictionary<string, object>
+                {
+                    ["type"] = "object",
+                    ["required"] = new List<object> { "name" },
+                    ["properties"] = new Dictionary<string, object>
+                    {
+                        ["name"] = Typed("string"),
+                        ["view"] = Typed("string", "single shown view (\"Category/Name\"); alternative to \"views\""),
+                        ["views"] = new Dictionary<string, object> { ["type"] = "array", ["items"] = Typed("string") },
+                        ["hide"] = new Dictionary<string, object> { ["type"] = "array", ["items"] = Typed("string") },
+                        ["next"] = new Dictionary<string, object> { ["type"] = "array", ["items"] = Ref("flowEdge") }
+                    }
                 }
             };
 
@@ -393,7 +426,16 @@ namespace Neo.UI.Editor
                     },
                     ["popups"] = ArrayOf("popup"),
                     ["breakpoints"] = ArrayOf("breakpoint"),
-                    ["flow"] = new Dictionary<string, object> { ["type"] = "object" }
+                    ["flow"] = new Dictionary<string, object>
+                    {
+                        ["type"] = "object",
+                        ["properties"] = new Dictionary<string, object>
+                        {
+                            ["name"] = Typed("string"),
+                            ["start"] = Typed("string", "name of the starting flow node"),
+                            ["nodes"] = new Dictionary<string, object> { ["type"] = "array", ["items"] = Ref("flowNode") }
+                        }
+                    }
                 },
                 ["definitions"] = definitions
             };
@@ -438,6 +480,9 @@ namespace Neo.UI.Editor
                 },
                 ["variant"] = EnumOf(FactoryConstants("Variant")),
                 ["preset"] = Typed("string", "name of a reusable NeoWidgetPreset; resolved at generate as the base, element fields override"),
+                ["sharedElement"] = Typed("string", "hero-transition match key (NeoSharedElement) — an element with the same " +
+                                                     "key on both sides of a navigation cut is matched/morphed by a hero-capable " +
+                                                     "ViewTransitionAsset instead of cutting/crossfading normally"),
                 ["anchor"] = EnumOf(UIWidgetFactory.AnchorPresetNames),
                 ["layout"] = Ref("layoutSpec"),
                 ["overrides"] = new Dictionary<string, object>
@@ -617,6 +662,22 @@ namespace Neo.UI.Editor
                           "the card) for custom content, `\"size\": [w,h]` for the card size and `\"close\": true` " +
                           "for an X dismiss button. A button element with `\"onClick\": { \"close\": true }` hides " +
                           "the popup. Open one from any button via `\"onClick\": { \"popup\": \"Name\" }`.");
+            sb.AppendLine();
+
+            sb.AppendLine("## Flow edges & transitions");
+            sb.AppendLine();
+            sb.AppendLine("A flow node's `next` array holds edges: `{ \"to\": \"NodeName\", \"allowsBack\": true, " +
+                          "\"transition\": \"Category/Name\", \"on\": { ... } }`. `to` and `on` are covered below; " +
+                          "`allowsBack` (default `true`) controls whether the Back trigger can return along this edge. " +
+                          "`transition` names a `ViewTransitionAsset` by its full name (e.g. `\"Push/SlideLeft\"`) choreographing " +
+                          "this navigation cut — resolved through `ViewTransitionRegistry`/`ViewTransitionAsset` full names; " +
+                          "empty/absent falls back to the project default (`NeoUISettings.defaultViewTransition`). Omitted " +
+                          "entirely when not set, so existing flows round-trip unchanged.");
+            sb.AppendLine();
+            sb.AppendLine("An element's `sharedElement` field (a plain string key) marks it for hero/shared-element matching: " +
+                          "when a transition supports shared elements and an element with the SAME key exists in both the " +
+                          "outgoing and incoming view, it flies its own frame across the cut instead of being cut/crossfaded " +
+                          "with the rest of its view (backed by the `NeoSharedElement` component).");
             sb.AppendLine();
 
             sb.AppendLine("## Flow triggers (`on` in a flow edge)");

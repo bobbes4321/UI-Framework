@@ -239,6 +239,7 @@ MonoBehaviour:
   - category: RT
     names:
     - DualNav
+    - Go
   - category: Reg
     names:
     - Del
@@ -296,6 +297,18 @@ MonoBehaviour:
   - category: Test
     names:
     - Penis
+  - category: Transitions
+    names:
+    - DetailBack
+    - GalleryBack
+    - GoFadeBlack
+    - GoFadeCross
+    - GoSheetUp
+    - GoSlideDown
+    - GoSlideLeft
+    - GoSlideRight
+    - GoSlideUp
+    - GoZoomIn
   - category: Typo
     names:
     - Apply

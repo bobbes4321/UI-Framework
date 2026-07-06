@@ -32,12 +32,21 @@ namespace Neo.UI.Editor
         /// pass-through edge, a named "Next" edge, or none for non-executable nodes). </summary>
         public readonly Action<FlowNode> seedDefaultOutputs;
 
-        public FlowNodeDescriptor(string id, string menuLabel, Func<FlowNode> create, Action<FlowNode> seedDefaultOutputs)
+        /// <summary> Extra synonyms the graph's search-as-you-type node creator can match this kind
+        /// against (e.g. "wait"/"delay" for a timer node) — additive, defaults to none. Reserved for
+        /// a future custom-filtered searcher: the stock <c>UnityEditor.Experimental.GraphView.SearchWindow</c>
+        /// only text-matches an entry's visible label, so this isn't consulted by
+        /// <see cref="FlowNodeSearchWindowProvider"/> yet. </summary>
+        public readonly string[] searchKeywords;
+
+        public FlowNodeDescriptor(string id, string menuLabel, Func<FlowNode> create, Action<FlowNode> seedDefaultOutputs,
+            string[] searchKeywords = null)
         {
             this.id = id;
             this.menuLabel = menuLabel;
             this.create = create;
             this.seedDefaultOutputs = seedDefaultOutputs ?? (_ => { });
+            this.searchKeywords = searchKeywords ?? Array.Empty<string>();
         }
     }
 

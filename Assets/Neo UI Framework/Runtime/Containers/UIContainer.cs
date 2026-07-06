@@ -35,6 +35,20 @@ namespace Neo.UI
     {
         void OnShow(bool instant);
         void OnHide(bool instant);
+
+        /// <summary>
+        /// Show driven by a view transition's override animation instead of this animator's own —
+        /// the per-call choreography a <see cref="ViewTransitionAsset"/> plants over a navigation
+        /// cut. The default forwards to the legacy overload (a null override must always behave
+        /// identically to it), so existing/third-party animators compile and behave unchanged;
+        /// <see cref="UIContainerUIAnimator"/> is the one built-in implementation that actually
+        /// plays the override.
+        /// </summary>
+        void OnShow(bool instant, UIAnimation overrideAnimation) => OnShow(instant);
+
+        /// <summary> Hide counterpart of <see cref="OnShow(bool, UIAnimation)"/>. </summary>
+        void OnHide(bool instant, UIAnimation overrideAnimation) => OnHide(instant);
+
         bool isAnimating { get; }
         float showDuration { get; }
         float hideDuration { get; }
@@ -234,6 +248,16 @@ namespace Neo.UI
         public virtual void InstantShow() => Show(instant: true);
         public virtual void InstantHide() => Hide(instant: true);
 
+        /// <summary>
+        /// Shows using a transition-owned override animation instead of this container's own show
+        /// animation (see <see cref="IContainerAnimator.OnShow(bool, UIAnimation)"/>). Null behaves
+        /// exactly like <see cref="Show()"/>.
+        /// </summary>
+        public virtual void Show(UIAnimation overrideAnimation) => Show(instant: false, overrideAnimation);
+
+        /// <summary> Hide counterpart of <see cref="Show(UIAnimation)"/>. </summary>
+        public virtual void Hide(UIAnimation overrideAnimation) => Hide(instant: false, overrideAnimation);
+
         public void Toggle()
         {
             NormalizeBakedHiddenState();
@@ -254,7 +278,17 @@ namespace Neo.UI
                 visibilityState = VisibilityState.Hidden; // quiet correction — no visibility event
         }
 
-        protected virtual void Show(bool instant)
+        protected virtual void Show(bool instant) => Show(instant, overrideAnimation: null);
+
+        /// <summary>
+        /// Show, optionally driven by a transition-owned override animation instead of this
+        /// container's own show animation. A null override is byte-identical to the pre-transition
+        /// path — callers must NEVER pass a shared <see cref="ViewTransitionAsset"/>'s own
+        /// UIAnimation instance here for two containers showing under the same transition (they'd
+        /// fight over one tween's live playhead); each receiving <see cref="IContainerAnimator"/>
+        /// copies it into its own per-instance scratch first (see UIAnimationChannels.Copy).
+        /// </summary>
+        protected virtual void Show(bool instant, UIAnimation overrideAnimation)
         {
             // consume the start behaviour BEFORE the redundancy early-out: an explicit command
             // outranks the default start state. A flow can Show() a default-Visible view before
@@ -275,7 +309,7 @@ namespace Neo.UI
             OnShow?.Invoke();
 
             EnsureCustomRestPose();
-            foreach (IContainerAnimator animator in _animators) animator.OnShow(instant);
+            foreach (IContainerAnimator animator in _animators) animator.OnShow(instant, overrideAnimation);
             foreach (Progressor progressor in _progressors)
             {
                 if (progressor == null) continue;
@@ -295,7 +329,10 @@ namespace Neo.UI
             }
         }
 
-        protected virtual void Hide(bool instant)
+        protected virtual void Hide(bool instant) => Hide(instant, overrideAnimation: null);
+
+        /// <summary> Hide counterpart of <see cref="Show(bool, UIAnimation)"/>. </summary>
+        protected virtual void Hide(bool instant, UIAnimation overrideAnimation)
         {
             _startBehaviourExecuted = true; // see Show(): explicit commands consume the start behaviour
             if (visibilityState == VisibilityState.Hidden || visibilityState == VisibilityState.IsHiding) return;
@@ -309,7 +346,7 @@ namespace Neo.UI
             OnHide?.Invoke();
 
             EnsureCustomRestPose();
-            foreach (IContainerAnimator animator in _animators) animator.OnHide(instant);
+            foreach (IContainerAnimator animator in _animators) animator.OnHide(instant, overrideAnimation);
             foreach (Progressor progressor in _progressors)
             {
                 if (progressor == null) continue;

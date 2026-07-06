@@ -6,6 +6,18 @@ using UnityEngine;
 namespace Neo.UI
 {
     /// <summary>
+    /// A named organizational region in the graph editor (Blender frames / Houdini network boxes):
+    /// zero execution semantics — membership is by node name, rendered as a GraphView Group.
+    /// </summary>
+    [Serializable]
+    public class FlowGroup
+    {
+        public string title = "Group";
+        public Color tint = new Color(0.3f, 0.3f, 0.35f, 1f);
+        public List<string> nodeNames = new List<string>();
+    }
+
+    /// <summary>
     /// A UI navigation graph: nodes + string-addressed edges, run by a <see cref="FlowController"/>.
     /// Nodes serialize with [SerializeReference] into this single force-text asset.
     /// </summary>
@@ -19,6 +31,10 @@ namespace Neo.UI
         public string startNode;
 
         [SerializeReference] public List<FlowNode> nodes = new List<FlowNode>();
+
+        [Tooltip("Named, tinted organizational regions in the graph editor (Blender-frame style) — " +
+                 "pure editor metadata, ignored by the runtime")]
+        public List<FlowGroup> groups = new List<FlowGroup>();
 
         [Header("Editor View State")]
         public Vector2 editorPan;
@@ -79,7 +95,14 @@ namespace Neo.UI
 
                 foreach (FlowEdge edge in node.outputs)
                 {
-                    if (string.IsNullOrEmpty(edge.toNode)) continue;
+                    if (string.IsNullOrEmpty(edge.toNode))
+                    {
+                        // an unconnected port is fine; an unconnected port with a CONFIGURED trigger
+                        // is dead wiring — the button/signal will visibly do nothing at runtime
+                        if (edge.trigger != null && edge.trigger.type != FlowTrigger.TriggerType.None)
+                            issues.Add($"Node '{node.name}' has a '{edge.trigger}' edge with no target node — its trigger can never advance the flow");
+                        continue;
+                    }
                     if (GetNode(edge.toNode) == null)
                         issues.Add($"Node '{node.name}' has an edge to missing node '{edge.toNode}'");
                 }

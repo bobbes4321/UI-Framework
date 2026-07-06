@@ -444,6 +444,9 @@ namespace Neo.UI.Editor
             element.particles = ExportParticles(go);
             element.pointerGlow = ExportPointerGlow(go);
             element.animations = ExportElementAnimations(go);
+            var sharedElement = go.GetComponent<NeoSharedElement>();
+            if (sharedElement != null && !string.IsNullOrEmpty(sharedElement.key))
+                element.sharedElement = sharedElement.key;
             ApplyPresetDelta(go, element);
             if (s_elementSink != null) s_elementSink[go] = element;
             return element;
@@ -1247,6 +1250,7 @@ namespace Neo.UI.Editor
                     {
                         to = edge.toNode,
                         allowsBack = edge.allowsBack,
+                        transition = edge.transition,
                         trigger = edge.trigger
                     });
                 }

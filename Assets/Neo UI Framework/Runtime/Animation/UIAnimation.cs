@@ -152,6 +152,9 @@ namespace Neo.UI
             if (!_hasStartValues) CaptureStartValues();
         }
 
+        /// <summary> Whether a rest-state snapshot exists (CaptureStartValues ran against a bound target). </summary>
+        public bool hasStartValues => _hasStartValues;
+
         /// <summary> Snapshots the target's rest state — the values StartValue endpoints resolve to. </summary>
         public void CaptureStartValues()
         {

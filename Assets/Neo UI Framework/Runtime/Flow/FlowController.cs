@@ -68,6 +68,13 @@ namespace Neo.UI
         /// <summary> Raised when the active node changes — the graph window's live highlight hook. </summary>
         public event Action<FlowNode> OnActiveNodeChanged;
 
+        /// <summary>
+        /// Raised when the flow advances to a node, carrying the edge it crossed (null for direct
+        /// jumps/start) — the graph window's edge-pulse hook. Fires alongside
+        /// <see cref="OnActiveNodeChanged"/>, which stays node-only for existing subscribers.
+        /// </summary>
+        public event Action<FlowNode, FlowEdge> OnAdvanced;
+
         public event Action OnFlowStarted;
         public event Action OnFlowStopped;
         public event Action OnFlowPaused;
@@ -226,7 +233,9 @@ namespace Neo.UI
                 Debug.LogWarning($"[Neo.UI] Flow edge points to missing node '{edge.toNode}'.", this);
                 return;
             }
-            SetActiveNode(target, pushHistory && edge.allowsBack);
+            // thread the crossed edge through so SetActiveNode can resolve its transition/portName
+            // and OnAdvanced subscribers (the graph window's edge-pulse hook) see which edge fired
+            SetActiveNode(target, edge, pushHistory && edge.allowsBack);
         }
 
         /// <summary> Activates a node directly. </summary>
@@ -241,7 +250,10 @@ namespace Neo.UI
                 // a view both nodes show must survive the transition untouched — without this the
                 // exit hides it and the enter re-shows it, replaying both animations as a flash
                 if (activeNode is UINode previousUi && node is UINode nextUi)
+                {
                     previousUi.carryOverViews = nextUi.showViews;
+                    PlantViewTransition(previousUi, nextUi, viaEdge);
+                }
                 activeNode.OnExit(this);
                 if (pushHistory && !_goingBack && !string.IsNullOrEmpty(activeNode.name))
                     _history.Push(activeNode.name);
@@ -250,7 +262,37 @@ namespace Neo.UI
             previousNode = activeNode;
             activeNode = node;
             OnActiveNodeChanged?.Invoke(node);
+            OnAdvanced?.Invoke(node, viaEdge);
             node.OnEnter(this, viaEdge);
+        }
+
+        /// <summary>
+        /// Resolves this navigation cut's transition — the edge's own name, else the project default
+        /// (<see cref="NeoUISettings.defaultViewTransition"/>) — and plants it on both nodes exactly
+        /// like <see cref="UINode.carryOverViews"/> above, so OnExit/OnEnter can each choreograph
+        /// their half without either node or this controller needing to know about the other. A
+        /// named-but-unregistered transition warns and falls back to the views' own show/hide
+        /// animations rather than silently doing nothing.
+        /// </summary>
+        private static void PlantViewTransition(UINode previous, UINode next, FlowEdge viaEdge)
+        {
+            string transitionName = !string.IsNullOrEmpty(viaEdge?.transition)
+                ? viaEdge.transition
+                : NeoUISettings.instance != null ? NeoUISettings.instance.defaultViewTransition : null;
+            if (string.IsNullOrEmpty(transitionName)) return;
+
+            if (NeoUISettings.instance == null ||
+                !NeoUISettings.instance.TryGetViewTransition(transitionName, out ViewTransitionAsset asset))
+            {
+                Debug.LogWarning($"[Neo.UI] View transition '{transitionName}' (edge '{viaEdge?.portName ?? "(default)"}' " +
+                                  $"out of node '{previous.name}') is not registered in NeoUISettings.viewTransitions — " +
+                                  "falling back to the views' own show/hide animations.");
+                return;
+            }
+
+            var plan = new ViewTransitionPlan { asset = asset };
+            previous.pendingTransition = plan;
+            next.pendingTransition = plan;
         }
 
         /// <summary> Returns to the previously active node (history stack). </summary>

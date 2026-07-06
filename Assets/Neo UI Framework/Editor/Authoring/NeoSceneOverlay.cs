@@ -39,6 +39,23 @@ namespace Neo.UI.Editor.Authoring
         private GameObject _presetTarget;
         private ElementSpec _presetCaptured;
 
+        // The Connect-to row's "what's selected" cache — a UIButton anywhere in the selection's parent
+        // chain (mirrors how _view resolves), refreshed alongside everything else on selection change.
+        private UIButton _selectedButton;
+
+        // "Connect to…" pick mode — a static one-shot so it survives whichever SceneView/overlay
+        // instance ends up handling the resolving click; only ONE session can be armed at a time.
+        // The anchor rect is captured ONCE at arm time and reused to open the confirm popup later:
+        // PopupWindow.Show must run inside an IMGUI pass of THIS container (coordinate spaces don't
+        // translate across SceneView's duringSceneGui and the overlay's own panel), so the scene-click/
+        // hierarchy-selection handlers only ever stash a pending result for the next OnGUI to consume.
+        private static bool _pickArmed;
+        private static UIButton _pickButton;
+        private static UIView _pickSourceView;
+        private static Rect _pickAnchorRect;
+        private static UIButton _pendingConnectButton;
+        private static UIView _pendingConnectTarget;
+
         // The Breakpoint row (Task 2.3 — native parity for the doomed Composer's BreakpointBar). The
         // breakpoint list is showcase-scoped and cached like _drift (recomputed on selection change /
         // on demand, never per repaint); the selection itself is UI-only state, not persisted.
@@ -58,7 +75,11 @@ namespace Neo.UI.Editor.Authoring
             RefreshActiveView();
         }
 
-        public override void OnWillBeDestroyed() => Selection.selectionChanged -= RefreshActiveView;
+        public override void OnWillBeDestroyed()
+        {
+            Selection.selectionChanged -= RefreshActiveView;
+            if (_pickArmed) CancelPick("overlay closed");
+        }
 
         // Cheap: one upward component walk, only when the selection actually changes.
         private void RefreshActiveView()
@@ -80,6 +101,9 @@ namespace Neo.UI.Editor.Authoring
                 _selectedBreakpoint = "";
             }
             displayed = _view != null;
+            _selectedButton = Selection.activeGameObject != null
+                ? Selection.activeGameObject.GetComponentInParent<UIButton>(true)
+                : null;
             RefreshPresetCapture();
         }
 
@@ -95,6 +119,19 @@ namespace Neo.UI.Editor.Authoring
 
         private void OnGUI()
         {
+            // Must run before the early-return below: a scene click resolving the pick can leave
+            // Selection untouched (the click is consumed so it never reaches Unity's own scene-pick
+            // logic), so _view is still whatever it was when the pick armed — but we open the popup
+            // unconditionally the first OnGUI pass after a valid target is resolved.
+            if (_pendingConnectButton != null && _pendingConnectTarget != null)
+            {
+                UIButton button = _pendingConnectButton;
+                UIView target = _pendingConnectTarget;
+                _pendingConnectButton = null;
+                _pendingConnectTarget = null;
+                UnityEditor.PopupWindow.Show(_pickAnchorRect, new ConnectToPopup(button, target));
+            }
+
             if (_view == null)
             {
                 EditorGUILayout.LabelField("Select a Neo UI view to author.", EditorStyles.miniLabel);
@@ -108,6 +145,7 @@ namespace Neo.UI.Editor.Authoring
             DrawStatusHeader();
             EditorGUILayout.Space(2f);
             DrawActions();
+            DrawConnectRow();
 
             if (_lastCapture != null && (_lastCapture.refused || _lastCapture.offSpecWarnings.Count > 0))
                 DrawCaptureFindings();
@@ -206,6 +244,101 @@ namespace Neo.UI.Editor.Authoring
                     }
                 }
             }
+        }
+
+        // "Connect to…" — direct-manipulation flow wiring (the scene-view counterpart of hand-editing a
+        // flow edge). Shows "Connect →" only when the selection resolves to a UIButton (cached in
+        // RefreshActiveView, same discipline as _presetTarget); clicking arms the static pick session so
+        // the next scene click / hierarchy selection resolves the target view.
+        private void DrawConnectRow()
+        {
+            if (_pickArmed)
+            {
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.LabelField("Click a target view… (Esc cancels)", EditorStyles.miniLabel);
+                    if (GUILayout.Button("Cancel", GUILayout.Width(50f))) CancelPick(null);
+                }
+                return;
+            }
+
+            if (_selectedButton == null) return;
+
+            if (GUILayout.Button(new GUIContent("Connect →",
+                    "Wire this button's click to navigate to a view — pick the target in the Scene View or Hierarchy"),
+                    GUILayout.Height(20f)))
+                ArmPick();
+        }
+
+        private void ArmPick()
+        {
+            _pickButton = _selectedButton;
+            _pickSourceView = _view;
+            _pickAnchorRect = GUILayoutUtility.GetLastRect();
+            _pickArmed = true;
+            SceneView.duringSceneGui += OnScenePick;
+            Selection.selectionChanged += OnSelectionPick;
+        }
+
+        private static void UnsubscribePick()
+        {
+            SceneView.duringSceneGui -= OnScenePick;
+            Selection.selectionChanged -= OnSelectionPick;
+        }
+
+        private static void CancelPick(string reason)
+        {
+            Debug.Log($"[Neo.UI] Connect To: pick cancelled{(string.IsNullOrEmpty(reason) ? "." : $" — {reason}.")}");
+            _pickArmed = false;
+            _pickButton = null;
+            _pickSourceView = null;
+            UnsubscribePick();
+        }
+
+        // Shared by both resolution paths (scene click / hierarchy selection): validates the target,
+        // stashes it for the next OnGUI to consume (never calls PopupWindow.Show from here — duringSceneGui
+        // and selectionChanged run outside this container's own IMGUI pass, wrong coordinate space).
+        private static void CompletePick(UIView target)
+        {
+            if (!_pickArmed) return;
+            if (target == null) { CancelPick("no view under the cursor"); return; }
+            if (target == _pickSourceView) { CancelPick("target is the button's own view"); return; }
+
+            _pendingConnectButton = _pickButton;
+            _pendingConnectTarget = target;
+
+            _pickArmed = false;
+            _pickButton = null;
+            _pickSourceView = null;
+            UnsubscribePick();
+        }
+
+        private static void OnSelectionPick()
+        {
+            if (!_pickArmed) return;
+            GameObject selected = Selection.activeGameObject;
+            UIView target = selected != null ? selected.GetComponentInParent<UIView>(true) : null;
+            CompletePick(target);
+        }
+
+        private static void OnScenePick(SceneView sceneView)
+        {
+            if (!_pickArmed) return;
+            Event e = Event.current;
+            if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
+            {
+                CancelPick("Esc");
+                e.Use();
+                sceneView.Repaint();
+                return;
+            }
+            if (e.type != EventType.MouseDown || e.button != 0) return;
+
+            GameObject picked = HandleUtility.PickGameObject(e.mousePosition, false);
+            UIView target = picked != null ? picked.GetComponentInParent<UIView>(true) : null;
+            e.Use(); // pick-mode clicks must never fall through to Unity's own scene selection
+            CompletePick(target);
+            sceneView.Repaint();
         }
 
         // Native parity for the (doomed) Composer's BreakpointBar (Task 2.3) — deliberately minimal:

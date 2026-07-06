@@ -979,6 +979,9 @@ namespace Neo.UI.Editor
         public string preset;      // reusable widget style this element references by name (NeoWidgetPreset).
                                    // Resolved at generate as the BASE; element-level fields override. Exports
                                    // as preset name + only the override delta (the link survives round-trip).
+        public string sharedElement; // hero-transition match key (NeoSharedElement.key) — an element with the
+                                   // same key on both sides of a navigation cut is matched/morphed by a
+                                   // hero-capable ViewTransitionAsset instead of cutting/crossfading normally
         public bool cascade;       // vstack/hstack/grid: staggered child entrance on show
         public float? badge;       // button/tab: notification badge count (0 = hidden)
         public float? radius;      // corner radius override (px)
@@ -1049,6 +1052,7 @@ namespace Neo.UI.Editor
                     shape = JsonReader.GetString(body, "shape"),
                     variant = JsonReader.GetString(body, "variant"),
                     preset = JsonReader.GetString(body, "preset"),
+                    sharedElement = JsonReader.GetString(body, "sharedElement"),
                     anchor = JsonReader.GetString(body, "anchor"),
                     layout = LayoutSpec.Parse(JsonReader.GetObject(body, "layout")),
                     radius = GetNullableFloat(body, "radius"),
@@ -1175,6 +1179,7 @@ namespace Neo.UI.Editor
             if (arcSweep.HasValue) body["arcSweep"] = (double)arcSweep.Value;
             if (!string.IsNullOrEmpty(variant)) body["variant"] = variant;
             if (!string.IsNullOrEmpty(preset)) body["preset"] = preset;
+            if (!string.IsNullOrEmpty(sharedElement)) body["sharedElement"] = sharedElement;
             if (radius.HasValue) body["radius"] = (double)radius.Value;
             if (!string.IsNullOrEmpty(anchor)) body["anchor"] = anchor;
             if (layout != null && !layout.IsEmpty) body["layout"] = layout.ToJsonObject();
@@ -1391,6 +1396,10 @@ namespace Neo.UI.Editor
     {
         public string to;
         public bool allowsBack = true;
+        /// <summary> Optional view-transition full name ("Category/Name", e.g. "Push/SlideLeft") played
+        /// when this edge fires. Names resolve through <c>ViewTransitionRegistry</c>/<c>ViewTransitionAsset</c>
+        /// full names; empty/absent means the project default (<c>NeoUISettings.defaultViewTransition</c>). </summary>
+        public string transition;
         public FlowTrigger trigger = new FlowTrigger();
 
         public static FlowEdgeSpec Parse(Dictionary<string, object> obj)
@@ -1398,7 +1407,8 @@ namespace Neo.UI.Editor
             var spec = new FlowEdgeSpec
             {
                 to = JsonReader.GetString(obj, "to"),
-                allowsBack = JsonReader.GetBool(obj, "allowsBack", true)
+                allowsBack = JsonReader.GetBool(obj, "allowsBack", true),
+                transition = JsonReader.GetString(obj, "transition")
             };
             if (string.IsNullOrWhiteSpace(spec.to))
                 throw new FormatException("Flow edge is missing required field 'to'");
@@ -1478,6 +1488,7 @@ namespace Neo.UI.Editor
         {
             var result = new Dictionary<string, object> { ["to"] = to };
             if (!allowsBack) result["allowsBack"] = false;
+            if (!string.IsNullOrEmpty(transition)) result["transition"] = transition;
             Dictionary<string, object> on = TriggerToJson(trigger);
             if (on != null) result["on"] = on;
             return result;

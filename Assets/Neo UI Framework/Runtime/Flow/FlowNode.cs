@@ -26,6 +26,11 @@ namespace Neo.UI
 
         [Tooltip("Relative weight for RandomNode output selection")]
         [Min(0)] public int weight = 100;
+
+        [Tooltip("View transition full name (\"Push/SlideLeft\") choreographing this navigation cut — " +
+                 "empty = the project default (NeoUISettings.defaultViewTransition), else the views' own " +
+                 "show/hide animations")]
+        public string transition;
     }
 
     /// <summary>

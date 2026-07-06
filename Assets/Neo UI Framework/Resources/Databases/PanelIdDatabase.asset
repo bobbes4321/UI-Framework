@@ -70,6 +70,7 @@ MonoBehaviour:
     - Audio
     - General
     - Panel0
+    - Panel2
     - Panel3
     - SetAudio
     - SetControls

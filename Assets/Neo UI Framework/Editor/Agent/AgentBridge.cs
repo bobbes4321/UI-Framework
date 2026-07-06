@@ -96,6 +96,11 @@ namespace Neo.UI.Editor
 
             string json = File.ReadAllText(RequestPath);
             File.Delete(RequestPath);
+            // agents edit specs/assets on disk between requests — without a refresh the editor
+            // (often unfocused while an agent drives it) would export/generate from a stale
+            // in-memory view of those files. Skipped in Play mode (mutating actions refuse there
+            // anyway, and a refresh can trigger a domain reload mid-game).
+            if (!EditorApplication.isPlayingOrWillChangePlaymode) AssetDatabase.Refresh();
             File.WriteAllText(ResultPath, HandleRequest(json));
         }
 

@@ -16,6 +16,16 @@ MonoBehaviour:
   iconFont: {fileID: 11400000, guid: 5f1b298af17d2614f8332dcbe6c51e11, type: 2}
   animationPresets: {fileID: 11400000, guid: 624df2d6a410c40458af64eba0a88f90, type: 2}
   animatorDefaults: []
+  viewTransitions:
+  - {fileID: 11400000, guid: 55fbb5d6a487ffa4984af9a97688441b, type: 2}
+  - {fileID: 11400000, guid: 86e4a1249583f2445bda9c09b9bf1be4, type: 2}
+  - {fileID: 11400000, guid: 005328b4ed6c4254dab4909e045c90ec, type: 2}
+  - {fileID: 11400000, guid: 311abaf91499aed4091517655bdea324, type: 2}
+  - {fileID: 11400000, guid: 0f8fd41afd0990544b31e6dd5139fa10, type: 2}
+  - {fileID: 11400000, guid: 3ada87b4f06ebe843b79b33eab431f7c, type: 2}
+  - {fileID: 11400000, guid: adfe7606b5d41614280f2de791fd8550, type: 2}
+  - {fileID: 11400000, guid: 2c90e020c468d5b42b4af4561eb58fab, type: 2}
+  defaultViewTransition: 
   popupDatabase: {fileID: 11400000, guid: 0dfe29634ae01fe4aab74466df901075, type: 2}
   popupsCanvasName: PopupsCanvas
   tooltipsCanvasName: TooltipsCanvas
@@ -110,7 +120,7 @@ MonoBehaviour:
       normal:
         useToken: 0
         token: 
-        color: {r: 0.14509805, g: 0.16470589, b: 0.20392157, a: 0}
+        color: {r: 0.14117648, g: 0.21176471, b: 0.16470589, a: 0}
       highlighted:
         useToken: 1
         token: SurfaceElevated

@@ -78,6 +78,13 @@ namespace Neo.UI.Editor
                           "screenshotter so you can see at a glance what the agent built.",
                 invoke = NeoGalleryWindow.Open,
             };
+            yield return new HubTool
+            {
+                id = "command-palette", label = "Command Palette", category = Author,
+                tooltip = "Ctrl/Cmd-K — search-as-you-type commands: wire a button to a view, create a " +
+                          "widget, jump to a view, or open a Neo UI window.",
+                invoke = NeoCommandPaletteWindow.Open,
+            };
 
             // --- Data: id databases ---------------------------------------------------------------
             yield return new HubTool
@@ -109,6 +116,10 @@ namespace Neo.UI.Editor
                 "Seed the curated default animation presets (fades, four-way slides, scale-pop, button " +
                 "press, loop pulse) — auto-discovered, referenced by name from specs.",
                 "Tools/Neo UI/Setup/Create or Repair Animation Library");
+            yield return Menu("setup-transitions", "Create or Repair Transition Library", Setup,
+                "Seed the curated view-transition library (cross-fade, push slides, modal zoom/sheet) — " +
+                "auto-discovered, referenced by full name from a flow edge's `transition` field.",
+                "Tools/Neo UI/Setup/Create or Repair Transition Library");
             yield return Menu("setup-menu-lib", "Create or Repair Menu Widget Library", Setup,
                 "Create or repair the menu widget prefab library.",
                 "Tools/Neo UI/Setup/Create or Repair Menu Widget Library");

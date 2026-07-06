@@ -202,7 +202,7 @@ namespace Neo.UI.Editor
                 }
                 foreach (ViewSpec view in spec.views) GenerateView(view, settings, report);
                 foreach (PopupSpec popup in spec.popups) GeneratePopup(popup, settings, report);
-                if (spec.flow != null) GenerateFlow(spec.flow, report);
+                if (spec.flow != null) GenerateFlow(spec.flow, settings, report);
             }
             catch (Exception e)
             {
@@ -1135,6 +1135,7 @@ namespace Neo.UI.Editor
             // registries (no per-effect switch here — adding a future effect/module is one registration).
             if (go != null) ApplyEffectsAndParticles(element, go, settings, report);
             if (go != null) ApplyElementAnimations(element, go, settings, report);
+            if (go != null) ApplySharedElement(element, go);
 
             if (ElementObjectSink != null && go != null) ElementObjectSink[element] = go;
             // Pillar B: record elements carrying breakpoint overrides for the post-build resolve pass.
@@ -1204,6 +1205,21 @@ namespace Neo.UI.Editor
 
             if (element.pointerGlow != null)
                 ApplyPointerGlow(element.pointerGlow, go);
+        }
+
+        /// <summary>
+        /// Bakes the element's hero-transition match key onto a <see cref="NeoSharedElement"/>. Reuses the
+        /// same component when one already exists (native re-authoring shouldn't stack duplicates); an
+        /// element that stops naming a shared key simply stops writing to it — the component itself is
+        /// only ever added, never removed here (mirrors how other spec-driven components behave elsewhere
+        /// in this factory).
+        /// </summary>
+        private static void ApplySharedElement(ElementSpec element, GameObject go)
+        {
+            if (string.IsNullOrEmpty(element.sharedElement)) return;
+            var shared = go.GetComponent<NeoSharedElement>();
+            if (shared == null) shared = go.AddComponent<NeoSharedElement>();
+            shared.key = element.sharedElement;
         }
 
         /// <summary>
@@ -1682,7 +1698,7 @@ namespace Neo.UI.Editor
 
         // ------------------------------------------------------------------ flow
 
-        private static void GenerateFlow(FlowSpec flowSpec, GenerateReport report)
+        private static void GenerateFlow(FlowSpec flowSpec, NeoUISettings settings, GenerateReport report)
         {
             EnsureFolder(FlowFolder);
             string path = $"{FlowFolder}/{Sanitize(flowSpec.name)}.asset";
@@ -1721,12 +1737,18 @@ namespace Neo.UI.Editor
                 }
                 foreach (FlowEdgeSpec edgeSpec in nodeSpec.next)
                 {
+                    if (!string.IsNullOrEmpty(edgeSpec.transition) &&
+                        ViewTransitionRegistry.EnsureRuntimeResolvable(settings, edgeSpec.transition) == null)
+                        report.issues.Add($"Flow '{flowSpec.name}' node '{nodeSpec.name}' -> '{edgeSpec.to}': " +
+                            $"transition '{edgeSpec.transition}' not found (define a ViewTransitionAsset with that full name)");
+
                     node.outputs.Add(new FlowEdge
                     {
                         portName = edgeSpec.trigger != null ? edgeSpec.trigger.ToString() : "Next",
                         toNode = edgeSpec.to,
                         allowsBack = edgeSpec.allowsBack,
-                        trigger = edgeSpec.trigger
+                        trigger = edgeSpec.trigger,
+                        transition = edgeSpec.transition
                     });
                 }
             }

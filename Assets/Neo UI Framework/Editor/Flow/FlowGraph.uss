@@ -122,6 +122,14 @@ GridBackground {
     opacity: 1;
 }
 
+/* Play-mode "flow just crossed this edge" pulse — briefly applied then removed via a scheduled
+   callback (FlowGraphView.FlashEdge), never a per-frame tick. */
+.flow-edge--pulse {
+    --edge-width: 4;
+    --edge-color: #b197fc;
+    opacity: 1;
+}
+
 /* ----------------------------------------------------------------- minimap */
 .mini-map {
     background-color: rgba(27, 30, 35, 0.88);

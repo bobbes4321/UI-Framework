@@ -16,6 +16,20 @@ namespace Neo.UI
     }
 
     /// <summary>
+    /// A resolved view transition for one navigation cut — planted on both the outgoing and
+    /// incoming <see cref="UINode"/> by <c>FlowController.SetActiveNode</c> (see
+    /// <see cref="UINode.pendingTransition"/>), exactly like <see cref="UINode.carryOverViews"/>.
+    /// <see cref="outgoingViews"/> is filled in by the outgoing node's OnExit (the views it actually
+    /// showed) so the incoming node's OnEnter can look for <see cref="NeoSharedElement"/> pairs
+    /// without either node needing a reference to the other.
+    /// </summary>
+    internal class ViewTransitionPlan
+    {
+        public ViewTransitionAsset asset;
+        public List<UINode.ViewRef> outgoingViews;
+    }
+
+    /// <summary>
     /// The core node: shows/hides views on enter (and optionally on exit), then advances when one
     /// of its output-edge triggers fires (button click / signal / toggle / view event / back / timer).
     /// </summary>
@@ -53,6 +67,14 @@ namespace Neo.UI
         /// </summary>
         [NonSerialized] internal List<ViewRef> carryOverViews;
 
+        /// <summary>
+        /// The resolved view transition for the CURRENT navigation cut — the transition analog of
+        /// <see cref="carryOverViews"/>, planted on both the outgoing and incoming node right before
+        /// OnExit/OnEnter run. Consumed and cleared by this node's own OnExit/OnEnter; never carried
+        /// past one cut.
+        /// </summary>
+        [NonSerialized] internal ViewTransitionPlan pendingTransition;
+
         [NonSerialized] private readonly List<FlowTriggerListener> _listeners = new List<FlowTriggerListener>();
         [NonSerialized] private readonly List<FlowEdge> _timerEdges = new List<FlowEdge>();
         [NonSerialized] private float _timeInNode;
@@ -63,13 +85,33 @@ namespace Neo.UI
             _active = true;
             _timeInNode = 0f;
 
+            ViewTransitionPlan plan = pendingTransition;
+            pendingTransition = null;
+
             foreach (ViewRef view in hideViews) UIView.Hide(view.category, view.viewName);
-            foreach (ViewRef view in showViews) UIView.Show(view.category, view.viewName);
+            foreach (ViewRef view in showViews)
+            {
+                // a resolved transition owns the incoming choreography (offset/cascade/hero) for
+                // every shown view, including ones also carried over from the previous node — Show()
+                // is a no-op on an already-visible view either way, so this can't replay a carryover.
+                if (plan != null)
+                    ViewTransitionRunner.ScheduleShow(view.category, view.viewName, plan.asset, plan.outgoingViews);
+                else
+                    UIView.Show(view.category, view.viewName);
+            }
 
             _timerEdges.Clear();
             foreach (FlowEdge edge in outputs)
             {
-                if (string.IsNullOrEmpty(edge.toNode) || edge.trigger == null) continue;
+                if (edge.trigger == null) continue;
+                if (string.IsNullOrEmpty(edge.toNode))
+                {
+                    // no-silent-failures: a trigger with no target is dead wiring — the button/signal
+                    // will visibly do nothing, so say so instead of skipping quietly
+                    if (edge.trigger.type != FlowTrigger.TriggerType.None)
+                        Debug.LogWarning($"FlowGraph: node '{name}' has a '{edge.trigger}' edge with no target node — its trigger will never advance the flow. Set the edge's toNode in the flow graph window.");
+                    continue;
+                }
                 if (edge.trigger.type == FlowTrigger.TriggerType.Timer)
                 {
                     _timerEdges.Add(edge);
@@ -94,10 +136,21 @@ namespace Neo.UI
             _listeners.Clear();
             _timerEdges.Clear();
 
+            ViewTransitionPlan plan = pendingTransition;
+            pendingTransition = null;
+            // hand this node's shown views to the incoming node's plan (shared-element flights match
+            // against them) before they get hidden below
+            if (plan != null) plan.outgoingViews = showViews;
+
             if (hideShownViewsOnExit)
                 foreach (ViewRef view in showViews)
                     if (!IsCarriedOver(view))
-                        UIView.Hide(view.category, view.viewName);
+                    {
+                        if (plan != null && ViewTransitionAsset.Overrides(plan.asset.outgoing))
+                            UIView.Hide(view.category, view.viewName, plan.asset.outgoing);
+                        else
+                            UIView.Hide(view.category, view.viewName);
+                    }
             carryOverViews = null;
         }
 

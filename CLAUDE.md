@@ -71,6 +71,18 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   chain — a descriptor owns its menu label, bare-instance factory and default-output-seeding policy,
   so a project's registered `FlowNode` subtype appears in the create menu via `FlowNodeKinds.Register`
   without forking this file.
+- The flow graph window also has Blueprint-style creation UX layered ON TOP of `FlowNodeKinds` (the
+  flat right-click menu still works): `nodeCreationRequest` + drag-off-an-output-port-into-empty-space
+  both open a search-as-you-type window (`Editor/Flow/FlowNodeSearchWindowProvider.cs` — "Create Node"
+  entries from the registry + optional `FlowNodeDescriptor.searchKeywords`, plus "Go To Node" jump
+  entries); a node picked from a port drag is created AND wired (`outputs[i].toNode`) in one undo.
+  **Groups** (Blender-frame style, organizational only): `FlowGraph.groups` (`FlowGroup
+  {title,tint,nodeNames}`) render as GraphView `Group`s, written back via `elementsAddedToGroup`/
+  `elementsRemovedFromGroup`/`groupTitleChanged`; deleting a group keeps its nodes; zero runtime
+  semantics. **Play-mode pulse**: the window subscribes to `FlowController.OnActiveNodeChanged` +
+  `OnAdvanced(node, viaEdge)` (never polls), restyles the active node's view IN PLACE (no repopulate),
+  flashes the traversed edge (`.flow-edge--pulse`, 600ms) and renders a clickable history breadcrumb
+  strip — runtime clone nodes are matched to design-time views by node NAME, never reference.
 
 ## Runtime robustness rules (learned from the first playable generated scene)
 
@@ -211,6 +223,36 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
     showcase (`Assets/Showcases/Specs/animations.json`). The spec's top-level `presets` section also carries
     the color channel now (`color`: from/to = `start`/`current`/`#hex`/token). Tests: `AnimationColorChannelTests`,
     `AnimatorDefaultsTests`, `ElementAnimationsRoundTripTests`.
+  - **Preview controls** (`Editor/AnimationPreviewEditor.cs`, shared by every animator inspector) also
+    ship an After-Effects-lite strip: a scrub slider (drives `UIAnimation.SetProgressAt` through the
+    same snapshot/restore `AnimationPreview` machinery; Stop ends playback AND scrub sessions) and
+    read-only channel LANES (one bar per enabled channel spanning delay→delay+duration, M/R/S/F/C).
+- **View transitions (edge-level choreography)** — a navigation cut is owned by the EDGE, not either
+  view. `ViewTransitionAsset` (`Runtime/Flow/`, "Category/Name" like animation presets) overrides the
+  outgoing views' hide and/or incoming views' show (`UIAnimation` each; a channels-disabled side keeps
+  the view's own animation), offsets the incoming side (`incomingOffset`), optionally cascades incoming
+  children and flies `NeoSharedElement`-tagged widgets across the cut (hero/"magic move" — explicit
+  `key`, spec field `"sharedElement"`). `FlowEdge.transition` stores the full name; empty falls back to
+  `NeoUISettings.defaultViewTransition`; resolution at runtime goes through the EXPLICIT
+  `NeoUISettings.viewTransitions` list (the `animationPresets` precedent — `ViewTransitionRegistry.
+  EnsureRuntimeResolvable` appends what specs/wiring use; a named-but-unresolved transition WARNS and
+  falls back, never silent). Editor pickers discover assets via `ViewTransitionRegistry`
+  (`NeoAssetRegistry`, keyed by FULL name). Execution: `FlowController.SetActiveNode` plants a
+  `ViewTransitionPlan` on both `UINode`s (the `carryOverViews` pattern); overrides ride
+  `ViewCommand.overrideAnimation` → `UIContainer.Show/Hide(instant, override)` →
+  `IContainerAnimator.OnShow/OnHide(bool, UIAnimation)` (C#8 default-interface overloads — existing
+  animators unaffected); `UIContainerUIAnimator` plays a per-view SCRATCH copy
+  (`UIAnimationChannels.Copy` — never play a shared asset's `UIAnimation` instance, it holds live tween
+  state). `ViewTransitionRunner` (play-mode only) owns offset-delayed shows, cascade and hero flights
+  (proxy on a temp top-sorted overlay canvas; interrupts flush pending shows — a Show is never dropped).
+  Curated library: `Tools → Neo UI → Setup → Create or Repair Transition Library`
+  (`TransitionLibraryBootstrap`, 8 presets: Fade/Cross, Fade/ThroughBlack, Push/SlideLeft|Right|Up|Down,
+  Modal/ZoomIn, Modal/SheetUp). Authoring: the `FlowEdgeDrawer` Transition row (searchable popup +
+  `ViewTransitionBrowserPopup` — hover-dwell LIVE preview on the edge's actual scene views via
+  `AnimationPreview`, restored untouched) plus a lanes strip + scrubber that scrubs BOTH sides on the
+  live views. Spec: edge-level `"transition": "Push/SlideLeft"` (omitted when unset). Demoed by the
+  `transitions` showcase (`Assets/Showcases/Specs/transitions.json`). Tests: `TransitionRoundTripTests`
+  (EditMode), `ViewTransitionRuntimeTests` (PlayMode).
 - Settings/databases are created via `Tools → Neo UI → Setup → Create or Repair Settings`; the themed
   widget prefab library + Dark/Light palette + type scale via `Tools → Neo UI → Setup → Create or
   Repair Starter Kit`. TMP SDF font assets (Inter + the Lucide icon font, committed under
@@ -252,7 +294,11 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
 - Build UI hierarchies in editor code through `UIWidgetFactory` (Editor/Agent) — it is the single
   source of widget structure; the spec generator AND exporter both rely on its child names.
 - Agent workflow with the editor OPEN: toggle `Tools → Neo UI → Advanced → Agent Bridge` once, then
-  write `Temp/neo-request.json` and read `Temp/neo-result.json`. With the editor CLOSED, run the
+  write `Temp/neo-request.json` and read `Temp/neo-result.json` (the bridge runs
+  `AssetDatabase.Refresh()` before handling each request, so on-disk spec/asset edits made between
+  requests are seen without focusing the editor — export/sync would otherwise read the stale
+  in-memory versions and fold that staleness into the baseline as phantom "human edits"). With the
+  editor CLOSED, run the
   same requests headlessly: `Unity.exe -batchmode -projectPath . -executeMethod
   Neo.UI.Editor.AgentBridge.RunBatch -neoRequest req.json -neoResult res.json` (req.json =
   one request or an array, processed in order; omit `-nographics` when screenshots/previews are in
@@ -403,7 +449,10 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   corner); a button `"onClick": {"close": true}` hides its popup (`HideContainerOnClick`); the
   generator fills the UIPopup indexed slots (labels/images/buttons) for the Doozy-style runtime
   APIs (`SetTexts/SetSprites/SetEvents`). Flow nodes take
-  `view` (one), `views` (several) and `hide` lists. Export → generate → export must stay
+  `view` (one), `views` (several) and `hide` lists; a flow edge takes an optional
+  `"transition": "Category/Name"` (see the view-transitions bullet) and any element takes an optional
+  `"sharedElement": "key"` (bakes a `NeoSharedElement` — hero matching across a cut). Export →
+  generate → export must stay
   byte-identical (`SpecLayoutAndWidgetTests`, `TypographyTests`, `IconAndVariantTests`,
   `DepthAndShapeTests`, `JuiceTests`, `CompositionAndRichPopupTests`) — any new spec field needs
   deterministic export. NEVER let
@@ -511,6 +560,23 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   already-linked preset asset; Reset clears just the preset-governed fields back to the preset's own
   values (unlike Apply-Preset, it keeps the widget's other data — layout, bindings, etc. — intact) and
   rebuilds in place. Tests: `NativePresetWorkflowTests`.
+  **Connect-to** (Figma-prototype-style wiring without leaving the scene): selecting a `UIButton`
+  surfaces a "Connect →" overlay action that arms a one-shot pick mode (click a target view in Scene
+  View or Hierarchy, Esc cancels) and opens `ConnectToPopup` ("On Click of X → go to Y", transition
+  picker defaulting to "(project default)", allows-back) — `Editor/Authoring/NeoFlowWiring.cs` then
+  writes the wiring: finds/creates the `UINode`s showing the two views, appends a
+  `FlowEdge{trigger=ButtonClick(button.id), toNode, transition}`, registers ids, creates the
+  FlowGraph asset + `FlowController` when the scene has none (showcase-scoped root when attributable),
+  and never guesses on ambiguity (2+ nodes showing a view → candidates surface in the popup;
+  `explicitFromNode/ToNode` overload resolves). Connecting is listener-side data entry — buttons
+  already publish `UIButton/Behaviour` unconditionally, so no scene components are added. Tests:
+  `FlowWiringTests`.
+- **Command palette** (`Tools → Neo UI → Command Palette`, Ctrl/Cmd-K): a searchable, keyboard-first
+  action window (`Editor/Commands/NeoCommandPaletteWindow.cs`) over `NeoCommands` — a
+  `NeoKeyedRegistry<NeoCommandDescriptor>` (id/label/category/visible-gate/run/searchKeywords), the
+  extensibility seam: a consuming project adds its own editor command via `NeoCommands.Register`.
+  Built-ins: connect-selected-button-to-view (calls `NeoFlowWiring`), create-widget (per
+  `NeoWidgetPalette.All`), go-to-view, and open-window commands for the Neo UI tool windows.
 - Soft design lint (`AgentValidation.ValidateDesign`, surfaced as `designWarnings` by the bridge's
   validate action): WCAG contrast on theme token pairs (3:1 for button labels — large text),
   raw fontSize where text styles exist, off-scale container spacing (4/8/12/16/24/32/48/64).

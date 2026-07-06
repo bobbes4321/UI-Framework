@@ -23,6 +23,14 @@ namespace Neo.UI
         public string viewName;
         public bool instant;
 
+        /// <summary>
+        /// A view transition's override channel for this one call — in-process only (a signal
+        /// payload, never persisted), so an object reference is fine here. Copied into the
+        /// receiving <see cref="IContainerAnimator"/>'s own scratch instance, never played
+        /// directly. Null = the container's own show/hide animation (pre-transition behavior).
+        /// </summary>
+        [NonSerialized] public UIAnimation overrideAnimation;
+
         public override string ToString() => $"{type} {category}/{viewName}{(instant ? " (instant)" : "")}";
     }
 
@@ -69,8 +77,21 @@ namespace Neo.UI
         public static void Show(string category, string name, bool instant = false) =>
             SendCommand(new ViewCommand { type = ViewCommand.CommandType.Show, category = category, viewName = name, instant = instant });
 
+        /// <summary>
+        /// Shows with a transition-owned override animation instead of the view's own show
+        /// animation — the per-call choreography <see cref="ViewTransitionRunner"/> plants over a
+        /// navigation cut. Pass the transition asset's channel directly; the receiving animator
+        /// copies it into its own scratch instance rather than playing the shared asset live.
+        /// </summary>
+        public static void Show(string category, string name, UIAnimation overrideAnimation, bool instant = false) =>
+            SendCommand(new ViewCommand { type = ViewCommand.CommandType.Show, category = category, viewName = name, instant = instant, overrideAnimation = overrideAnimation });
+
         public static void Hide(string category, string name, bool instant = false) =>
             SendCommand(new ViewCommand { type = ViewCommand.CommandType.Hide, category = category, viewName = name, instant = instant });
+
+        /// <summary> Hide counterpart of <see cref="Show(string, string, UIAnimation, bool)"/>. </summary>
+        public static void Hide(string category, string name, UIAnimation overrideAnimation, bool instant = false) =>
+            SendCommand(new ViewCommand { type = ViewCommand.CommandType.Hide, category = category, viewName = name, instant = instant, overrideAnimation = overrideAnimation });
 
         public static void ShowCategory(string category, bool instant = false) =>
             SendCommand(new ViewCommand { type = ViewCommand.CommandType.ShowCategory, category = category, instant = instant });
@@ -105,33 +126,33 @@ namespace Neo.UI
                     case ViewCommand.CommandType.Show:
                         if (view.id.Matches(command.category, command.viewName))
                         {
-                            view.Execute(true, command.instant);
+                            view.Execute(true, command.instant, command.overrideAnimation);
                             matched++;
                         }
                         break;
                     case ViewCommand.CommandType.Hide:
                         if (view.id.Matches(command.category, command.viewName))
                         {
-                            view.Execute(false, command.instant);
+                            view.Execute(false, command.instant, command.overrideAnimation);
                             matched++;
                         }
                         break;
                     case ViewCommand.CommandType.ShowCategory:
                         if (view.id.Category == command.category)
                         {
-                            view.Execute(true, command.instant);
+                            view.Execute(true, command.instant, command.overrideAnimation);
                             matched++;
                         }
                         break;
                     case ViewCommand.CommandType.HideCategory:
                         if (view.id.Category == command.category)
                         {
-                            view.Execute(false, command.instant);
+                            view.Execute(false, command.instant, command.overrideAnimation);
                             matched++;
                         }
                         break;
                     case ViewCommand.CommandType.HideAll:
-                        view.Execute(false, command.instant);
+                        view.Execute(false, command.instant, command.overrideAnimation);
                         break;
                 }
             }
@@ -156,16 +177,19 @@ namespace Neo.UI
             }
         }
 
-        private void Execute(bool show, bool instant)
+        private void Execute(bool show, bool instant, UIAnimation overrideAnimation)
         {
             if (show)
             {
+                // instant has no timeline to play the override on — it stays a plain instant snap
                 if (instant) InstantShow();
+                else if (overrideAnimation != null) Show(overrideAnimation);
                 else Show();
             }
             else
             {
                 if (instant) InstantHide();
+                else if (overrideAnimation != null) Hide(overrideAnimation);
                 else Hide();
             }
         }

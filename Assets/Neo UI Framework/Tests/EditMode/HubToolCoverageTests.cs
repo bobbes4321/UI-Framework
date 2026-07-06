@@ -73,6 +73,17 @@ namespace Neo.UI.Tests
                     string leaf = path.Substring(path.LastIndexOf('/') + 1);
                     if (string.IsNullOrEmpty(leaf)) continue;
 
+                    // A MenuItem path may end with a hotkey token ("Command Palette %k", "_F5",
+                    // "#&d") — Unity strips it for display and ExecuteMenuItem, so strip it here
+                    // too before comparing against Hub labels.
+                    int hotkeySpace = leaf.LastIndexOf(' ');
+                    if (hotkeySpace > 0)
+                    {
+                        char first = leaf[hotkeySpace + 1];
+                        if (first == '%' || first == '#' || first == '&' || first == '_')
+                            leaf = leaf.Substring(0, hotkeySpace);
+                    }
+
                     if (Allowlist.Contains(path)) continue;
 
                     if (!hubLabels.Contains(leaf))
