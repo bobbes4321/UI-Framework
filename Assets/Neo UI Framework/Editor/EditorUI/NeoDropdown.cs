@@ -18,10 +18,12 @@ namespace Neo.EditorUI
         /// <summary>
         /// Searchable string dropdown. <paramref name="onAddNew"/> being non-null enables the inline
         /// "+ Add" row; it should register the new value wherever the options come from (the property
-        /// is set to the new value automatically).
+        /// is set to the new value automatically). <paramref name="optionSwatch"/> being non-null draws
+        /// a color swatch per option in the popup (color-token pickers).
         /// </summary>
         public static void StringPopup(Rect rect, SerializedProperty property,
-            Func<List<string>> optionsProvider, string emptyLabel = "None", Action<string> onAddNew = null)
+            Func<List<string>> optionsProvider, string emptyLabel = "None", Action<string> onAddNew = null,
+            Func<string, Color?> optionSwatch = null)
         {
             string current = property.stringValue;
             TempContent.text = string.IsNullOrEmpty(current) ? emptyLabel : current;
@@ -59,7 +61,8 @@ namespace Neo.EditorUI
                     {
                         onAddNew(value);
                         Apply(value);
-                    });
+                    },
+                optionSwatch);
         }
 
         /// <summary>
@@ -67,7 +70,8 @@ namespace Neo.EditorUI
         /// and toolbars. Returns true when the button was clicked (popup opened).
         /// </summary>
         public static bool ValuePopup(Rect rect, string current, Func<List<string>> optionsProvider,
-            Action<string> onSelect, string emptyLabel = "None", Action<string> onAddNew = null)
+            Action<string> onSelect, string emptyLabel = "None", Action<string> onAddNew = null,
+            Func<string, Color?> optionSwatch = null)
         {
             TempContent.text = string.IsNullOrEmpty(current) ? emptyLabel : current;
             TempContent.tooltip = null;
@@ -81,7 +85,8 @@ namespace Neo.EditorUI
                     {
                         onAddNew(value);
                         onSelect?.Invoke(value);
-                    });
+                    },
+                optionSwatch);
             return true;
         }
     }

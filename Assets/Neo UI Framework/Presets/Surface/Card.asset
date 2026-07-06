@@ -24,7 +24,7 @@ MonoBehaviour:
   background: SurfaceElevated
   labelColor: 
   icon: 
-  radius: 8
+  radius: 12
   padding: 16
   padding4: []
   spacing: 12

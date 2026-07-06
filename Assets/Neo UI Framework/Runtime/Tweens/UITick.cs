@@ -56,7 +56,20 @@ namespace Neo.UI
                 ITickable t = Snapshot[i];
                 // skip tickables removed mid-tick
                 if (!Tickables.Contains(t)) continue;
-                t.Tick(deltaTime);
+                try
+                {
+                    t.Tick(deltaTime);
+                }
+                catch (System.Exception e)
+                {
+                    // loud but bounded: a tickable that throws would otherwise throw on EVERY tick
+                    // (the editor heartbeat never stops) — log the exception once and drop it, and
+                    // keep ticking the rest of the snapshot.
+                    UnityEngine.Debug.LogException(e);
+                    UnityEngine.Debug.LogWarning(
+                        $"[Neo.UI] Unregistered tickable {t.GetType().Name} — it threw during Tick (exception above).");
+                    Tickables.Remove(t);
+                }
             }
             OnTick?.Invoke();
         }

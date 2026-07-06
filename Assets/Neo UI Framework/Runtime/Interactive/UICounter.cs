@@ -48,7 +48,7 @@ namespace Neo.UI
             if (_tween == null)
             {
                 _tween = new FloatTween();
-                _tween.SetTarget(() => _displayed, Write);
+                _tween.SetTarget(this, () => _displayed, Write);
             }
             _tween.Stop(silent: true);
             _tween.SetFrom(_displayed);

@@ -168,11 +168,29 @@ namespace Neo.UI.Editor
         /// </summary>
         private static void DrawChannelLanes(UIAnimation animation, RectTransform target)
         {
-            if (!animation.hasEnabledChannels) return;
+            // This overload reads the playhead from the shared scrub-session dictionary (the inspector's
+            // own preview lifecycle); the target-free overload below does the drawing so a host that owns
+            // its own preview/scrub lifecycle can reuse the exact same lane strip.
+            bool showPlayhead = IsScrubbing(target);
+            float progress = showPlayhead && ScrubProgress.TryGetValue(target, out float p) ? p : 0f;
+            DrawChannelLanes(animation, progress, showPlayhead);
+        }
+
+        /// <summary>
+        /// Read-only M/R/S/F/C channel-lane strip for one animation, decoupled from the scrub-session
+        /// dictionary so a host that owns its own preview/scrub lifecycle (the Design System Motion tab)
+        /// renders the identical lanes. One thin bar per enabled channel spanning
+        /// [startDelay, startDelay+duration] over the total duration; <paramref name="scrubProgress01"/>
+        /// (0..1) positions a playhead when <paramref name="showPlayhead"/> is true. Draws nothing when
+        /// no channel is enabled. (Behaviour-neutral extraction — the inspector overload above delegates
+        /// here, so the animator inspectors are unchanged.)
+        /// </summary>
+        public static void DrawChannelLanes(UIAnimation animation, float scrubProgress01, bool showPlayhead)
+        {
+            if (animation == null || !animation.hasEnabledChannels) return;
 
             float total = animation.totalDuration;
-            bool showPlayhead = IsScrubbing(target);
-            float scrubSeconds = showPlayhead && ScrubProgress.TryGetValue(target, out float p) ? p * total : 0f;
+            float scrubSeconds = showPlayhead ? scrubProgress01 * total : 0f;
 
             GUILayout.Space(2f);
             DrawChannelLane('M', animation.move.enabled, animation.move.settings, NeoColors.Animation, total, scrubSeconds, showPlayhead);

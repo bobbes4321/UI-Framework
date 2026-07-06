@@ -113,6 +113,7 @@ namespace Neo.UI.Editor
             Scene scene = EditorSceneManager.NewPreviewScene();
             RenderTexture renderTexture = null;
             Texture2D pixels = null;
+            GameObject content = null;
             bool success = false;
             try
             {
@@ -139,13 +140,17 @@ namespace Neo.UI.Editor
                 ApplyDeviceScale(canvasRect, width, height, options.deviceScale);
                 canvasRect.position = Vector3.zero;
 
-                GameObject content = produceContent(scene, canvasRect);
+                content = produceContent(scene, canvasRect);
 
                 // containers start hidden via a ROOT CanvasGroup; the screenshot wants the shown
                 // state. Only the root — child groups encode widget states (e.g. an unchecked
                 // toggle's hidden checkmark) that must render as authored.
                 var rootGroup = content.GetComponent<CanvasGroup>();
                 if (rootGroup != null) rootGroup.alpha = 1f;
+                // ...except panels: in play mode their enable-fade just set alpha to 0, and this
+                // synchronous capture would snapshot frame one of the fade (blank content)
+                foreach (UIPanel panel in content.GetComponentsInChildren<UIPanel>(true))
+                    panel.CancelEnableFade();
 
                 // two passes + an explicit root rebuild: deeply nested layout chains (stack >
                 // stack > grid) and TMP preferred sizes only settle after the first pass — one
@@ -170,6 +175,11 @@ namespace Neo.UI.Editor
             }
             finally
             {
+                // destroy the content tree explicitly rather than letting ClosePreviewScene tear it
+                // down — DestroyImmediate guarantees OnDisable runs so components stop the tweens
+                // they started while enabled (a leaked tween over a destroyed target would throw
+                // from the editor heartbeat on every tick)
+                if (content != null) UnityEngine.Object.DestroyImmediate(content);
                 if (renderTexture != null)
                 {
                     renderTexture.Release();

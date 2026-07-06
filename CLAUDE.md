@@ -57,7 +57,18 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   Containers=cyan, Animation=orange, Flow=purple, Theming=pink, Signals=teal, Data=yellow).
 - Any category/name string gets a searchable dropdown: `IdDatabaseOptions.DrawCategoryNamePair`
   (databases live on `NeoUISettings`). Plain string pickers use `NeoDropdown.StringPopup/ValuePopup`
-  with an inline "+ Add" row — never modal dialogs.
+  with an inline "+ Add" row — never modal dialogs. Theme-color-token pickers additionally pass
+  `optionSwatch` (a `token → Color?` resolver; colors are resolved once when the popup opens) so
+  every option row shows its color swatch — any new token picker must do the same.
+- Runtime-driven values get a TMP-LocalizedString-style "don't hand-edit this" notice:
+  `ColorDriverNotice`/`NeoColorDrivers` (`Editor/Inspectors/ColorDriverNotice.cs`) detect components
+  that overwrite the color of the Graphic/SpriteRenderer on their own GameObject (toggle/selectable/
+  container color animators, enabled UIAnimation color channels, theme color/style targets) and show
+  an info box — inline above the Color field in package-owned inspectors (NeoShape), and via the
+  `Editor.finishedDefaultHeaderGUI` GameObject-header hook for graphics with Unity-made inspectors
+  (Image, RawImage, TMP, SpriteRenderer). Scan results are cached per GameObject (invalidated on
+  object change/undo/selection). A project component that drives colors registers a
+  `ColorDriverDescriptor` via `NeoColorDrivers.Register`. Tests: `ColorDriverNoticeTests`.
 - IMGUI rules: never create GUIStyles/ReorderableLists/SerializedObjects per OnGUI pass (cache —
   see `NeoListView`/`NeoStyles`); fetch dropdown options only when the dropdown opens; conditional
   display = draw or don't draw; guard `enumValueIndex < 0` (multi-edit mixed values); wrap manual
@@ -104,6 +115,16 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   is the pipeline-level net: it generates the canonical demo spec, instantiates its views + flow
   graph in-memory and clicks through every flow edge + tab, asserting node/view/panel visibility
   (EditMode because flow advance is synchronous signal dispatch — no play-mode ticking needed).
+- **Tween lifetime**: a tween whose getter/setter closures capture a component must bind its
+  lifetime to it — `tween.SetTarget(owner, get, set)` (or `Tween.BindLifetime`) — so a destroyed
+  target self-stops the tween instead of throwing `MissingReferenceException` from `UITick` on
+  every editor-heartbeat tick forever; `UITick.Tick` additionally logs-and-drops any tickable that
+  throws (loud once, never a per-frame storm). Editor capture paths that activate widgets in a
+  preview scene must `DestroyImmediate` the widget tree themselves (never rely on
+  `ClosePreviewScene`'s teardown to dispatch `OnDisable`) and call `UIPanel.CancelEnableFade()`
+  before a synchronous snapshot — in play mode the enable-fade starts at alpha 0, which reads back
+  as a blank render. Tests: `TweenTests.LifetimeOwnerDestroyed_SelfStopsInsteadOfThrowing`,
+  `TweenTests.UITick_ThrowingTickable_IsDroppedAndOthersStillTick`.
 
 ## Build & test workflows
 
@@ -175,14 +196,23 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   rendered sample line), **Buttons** (`ButtonVariantAsset` per-state colors + `contentToken` + sizes, all
   five seeded variants incl. success, real rendered preview), **Shapes** (full `ShapeStyle` fidelity —
   uniform/per-corner radius, fill mode/gradient, elevation — with a real `NeoShape` render),
-  **Presets** (thumbnail-card grid + an embedded editor sharing the `NeoWidgetPresetEditor` form + create/
-  duplicate/delete/from-selection), **Motion** (role defaults + the full preset library as a searchable
-  browser + an embedded channel editor + live preview — `NeoUISettings.animatorDefaults`, the same data
-  the Setup wizard seeds and animator `Reset()`/the factory consume), **Bundles** (apply with a diff
-  preview before it overwrites edits, "save current look as bundle"). Edits the exact structures the
+  **Presets** (dual-pane master-detail sharing the `NeoWidgetPresetEditor` form: left = search +
+  two-column thumbnail-card grid + create/from-selection, right = the embedded editor with an
+  empty-state hint when nothing's selected), **Motion** (dual-pane master-detail: left = collapsible
+  role defaults + search + grouped preset browser — rows show per-channel M/R/S/F/C badges and
+  hover-dwell live preview, parity with `AnimationPresetBrowserPopup` — + New-preset row; right = the
+  embedded channel editor for the selected preset (Ping/Duplicate/Delete, rename-to-convention notice,
+  scrub slider + channel-lanes strip via the shared `AnimationPreview.DrawChannelLanes`); previews play
+  on the scene selection when a RectTransform is selected, else on a lazy offscreen `MotionPreviewStage`
+  — `NeoUISettings.animatorDefaults`, the same data the Setup wizard seeds and animator `Reset()`/the
+  factory consume), **Bundles** (apply with a diff preview before it overwrites edits, "save current
+  look as bundle"). Edits the exact structures the
   factory consults, so they flow into generated and native-built UI. The tab set is the extensibility
-  seam: `NeoDesignSystemTabs` (a `NeoKeyedRegistry<DesignSystemTabDescriptor>`, the built-in EIGHT each in
-  their own `Editor/DesignSystem/*Tab.cs` file over shared `DesignSystemGUI` helpers) — a project adds its
+  seam: `NeoDesignSystemTabs` (a `NeoKeyedRegistry<DesignSystemTabDescriptor>`, an `ownsLayout` flag lets
+  a tab own its full height + scrolling instead of the window's outer scroll view — via
+  `DesignSystemGUI`'s `BeginSplitPane`/`BeginSplitLeft`/`BeginSplitRight` dual-pane helpers, as Motion and
+  Presets do — the built-in EIGHT each in their own `Editor/DesignSystem/*Tab.cs` file over shared
+  `DesignSystemGUI` helpers) — a project adds its
   own design-system tab via `NeoDesignSystemTabs.Register` without forking the window. Surfaced in the Hub
   Tools tab alongside the Gallery window (`Tools → Neo UI → Gallery`, `Editor/Gallery/NeoGalleryWindow.cs`
   — a read-only visual gallery of every generated view/popup prefab) and the Widget Presets bootstrap;

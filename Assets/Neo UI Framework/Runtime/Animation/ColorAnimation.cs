@@ -173,7 +173,7 @@ namespace Neo.UI
             if (!_hasStartColor) CaptureStartColor();
             _tween = _tween ?? TweenPool.Get<ColorTween>();
             _tween.settings = settings;
-            _tween.SetTarget(() => _target.GetColor(), c => _target.SetColor(c));
+            _tween.SetTarget(_target?.targetObject, () => _target.GetColor(), c => _target.SetColor(c));
             _tween.SetStartValue(_startColor);
             ApplyEndpoint(from, isFrom: true);
             ApplyEndpoint(to, isFrom: false);

@@ -50,6 +50,17 @@ namespace Neo.UI
             setter = setValue;
         }
 
+        /// <summary>
+        /// Binds the getter/setter AND ties the tween's lifetime to the object they touch
+        /// (<see cref="Tween.BindLifetime"/>) — prefer this overload whenever the closures capture a
+        /// component, so a destroyed target self-stops the tween instead of throwing from the ticker.
+        /// </summary>
+        public void SetTarget(UnityEngine.Object owner, Func<T> getValue, Action<T> setValue)
+        {
+            BindLifetime(owner);
+            SetTarget(getValue, setValue);
+        }
+
         /// <summary> Captures the StartValue snapshot from the target (or sets it explicitly). </summary>
         public void CaptureStartValue()
         {

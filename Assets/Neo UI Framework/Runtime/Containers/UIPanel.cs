@@ -42,7 +42,7 @@ namespace Neo.UI
                 if (_fadeTween == null)
                 {
                     _fadeTween = new FloatTween();
-                    _fadeTween.SetTarget(() => canvasGroup.alpha, a => canvasGroup.alpha = a);
+                    _fadeTween.SetTarget(this, () => canvasGroup.alpha, a => canvasGroup.alpha = a);
                 }
                 _fadeTween.Stop(silent: true);
                 _fadeTween.SetFrom(0f);
@@ -52,6 +52,17 @@ namespace Neo.UI
                 canvasGroup.alpha = 0f;
                 _fadeTween.Play();
             }
+        }
+
+        /// <summary>
+        /// Kills a running enable-fade and restores full alpha. Synchronous capture paths
+        /// (thumbnails, screenshots) call this after activating a panel so the snapshot is WYSIWYG
+        /// instead of catching frame one of the play-mode fade (alpha 0 — a blank render).
+        /// </summary>
+        public void CancelEnableFade()
+        {
+            _fadeTween?.Stop(silent: true);
+            canvasGroup.alpha = 1f;
         }
 
         protected override void OnDisable()

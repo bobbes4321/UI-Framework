@@ -68,7 +68,7 @@ namespace Neo.UI
             if (_tween == null)
             {
                 _tween = TweenPool.Get<ColorTween>();
-                _tween.SetTarget(() => _target.GetColor(), c => _target.SetColor(c));
+                _tween.SetTarget(this, () => _target.GetColor(), c => _target.SetColor(c));
             }
             _tween.settings = transitionSettings;
             _tween.PlayToValue(targetColor);

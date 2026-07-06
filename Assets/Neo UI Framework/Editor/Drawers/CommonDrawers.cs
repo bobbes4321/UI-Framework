@@ -42,7 +42,8 @@ namespace Neo.UI.Editor
                 var dropdownRect = new Rect(fieldRect.x, fieldRect.y, fieldRect.width - SwatchWidth - 2f, fieldRect.height);
                 var swatchRect = new Rect(dropdownRect.xMax + 2f, fieldRect.y + 1f, SwatchWidth, fieldRect.height - 2f);
 
-                NeoDropdown.StringPopup(dropdownRect, tokenProperty, TokenOptions, emptyLabel: "(no token)");
+                NeoDropdown.StringPopup(dropdownRect, tokenProperty, TokenOptions, emptyLabel: "(no token)",
+                    optionSwatch: TokenSwatch);
 
                 Theme theme = NeoUISettings.instance != null ? NeoUISettings.instance.theme : null;
                 Color resolved = theme != null && theme.TryGetColor(tokenProperty.stringValue, out Color themed)
@@ -63,6 +64,12 @@ namespace Neo.UI.Editor
             Theme theme = NeoUISettings.instance != null ? NeoUISettings.instance.theme : null;
             if (theme != null) options.AddRange(theme.GetTokenNames());
             return options;
+        }
+
+        private static Color? TokenSwatch(string token)
+        {
+            Theme theme = NeoUISettings.instance != null ? NeoUISettings.instance.theme : null;
+            return theme != null && theme.TryGetColor(token, out Color color) ? color : (Color?)null;
         }
     }
 

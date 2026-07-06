@@ -285,22 +285,34 @@ namespace Neo.UI.Editor
             Rect rect = EditorGUILayout.GetControlRect();
             GUIContent tokenLabel = EditorGUI.BeginProperty(rect, new GUIContent("Token", tokenProperty.tooltip), tokenProperty);
             rect = EditorGUI.PrefixLabel(rect, tokenLabel);
-            NeoDropdown.StringPopup(rect, tokenProperty, TokenOptions, "(no token)");
+            NeoDropdown.StringPopup(rect, tokenProperty, TokenOptions, "(no token)",
+                optionSwatch: TokenSwatch);
             EditorGUI.EndProperty();
 
             EditorGUILayout.PropertyField(serializedObject.FindProperty("themeOverride"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("tint"));
         }
 
+        private Theme ResolvedTheme()
+        {
+            var targetComponent = (ThemeColorTarget)target;
+            return targetComponent.themeOverride != null
+                ? targetComponent.themeOverride
+                : NeoUISettings.instance != null ? NeoUISettings.instance.theme : null;
+        }
+
         private System.Collections.Generic.List<string> TokenOptions()
         {
             var options = new System.Collections.Generic.List<string>();
-            var targetComponent = (ThemeColorTarget)target;
-            Theme theme = targetComponent.themeOverride != null
-                ? targetComponent.themeOverride
-                : NeoUISettings.instance != null ? NeoUISettings.instance.theme : null;
+            Theme theme = ResolvedTheme();
             if (theme != null) options.AddRange(theme.GetTokenNames());
             return options;
+        }
+
+        private Color? TokenSwatch(string token)
+        {
+            Theme theme = ResolvedTheme();
+            return theme != null && theme.TryGetColor(token, out Color color) ? color : (Color?)null;
         }
     }
 

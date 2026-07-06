@@ -45,6 +45,11 @@ namespace Neo.UI
         private TweenState _stateBeforePause;
         private bool _pingPongFlipped;
 
+        // Optional lifetime guard — a tween whose target dies must self-stop, never keep throwing
+        // MissingReferenceException out of the tick loop (the editor heartbeat runs forever).
+        private UnityEngine.Object _lifetimeOwner;
+        private bool _hasLifetimeOwner;
+
         public Action onPlay;
         public Action onStop;
         public Action onFinish;
@@ -53,6 +58,18 @@ namespace Neo.UI
         public Action onResume;
         /// <summary> Invoked every tick while playing, with the eased progress. </summary>
         public Action<float> onUpdate;
+
+        /// <summary>
+        /// Ties the tween's lifetime to a Unity object — normally the component whose values its
+        /// getter/setter closures touch. Once the owner is destroyed, the next tick silently stops
+        /// and unregisters the tween instead of invoking the setter on a dead target. Cleared by
+        /// <see cref="Reset"/>; pass null to unbind.
+        /// </summary>
+        public void BindLifetime(UnityEngine.Object owner)
+        {
+            _lifetimeOwner = owner;
+            _hasLifetimeOwner = owner != null;
+        }
 
         // ------------------------------------------------------------------ play API
 
@@ -224,6 +241,12 @@ namespace Neo.UI
 
         public void Tick(float deltaTime)
         {
+            if (_hasLifetimeOwner && _lifetimeOwner == null)
+            {
+                Stop(silent: true);
+                return;
+            }
+
             switch (state)
             {
                 case TweenState.StartDelay:
@@ -344,6 +367,8 @@ namespace Neo.UI
             elapsed = 0f;
             completedLoops = 0;
             direction = PlayDirection.Forward;
+            _lifetimeOwner = null;
+            _hasLifetimeOwner = false;
         }
 
         internal void MarkPooled() => SetState(TweenState.Pooled);

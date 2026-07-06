@@ -16,7 +16,7 @@ MonoBehaviour:
   category: Switch
   targetKind: switch
   description: 
-  variant: 
+  variant: secondary
   sizeVariant: 
   textStyle: 
   shapeStyle: 

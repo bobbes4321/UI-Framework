@@ -58,14 +58,24 @@ namespace Neo.UI.Editor
         /// <summary> Draws the tab's body inside the window's scroll view. </summary>
         public readonly Action<DesignSystemTabContext> draw;
 
+        /// <summary> When true, the window does NOT wrap this tab's <see cref="draw"/> call in its own
+        /// <see cref="EditorGUILayout.BeginScrollView"/> — the tab draws its own scroll container(s) and
+        /// is handed the full remaining window height to fill instead (see
+        /// <see cref="DesignSystemGUI.BeginSplitPane"/>, the master-detail helper built for this). Default
+        /// false, meaning the window's outer scroll view wraps the tab as before. This is a public
+        /// extensibility seam: a consuming project's registered tab can opt in too, via the constructor's
+        /// <c>ownsLayout</c> parameter, for its own dual-pane/master-detail layouts. </summary>
+        public readonly bool ownsLayout;
+
         public DesignSystemTabDescriptor(string id, string title, int order,
-            Func<object> createState, Action<DesignSystemTabContext> draw)
+            Func<object> createState, Action<DesignSystemTabContext> draw, bool ownsLayout = false)
         {
             this.id = id;
             this.title = title;
             this.order = order;
             this.createState = createState;
             this.draw = draw;
+            this.ownsLayout = ownsLayout;
         }
     }
 
@@ -97,8 +107,8 @@ namespace Neo.UI.Editor
             yield return TypographyTab.Descriptor;
             yield return new DesignSystemTabDescriptor("buttons", "Buttons", 10, ButtonsTab.CreateState, ButtonsTab.Draw);
             yield return new DesignSystemTabDescriptor("shapes", "Shapes", 20, ShapesTab.CreateState, ShapesTab.Draw);
-            yield return new DesignSystemTabDescriptor("presets", "Presets", 30, PresetsTab.CreateState, PresetsTab.Draw);
-            yield return new DesignSystemTabDescriptor("motion", "Motion", 40, MotionTab.CreateState, MotionTab.Draw);
+            yield return new DesignSystemTabDescriptor("presets", "Presets", 30, PresetsTab.CreateState, PresetsTab.Draw, ownsLayout: true);
+            yield return new DesignSystemTabDescriptor("motion", "Motion", 40, MotionTab.CreateState, MotionTab.Draw, ownsLayout: true);
             yield return BundlesTab.Descriptor;
         }
 

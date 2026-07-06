@@ -10,17 +10,23 @@ namespace Neo.UI.Editor
 {
     /// <summary>
     /// Design System window "Presets" tab (Phase 2.3): a real editor over the discovered
-    /// <see cref="NeoWidgetPreset"/> library, no longer a list-and-ping shell. A thumbnail card grid (the
-    /// same visuals as the scene-view overlay's <c>PresetPickerPopup</c> — shared
-    /// <see cref="PresetThumbnailCache"/> / <see cref="PresetThumbnailRenderer"/>) with a kind filter and
-    /// search, an embedded editor pane that renders the SAME form as the preset inspector (via the shared
-    /// <see cref="WidgetPresetGUI"/> drawer), and create / new-from-selection / duplicate / delete actions.
+    /// <see cref="NeoWidgetPreset"/> library, no longer a list-and-ping shell. Laid out master–detail
+    /// (<c>ownsLayout: true</c> on the descriptor + <see cref="DesignSystemGUI.BeginSplitPane"/>) so a card
+    /// click never pushes the editor below the fold: a fixed-width, independently-scrolling LEFT (browse)
+    /// column — kind filter + search, the thumbnail card grid (the same visuals as the scene-view overlay's
+    /// <c>PresetPickerPopup</c> — shared <see cref="PresetThumbnailCache"/> / <see cref="PresetThumbnailRenderer"/>),
+    /// and the create / new-from-selection actions — beside a flexible, independently-scrolling RIGHT
+    /// (detail) column that renders the SAME form as the preset inspector (via the shared
+    /// <see cref="WidgetPresetGUI"/> drawer) with per-preset duplicate / delete actions, or a friendly
+    /// empty-state hint when nothing is selected. The left column is sized to exactly two card columns
+    /// (<see cref="LeftPaneWidth"/>, derived from <see cref="CardW"/>/<see cref="Gap"/> so cards never clip).
     /// <para>
     /// Perf discipline (CLAUDE.md flow-window + IMGUI rules): ONE cached <see cref="SerializedObject"/> for
     /// the selected preset, recreated only when the selection changes — never per OnGUI. Thumbnails come
     /// from the shared cache (rendered once per look, keyed by a content hash so an edit refreshes the
     /// card automatically) — never rendered per OnGUI. The "new from selection" enablement probe runs only
-    /// when the scene selection changes, not every repaint. GUIStyles are built lazily and reused.
+    /// when the scene selection changes, not every repaint. Both panes' scroll positions live in the tab's
+    /// per-window <see cref="State"/> (never allocated per OnGUI). GUIStyles are built lazily and reused.
     /// </para>
     /// </summary>
     internal static class PresetsTab
@@ -31,6 +37,21 @@ namespace Neo.UI.Editor
         private const float CardLabelH = 18f;
         private const float CardH = CardThumb + CardLabelH + 6f;
         private const float Gap = 6f;
+
+        // Default left (browse) pane width: exactly two card columns plus the scroll view's inner margin +
+        // vertical scrollbar, derived from the card metrics so cards never clip (CLAUDE.md: derive, don't
+        // hardcode a magic number). 2*132 + 6 gap + ~30 chrome = 300. The pane is now user-resizable
+        // (DesignSystemGUI split-pane drag) — this is only the starting width; DrawGrid derives its column
+        // count from the CURRENT width, so widening the pane reveals more columns.
+        private const int LeftColumns = 2;
+        private const float LeftChrome = 30f;
+        private const float DefaultLeftWidth = LeftColumns * CardW + (LeftColumns - 1) * Gap + LeftChrome;
+
+        // Drag clamp + SessionState key (per-tab, keyed like NeoDesignSystemWindow.TabKey) so a resize
+        // survives window close/reopen within the session. RightMinWidth keeps the detail pane usable.
+        private const float LeftMinWidth = 200f;
+        private const float RightMinWidth = 320f;
+        private const string LeftWidthKey = "NeoUI.DesignSystem.Presets.LeftWidth";
 
         private const string AllKinds = "All";
 
@@ -43,6 +64,28 @@ namespace Neo.UI.Editor
         {
             public string kindFilter = AllKinds;
             public string search = "";
+
+            // Independent scroll positions for the two master-detail panes (caller-owned per the
+            // split-pane helper's contract; kept here so nothing allocates per OnGUI).
+            public Vector2 leftScroll;
+            public Vector2 rightScroll;
+
+            // Draggable master-column width (caller-owned + SessionState-persisted; see LeftWidthKey).
+            public float leftWidth;
+            private float _persistedWidth;
+
+            /// <summary> Seeds <see cref="leftWidth"/> from SessionState (or <paramref name="def"/> first
+            /// time) — call once from the state factory. </summary>
+            public void LoadWidth(string key, float def) => leftWidth = _persistedWidth = SessionState.GetFloat(key, def);
+
+            /// <summary> Writes <see cref="leftWidth"/> back to SessionState only when a drag actually
+            /// changed it (never a per-OnGUI write) — call after the split pane closes. </summary>
+            public void PersistWidth(string key)
+            {
+                if (leftWidth == _persistedWidth) return;
+                SessionState.SetFloat(key, leftWidth);
+                _persistedWidth = leftWidth;
+            }
 
             // The hosting window (set each draw from the context) so a card click can request a repaint.
             public EditorWindow window;
@@ -61,6 +104,59 @@ namespace Neo.UI.Editor
             public int probedSelectionId;
             public bool selectionIsWidget;
 
+            // --- "all presets" snapshot cache (CLAUDE.md: no uncached LINQ in draw paths) ---
+            // Rebuilt only when the registry's discovered count changes (create/delete/import) — mirrors
+            // MotionTab.EnsureModel's builtForCount guard.
+            private List<NeoWidgetPreset> _allCache;
+            private int _allBuiltForCount = -1;
+
+            // --- filtered "visible" snapshot cache, keyed off the "all" cache reference + the exact filter
+            // inputs it was built against. An in-place field edit (rename/re-kind via the embedded form on
+            // the right) can change filter membership WITHOUT touching the registry count, so
+            // DrawEditorPane calls MarkFilterDirty() on every applied edit and that version rides along.
+            private List<NeoWidgetPreset> _visibleCache;
+            private List<NeoWidgetPreset> _visibleBuiltForAll;
+            private string _visibleBuiltForKind;
+            private string _visibleBuiltForSearch;
+            private int _visibleBuiltForVersion = -1;
+            private int _filterVersion;
+
+            /// <summary> Returns the cached null-filtered snapshot of <see cref="NeoWidgetPresets.All"/>,
+            /// rebuilding only when the discovered count changed. </summary>
+            public List<NeoWidgetPreset> GetAll()
+            {
+                IReadOnlyList<NeoWidgetPreset> registryAll = NeoWidgetPresets.All;
+                if (_allCache == null || _allBuiltForCount != registryAll.Count)
+                {
+                    _allCache = registryAll.Where(p => p != null).ToList();
+                    _allBuiltForCount = registryAll.Count;
+                }
+                return _allCache;
+            }
+
+            /// <summary> Returns the cached kind/search-filtered snapshot of <paramref name="all"/>,
+            /// rebuilding only when the source list, the kind filter, the search text or
+            /// <see cref="MarkFilterDirty"/> changed since the last build. </summary>
+            public List<NeoWidgetPreset> GetVisible(List<NeoWidgetPreset> all, string kindFilter, string search)
+            {
+                if (_visibleCache != null && _visibleBuiltForAll == all
+                    && _visibleBuiltForKind == kindFilter && _visibleBuiltForSearch == search
+                    && _visibleBuiltForVersion == _filterVersion)
+                    return _visibleCache;
+
+                string needle = string.IsNullOrEmpty(search) ? null : search.ToLowerInvariant();
+                _visibleCache = all.Where(p => Matches(p, kindFilter, needle)).ToList();
+                _visibleBuiltForAll = all;
+                _visibleBuiltForKind = kindFilter;
+                _visibleBuiltForSearch = search;
+                _visibleBuiltForVersion = _filterVersion;
+                return _visibleCache;
+            }
+
+            /// <summary> Invalidates the "visible" filter cache — call after an in-place preset field edit
+            /// (rename/re-kind) that could change filter membership without changing the registry count. </summary>
+            public void MarkFilterDirty() => _filterVersion++;
+
             public void Dispose()
             {
                 so?.Dispose();
@@ -72,7 +168,12 @@ namespace Neo.UI.Editor
             }
         }
 
-        internal static object CreateState() => new State();
+        internal static object CreateState()
+        {
+            var s = new State();
+            s.LoadWidth(LeftWidthKey, DefaultLeftWidth);
+            return s;
+        }
 
         // Card label + headless fallback styles — built once, reused (never per OnGUI).
         private static GUIStyle _cardLabel, _cardFallback;
@@ -88,22 +189,59 @@ namespace Neo.UI.Editor
             var s = ctx.State<State>();
             s.window = ctx.window;
 
-            EditorGUILayout.LabelField("Component presets (NeoWidgetPreset)", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField("Named component styles referenced by an element's \"preset\". " +
-                "Select a card to edit it below.", EditorStyles.wordWrappedMiniLabel);
+            // Cached snapshot of the discovered library (State.GetAll — rebuilt only on registry-count
+            // change, never per OnGUI event; see State.GetAll/GetVisible).
+            List<NeoWidgetPreset> all = s.GetAll();
 
-            // Live snapshot of the discovered library (a cached snapshot from the registry — cheap).
-            List<NeoWidgetPreset> all = NeoWidgetPresets.All.Where(p => p != null).ToList();
+            using (DesignSystemGUI.BeginSplitPane(ctx.window))
+            {
+                // LEFT (browse): filter + search, thumbnail grid, create actions. Resizable via the
+                // separator drag (DesignSystemGUI.EndSplitLeft); width rides s.leftWidth, persisted below.
+                DesignSystemGUI.BeginSplitLeft(ref s.leftScroll, ref s.leftWidth, LeftMinWidth, RightMinWidth);
+                DrawBrowsePane(s, all);
+                DesignSystemGUI.EndSplitLeft(ref s.leftWidth, LeftMinWidth, RightMinWidth);
+
+                // Card clicks in the browse pane may have changed the selection this frame — resync the
+                // cached SerializedObject before the detail pane reads it (still recreated only on change).
+                SyncSelection(s);
+
+                // RIGHT (detail): the embedded editor for the selected preset, or an empty-state hint.
+                DesignSystemGUI.BeginSplitRight(ref s.rightScroll);
+                DrawDetailPane(s);
+                DesignSystemGUI.EndSplitRight();
+            }
+            s.PersistWidth(LeftWidthKey);
+        }
+
+        // ---------------------------------------------------------------- left (browse) pane
+
+        private static void DrawBrowsePane(State s, List<NeoWidgetPreset> all)
+        {
+            EditorGUILayout.LabelField("Component presets", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Named component styles referenced by an element's \"preset\". " +
+                "Select a card to edit it on the right.", EditorStyles.wordWrappedMiniLabel);
 
             DrawToolbar(s, all);
             DrawGrid(s, all);
 
             NeoGUI.Splitter();
             DrawCreateRow(s);
+        }
 
-            SyncSelection(s);
-            if (s.selected != null && s.so != null)
-                DrawEditorPane(s);
+        // ---------------------------------------------------------------- right (detail) pane
+
+        private static void DrawDetailPane(State s)
+        {
+            if (s.selected == null || s.so == null)
+            {
+                GUILayout.FlexibleSpace();
+                EditorGUILayout.LabelField("Select a preset on the left to edit it.",
+                    EditorStyles.centeredGreyMiniLabel);
+                GUILayout.FlexibleSpace();
+                return;
+            }
+
+            DrawEditorPane(s);
         }
 
         // ---------------------------------------------------------------- toolbar (filter + search)
@@ -134,8 +272,9 @@ namespace Neo.UI.Editor
 
         private static void DrawGrid(State s, List<NeoWidgetPreset> all)
         {
-            string needle = string.IsNullOrEmpty(s.search) ? null : s.search.ToLowerInvariant();
-            var visible = all.Where(p => Matches(p, s.kindFilter, needle)).ToList();
+            // Cached (State.GetVisible — keyed off the "all" list + kind filter + search + edit version;
+            // never an uncached .Where().ToList() per OnGUI event).
+            List<NeoWidgetPreset> visible = s.GetVisible(all, s.kindFilter, s.search);
 
             if (visible.Count == 0)
             {
@@ -146,7 +285,13 @@ namespace Neo.UI.Editor
                 return;
             }
 
-            int columns = Mathf.Max(1, Mathf.FloorToInt((EditorGUIUtility.currentViewWidth - 28f) / (CardW + Gap)));
+            // Grid lives inside the resizable left pane (not the full window), so columns derive from the
+            // CURRENT pane width, not EditorGUIUtility.currentViewWidth (which would over-count and clip) —
+            // widening the pane reveals more columns, narrowing it fewer. n cards need n*CardW + (n−1)*Gap,
+            // so the +Gap term inverts that exactly (avail=270 ⇒ 2 cols at the 300px default; the old
+            // formula lacked +Gap and under-counted to 1).
+            float avail = s.leftWidth - LeftChrome;
+            int columns = Mathf.Max(1, Mathf.FloorToInt((avail + Gap) / (CardW + Gap)));
             for (int i = 0; i < visible.Count; i += columns)
             {
                 using (new EditorGUILayout.HorizontalScope())
@@ -300,7 +445,6 @@ namespace Neo.UI.Editor
 
         private static void DrawEditorPane(State s)
         {
-            NeoGUI.Splitter();
             using (new EditorGUILayout.HorizontalScope())
             {
                 EditorGUILayout.LabelField($"Editing: {s.selected.presetName}", EditorStyles.boldLabel);
@@ -316,7 +460,10 @@ namespace Neo.UI.Editor
             // A distinct key prefix keeps window foldout state independent from the inspector's.
             s.so.UpdateIfRequiredOrScript();
             WidgetPresetGUI.Draw(s.so, "NeoUI.DesignSystem.Presets");
-            s.so.ApplyModifiedProperties();
+            // A rename/re-kind edit can change grid filter membership without touching the registry count
+            // (create/delete already invalidate via NeoWidgetPresets.InvalidateDiscovery) — bump the filter
+            // version so State.GetVisible rebuilds instead of serving a stale cached snapshot.
+            if (s.so.ApplyModifiedProperties()) s.MarkFilterDirty();
         }
 
         private static void Duplicate(State s)

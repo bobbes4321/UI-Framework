@@ -94,7 +94,7 @@ namespace Neo.UI
             _initialized = true;
             _currentValue = fromValue;
             _tween = TweenPool.Get<FloatTween>();
-            _tween.SetTarget(() => _currentValue, ApplyValue);
+            _tween.SetTarget(this, () => _currentValue, ApplyValue);
         }
 
         private void Configure()

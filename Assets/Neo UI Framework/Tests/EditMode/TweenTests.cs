@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Neo.UI;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace Neo.UI.Tests
 {
@@ -326,6 +328,87 @@ namespace Neo.UI.Tests
             for (int i = 0; i < 20; i++) Tick(1f);
             Assert.IsTrue(_tween.isActive, "infinite-loop tween should still be active");
             _tween.Stop();
+        }
+
+        [Test]
+        public void LifetimeOwnerDestroyed_SelfStopsInsteadOfThrowing()
+        {
+            var owner = new GameObject("tween owner");
+            try
+            {
+                _tween.SetTarget(owner, () => _value, v => _value = v);
+                _tween.SetFrom(0f);
+                _tween.SetTo(10f);
+                _tween.Play();
+                Tick(0.3f);
+                Assert.That(_value, Is.EqualTo(3f).Within(1e-4f));
+
+                Object.DestroyImmediate(owner);
+                Tick(0.3f); // the regression: this used to keep invoking the setter on a dead target
+
+                Assert.AreEqual(TweenState.Idle, _tween.state, "orphaned tween should self-stop");
+                Assert.AreEqual(0, UITick.count, "orphaned tween should unregister from the ticker");
+                Assert.That(_value, Is.EqualTo(3f).Within(1e-4f), "no value writes after the owner died");
+            }
+            finally
+            {
+                if (owner != null) Object.DestroyImmediate(owner);
+            }
+        }
+
+        [Test]
+        public void Reset_ClearsLifetimeOwner()
+        {
+            var owner = new GameObject("tween owner");
+            try
+            {
+                _tween.SetTarget(owner, () => _value, v => _value = v);
+                _tween.Reset();
+                Object.DestroyImmediate(owner);
+
+                _tween.SetTarget(() => _value, v => _value = v);
+                _tween.settings.duration = 1f;
+                _tween.settings.ease = Ease.Linear; // Reset() replaced the settings from SetUp
+                _tween.SetFrom(0f);
+                _tween.SetTo(10f);
+                _tween.Play();
+                Tick(0.5f);
+                Assert.That(_value, Is.EqualTo(5f).Within(1e-4f), "a recycled tween must not inherit the old owner");
+            }
+            finally
+            {
+                if (owner != null) Object.DestroyImmediate(owner);
+            }
+        }
+
+        private class ThrowingTickable : ITickable
+        {
+            public int ticks;
+            public void Tick(float deltaTime)
+            {
+                ticks++;
+                throw new System.InvalidOperationException("tickable boom");
+            }
+        }
+
+        [Test]
+        public void UITick_ThrowingTickable_IsDroppedAndOthersStillTick()
+        {
+            var throwing = new ThrowingTickable();
+            UITick.Register(throwing); // registered FIRST so it throws before the tween's turn
+            _tween.SetFrom(0f);
+            _tween.SetTo(10f);
+            _tween.Play();
+
+            LogAssert.Expect(LogType.Exception, new Regex("tickable boom"));
+            LogAssert.Expect(LogType.Warning, new Regex("Unregistered tickable"));
+            Tick(0.25f);
+
+            Assert.IsFalse(UITick.IsRegistered(throwing), "a throwing tickable must be dropped from the loop");
+            Assert.That(_value, Is.EqualTo(2.5f).Within(1e-4f), "later tickables must still tick");
+
+            Tick(0.25f); // no further exception expected — the offender ticked exactly once
+            Assert.AreEqual(1, throwing.ticks);
         }
     }
 }

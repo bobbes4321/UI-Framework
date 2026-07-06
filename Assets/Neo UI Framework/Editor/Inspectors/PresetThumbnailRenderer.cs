@@ -179,6 +179,10 @@ namespace Neo.UI.Editor
                 root.SetActive(true);
                 var rootGroup = root.GetComponent<CanvasGroup>();
                 if (rootGroup != null) rootGroup.alpha = 1f;
+                // in play mode a panel's enable-fade just set its alpha to 0 — this synchronous
+                // capture would snapshot frame one of the fade (a blank thumbnail); freeze it
+                foreach (UIPanel panel in root.GetComponentsInChildren<UIPanel>(true))
+                    panel.CancelEnableFade();
 
                 // two passes + a root rebuild: nested layout / TMP preferred sizes settle on the second
                 Canvas.ForceUpdateCanvases();
@@ -202,6 +206,11 @@ namespace Neo.UI.Editor
             }
             finally
             {
+                // destroy the widget tree explicitly rather than letting ClosePreviewScene tear it
+                // down — DestroyImmediate guarantees OnDisable runs so components stop the tweens
+                // they started while enabled (a leaked tween over a destroyed panel would throw
+                // from the editor heartbeat on every tick)
+                if (root != null) UnityEngine.Object.DestroyImmediate(root);
                 if (renderTexture != null)
                 {
                     renderTexture.Release();

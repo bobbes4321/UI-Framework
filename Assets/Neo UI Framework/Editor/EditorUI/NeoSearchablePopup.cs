@@ -16,11 +16,14 @@ namespace Neo.EditorUI
         private const float ItemHeight = 20f;
         private const float SearchHeight = 24f;
         private const float MaxListHeight = 280f;
+        private const float SwatchSize = 12f;
+        private const float SwatchPadding = 4f;
 
         private readonly IReadOnlyList<string> _options;
         private readonly string _current;
         private readonly Action<string> _onSelect;
         private readonly Action<string> _onAddNew;
+        private readonly Dictionary<string, Color> _swatches; // resolved once on open, never per repaint
         private readonly float _width;
 
         private readonly List<string> _filtered = new List<string>();
@@ -31,23 +34,34 @@ namespace Neo.EditorUI
 
         /// <summary>
         /// Opens the popup under <paramref name="activatorRect"/>. <paramref name="onAddNew"/> being
-        /// non-null enables the inline add row.
+        /// non-null enables the inline add row. <paramref name="optionSwatch"/> being non-null draws a
+        /// small color swatch before each option it returns a color for (color-token pickers) — options
+        /// it returns null for keep the indentation so the list stays aligned.
         /// </summary>
         public static void Show(Rect activatorRect, string current, IReadOnlyList<string> options,
-            Action<string> onSelect, Action<string> onAddNew = null)
+            Action<string> onSelect, Action<string> onAddNew = null, Func<string, Color?> optionSwatch = null)
         {
             PopupWindow.Show(activatorRect,
-                new NeoSearchablePopup(options, current, onSelect, onAddNew, Mathf.Max(activatorRect.width, 200f)));
+                new NeoSearchablePopup(options, current, onSelect, onAddNew, optionSwatch,
+                    Mathf.Max(activatorRect.width, 200f)));
         }
 
         private NeoSearchablePopup(IReadOnlyList<string> options, string current, Action<string> onSelect,
-            Action<string> onAddNew, float width)
+            Action<string> onAddNew, Func<string, Color?> optionSwatch, float width)
         {
             _options = options ?? Array.Empty<string>();
             _current = current;
             _onSelect = onSelect;
             _onAddNew = onAddNew;
             _width = width;
+            if (optionSwatch != null)
+            {
+                _swatches = new Dictionary<string, Color>();
+                foreach (string option in _options)
+                    if (!string.IsNullOrEmpty(option) && !_swatches.ContainsKey(option) &&
+                        optionSwatch(option) is Color swatch)
+                        _swatches.Add(option, swatch);
+            }
             Filter();
         }
 
@@ -123,9 +137,26 @@ namespace Neo.EditorUI
                 else if (!isAddRow && text == _current)
                     EditorGUI.DrawRect(rowRect, NeoColors.RowHover);
 
+                Rect labelRect = rowRect;
+                if (_swatches != null)
+                {
+                    // indent every row (even ones without a color, e.g. a "(none)" sentinel) so
+                    // labels stay aligned down the list
+                    float inset = SwatchSize + SwatchPadding * 2f;
+                    labelRect = new Rect(rowRect.x + inset, rowRect.y, rowRect.width - inset, rowRect.height);
+                    if (!isAddRow && _swatches.TryGetValue(text, out Color swatch))
+                    {
+                        var swatchRect = new Rect(rowRect.x + SwatchPadding,
+                            rowRect.y + (rowRect.height - SwatchSize) * 0.5f, SwatchSize, SwatchSize);
+                        EditorGUI.DrawRect(new Rect(swatchRect.x - 1f, swatchRect.y - 1f,
+                            swatchRect.width + 2f, swatchRect.height + 2f), NeoColors.Separator);
+                        EditorGUI.DrawRect(swatchRect, swatch);
+                    }
+                }
+
                 Color previousColor = GUI.contentColor;
                 if (isAddRow) GUI.contentColor = NeoColors.Add;
-                NeoStyles.PopupItem.Draw(rowRect, text, isHover: hovered, isActive: false,
+                NeoStyles.PopupItem.Draw(labelRect, text, isHover: hovered, isActive: false,
                     on: !isAddRow && text == _current, hasKeyboardFocus: false);
                 GUI.contentColor = previousColor;
             }

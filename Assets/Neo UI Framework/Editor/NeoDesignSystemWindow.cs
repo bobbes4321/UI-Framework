@@ -44,7 +44,7 @@ namespace Neo.UI.Editor
         public static void Open()
         {
             var w = GetWindow<NeoDesignSystemWindow>(false, "Neo UI — Design System");
-            w.minSize = new Vector2(460f, 520f);
+            w.minSize = new Vector2(760f, 520f);
         }
 
         /// <summary>
@@ -83,6 +83,12 @@ namespace Neo.UI.Editor
 
         private void OnGUI()
         {
+            // Reset every draw so a tab's need for MouseMove events (e.g. Motion's hover-dwell browser)
+            // doesn't leak onto whichever OTHER tab is active after a switch — MotionTab.MarkDrawn
+            // re-asserts this to true on every one of ITS draws, so its own behavior is unaffected; a
+            // project tab that needs MouseMove does the same in its own draw.
+            wantsMouseMove = false;
+
             NeoGUI.ComponentHeader("Design System", "Author your colors, buttons, shapes and presets",
                 NeoColors.Theming);
 
@@ -104,14 +110,25 @@ namespace Neo.UI.Editor
             int tab = Mathf.Clamp(NeoGUI.Tabs(TabKey, _tabTitles), 0, _orderedTabs.Count - 1);
             NeoGUI.Splitter();
 
-            _scroll = EditorGUILayout.BeginScrollView(_scroll);
             DesignSystemTabDescriptor desc = _orderedTabs[tab];
             _ctx.settings = settings;
             _ctx.theme = theme;
             _ctx.window = this;
             _ctx.state = _tabStates.TryGetValue(desc.id, out object state) ? state : null;
-            desc.draw?.Invoke(_ctx);
-            EditorGUILayout.EndScrollView();
+
+            if (desc.ownsLayout)
+            {
+                // Dual-pane/master-detail tabs (DesignSystemTabDescriptor.ownsLayout) draw their own
+                // scroll container(s) and fill the remaining window height themselves — wrapping them in
+                // the window's own scroll view too would nest scroll views and break their layout.
+                desc.draw?.Invoke(_ctx);
+            }
+            else
+            {
+                _scroll = EditorGUILayout.BeginScrollView(_scroll);
+                desc.draw?.Invoke(_ctx);
+                EditorGUILayout.EndScrollView();
+            }
 
             NeoGUI.Splitter();
             if (GUILayout.Button("Save Assets")) AssetDatabase.SaveAssets();

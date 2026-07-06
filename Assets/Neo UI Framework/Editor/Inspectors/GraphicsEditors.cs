@@ -47,6 +47,8 @@ namespace Neo.UI.Editor
             }
 
             GUILayout.Space(NeoGUI.Spacing);
+            // "This color is runtime-driven" hint (single selection only — multi-edit scans multiply cost)
+            if (targets.Length == 1) ColorDriverNotice.DrawInline((NeoShape)target);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("m_Color"));
             SerializedProperty fillModeProperty = serializedObject.FindProperty("fillMode");
             EditorGUILayout.PropertyField(fillModeProperty);

@@ -84,8 +84,10 @@ namespace Neo.UI.Editor
                 StringPicker(presetObject, "textStyle", "Text Style", TextStyleOptions);     // text-bearing
                 StringPicker(presetObject, "shapeStyle", "Shape Style", ShapeStyleOptions);  // surface
                 StringPicker(presetObject, "motion", "Motion", MotionOptions);               // on-start / loop animation
-                StringPicker(presetObject, "background", "Background Token", TokenOptions);  // theme token
-                StringPicker(presetObject, "labelColor", "Label Color Token", TokenOptions); // theme token
+                StringPicker(presetObject, "background", "Background Token", TokenOptions,
+                    optionSwatch: TokenSwatch);                                              // theme token
+                StringPicker(presetObject, "labelColor", "Label Color Token", TokenOptions,
+                    optionSwatch: TokenSwatch);                                              // theme token
                 StringPicker(presetObject, "icon", "Icon", IconOptions);                     // Lucide glyph
             }
             NeoGUI.EndFoldoutSection();
@@ -121,7 +123,8 @@ namespace Neo.UI.Editor
         /// know yet (a layer entry authored later); the option provider runs only when the popup opens.
         /// </summary>
         private static void StringPicker(SerializedObject so, string propertyName, string label,
-            Func<List<string>> options, string emptyLabel = "(not set)")
+            Func<List<string>> options, string emptyLabel = "(not set)",
+            Func<string, Color?> optionSwatch = null)
         {
             SerializedProperty property = so.FindProperty(propertyName);
             if (property == null) return;
@@ -131,7 +134,7 @@ namespace Neo.UI.Editor
             // onAddNew simply commits the typed value to the property — there is no central registry to
             // mutate here (the value is just a name that resolves at generate), so the picker stays a
             // pure free-or-pick field with no modal.
-            NeoDropdown.StringPopup(rect, property, options, emptyLabel, onAddNew: _ => { });
+            NeoDropdown.StringPopup(rect, property, options, emptyLabel, onAddNew: _ => { }, optionSwatch);
             EditorGUI.EndProperty();
         }
 
@@ -184,6 +187,12 @@ namespace Neo.UI.Editor
 
         // Theme tokens — no live document here, so pass null (project theme only).
         private static List<string> TokenOptions() => NeoWidgetOptions.Tokens(null);
+
+        private static Color? TokenSwatch(string token)
+        {
+            Theme theme = NeoUISettings.instance != null ? NeoUISettings.instance.theme : null;
+            return theme != null && theme.TryGetColor(token, out Color color) ? color : (Color?)null;
+        }
 
         // Animation preset names from the settings' AnimationPresetDatabase (the motion seam).
         private static List<string> MotionOptions()

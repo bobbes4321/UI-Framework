@@ -306,7 +306,7 @@ namespace Neo.UI
             {
                 _moveTween = _moveTween ?? TweenPool.Get<Vector3Tween>();
                 _moveTween.settings = move.settings;
-                _moveTween.SetTarget(
+                _moveTween.SetTarget(_rectTransform,
                     () => _rectTransform != null ? _rectTransform.anchoredPosition3D : Vector3.zero,
                     v => { if (_rectTransform != null) _rectTransform.anchoredPosition3D = v; });
                 _moveTween.SetStartValue(startPosition);
@@ -319,7 +319,7 @@ namespace Neo.UI
             {
                 _rotateTween = _rotateTween ?? TweenPool.Get<Vector3Tween>();
                 _rotateTween.settings = rotate.settings;
-                _rotateTween.SetTarget(
+                _rotateTween.SetTarget(_rectTransform,
                     () => _rectTransform != null ? _rectTransform.localEulerAngles : Vector3.zero,
                     v => { if (_rectTransform != null) _rectTransform.localEulerAngles = v; });
                 _rotateTween.SetStartValue(startRotation);
@@ -336,7 +336,7 @@ namespace Neo.UI
             {
                 _scaleTween = _scaleTween ?? TweenPool.Get<Vector3Tween>();
                 _scaleTween.settings = scale.settings;
-                _scaleTween.SetTarget(
+                _scaleTween.SetTarget(_rectTransform,
                     () => _rectTransform != null ? _rectTransform.localScale : Vector3.one,
                     v => { if (_rectTransform != null) _rectTransform.localScale = v; });
                 _scaleTween.SetStartValue(startScale);
@@ -353,7 +353,7 @@ namespace Neo.UI
             {
                 _fadeTween = _fadeTween ?? TweenPool.Get<FloatTween>();
                 _fadeTween.settings = fade.settings;
-                _fadeTween.SetTarget(
+                _fadeTween.SetTarget(_canvasGroup,
                     () => _canvasGroup != null ? _canvasGroup.alpha : 1f,
                     v => { if (_canvasGroup != null) _canvasGroup.alpha = Mathf.Clamp01(v); });
                 _fadeTween.SetStartValue(startAlpha);

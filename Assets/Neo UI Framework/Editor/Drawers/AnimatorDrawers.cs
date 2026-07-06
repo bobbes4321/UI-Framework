@@ -152,7 +152,10 @@ namespace Neo.UI.Editor
                 }
                 float h = EditorGUI.GetPropertyHeight(item.Prop, true);
                 EditorGUI.indentLevel++;
-                EditorGUI.PropertyField(new Rect(rect.x, y, rect.width, h), item.Prop, true);
+                if (item.Prop.name == "themeToken")
+                    DrawThemeTokenRow(new Rect(rect.x, y, rect.width, h), item.Prop);
+                else
+                    EditorGUI.PropertyField(new Rect(rect.x, y, rect.width, h), item.Prop, true);
                 EditorGUI.indentLevel--;
                 y += h + Spacing;
             }
@@ -233,6 +236,31 @@ namespace Neo.UI.Editor
             if (IsCustomValue(reference))
                 buffer.Add(new PanelItem { Prop = channel.FindPropertyRelative(prefix + "CustomValue") });
             buffer.Add(new PanelItem { Prop = channel.FindPropertyRelative(prefix + "Offset") });
+        }
+
+        // The color endpoint's theme token gets the standard searchable token dropdown with per-option
+        // color swatches instead of a raw string field.
+        private static void DrawThemeTokenRow(Rect rect, SerializedProperty tokenProperty)
+        {
+            GUIContent label = EditorGUI.BeginProperty(rect, new GUIContent("Theme Token", tokenProperty.tooltip), tokenProperty);
+            rect = EditorGUI.PrefixLabel(rect, label);
+            NeoDropdown.StringPopup(rect, tokenProperty, ThemeTokenOptions, emptyLabel: "(no token)",
+                optionSwatch: ThemeTokenSwatch);
+            EditorGUI.EndProperty();
+        }
+
+        private static List<string> ThemeTokenOptions()
+        {
+            var options = new List<string>();
+            Theme theme = NeoUISettings.instance != null ? NeoUISettings.instance.theme : null;
+            if (theme != null) options.AddRange(theme.GetTokenNames());
+            return options;
+        }
+
+        private static Color? ThemeTokenSwatch(string token)
+        {
+            Theme theme = NeoUISettings.instance != null ? NeoUISettings.instance.theme : null;
+            return theme != null && theme.TryGetColor(token, out Color color) ? color : (Color?)null;
         }
 
         private static bool IsCustomPosition(SerializedProperty direction) =>

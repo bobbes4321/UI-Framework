@@ -47,7 +47,7 @@ namespace Neo.UI
 
                 group.alpha = 0f;
                 var tween = new FloatTween();
-                tween.SetTarget(() => group.alpha, value => group.alpha = value);
+                tween.SetTarget(group, () => group.alpha, value => group.alpha = value);
                 tween.SetFrom(0f);
                 tween.SetTo(1f);
                 tween.settings.duration = itemDuration;
