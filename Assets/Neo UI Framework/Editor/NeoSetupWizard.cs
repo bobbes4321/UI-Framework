@@ -18,7 +18,8 @@ namespace Neo.UI.Editor
     public sealed class NeoSetupWizard : EditorWindow
     {
         private const string KeepCurrent = "(keep current theme)";
-        private const string CustomThemesRoot = "Assets/Neo UI Themes";
+        // internal: NeoResetComponentDefaults' custom-themes entry deletes this same root
+        internal const string CustomThemesRoot = "Assets/Neo UI Themes";
 
         private enum LookMode { Bundle, CustomColors }
 

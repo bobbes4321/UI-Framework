@@ -189,6 +189,21 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   (`NeoSetupStatus`, shared with the Hub's setup strip) — it never silently reverts to neutral defaults.
   Surfaced in the Hub Tools tab; covered by `HubToolCoverageTests` (every Setup/Advanced menu item must
   have a Hub tool).
+- **Reset To Clean Slate** (`Tools → Neo UI → Setup → Reset To Clean Slate…`, `Editor/NeoResetWizard.cs`)
+  is the uninstall counterpart to the create-or-repair bootstraps — rehearse the fresh-project /
+  new-developer experience by deleting what setup and the generators created, per part. Rows come from
+  `NeoResetComponents` (a `NeoKeyedRegistry<ResetComponentDescriptor>`: id/label/`keepByDefault`/
+  `cleanPaths`/`unwire` — the extensibility seam; a project with its own bootstrap registers a descriptor
+  and its content appears in the wizard, no fork). `NeoProjectReset.BuildPlan` resolves a selection into
+  existence-filtered concrete paths — every path must pass the `IsSafeToDelete` guard (nothing outside
+  `Assets/`, never a protected root — package code, `Resources`, the NeoShape shader, `Assets/Showcases`
+  + Specs — nor an ANCESTOR of one), unknown ids and unsafe paths warn, never silent — and `Execute`
+  batch-deletes, prunes now-dangling settings refs via each component's `unwire` (or clears
+  `NeoUISettings.instance` when settings themselves were deleted) and logs failures loudly. Defaults keep
+  the curated libraries (animations — per the "nobody wants these empty" call — transitions, fonts) and
+  user-authored content (showcase generated content + scenes, custom theme bundles, binding stubs);
+  everything is re-creatable via the Setup steps / Hub Open, and the wizard previews the exact paths and
+  confirms before deleting. Hub tool `setup-reset`. Tests: `ProjectResetTests`.
 - **Design System editor** (`Tools → Neo UI → Design System`, `Editor/NeoDesignSystemWindow.cs`) is the
   ongoing authoring window over the live `NeoUISettings` + `Theme`: **Overview** (dashboard — counts +
   provenance + jump buttons + "See it live" showcase links, the default tab), **Colors** (single-column

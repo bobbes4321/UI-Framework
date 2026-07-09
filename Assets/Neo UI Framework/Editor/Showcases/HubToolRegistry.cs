@@ -137,6 +137,11 @@ namespace Neo.UI.Editor
             yield return Menu("setup-effects", "Create or Repair Effect Assets", Setup,
                 "Bake the procedural noise/ramp textures + the dissolve material and ShapeEffectDefinition used by Tier-2 shape effects.",
                 "Tools/Neo UI/Setup/Create or Repair Effect Assets");
+            yield return Menu("setup-reset", "Reset To Clean Slate…", Setup,
+                "The uninstall counterpart to the create-or-repair steps: delete what setup created, " +
+                "per part (curated libraries and user-authored content kept by default), to rehearse " +
+                "the fresh-project experience.",
+                "Tools/Neo UI/Setup/Reset To Clean Slate…");
 
             // --- Advanced: spec / round-trip / agent power tools (Tools/Neo UI/Advanced/*) -------
             yield return Menu("adv-generate", "Generate From Spec…", Advanced,
