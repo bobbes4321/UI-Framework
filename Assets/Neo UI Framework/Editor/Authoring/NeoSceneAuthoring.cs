@@ -43,9 +43,50 @@ namespace Neo.UI.Editor.Authoring
         {
             if (string.IsNullOrEmpty(kind)) return null;
             ElementSpec element = SpecFactory.NewElement(kind);
-            if (!string.IsNullOrEmpty(presetName)) element.preset = presetName;
+            if (!string.IsNullOrEmpty(presetName))
+            {
+                // NewElement seeds kind defaults (a button gets variant "primary"), and a SET element
+                // field overrides the preset at generate — so without this clear, a "Ghost Button" tile
+                // spawned primary. Clear the preset-governed fields (same rule as ApplyPreset) so the
+                // PRESET drives the look; identity/content fields (id/label) aren't preset-governed and
+                // survive.
+                foreach (PresetField field in PresetFields.All) field.clearElement(element);
+                element.preset = presetName;
+            }
             string label = string.IsNullOrEmpty(presetName) ? Humanize(kind) : presetName;
             return Place(element, kind, parentSelection, $"Create Neo {label}");
+        }
+
+        /// <summary>
+        /// Creates a widget of <paramref name="kind"/> with <paramref name="presetName"/>'s styling BAKED
+        /// into the element and NO preset link — the "disconnected copy" counterpart to
+        /// <see cref="CreateWidget(string, string, GameObject)"/> (which keeps the widget following the
+        /// preset asset, Doozy's "Link" mode). Use it for a one-off variation that must not restyle when
+        /// the preset is later edited; the baked fields export as the element's own values. Falls back to
+        /// a bare <paramref name="kind"/> (with a warning, never silently) when the preset can't be
+        /// resolved.
+        /// </summary>
+        public static GameObject CreateWidgetDetached(string kind, string presetName, GameObject parentSelection)
+        {
+            if (string.IsNullOrEmpty(kind)) return null;
+            if (string.IsNullOrEmpty(presetName) || !NeoWidgetPresets.TryGet(presetName, out NeoWidgetPreset preset))
+            {
+                if (!string.IsNullOrEmpty(presetName))
+                    Debug.LogWarning($"Neo UI: preset '{presetName}' not found — creating a bare '{kind}' instead.");
+                return CreateWidget(kind, parentSelection);
+            }
+
+            ElementSpec element = SpecFactory.NewElement(kind);
+            foreach (PresetField field in PresetFields.All)
+            {
+                // Same clear as the linked path (kind defaults must not shadow the preset), then bake the
+                // preset's own values in as plain element fields — visually identical to a linked spawn,
+                // but with no `preset` reference for the exporter/generator to resolve later.
+                field.clearElement(element);
+                object value = field.getPreset(preset);
+                if (!PresetFields.IsUnset(value)) field.setElement(element, value);
+            }
+            return Place(element, kind, parentSelection, $"Create Neo {presetName} (Detached)");
         }
 
         /// <summary>

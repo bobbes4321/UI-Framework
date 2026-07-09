@@ -191,11 +191,17 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   have a Hub tool).
 - **Design System editor** (`Tools → Neo UI → Design System`, `Editor/NeoDesignSystemWindow.cs`) is the
   ongoing authoring window over the live `NeoUISettings` + `Theme`: **Overview** (dashboard — counts +
-  provenance + jump buttons + "See it live" showcase links, the default tab), **Colors** (variant tokens +
-  derive hover/pressed, bundle-provenance tags), **Typography** (CRUD over `Theme.TextStyles` with a
-  rendered sample line), **Buttons** (`ButtonVariantAsset` per-state colors + `contentToken` + sizes, all
-  five seeded variants incl. success, real rendered preview), **Shapes** (full `ShapeStyle` fidelity —
-  uniform/per-corner radius, fill mode/gradient, elevation — with a real `NeoShape` render),
+  provenance + jump buttons + "See it live" showcase links, the default tab), **Colors** (single-column
+  but sectioned: a visible variant row-list — browse never flips the live variant, only "Set Active"
+  does — then a "Tokens — {variant}" table with the add row pinned on top, derive hover/pressed,
+  bundle-provenance tags), **Typography** (master-detail CRUD over `Theme.TextStyles`: searchable
+  style list with size badges + pinned "New style…" row, detail form with Duplicate/Delete and a
+  rendered sample line whose render target scales with the font size so display styles never clip),
+  **Buttons** (master-detail: variant list with normal-color swatches, detail = `ButtonVariantAsset`
+  per-state colors + `contentToken` + Duplicate/Delete + real rendered preview, all five seeded
+  variants incl. success; the shared-across-variants sizes table sits below the detail form),
+  **Shapes** (master-detail with full `ShapeStyle` fidelity — uniform/per-corner radius, fill
+  mode/gradient, elevation, in-place rename — with a real `NeoShape` render and Duplicate/Delete),
   **Presets** (dual-pane master-detail sharing the `NeoWidgetPresetEditor` form: left = search +
   two-column thumbnail-card grid + create/from-selection, right = the embedded editor with an
   empty-state hint when nothing's selected), **Motion** (dual-pane master-detail: left = collapsible
@@ -210,13 +216,34 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   factory consults, so they flow into generated and native-built UI. The tab set is the extensibility
   seam: `NeoDesignSystemTabs` (a `NeoKeyedRegistry<DesignSystemTabDescriptor>`, an `ownsLayout` flag lets
   a tab own its full height + scrolling instead of the window's outer scroll view — via
-  `DesignSystemGUI`'s `BeginSplitPane`/`BeginSplitLeft`/`BeginSplitRight` dual-pane helpers, as Motion and
-  Presets do — the built-in EIGHT each in their own `Editor/DesignSystem/*Tab.cs` file over shared
-  `DesignSystemGUI` helpers) — a project adds its
-  own design-system tab via `NeoDesignSystemTabs.Register` without forking the window. Surfaced in the Hub
+  `DesignSystemGUI`'s `BeginSplitPane`/`BeginSplitLeft`/`BeginSplitRight` dual-pane helpers, as
+  Typography/Buttons/Shapes/Presets/Motion do — the built-in EIGHT each in their own
+  `Editor/DesignSystem/*Tab.cs` file over shared `DesignSystemGUI` helpers) — a project adds its
+  own design-system tab via `NeoDesignSystemTabs.Register` without forking the window. Master-detail
+  tabs share `Editor/DesignSystem/DesignSystemCatalog.cs` — the catalog row/chrome vocabulary (search
+  field, selectable rows with accessory swatch + trailing badge, pinned create row, Duplicate/Delete
+  detail header, empty state; Theme-agnostic). Both `DesignSystemGUI` (split-pane) and
+  `DesignSystemCatalog` are PUBLIC so a project-registered tab can read as a native one — keep them so. Surfaced in the Hub
   Tools tab alongside the Gallery window (`Tools → Neo UI → Gallery`, `Editor/Gallery/NeoGalleryWindow.cs`
   — a read-only visual gallery of every generated view/popup prefab) and the Widget Presets bootstrap;
   `HubToolCoverageTests` requires every `Tools/Neo UI` window to have a Hub tool.
+- **Palette window** (`Tools → Neo UI → Palette`, `Editor/Authoring/NeoPaletteWindow.cs`) is the
+  Doozy-UI-Menu-style compose surface — dock it beside Project/Console and build scenes by clicking:
+  a searchable thumbnail grid over `NeoWidgetPalette.All` (bare kinds + every discovered
+  `NeoWidgetPreset` as component tiles) plus `NeoLayoutTemplates.All` scaffolds. Click a tile to spawn
+  into the current selection (the same `NeoSceneAuthoring.CreateWidget` path as the GameObject menu /
+  Ctrl-K), or DRAG it into the Hierarchy/Scene view — `NeoPaletteDropHandlers` finally wires the
+  reserved `NeoWidgetPalette.DragKey`/`PresetDragKey`/`TemplateDragKey` payloads via
+  `DragAndDrop.AddDropHandler`; a free-anchored scene drop lands at the cursor. Preset tiles honor the
+  bottom-bar **Linked/Detached** mode (the Doozy Link/Clone analog): Linked keeps the `preset`
+  reference (restyles with the asset, exports as preset + delta); Detached
+  (`NeoSceneAuthoring.CreateWidgetDetached`) bakes the preset's `PresetFields` into the element with
+  no link. Every entry point routes through the ONE `NeoPaletteWindow.SpawnPayload`. Extras beyond
+  Doozy: ★ favorites, a Recent strip, per-tile category accents, EditorPrefs-persisted tile
+  size/category/mode; thumbnails ride the shared `PresetThumbnailCache` at a fixed render size (the
+  size slider scales, never re-renders). The linked create path clears preset-governed fields so
+  `SpecFactory.NewElement` kind defaults (button `variant="primary"`) can't shadow the preset — same
+  rule as `ApplyPreset`. Tests: `PaletteSpawnTests`.
 - **Animation presets** — the motion system, designer- and agent-authorable end to end. A `UIAnimation`
   has FIVE independent channels: Move / Rotate / Scale / Fade / **Color** (the color/tint channel reuses
   the existing `ColorAnimation` — endpoints resolve to a theme token, a `#hex`, or the start/current color;

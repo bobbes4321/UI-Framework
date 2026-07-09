@@ -32,8 +32,9 @@ namespace Neo.UI.Editor
         {
             EditorGUILayout.LabelField("Theme bundles", EditorStyles.boldLabel);
             EditorGUILayout.LabelField(
-                "A bundle is a complete look — token palette, shape radii, type tracking and motion. " +
-                "Applying one recolors the theme (all variants) and reseeds the widget-preset library.",
+                "Theme bundles — complete looks (tokens, shapes, type tracking, motion) applied as a set. " +
+                "Applying overwrites current theme values across every variant and reseeds the " +
+                "widget-preset library — a diff preview confirms exactly what changes first.",
                 EditorStyles.wordWrappedMiniLabel);
 
             var bundles = ThemeBundleRegistry.All.ToList();

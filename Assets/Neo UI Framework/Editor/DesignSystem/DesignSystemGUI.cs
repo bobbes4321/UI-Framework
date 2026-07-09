@@ -12,11 +12,17 @@ namespace Neo.UI.Editor
     /// the <see cref="ThemeColorRef"/> editor, the searchable theme-token dropdown, token→color
     /// resolution, a swatch, and the folder-ensure used when creating preset assets. Single
     /// implementation so every tab draws color refs / token pickers identically.
+    /// <para>
+    /// PUBLIC on purpose: <see cref="NeoDesignSystemTabs.Register"/> invites a consuming project to add
+    /// its own design-system tab, and a tab that opts into <c>ownsLayout</c> needs this split-pane
+    /// machinery (and typically <see cref="DesignSystemCatalog"/>) to match the built-in tabs' layout —
+    /// keeping these internal would leave the registered-tab seam 90% unusable ("extensible by design").
+    /// </para>
     /// </summary>
-    internal static class DesignSystemGUI
+    public static class DesignSystemGUI
     {
         // ThemeColorRef editor: "T" toggles token-vs-raw; dirtyTarget is the asset that owns the ref.
-        internal static void ColorRef(Theme theme, Object dirtyTarget, string label, ThemeColorRef cref)
+        public static void ColorRef(Theme theme, Object dirtyTarget, string label, ThemeColorRef cref)
         {
             using (new EditorGUILayout.HorizontalScope())
             {
@@ -48,7 +54,7 @@ namespace Neo.UI.Editor
 
         // Searchable theme-token dropdown with a "(none)" sentinel (null token). The option list is only
         // built when the dropdown is opened; onPick fires with the chosen token, or null for "(none)".
-        internal static void TokenPicker(Theme theme, string label, string current, System.Action<string> onPick)
+        public static void TokenPicker(Theme theme, string label, string current, System.Action<string> onPick)
         {
             Rect rect = EditorGUILayout.GetControlRect();
             if (label != null) rect = EditorGUI.PrefixLabel(rect, new GUIContent(label));
@@ -63,10 +69,10 @@ namespace Neo.UI.Editor
                 optionSwatch: token => theme.TryGetColor(token, out Color c) ? c : (Color?)null);
         }
 
-        internal static Color ResolveToken(Theme theme, string token) =>
+        public static Color ResolveToken(Theme theme, string token) =>
             !string.IsNullOrEmpty(token) && theme.TryGetColor(token, out Color c) ? c : Color.gray;
 
-        internal static void Swatch(string label, Color c)
+        public static void Swatch(string label, Color c)
         {
             Rect r = GUILayoutUtility.GetRect(34f, 18f, GUILayout.Width(34f));
             EditorGUI.DrawRect(r, c);
@@ -117,7 +123,7 @@ namespace Neo.UI.Editor
         /// expand-height horizontal group. Always opened via a <c>using</c> statement, with one
         /// <see cref="BeginSplitLeft"/>/<see cref="EndSplitLeft"/> pair followed by one
         /// <see cref="BeginSplitRight"/>/<see cref="EndSplitRight"/> pair nested inside it. </summary>
-        internal readonly struct SplitPaneScope : System.IDisposable
+        public readonly struct SplitPaneScope : System.IDisposable
         {
             public void Dispose() => GUILayout.EndHorizontal();
         }
@@ -127,7 +133,7 @@ namespace Neo.UI.Editor
         /// dragged. Pair with a <c>using</c> block (<see cref="SplitPaneScope"/>); nest a
         /// <see cref="BeginSplitLeft"/>/<see cref="EndSplitLeft"/> pair then a
         /// <see cref="BeginSplitRight"/>/<see cref="EndSplitRight"/> pair inside it. </summary>
-        internal static SplitPaneScope BeginSplitPane(EditorWindow host)
+        public static SplitPaneScope BeginSplitPane(EditorWindow host)
         {
             s_splitHost = host;
             GUILayout.BeginHorizontal(GUILayout.ExpandHeight(true));
@@ -141,7 +147,7 @@ namespace Neo.UI.Editor
         /// tab's per-window state) — the updated position is written back through the ref, read it after
         /// <see cref="EndSplitLeft"/>. Must be closed with <see cref="EndSplitLeft"/> before opening the
         /// right column. </summary>
-        internal static void BeginSplitLeft(ref Vector2 scroll, ref float width, float minWidth, float rightMinWidth)
+        public static void BeginSplitLeft(ref Vector2 scroll, ref float width, float minWidth, float rightMinWidth)
         {
             width = ClampSplitWidth(width, minWidth, rightMinWidth);
             GUILayout.BeginVertical(GUILayout.Width(width), GUILayout.ExpandHeight(true));
@@ -160,7 +166,7 @@ namespace Neo.UI.Editor
         /// <see cref="NeoGUI.Splitter"/> uses) down its middle. Dragging mutates <paramref name="width"/>
         /// by ref, clamped to <paramref name="minWidth"/> … window-width−<paramref name="rightMinWidth"/>;
         /// the caller persists the new value. </summary>
-        internal static void EndSplitLeft(ref float width, float minWidth, float rightMinWidth)
+        public static void EndSplitLeft(ref float width, float minWidth, float rightMinWidth)
         {
             GUILayout.EndVertical();          // inner content column
             EditorGUILayout.EndScrollView();
@@ -209,14 +215,14 @@ namespace Neo.UI.Editor
         /// <summary> Opens the split pane's flexible RIGHT (detail) column with its own scroll view.
         /// <paramref name="scroll"/> is caller-owned — read it back after <see cref="EndSplitRight"/>.
         /// Must be the last thing opened inside a <see cref="BeginSplitPane"/> scope. </summary>
-        internal static void BeginSplitRight(ref Vector2 scroll)
+        public static void BeginSplitRight(ref Vector2 scroll)
         {
             GUILayout.BeginVertical(GUILayout.ExpandHeight(true));
             scroll = EditorGUILayout.BeginScrollView(scroll, GUILayout.ExpandHeight(true));
         }
 
         /// <summary> Closes the RIGHT column opened by <see cref="BeginSplitRight"/>. </summary>
-        internal static void EndSplitRight()
+        public static void EndSplitRight()
         {
             EditorGUILayout.EndScrollView();
             GUILayout.EndVertical();

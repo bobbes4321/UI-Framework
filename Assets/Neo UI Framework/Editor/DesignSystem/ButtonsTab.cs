@@ -8,21 +8,67 @@ using UnityEngine;
 namespace Neo.UI.Editor
 {
     /// <summary>
-    /// Design System window "Buttons" tab: pick/add/edit/remove button variants (per-state colors +
-    /// content token), edit sizes, and see a REAL rendered sample button that re-renders only when its
-    /// look key changes. Split out of the old monolithic <see cref="NeoDesignSystemWindow"/> (Phase 2.9)
-    /// — draw code unchanged, including the Phase-0 fixes: defensive null-list init (B7a) and unique
-    /// size names (B7b). The live preview texture lives on the tab's <see cref="State"/>, which is
-    /// <see cref="IDisposable"/> so the window destroys it on disable.
+    /// Design System window "Buttons" tab: a master–detail editor over
+    /// <see cref="NeoUISettings.buttonVariants"/> (<c>ownsLayout: true</c> +
+    /// <see cref="DesignSystemGUI.BeginSplitPane"/>, like Typography/Presets/Motion) — a fixed-width,
+    /// searchable LEFT list of variants (each row's leading swatch shows the variant's resolved Normal
+    /// color) with a pinned "New variant…" create row, beside a flexible RIGHT detail pane that edits the
+    /// selected variant's name, five per-state colors and content token, a REAL rendered sample button
+    /// (re-renders only when its look key changes) and Duplicate/Delete actions. Below the variant form,
+    /// a shared "Sizes" section (variant-independent — heights/label styles consulted by every variant's
+    /// `size` field) always renders, even with nothing selected. The catalog chrome (search / rows /
+    /// create row / detail header / empty state) comes from the shared <see cref="DesignSystemCatalog"/>
+    /// so Buttons reads like every other converted tab.
+    /// <para>
+    /// Carries forward two Phase-0 fixes from the original monolithic window: defensive null-list init
+    /// for a pre-migration settings asset (B7a) and unique size names so <c>TryGetButtonSize</c> lookups
+    /// are never shadowed by a duplicate (B7b).
+    /// </para>
     /// </summary>
     internal static class ButtonsTab
     {
+        // --- resizable master column (DesignSystemGUI split-pane), mirroring Typography/Presets/Motion ---
+        private const float DefaultLeftWidth = 240f;
+        private const float LeftMinWidth = 180f;
+        private const float RightMinWidth = 320f;
+        private const string LeftWidthKey = "NeoUI.DesignSystem.Buttons.LeftWidth";
+
+        // Fixed render target for the sample-button preview (a button's proportions don't vary enough
+        // across variants to warrant Typography's size-driven render target).
+        private const int PreviewRenderWidth = 320;
+        private const int PreviewRenderHeight = 120;
+
         /// <summary> Per-window UI state for the Buttons tab. Disposable so the window destroys the
         /// cached preview texture on disable (the old <c>OnDisable</c> behavior). </summary>
         internal sealed class State : IDisposable
         {
-            public int btnIdx;
-            public string newBtnVariant = "";
+            // Selection is tracked by variant NAME (not an index) so it survives add/remove/reorder; the
+            // draw path clamps/falls back when the name disappears (see ResolveSelection).
+            public string selectedName;
+            public string newVariantName = "";
+            public string search = "";
+
+            // Independent scroll positions for the two master-detail panes (caller-owned per the
+            // split-pane helper's contract; kept here so nothing allocates per OnGUI).
+            public Vector2 leftScroll;
+            public Vector2 rightScroll;
+
+            // Draggable master-column width (caller-owned + SessionState-persisted; see LeftWidthKey).
+            public float leftWidth;
+            private float _persistedWidth;
+
+            /// <summary> Seeds <see cref="leftWidth"/> from SessionState (or <paramref name="def"/> first
+            /// time) — call once from the state factory. </summary>
+            public void LoadWidth(string key, float def) => leftWidth = _persistedWidth = SessionState.GetFloat(key, def);
+
+            /// <summary> Writes <see cref="leftWidth"/> back to SessionState only when a drag actually
+            /// changed it (never a per-OnGUI write) — call after the split pane closes. </summary>
+            public void PersistWidth(string key)
+            {
+                if (leftWidth == _persistedWidth) return;
+                SessionState.SetFloat(key, leftWidth);
+                _persistedWidth = leftWidth;
+            }
 
             // Live button preview: a real render of a sample button, cached and re-rendered only when
             // its look key changes (never per OnGUI). Falls back to a faux swatch if rendering fails.
@@ -37,7 +83,27 @@ namespace Neo.UI.Editor
             }
         }
 
-        internal static object CreateState() => new State();
+        internal static object CreateState()
+        {
+            var s = new State();
+            s.LoadWidth(LeftWidthKey, DefaultLeftWidth);
+            return s;
+        }
+
+        // Cached field labels (with tooltips) — static so the form never allocates a GUIContent per OnGUI.
+        private static readonly GUIContent LName = new GUIContent("Name",
+            "The variant id — how a spec's button `variant` field and the Starter Kit reference it.");
+        private static readonly GUIContent LContentToken = new GUIContent("Content (label/icon)",
+            "Theme token coloring the button's label + icon for this variant.");
+        private static readonly GUIContent LSizesHeader = new GUIContent("Sizes (shared across all variants)",
+            "Heights + label styles available to every variant via a widget's `size` field (sm/md/lg/…) " +
+            "— editing here affects all variants using a given size, not just the one selected above.");
+        private static readonly GUIContent LSizeName = new GUIContent("Name",
+            "The size's spec string (\"size\": \"xl\") — must stay unique for lookups to resolve it.");
+        private static readonly GUIContent LSizeHeight = new GUIContent("Height",
+            "Button height in pixels at this size.");
+        private static readonly GUIContent LSizeLabelStyle = new GUIContent("Label style",
+            "Theme TextStyle name applied to the button's label at this size.");
 
         // Fallback preview label (used only when live rendering is unavailable) — a cached static so the
         // faux-preview path never allocates a GUIStyle per OnGUI pass; its text color is re-applied on
@@ -58,107 +124,207 @@ namespace Neo.UI.Editor
             settings.buttonVariants ??= new List<ButtonVariantAsset>();
             settings.buttonSizes ??= new List<ButtonSizeAsset>();
 
+            List<string> names = settings.buttonVariants.Select(v => v.name).ToList();
+            ResolveSelection(s, names);
+
+            using (DesignSystemGUI.BeginSplitPane(ctx.window))
+            {
+                DesignSystemGUI.BeginSplitLeft(ref s.leftScroll, ref s.leftWidth, LeftMinWidth, RightMinWidth);
+                DrawBrowsePane(s, settings, theme, names, ctx.window);
+                DesignSystemGUI.EndSplitLeft(ref s.leftWidth, LeftMinWidth, RightMinWidth);
+
+                DesignSystemGUI.BeginSplitRight(ref s.rightScroll);
+                DrawDetailPane(s, settings, theme);
+                DesignSystemGUI.EndSplitRight();
+            }
+            s.PersistWidth(LeftWidthKey);
+        }
+
+        // Keep the selected name valid: fall back to the first variant when the current one disappears
+        // (removed/renamed), or clear it when there are no variants at all.
+        private static void ResolveSelection(State s, List<string> names)
+        {
+            if (names.Count == 0) { s.selectedName = null; return; }
+            if (s.selectedName == null || !names.Contains(s.selectedName)) s.selectedName = names[0];
+        }
+
+        private static ButtonVariantAsset FindVariant(NeoUISettings settings, string name) =>
+            string.IsNullOrEmpty(name) ? null : settings.buttonVariants.FirstOrDefault(v => v.name == name);
+
+        // ---------------------------------------------------------------- left (browse) pane
+
+        private static void DrawBrowsePane(State s, NeoUISettings settings, Theme theme, List<string> names,
+            EditorWindow window)
+        {
             EditorGUILayout.LabelField("Variants", EditorStyles.boldLabel);
-            int variantCount = settings.buttonVariants.Count;
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                if (variantCount > 0)
-                {
-                    s.btnIdx = Mathf.Clamp(s.btnIdx, 0, variantCount - 1);
-                    Rect rect = EditorGUILayout.GetControlRect();
-                    rect = EditorGUI.PrefixLabel(rect, new GUIContent("Variant"));
-                    NeoDropdown.ValuePopup(rect, settings.buttonVariants[s.btnIdx].name,
-                        () => settings.buttonVariants.Select(v => v.name).ToList(),
-                        chosen =>
-                        {
-                            int idx = settings.buttonVariants.FindIndex(v => v.name == chosen);
-                            if (idx >= 0) s.btnIdx = idx;
-                        });
-                }
-                else EditorGUILayout.LabelField("No variants yet — run Setup → Create or Repair Starter Kit " +
-                    "to seed the five built-ins (primary/secondary/ghost/danger/success), or add one below.",
-                    EditorStyles.wordWrappedLabel);
-            }
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                s.newBtnVariant = EditorGUILayout.TextField("New variant", s.newBtnVariant);
-                if (GUILayout.Button("Add", GUILayout.Width(60f)) && !string.IsNullOrWhiteSpace(s.newBtnVariant))
-                {
-                    Undo.RecordObject(settings, "Add button variant");
-                    settings.buttonVariants.Add(new ButtonVariantAsset
-                    {
-                        name = s.newBtnVariant.Trim(),
-                        contentToken = UIWidgetFactory.TokenTextOnPrimary,
-                        colors = DefaultVariantColors(),
-                    });
-                    EditorUtility.SetDirty(settings);
-                    s.btnIdx = settings.buttonVariants.Count - 1;
-                    s.newBtnVariant = "";
-                    variantCount = settings.buttonVariants.Count;
-                }
-            }
+            EditorGUILayout.LabelField(
+                "Button variants — referenced by spec `variant` and seeded by the Starter Kit.",
+                EditorStyles.wordWrappedMiniLabel);
 
-            if (variantCount > 0 && s.btnIdx < settings.buttonVariants.Count)
+            if (names.Count == 0)
+                EditorGUILayout.LabelField(
+                    "No variants yet — run Setup → Create or Repair Starter Kit to seed the five " +
+                    "built-ins (primary/secondary/ghost/danger/success), or add one below.",
+                    EditorStyles.wordWrappedMiniLabel);
+            else
             {
-                ButtonVariantAsset v = settings.buttonVariants[s.btnIdx];
-                NeoGUI.Splitter();
-                EditorGUI.BeginChangeCheck();
-                string newName = EditorGUILayout.TextField("Name", v.name);
-                DesignSystemGUI.ColorRef(theme, settings, "Normal", v.colors.normal);
-                DesignSystemGUI.ColorRef(theme, settings, "Hover", v.colors.highlighted);
-                DesignSystemGUI.ColorRef(theme, settings, "Pressed", v.colors.pressed);
-                DesignSystemGUI.ColorRef(theme, settings, "Selected", v.colors.selected);
-                DesignSystemGUI.ColorRef(theme, settings, "Disabled", v.colors.disabled);
-                if (EditorGUI.EndChangeCheck())
+                DesignSystemCatalog.SearchField(ref s.search);
+                string needle = string.IsNullOrEmpty(s.search) ? null : s.search.ToLowerInvariant();
+                var visible = new List<string>();
+                foreach (ButtonVariantAsset v in settings.buttonVariants)
                 {
-                    Undo.RecordObject(settings, "Edit button variant");
-                    v.name = newName;
-                    EditorUtility.SetDirty(settings);
+                    if (needle != null && !v.name.ToLowerInvariant().Contains(needle)) continue;
+                    visible.Add(v.name);
+                    ButtonVariantAsset captured = v; // capture for the accessory closure
+                    if (DesignSystemCatalog.Row(v.name, v.name == s.selectedName,
+                            rect => EditorGUI.DrawRect(rect, captured.colors.normal.Resolve(theme))))
+                        s.selectedName = v.name;
                 }
-                DesignSystemGUI.TokenPicker(theme, "Content (label/icon)", v.contentToken, chosen =>
-                {
-                    Undo.RecordObject(settings, "Edit button variant");
-                    v.contentToken = chosen;
-                    EditorUtility.SetDirty(settings);
-                });
-
-                PreviewButton(s, theme, v);
-
-                if (GUILayout.Button("Remove variant"))
-                {
-                    Undo.RecordObject(settings, "Remove button variant");
-                    settings.buttonVariants.RemoveAt(s.btnIdx);
-                    EditorUtility.SetDirty(settings);
-                }
+                ApplyListNav(s, visible, window);
             }
 
             NeoGUI.Splitter();
-            EditorGUILayout.LabelField("Sizes", EditorStyles.boldLabel);
-            for (int i = 0; i < settings.buttonSizes.Count; i++)
+            DrawNewVariantRow(s, settings, names);
+        }
+
+        // Arrow-key browse navigation over the VISIBLE (search-filtered) list — selection stays
+        // name-based; only repaints when the delta actually moves it.
+        private static void ApplyListNav(State s, List<string> visible, EditorWindow window)
+        {
+            int delta = DesignSystemCatalog.ListNavDelta();
+            if (delta == 0 || visible.Count == 0) return;
+            int idx = Mathf.Max(0, visible.IndexOf(s.selectedName));
+            string next = visible[Mathf.Clamp(idx + delta, 0, visible.Count - 1)];
+            if (next == s.selectedName) return;
+            s.selectedName = next;
+            window.Repaint();
+        }
+
+        private static void DrawNewVariantRow(State s, NeoUISettings settings, List<string> names)
+        {
+            if (!DesignSystemCatalog.NewItemRow(ref s.newVariantName, "New variant…")) return;
+
+            string name = s.newVariantName; // trimmed + non-blank by NewItemRow
+            s.newVariantName = "";
+            if (names.Contains(name))
             {
-                ButtonSizeAsset size = settings.buttonSizes[i];
-                using (new EditorGUILayout.HorizontalScope())
-                {
-                    EditorGUI.BeginChangeCheck();
-                    string n = EditorGUILayout.TextField(size.name, GUILayout.Width(120f));
-                    float h = EditorGUILayout.FloatField(size.height, GUILayout.Width(60f));
-                    string ls = EditorGUILayout.TextField(size.labelStyle);
-                    if (EditorGUI.EndChangeCheck())
-                    {
-                        Undo.RecordObject(settings, "Edit size");
-                        size.name = n; size.height = h; size.labelStyle = ls;
-                        EditorUtility.SetDirty(settings);
-                    }
-                }
+                Debug.LogWarning($"[Neo.UI] A button variant named '{name}' already exists.");
+                return;
             }
-            if (GUILayout.Button("Add size"))
+
+            Undo.RecordObject(settings, "Add button variant");
+            settings.buttonVariants.Add(new ButtonVariantAsset
             {
-                Undo.RecordObject(settings, "Add size");
-                // Unique name so TryGetButtonSize lookups aren't shadowed by duplicate "xl"s (B7b).
-                settings.buttonSizes.Add(new ButtonSizeAsset
-                { name = UniqueSizeName(settings.buttonSizes, "xl"), height = 64f, labelStyle = "ButtonLabel" });
+                name = name,
+                contentToken = UIWidgetFactory.TokenTextOnPrimary,
+                colors = DefaultVariantColors(),
+            });
+            EditorUtility.SetDirty(settings);
+            s.selectedName = name;
+        }
+
+        // ---------------------------------------------------------------- right (detail) pane
+
+        private static void DrawDetailPane(State s, NeoUISettings settings, Theme theme)
+        {
+            ButtonVariantAsset v = FindVariant(settings, s.selectedName);
+            if (v == null)
+                DesignSystemCatalog.EmptyState(
+                    "Select a button variant on the left to edit it —\nor add a new one below the list.");
+            else
+                DrawVariantForm(s, settings, theme, v);
+
+            NeoGUI.Splitter();
+            DrawSizesSection(settings);
+        }
+
+        private static void DrawVariantForm(State s, NeoUISettings settings, Theme theme, ButtonVariantAsset v)
+        {
+            DesignSystemCatalog.DetailHeader(v.name, out bool duplicate, out bool remove);
+            if (duplicate) { DuplicateVariant(s, settings, v); return; }
+            if (remove) { RemoveVariant(s, settings, v); return; }
+
+            EditorGUI.BeginChangeCheck();
+            string newName = EditorGUILayout.TextField(LName, v.name);
+            DesignSystemGUI.ColorRef(theme, settings, "Normal", v.colors.normal);
+            DesignSystemGUI.ColorRef(theme, settings, "Hover", v.colors.highlighted);
+            DesignSystemGUI.ColorRef(theme, settings, "Pressed", v.colors.pressed);
+            DesignSystemGUI.ColorRef(theme, settings, "Selected", v.colors.selected);
+            DesignSystemGUI.ColorRef(theme, settings, "Disabled", v.colors.disabled);
+            if (EditorGUI.EndChangeCheck())
+            {
+                Undo.RecordObject(settings, "Edit button variant");
+                v.name = newName;
                 EditorUtility.SetDirty(settings);
+                s.selectedName = v.name; // follow a rename
             }
+            DesignSystemGUI.TokenPicker(theme, LContentToken.text, v.contentToken, chosen =>
+            {
+                Undo.RecordObject(settings, "Edit button variant");
+                v.contentToken = chosen;
+                EditorUtility.SetDirty(settings);
+            });
+
+            PreviewButton(s, theme, v);
+        }
+
+        private static void DuplicateVariant(State s, NeoUISettings settings, ButtonVariantAsset v)
+        {
+            string unique = UniqueVariantName(settings, v.name);
+            var copy = new ButtonVariantAsset
+            {
+                name = unique,
+                contentToken = v.contentToken,
+                // Fresh SelectableColorSet with FRESH ThemeColorRef instances — never share refs with the
+                // original variant, or editing one would silently repaint the other.
+                colors = new SelectableColorSet
+                {
+                    normal = CopyColorRef(v.colors.normal),
+                    highlighted = CopyColorRef(v.colors.highlighted),
+                    pressed = CopyColorRef(v.colors.pressed),
+                    selected = CopyColorRef(v.colors.selected),
+                    disabled = CopyColorRef(v.colors.disabled),
+                },
+            };
+            Undo.RecordObject(settings, "Duplicate button variant");
+            settings.buttonVariants.Add(copy);
+            EditorUtility.SetDirty(settings);
+            s.selectedName = unique;
+        }
+
+        private static ThemeColorRef CopyColorRef(ThemeColorRef src) =>
+            new ThemeColorRef { useToken = src.useToken, token = src.token, color = src.color };
+
+        // "Name 2", "Name 3", … — the first suffix not already taken.
+        private static string UniqueVariantName(NeoUISettings settings, string baseName)
+        {
+            var existing = new HashSet<string>(settings.buttonVariants.Select(bv => bv.name));
+            for (int i = 2; ; i++)
+            {
+                string candidate = $"{baseName} {i}";
+                if (!existing.Contains(candidate)) return candidate;
+            }
+        }
+
+        private static void RemoveVariant(State s, NeoUISettings settings, ButtonVariantAsset v)
+        {
+            if (!EditorUtility.DisplayDialog("Remove button variant",
+                    $"Remove the button variant \"{v.name}\"?\n\nButtons generated with this variant name " +
+                    "will fall back to the built-in colors on the next build — the reference never throws " +
+                    "or breaks the build, it just stops looking custom.",
+                    "Remove", "Cancel"))
+                return;
+
+            // Select a neighbour after removal (the entry that slides into the removed index, clamped).
+            List<string> names = settings.buttonVariants.Select(bv => bv.name).ToList();
+            int idx = names.IndexOf(v.name);
+
+            Undo.RecordObject(settings, "Remove button variant");
+            settings.buttonVariants.Remove(v);
+            EditorUtility.SetDirty(settings);
+
+            names = settings.buttonVariants.Select(bv => bv.name).ToList();
+            s.selectedName = names.Count == 0 ? null : names[Mathf.Clamp(idx, 0, names.Count - 1)];
         }
 
         private static SelectableColorSet DefaultVariantColors() => new SelectableColorSet
@@ -169,6 +335,8 @@ namespace Neo.UI.Editor
             selected = new ThemeColorRef(UIWidgetFactory.TokenPrimaryHover) { useToken = true },
             disabled = new ThemeColorRef(UIWidgetFactory.TokenOutline) { useToken = true },
         };
+
+        // ---------------------------------------------------------------- preview
 
         private static void PreviewButton(State s, Theme theme, ButtonVariantAsset v)
         {
@@ -185,7 +353,10 @@ namespace Neo.UI.Editor
                 s.previewKey = key;
             }
 
-            Rect r = GUILayoutUtility.GetRect(260f, 96f, GUILayout.Width(260f));
+            // Keep the texture's aspect: derive height from the available pane width (capped), so the
+            // preview stays proportional as the resizable pane widens — never the old hardcoded 260×96.
+            float aspect = (float)PreviewRenderWidth / PreviewRenderHeight;
+            Rect r = GUILayoutUtility.GetAspectRect(aspect, GUILayout.MaxWidth(360f));
             if (s.preview != null)
                 GUI.DrawTexture(r, s.preview, ScaleMode.ScaleToFit);
             else
@@ -217,7 +388,7 @@ namespace Neo.UI.Editor
                 { kind = "button", id = "DesignSystem/PreviewButton", label = "Button", variant = variantName });
                 NeoUISettings settings = NeoUISettingsBootstrap.GetOrCreateSettings();
                 go = UISpecGenerator.BuildViewGameObject(view, settings, new GenerateReport());
-                Texture2D tex = UIScreenshotter.RenderToTexture(go, 320, 120);
+                Texture2D tex = UIScreenshotter.RenderToTexture(go, PreviewRenderWidth, PreviewRenderHeight);
                 go = null; // moved into (and destroyed with) the render's preview scene
                 return tex;
             }
@@ -228,6 +399,46 @@ namespace Neo.UI.Editor
             finally
             {
                 if (go != null) UnityEngine.Object.DestroyImmediate(go);
+            }
+        }
+
+        // ---------------------------------------------------------------- sizes (shared, variant-independent)
+
+        // Always drawn below the variant form (or the empty state) — sizes aren't owned by any one
+        // variant, so they stay visible regardless of what's selected on the left.
+        private static void DrawSizesSection(NeoUISettings settings)
+        {
+            EditorGUILayout.LabelField(LSizesHeader, EditorStyles.boldLabel);
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField(LSizeName, EditorStyles.miniLabel, GUILayout.Width(120f));
+                EditorGUILayout.LabelField(LSizeHeight, EditorStyles.miniLabel, GUILayout.Width(60f));
+                EditorGUILayout.LabelField(LSizeLabelStyle, EditorStyles.miniLabel);
+            }
+            for (int i = 0; i < settings.buttonSizes.Count; i++)
+            {
+                ButtonSizeAsset size = settings.buttonSizes[i];
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUI.BeginChangeCheck();
+                    string n = EditorGUILayout.TextField(size.name, GUILayout.Width(120f));
+                    float h = EditorGUILayout.FloatField(size.height, GUILayout.Width(60f));
+                    string ls = EditorGUILayout.TextField(size.labelStyle);
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        Undo.RecordObject(settings, "Edit size");
+                        size.name = n; size.height = h; size.labelStyle = ls;
+                        EditorUtility.SetDirty(settings);
+                    }
+                }
+            }
+            if (GUILayout.Button("Add size"))
+            {
+                Undo.RecordObject(settings, "Add size");
+                // Unique name so TryGetButtonSize lookups aren't shadowed by duplicate "xl"s (B7b).
+                settings.buttonSizes.Add(new ButtonSizeAsset
+                { name = UniqueSizeName(settings.buttonSizes, "xl"), height = 64f, labelStyle = "ButtonLabel" });
+                EditorUtility.SetDirty(settings);
             }
         }
 

@@ -80,6 +80,13 @@ namespace Neo.UI.Editor
             };
             yield return new HubTool
             {
+                id = "palette", label = "Palette", category = Author,
+                tooltip = "Dockable compose palette — a searchable thumbnail grid of widgets, component " +
+                          "presets and templates; click or drag a tile to add it to the open scene.",
+                invoke = Authoring.NeoPaletteWindow.Open,
+            };
+            yield return new HubTool
+            {
                 id = "command-palette", label = "Command Palette", category = Author,
                 tooltip = "Ctrl/Cmd-K — search-as-you-type commands: wire a button to a view, create a " +
                           "widget, jump to a view, or open a Neo UI window.",

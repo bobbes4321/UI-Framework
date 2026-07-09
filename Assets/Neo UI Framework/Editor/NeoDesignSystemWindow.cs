@@ -69,6 +69,16 @@ namespace Neo.UI.Editor
             }
         }
 
+        private void OnEnable()
+        {
+            // Row hover-wash repaints (DesignSystemCatalog.Row, used by Typography/Buttons/Shapes/Colors)
+            // need MouseMove events, which IMGUI windows don't receive by default. Set once here — it
+            // fires again after a domain reload since Unity re-runs OnEnable for open EditorWindows —
+            // rather than per-OnGUI; MotionTab.MarkDrawn's own per-draw `wantsMouseMove = true` (its
+            // hover-dwell browser) stays a harmless idempotent no-op alongside this.
+            wantsMouseMove = true;
+        }
+
         private void OnDisable()
         {
             // Route disposal through the state objects — the Buttons tab's state destroys its cached
@@ -83,11 +93,12 @@ namespace Neo.UI.Editor
 
         private void OnGUI()
         {
-            // Reset every draw so a tab's need for MouseMove events (e.g. Motion's hover-dwell browser)
-            // doesn't leak onto whichever OTHER tab is active after a switch — MotionTab.MarkDrawn
-            // re-asserts this to true on every one of ITS draws, so its own behavior is unaffected; a
-            // project tab that needs MouseMove does the same in its own draw.
-            wantsMouseMove = false;
+            // Event-driven repaint only (no editor-tick subscription — CLAUDE.md forbids that for visuals):
+            // a hovered row's wash (DesignSystemCatalog.Row) would otherwise lag/stick until some unrelated
+            // event happened to repaint the window. MouseLeaveWindow clears a stale wash left behind when
+            // the cursor exits the window entirely.
+            if (Event.current.type == EventType.MouseMove || Event.current.type == EventType.MouseLeaveWindow)
+                Repaint();
 
             NeoGUI.ComponentHeader("Design System", "Author your colors, buttons, shapes and presets",
                 NeoColors.Theming);

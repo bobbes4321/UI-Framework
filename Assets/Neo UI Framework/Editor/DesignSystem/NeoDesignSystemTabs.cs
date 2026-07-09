@@ -105,8 +105,8 @@ namespace Neo.UI.Editor
             yield return OverviewTab.Descriptor;
             yield return new DesignSystemTabDescriptor("colors", "Colors", 0, ColorsTab.CreateState, ColorsTab.Draw);
             yield return TypographyTab.Descriptor;
-            yield return new DesignSystemTabDescriptor("buttons", "Buttons", 10, ButtonsTab.CreateState, ButtonsTab.Draw);
-            yield return new DesignSystemTabDescriptor("shapes", "Shapes", 20, ShapesTab.CreateState, ShapesTab.Draw);
+            yield return new DesignSystemTabDescriptor("buttons", "Buttons", 10, ButtonsTab.CreateState, ButtonsTab.Draw, ownsLayout: true);
+            yield return new DesignSystemTabDescriptor("shapes", "Shapes", 20, ShapesTab.CreateState, ShapesTab.Draw, ownsLayout: true);
             yield return new DesignSystemTabDescriptor("presets", "Presets", 30, PresetsTab.CreateState, PresetsTab.Draw, ownsLayout: true);
             yield return new DesignSystemTabDescriptor("motion", "Motion", 40, MotionTab.CreateState, MotionTab.Draw, ownsLayout: true);
             yield return BundlesTab.Descriptor;

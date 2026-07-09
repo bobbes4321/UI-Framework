@@ -66,6 +66,12 @@ namespace Neo.UI.Editor.Authoring
         /// set the created element's <c>preset</c> field from. Null for a bare-kind tile. </summary>
         public const string PresetDragKey = "Neo.Composer.PalettePreset";
 
+        /// <summary> The generic-data key a dragged <see cref="NeoLayoutTemplates"/> scaffold carries its
+        /// template id under (INSTEAD of <see cref="DragKey"/> — a template inserts a whole element tree,
+        /// not one kind), for a drop handler to route into
+        /// <see cref="NeoSceneAuthoring.InsertTemplate"/>. </summary>
+        public const string TemplateDragKey = "Neo.Composer.PaletteTemplate";
+
         /// <summary> The category preset tiles group under (the design-system "component" layer). </summary>
         public const string ComponentsCategory = "Components";
 

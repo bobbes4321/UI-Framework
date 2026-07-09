@@ -127,6 +127,9 @@ namespace Neo.UI.Editor
             yield return new NeoCommandDescriptor("tool-gallery", "Open Gallery", "Tools",
                 run: () => RunMenuItem("Tools/Neo UI/Gallery"),
                 searchKeywords: new[] { "gallery", "screenshots", "preview" });
+            yield return new NeoCommandDescriptor("tool-palette", "Open Palette", "Tools",
+                run: () => RunMenuItem("Tools/Neo UI/Palette"),
+                searchKeywords: new[] { "palette", "widgets", "presets", "compose", "tiles" });
         }
 
         private static void RunMenuItem(string menuPath)
