@@ -52,7 +52,6 @@ namespace Neo.UI.Editor.Authoring
         private const float SnapStep = 16f;   // slider snap — keeps the live resize smooth but chunky
         private const float CardLabelH = 18f;
         private const float Gap = 6f;
-        private const float GridChrome = 30f; // scroll view inner margin + vertical scrollbar
         private const int MaxRecents = 8;
 
         private const string AllCategories = "All";
@@ -246,7 +245,9 @@ namespace Neo.UI.Editor.Authoring
 
         private void DrawGrid()
         {
-            _scroll = EditorGUILayout.BeginScrollView(_scroll);
+            // Horizontal scrollbar OFF (GUIStyle.none) — a wrapping grid never scrolls sideways; a
+            // momentarily-too-wide row clips instead of flashing a scrollbar.
+            _scroll = EditorGUILayout.BeginScrollView(_scroll, GUIStyle.none, GUI.skin.verticalScrollbar);
 
             if (_sections.Count == 0)
             {
@@ -263,7 +264,12 @@ namespace Neo.UI.Editor.Authoring
 
             float thumbH = Mathf.Round(_cardW * 0.8f);
             float cardH = thumbH + CardLabelH + 6f;
-            int columns = Mathf.Max(1, Mathf.FloorToInt((position.width - GridChrome + Gap) / (_cardW + Gap)));
+            // Deterministic width — position.width is live every frame, so the grid reflows immediately
+            // in BOTH directions (a width MEASURED inside the scroll view gets inflated by the grid's
+            // own rows and can never shrink back — see NeoGUI.ScrollbarAllowance). The leftover is
+            // distributed into the cards, so the grid always fills the row edge to edge.
+            float avail = position.width - NeoGUI.ScrollbarAllowance;
+            int columns = NeoGUI.FitColumns(avail, _cardW, Gap, out float cardW);
 
             foreach (Section section in _sections)
             {
@@ -275,8 +281,9 @@ namespace Neo.UI.Editor.Authoring
                     {
                         for (int c = 0; c < columns && i + c < section.tiles.Count; c++)
                         {
-                            Rect rect = GUILayoutUtility.GetRect(_cardW, cardH,
-                                GUILayout.Width(_cardW), GUILayout.Height(cardH));
+                            if (c > 0) GUILayout.Space(Gap);
+                            Rect rect = GUILayoutUtility.GetRect(cardW, cardH,
+                                GUILayout.Width(cardW), GUILayout.Height(cardH));
                             DrawCard(rect, section.tiles[i + c]);
                         }
                     }

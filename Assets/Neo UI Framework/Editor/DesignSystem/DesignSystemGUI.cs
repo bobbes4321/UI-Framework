@@ -108,7 +108,7 @@ namespace Neo.UI.Editor
         // content column to (paneWidth − this) and hide the horizontal scrollbar entirely (content can't
         // overflow sideways then, so a too-wide row wraps to the viewport instead of scrolling off the
         // edge). Fixes both split-pane tabs' left panes at once — no per-row band-aids.
-        private const float LeftScrollbarAllowance = 15f;
+        private const float LeftScrollbarAllowance = NeoGUI.ScrollbarAllowance;
 
         // Draggable separator: the visible line stays 1px, but the mouse hit-zone (resize cursor + drag
         // capture) is this wide so the handle is grabbable without pixel-hunting for a 1px target.

@@ -38,14 +38,14 @@ namespace Neo.UI.Editor
         private const float CardH = CardThumb + CardLabelH + 6f;
         private const float Gap = 6f;
 
-        // Default left (browse) pane width: exactly two card columns plus the scroll view's inner margin +
-        // vertical scrollbar, derived from the card metrics so cards never clip (CLAUDE.md: derive, don't
-        // hardcode a magic number). 2*132 + 6 gap + ~30 chrome = 300. The pane is now user-resizable
-        // (DesignSystemGUI split-pane drag) — this is only the starting width; DrawGrid derives its column
-        // count from the CURRENT width, so widening the pane reveals more columns.
+        // Default left (browse) pane width: exactly two card columns plus the vertical-scrollbar
+        // allowance, derived from the card metrics so cards never clip (CLAUDE.md: derive, don't
+        // hardcode a magic number). The pane is user-resizable (DesignSystemGUI split-pane drag) — this
+        // is only the starting width; DrawGrid derives its column count from the CURRENT width, so
+        // widening the pane reveals more columns.
         private const int LeftColumns = 2;
-        private const float LeftChrome = 30f;
-        private const float DefaultLeftWidth = LeftColumns * CardW + (LeftColumns - 1) * Gap + LeftChrome;
+        private const float DefaultLeftWidth =
+            LeftColumns * CardW + (LeftColumns - 1) * Gap + NeoGUI.ScrollbarAllowance;
 
         // Drag clamp + SessionState key (per-tab, keyed like NeoDesignSystemWindow.TabKey) so a resize
         // survives window close/reopen within the session. RightMinWidth keeps the detail pane usable.
@@ -286,20 +286,23 @@ namespace Neo.UI.Editor
             }
 
             // Grid lives inside the resizable left pane (not the full window), so columns derive from the
-            // CURRENT pane width, not EditorGUIUtility.currentViewWidth (which would over-count and clip) —
-            // widening the pane reveals more columns, narrowing it fewer. n cards need n*CardW + (n−1)*Gap,
-            // so the +Gap term inverts that exactly (avail=270 ⇒ 2 cols at the 300px default; the old
-            // formula lacked +Gap and under-counted to 1).
-            float avail = s.leftWidth - LeftChrome;
-            int columns = Mathf.Max(1, Mathf.FloorToInt((avail + Gap) / (CardW + Gap)));
+            // CURRENT pane width minus the vertical-scrollbar allowance — deterministic and live every
+            // frame, so the grid reflows immediately in BOTH directions (a width MEASURED inside the
+            // scroll view gets inflated by the grid's own rows and can never shrink back — see
+            // NeoGUI.ScrollbarAllowance). The leftover width is distributed into the cards
+            // (NeoGUI.FitColumns) so rows fill the pane edge to edge — widening the pane widens the
+            // cards until the next column fits.
+            float avail = s.leftWidth - NeoGUI.ScrollbarAllowance;
+            int columns = NeoGUI.FitColumns(avail, CardW, Gap, out float cardW);
             for (int i = 0; i < visible.Count; i += columns)
             {
                 using (new EditorGUILayout.HorizontalScope())
                 {
                     for (int c = 0; c < columns && i + c < visible.Count; c++)
                     {
+                        if (c > 0) GUILayout.Space(Gap);
                         NeoWidgetPreset preset = visible[i + c];
-                        Rect r = GUILayoutUtility.GetRect(CardW, CardH, GUILayout.Width(CardW), GUILayout.Height(CardH));
+                        Rect r = GUILayoutUtility.GetRect(cardW, CardH, GUILayout.Width(cardW), GUILayout.Height(CardH));
                         DrawCard(r, preset, ReferenceEquals(preset, s.selected), s);
                     }
                 }

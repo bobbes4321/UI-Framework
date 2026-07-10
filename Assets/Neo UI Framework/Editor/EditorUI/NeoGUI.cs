@@ -145,6 +145,33 @@ namespace Neo.EditorUI
             return pressed;
         }
 
+        // ------------------------------------------------------------------ card grids
+
+        /// <summary>
+        /// Px a card grid inside a vertical-scrolling view should reserve for the scrollbar + scroll-view
+        /// padding when deriving its available width from a KNOWN outer width (the window's
+        /// <c>position.width</c>, a split pane's column width). Deliberately a constant, never a rect
+        /// measured inside the scroll view: an inner measurement gets inflated by the grid's own
+        /// fixed-width rows, so it can grow with the window but never shrink back (a one-way ratchet).
+        /// Reserving it unconditionally costs nothing visible — <see cref="FitColumns"/> stretches the
+        /// cards into whatever width it is given.
+        /// </summary>
+        public const float ScrollbarAllowance = 15f;
+
+        /// <summary>
+        /// Fits a card grid to <paramref name="availableWidth"/>: as many <paramref name="baseCardWidth"/>
+        /// columns as fit, with the leftover width distributed INTO the cards so every row fills the
+        /// available width exactly — never dead space at the right edge. <paramref name="cardWidth"/> is
+        /// therefore ≥ the base width, except in a too-narrow single column where the lone card shrinks
+        /// to fit instead of clipping.
+        /// </summary>
+        public static int FitColumns(float availableWidth, float baseCardWidth, float gap, out float cardWidth)
+        {
+            int columns = Mathf.Max(1, Mathf.FloorToInt((availableWidth + gap) / (baseCardWidth + gap)));
+            cardWidth = Mathf.Max(40f, (availableWidth - (columns - 1) * gap) / columns);
+            return columns;
+        }
+
         // ------------------------------------------------------------------ property helpers
 
         /// <summary> Draws every visible property except m_Script and any excluded names. </summary>

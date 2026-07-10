@@ -18,43 +18,43 @@ MonoBehaviour:
     - token: Primary
       color: {r: 0.23137255, g: 0.50980395, b: 0.9647059, a: 1}
     - token: Background
-      color: {r: 0.043137256, g: 0.050980393, b: 0.0627451, a: 1}
+      color: {r: 0.05882353, g: 0.06666667, b: 0.08235294, a: 1}
     - token: Accent
       color: {r: 1, g: 0.72156864, b: 0.2, a: 1}
     - token: TextDefault
-      color: {r: 0.7764706, g: 0.8, b: 0.8392157, a: 1}
+      color: {r: 0.7882353, g: 0.80784315, b: 0.8392157, a: 1}
     - token: Surface
-      color: {r: 0.08627451, g: 0.09803922, b: 0.11764706, a: 1}
+      color: {r: 0.101960786, g: 0.11372549, b: 0.14117648, a: 1}
     - token: SurfaceElevated
-      color: {r: 0.12941177, g: 0.14509805, b: 0.17254902, a: 1}
+      color: {r: 0.14509805, g: 0.16470589, b: 0.20392157, a: 1}
     - token: Outline
-      color: {r: 0.20392157, g: 0.22745098, b: 0.26666668, a: 1}
+      color: {r: 0.22352941, g: 0.2509804, b: 0.30588236, a: 1}
     - token: PrimaryHover
-      color: {r: 0.36522615, g: 0.5951698, b: 0.97085226, a: 1}
+      color: {r: 0.3882353, g: 0.6039216, b: 0.972549, a: 1}
     - token: PrimaryPressed
-      color: {r: 0.05927503, g: 0.4000479, b: 0.95680344, a: 1}
+      color: {r: 0.14509805, g: 0.3882353, b: 0.83137256, a: 1}
     - token: TextOnPrimary
       color: {r: 1, g: 1, b: 1, a: 1}
     - token: TextStrong
-      color: {r: 0.9607843, g: 0.96862745, b: 0.98039216, a: 1}
+      color: {r: 0.9490196, g: 0.95686275, b: 0.972549, a: 1}
     - token: TextMuted
-      color: {r: 0.5568628, g: 0.5882353, b: 0.6431373, a: 1}
+      color: {r: 0.5411765, g: 0.5686275, b: 0.61960787, a: 1}
     - token: Success
-      color: {r: 0.13333334, g: 0.77254903, b: 0.36862746, a: 1}
+      color: {r: 0.31764707, g: 0.8117647, b: 0.4, a: 1}
     - token: SuccessHover
-      color: {r: 0.18631524, g: 0.8595671, b: 0.434138, a: 1}
+      color: {r: 0.4273768, g: 0.842035, b: 0.49648654, a: 1}
     - token: SuccessPressed
-      color: {r: 0.106839836, g: 0.6190425, b: 0.29538068, a: 1}
+      color: {r: 0.20527822, g: 0.7441336, b: 0.2950875, a: 1}
     - token: Warning
-      color: {r: 0.9607843, g: 0.61960787, b: 0.043137256, a: 1}
+      color: {r: 1, g: 0.83137256, b: 0.23137255, a: 1}
     - token: Error
-      color: {r: 0.9372549, g: 0.26666668, b: 0.26666668, a: 1}
+      color: {r: 1, g: 0.41960785, b: 0.41960785, a: 1}
     - token: Danger
-      color: {r: 0.9372549, g: 0.26666668, b: 0.26666668, a: 1}
+      color: {r: 1, g: 0.41960785, b: 0.41960785, a: 1}
     - token: DangerHover
-      color: {r: 0.9482894, g: 0.39563215, b: 0.39563236, a: 1}
+      color: {r: 1, g: 0.55960786, b: 0.55960804, a: 1}
     - token: DangerPressed
-      color: {r: 0.9230677, g: 0.1008538, b: 0.10085409, a: 1}
+      color: {r: 1, g: 0.23960781, b: 0.23960808, a: 1}
     - token: Shadow
       color: {r: 0, g: 0, b: 0, a: 0.5}
   - name: Dark
@@ -62,131 +62,131 @@ MonoBehaviour:
     - token: Primary
       color: {r: 0.23137255, g: 0.50980395, b: 0.9647059, a: 1}
     - token: Background
-      color: {r: 0.043137256, g: 0.050980393, b: 0.0627451, a: 1}
+      color: {r: 0.05882353, g: 0.06666667, b: 0.08235294, a: 1}
     - token: Accent
       color: {r: 1, g: 0.72156864, b: 0.2, a: 1}
     - token: TextDefault
-      color: {r: 0.7764706, g: 0.8, b: 0.8392157, a: 1}
+      color: {r: 0.7882353, g: 0.80784315, b: 0.8392157, a: 1}
     - token: Surface
-      color: {r: 0.08627451, g: 0.09803922, b: 0.11764706, a: 1}
+      color: {r: 0.101960786, g: 0.11372549, b: 0.14117648, a: 1}
     - token: SurfaceElevated
-      color: {r: 0.12941177, g: 0.14509805, b: 0.17254902, a: 1}
+      color: {r: 0.14509805, g: 0.16470589, b: 0.20392157, a: 1}
     - token: Outline
-      color: {r: 0.20392157, g: 0.22745098, b: 0.26666668, a: 1}
+      color: {r: 0.22352941, g: 0.2509804, b: 0.30588236, a: 1}
     - token: PrimaryHover
-      color: {r: 0.36522615, g: 0.5951698, b: 0.97085226, a: 1}
+      color: {r: 0.3882353, g: 0.6039216, b: 0.972549, a: 1}
     - token: PrimaryPressed
-      color: {r: 0.05927503, g: 0.4000479, b: 0.95680344, a: 1}
+      color: {r: 0.14509805, g: 0.3882353, b: 0.83137256, a: 1}
     - token: TextOnPrimary
       color: {r: 1, g: 1, b: 1, a: 1}
     - token: TextStrong
-      color: {r: 0.9607843, g: 0.96862745, b: 0.98039216, a: 1}
+      color: {r: 0.9490196, g: 0.95686275, b: 0.972549, a: 1}
     - token: TextMuted
-      color: {r: 0.5568628, g: 0.5882353, b: 0.6431373, a: 1}
+      color: {r: 0.5411765, g: 0.5686275, b: 0.61960787, a: 1}
     - token: Success
-      color: {r: 0.13333334, g: 0.77254903, b: 0.36862746, a: 1}
+      color: {r: 0.31764707, g: 0.8117647, b: 0.4, a: 1}
     - token: SuccessHover
-      color: {r: 0.18631524, g: 0.8595671, b: 0.434138, a: 1}
+      color: {r: 0.4273768, g: 0.842035, b: 0.49648654, a: 1}
     - token: SuccessPressed
-      color: {r: 0.106839836, g: 0.6190425, b: 0.29538068, a: 1}
+      color: {r: 0.20527822, g: 0.7441336, b: 0.2950875, a: 1}
     - token: Warning
-      color: {r: 0.9607843, g: 0.61960787, b: 0.043137256, a: 1}
+      color: {r: 1, g: 0.83137256, b: 0.23137255, a: 1}
     - token: Error
-      color: {r: 0.9372549, g: 0.26666668, b: 0.26666668, a: 1}
+      color: {r: 1, g: 0.41960785, b: 0.41960785, a: 1}
     - token: Danger
-      color: {r: 0.9372549, g: 0.26666668, b: 0.26666668, a: 1}
+      color: {r: 1, g: 0.41960785, b: 0.41960785, a: 1}
     - token: DangerHover
-      color: {r: 0.9482894, g: 0.39563215, b: 0.39563236, a: 1}
+      color: {r: 1, g: 0.55960786, b: 0.55960804, a: 1}
     - token: DangerPressed
-      color: {r: 0.9230677, g: 0.1008538, b: 0.10085409, a: 1}
+      color: {r: 1, g: 0.23960781, b: 0.23960808, a: 1}
     - token: Shadow
       color: {r: 0, g: 0, b: 0, a: 0.5}
   - name: Light
     colors:
     - token: Primary
-      color: {r: 0.14509805, g: 0.3882353, b: 0.92156863, a: 1}
+      color: {r: 0.105882354, g: 0.43529412, b: 0.83137256, a: 1}
     - token: Background
-      color: {r: 0.95686275, g: 0.9647059, b: 0.972549, a: 1}
+      color: {r: 0.9490196, g: 0.95686275, b: 0.96862745, a: 1}
     - token: Accent
       color: {r: 1, g: 0.72156864, b: 0.2, a: 1}
     - token: TextDefault
-      color: {r: 0.1882353, g: 0.22745098, b: 0.28627452, a: 1}
+      color: {r: 0.16470589, g: 0.19215687, b: 0.23529412, a: 1}
     - token: Surface
       color: {r: 1, g: 1, b: 1, a: 1}
     - token: SurfaceElevated
-      color: {r: 0.91764706, g: 0.93333334, b: 0.9529412, a: 1}
+      color: {r: 0.9137255, g: 0.92941177, b: 0.9490196, a: 1}
     - token: Outline
-      color: {r: 0.827451, g: 0.85490197, b: 0.8901961, a: 1}
+      color: {r: 0.83137256, g: 0.85490197, b: 0.8901961, a: 1}
     - token: PrimaryHover
-      color: {r: 0.27333337, g: 0.4800001, b: 0.93333334, a: 1}
+      color: {r: 0.23921569, g: 0.5294118, b: 0.8784314, a: 1}
     - token: PrimaryPressed
-      color: {r: 0.0745098, g: 0.30549031, b: 0.8121569, a: 1}
+      color: {r: 0.07058824, g: 0.34901962, b: 0.68235296, a: 1}
     - token: TextOnPrimary
       color: {r: 1, g: 1, b: 1, a: 1}
     - token: TextStrong
-      color: {r: 0.06666667, g: 0.09411765, b: 0.15294118, a: 1}
+      color: {r: 0.078431375, g: 0.09411765, b: 0.12156863, a: 1}
     - token: TextMuted
-      color: {r: 0.3647059, g: 0.4, b: 0.45882353, a: 1}
+      color: {r: 0.41568628, g: 0.44705883, b: 0.5019608, a: 1}
     - token: Success
-      color: {r: 0.08235294, g: 0.5019608, b: 0.23921569, a: 1}
+      color: {r: 0.18039216, g: 0.5764706, b: 0.23529412, a: 1}
     - token: SuccessHover
-      color: {r: 0.10208446, g: 0.6222293, b: 0.29653105, a: 1}
+      color: {r: 0.21376002, g: 0.6831027, b: 0.27881745, a: 1}
     - token: SuccessPressed
-      color: {r: 0.05698383, g: 0.3473299, b: 0.16552438, a: 1}
+      color: {r: 0.1374906, g: 0.43937215, b: 0.17933558, a: 1}
     - token: Warning
-      color: {r: 0.7058824, g: 0.3254902, b: 0.03529412, a: 1}
+      color: {r: 0.7019608, g: 0.36078432, b: 0, a: 1}
     - token: Error
-      color: {r: 0.8627451, g: 0.14901961, b: 0.14901961, a: 1}
+      color: {r: 0.78039217, g: 0.24313726, b: 0.24313726, a: 1}
     - token: Danger
-      color: {r: 0.8627451, g: 0.14901961, b: 0.14901961, a: 1}
+      color: {r: 0.78039217, g: 0.24313726, b: 0.24313726, a: 1}
     - token: DangerHover
-      color: {r: 0.8821896, g: 0.26957518, b: 0.2695754, a: 1}
+      color: {r: 0.8118781, g: 0.3516513, b: 0.3516515, a: 1}
     - token: DangerPressed
-      color: {r: 0.7162419, g: 0.11552286, b: 0.11552308, a: 1}
+      color: {r: 0.65382, g: 0.18970942, b: 0.18970959, a: 1}
     - token: Shadow
-      color: {r: 0, g: 0, b: 0, a: 0.22}
+      color: {r: 0, g: 0, b: 0, a: 0.25}
   - name: Custom
     colors:
     - token: Primary
       color: {r: 0.23137255, g: 0.50980395, b: 0.9647059, a: 1}
     - token: Background
-      color: {r: 0.043137256, g: 0.050980393, b: 0.0627451, a: 1}
+      color: {r: 0.05882353, g: 0.06666667, b: 0.08235294, a: 1}
     - token: Accent
       color: {r: 1, g: 0.72156864, b: 0.2, a: 1}
     - token: TextDefault
-      color: {r: 0.7764706, g: 0.8, b: 0.8392157, a: 1}
+      color: {r: 0.7882353, g: 0.80784315, b: 0.8392157, a: 1}
     - token: Surface
-      color: {r: 0.08627451, g: 0.09803922, b: 0.11764706, a: 1}
+      color: {r: 0.101960786, g: 0.11372549, b: 0.14117648, a: 1}
     - token: SurfaceElevated
-      color: {r: 0.12941177, g: 0.14509805, b: 0.17254902, a: 1}
+      color: {r: 0.14509805, g: 0.16470589, b: 0.20392157, a: 1}
     - token: Outline
-      color: {r: 0.20392157, g: 0.22745098, b: 0.26666668, a: 1}
+      color: {r: 0.22352941, g: 0.2509804, b: 0.30588236, a: 1}
     - token: PrimaryHover
-      color: {r: 0.36522615, g: 0.5951698, b: 0.97085226, a: 1}
+      color: {r: 0.3882353, g: 0.6039216, b: 0.972549, a: 1}
     - token: PrimaryPressed
-      color: {r: 0.05927503, g: 0.4000479, b: 0.95680344, a: 1}
+      color: {r: 0.14509805, g: 0.3882353, b: 0.83137256, a: 1}
     - token: TextOnPrimary
       color: {r: 1, g: 1, b: 1, a: 1}
     - token: TextStrong
-      color: {r: 0.9607843, g: 0.96862745, b: 0.98039216, a: 1}
+      color: {r: 0.9490196, g: 0.95686275, b: 0.972549, a: 1}
     - token: TextMuted
-      color: {r: 0.5568628, g: 0.5882353, b: 0.6431373, a: 1}
+      color: {r: 0.5411765, g: 0.5686275, b: 0.61960787, a: 1}
     - token: Success
-      color: {r: 0.13333334, g: 0.77254903, b: 0.36862746, a: 1}
+      color: {r: 0.31764707, g: 0.8117647, b: 0.4, a: 1}
     - token: SuccessHover
-      color: {r: 0.18631524, g: 0.8595671, b: 0.434138, a: 1}
+      color: {r: 0.4273768, g: 0.842035, b: 0.49648654, a: 1}
     - token: SuccessPressed
-      color: {r: 0.106839836, g: 0.6190425, b: 0.29538068, a: 1}
+      color: {r: 0.20527822, g: 0.7441336, b: 0.2950875, a: 1}
     - token: Warning
-      color: {r: 0.9607843, g: 0.61960787, b: 0.043137256, a: 1}
+      color: {r: 1, g: 0.83137256, b: 0.23137255, a: 1}
     - token: Error
-      color: {r: 0.9372549, g: 0.26666668, b: 0.26666668, a: 1}
+      color: {r: 1, g: 0.41960785, b: 0.41960785, a: 1}
     - token: Danger
-      color: {r: 0.9372549, g: 0.26666668, b: 0.26666668, a: 1}
+      color: {r: 1, g: 0.41960785, b: 0.41960785, a: 1}
     - token: DangerHover
-      color: {r: 0.9482894, g: 0.39563215, b: 0.39563236, a: 1}
+      color: {r: 1, g: 0.55960786, b: 0.55960804, a: 1}
     - token: DangerPressed
-      color: {r: 0.9230677, g: 0.1008538, b: 0.10085409, a: 1}
+      color: {r: 1, g: 0.23960781, b: 0.23960808, a: 1}
     - token: Shadow
       color: {r: 0, g: 0, b: 0, a: 0.5}
   activeVariantName: Dark
@@ -194,7 +194,7 @@ MonoBehaviour:
   - name: Card
     radiusUnit: 0
     uniformRadius: 1
-    radius: 12
+    radius: 16
     radiusPerCorner: {x: 12, y: 12, z: 12, w: 12}
     borderWidth: 0
     fillColor:
@@ -208,15 +208,15 @@ MonoBehaviour:
     softness: 0
     fillMode: 0
     fillColorB:
-      useToken: 1
-      token: Surface
+      useToken: 0
+      token: 
       color: {r: 1, g: 1, b: 1, a: 1}
     gradientAngle: 90
-    elevation: 2
+    elevation: 0
   - name: Panel
     radiusUnit: 0
     uniformRadius: 1
-    radius: 12
+    radius: 14
     radiusPerCorner: {x: 12, y: 12, z: 12, w: 12}
     borderWidth: 0
     fillColor:
@@ -238,7 +238,7 @@ MonoBehaviour:
   - name: Control
     radiusUnit: 0
     uniformRadius: 1
-    radius: 10
+    radius: 12
     radiusPerCorner: {x: 12, y: 12, z: 12, w: 12}
     borderWidth: 1
     fillColor:
@@ -282,7 +282,7 @@ MonoBehaviour:
   - name: ShadowSoft
     radiusUnit: 0
     uniformRadius: 1
-    radius: 14
+    radius: 18
     radiusPerCorner: {x: 12, y: 12, z: 12, w: 12}
     borderWidth: 0
     fillColor:
@@ -293,7 +293,7 @@ MonoBehaviour:
       useToken: 0
       token: 
       color: {r: 0, g: 0, b: 0, a: 1}
-    softness: 16
+    softness: 18
     fillMode: 0
     fillColorB:
       useToken: 0

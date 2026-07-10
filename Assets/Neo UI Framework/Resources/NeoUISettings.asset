@@ -99,7 +99,7 @@ MonoBehaviour:
       normal:
         useToken: 0
         token: 
-        color: {r: 0.14509805, g: 0.16470589, b: 0.20392157, a: 0}
+        color: {r: 0.12941177, g: 0.14509805, b: 0.17254902, a: 0}
       highlighted:
         useToken: 1
         token: SurfaceElevated
