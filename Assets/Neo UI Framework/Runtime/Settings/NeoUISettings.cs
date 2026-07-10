@@ -81,6 +81,11 @@ namespace Neo.UI
         [Tooltip("Minimum seconds between accepted back-button fires")]
         public float backButtonCooldown = 0.1f;
 
+        [Tooltip("Any UIButton whose id Name matches this (case-insensitive) fires the back button " +
+                 "when clicked — no wiring needed. Empty disables the convention. Projects can add " +
+                 "extra names via BackButton.RegisterButtonName.")]
+        public string backButtonName = "Back";
+
         [Header("Ticker")]
         [Tooltip("Runtime tick FPS cap; 0 = uncapped")]
         public int runtimeFpsCap;

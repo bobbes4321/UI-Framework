@@ -66,6 +66,21 @@ namespace Neo.UI
         protected virtual void OnDisable()
         {
             _host?.UnregisterStateAnimator(this);
+            // Disabled mid-interaction (a click that navigates away hides the view while this
+            // button is still Highlighted/Pressed): park the widget back at rest so it doesn't
+            // come back tilted/scaled. Safe: re-registering on enable re-applies the host's
+            // current state instantly (SelectionStateRelay.Register).
+            ReturnToRest();
+        }
+
+        /// <summary> Stops the active state animation and parks the widget at its rest pose. </summary>
+        public void ReturnToRest()
+        {
+            if (_current == null) return;
+            _current.Stop(silent: true);
+            _current.RestoreStartValues();
+            _current = null;
+            _currentSettledToRest = false;
         }
 
         protected virtual void OnDestroy()
@@ -127,7 +142,14 @@ namespace Neo.UI
             }
 
             BindTarget();
-            _current?.Stop(silent: true);
+            if (_current != null && _current != animation)
+            {
+                _current.Stop(silent: true);
+                // Hand-off: channels the outgoing state animated but the incoming one doesn't
+                // would stay frozen mid-flight forever (a hover tilt's rotation surviving into a
+                // scale-only Pressed — the later return-to-Normal only reverses the NEW current).
+                _current.RestoreStartValuesNotCoveredBy(animation);
+            }
             _current = animation;
             _currentSettledToRest = false;
 

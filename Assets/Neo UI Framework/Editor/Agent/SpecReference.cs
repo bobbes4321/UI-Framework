@@ -692,10 +692,13 @@ namespace Neo.UI.Editor
             sb.AppendLine("| Timer | `{ \"timer\": seconds }` |");
             sb.AppendLine();
 
-            IEnumerable<string> icons = IconMap.Names.OrderBy(n => n, StringComparer.Ordinal);
-            sb.AppendLine($"## Icons ({IconMap.Count} Lucide names)");
+            IEnumerable<string> icons = IconMap.FeaturedNames.OrderBy(n => n, StringComparer.Ordinal);
+            sb.AppendLine($"## Icons ({IconMap.Count} featured Lucide names)");
             sb.AppendLine();
-            sb.AppendLine("Use on `icon` elements (`\"name\"`) or button/tab `\"icon\"` slots.");
+            sb.AppendLine("Use on `icon` elements (`\"name\"`) or button/tab `\"icon\"` slots. Beyond this " +
+                          "featured list, EVERY Lucide 1.17.0 name (~1960) resolves — use any name from " +
+                          "lucide.dev — plus project-defined `IconMapOverlay` entries (custom glyphs and " +
+                          "sprite-backed PNG icons).");
             sb.AppendLine();
             sb.AppendLine(string.Join(", ", icons.Select(n => $"`{n}`")));
             sb.AppendLine();

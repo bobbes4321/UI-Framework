@@ -119,7 +119,14 @@ Built on **`UISelectable`** (the package's Selectable equivalent, with per-state
   generator wires `UITab.containerReference` and bakes the selected tab's panel visible.
 - **`UISlider`**, **`UIScrollbar`**, **`UIStepper`** (+ `UIStepperValueLabel`), **`UICounter`**,
   **`UIDropdown`** (with commit events), **`UIBadge`**, **`UITag`**.
-- **`BackButton`** / `BackButtonInput` — hardware/escape back navigation.
+- **`BackButton`** / `BackButtonInput` — the back-navigation system. Three sources converge on
+  `BackButton.Fire` (cooldown-gated, ref-counted `Disable`/`Enable`): hardware input
+  (`BackButtonInput` — Escape, gamepad east/cancel, optional custom `InputActionReference`;
+  auto-added by `FlowController` when the scene has none), any clicked `UIButton` whose id **Name**
+  is `"Back"` (`NeoUISettings.backButtonName`, case-insensitive, no wiring needed; add extra names
+  via `BackButton.RegisterButtonName`), and direct `Fire()` calls (VR rigs). `FlowController`
+  history-back is the fallback — explicit graph wiring (a Back-trigger edge, or a ButtonClick edge
+  matching the pressed back-named button) consumes the press so nothing navigates twice.
 - Wiring helpers: `ViewCommandOnClick`, `UIActionBehaviour`, `SelectionStateRelay`, `UISoundRelay`,
   `WidgetStyleTag` (records the chosen `variant`/`size` so the exporter can read it back).
 
@@ -346,7 +353,10 @@ The standalone look-and-feel kit every inspector/drawer routes through so everyt
   components subclass `SelectableEditor`/`SliderEditor` and tuck the base GUI inside
   `NeoGUI.BeginFoldoutSection`.
 - Any category/name string field uses **`IdDatabaseOptions.DrawCategoryNamePair`** (a searchable
-  dropdown backed by the databases on `NeoUISettings`). Plain string pickers use
+  dropdown backed by the databases on `NeoUISettings`). Every pair carries two tail buttons:
+  **`+`** quick-adds a new id in one step (type `Name` or `Category/Name` into a `NeoInputPopup` —
+  it's written to the database and assigned to the field at once) and **`…`** jumps straight into
+  the ID Database Manager pre-selected to that database/category/name. Plain string pickers use
   `NeoDropdown.StringPopup/ValuePopup` with an inline **"+ Add"** row — **never modal dialogs**.
 
 **IMGUI performance rules** (these are why selection stays snappy):
@@ -385,7 +395,14 @@ prefabs, views, and a flow graph — round-trippable.
 - **`AgentValidation`** — hard validation (`ValidateAll`) plus soft design lint (`ValidateDesign`:
   WCAG contrast, off-scale spacing, raw fontSize where text styles exist). Includes the
   **dead-interaction lint** (`ValidateInteractivity`) that flags buttons/tabs that do nothing.
-- **`IconMap`** — Lucide icon-name → glyph mapping. **`SpecReference`** writes the spec docs/schema.
+- **`IconMap`** — icon-name → glyph/sprite mapping (an editor façade over the runtime
+  `IconLibrary`, so `NeoIcon.SetIcon("volume-x")` also resolves names in a build). Resolution:
+  project `IconMapOverlay` sprites (PNG icons — add via the Design System **Icons** tab, no font
+  authoring) → overlay glyphs → the curated Lucide subset → the full ~1960-name Lucide 1.17.0
+  table (any lucide.dev name just works; glyphs bake into the atlas on first use). Generated icon
+  texts carry a `NeoIcon` component — the name-addressed identity the exporter reads back — whose
+  inspector is a searchable glyph-grid picker (`NeoIconPickerPopup`).
+  **`SpecReference`** writes the spec docs/schema.
 
 ### 6.2 Spec element kinds
 

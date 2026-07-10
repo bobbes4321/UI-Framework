@@ -38,7 +38,10 @@ namespace Neo.UI.Editor
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("onEnableBehaviour"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("onDisableBehaviour"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("dontDestroyOnSceneChange"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("goBackOnBackButton"));
+                SerializedProperty goBack = serializedObject.FindProperty("goBackOnBackButton");
+                EditorGUILayout.PropertyField(goBack);
+                if (goBack.boolValue || goBack.hasMultipleDifferentValues)
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("autoCreateBackInput"));
             }
 
             serializedObject.ApplyModifiedProperties();

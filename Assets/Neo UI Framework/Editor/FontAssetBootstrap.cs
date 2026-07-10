@@ -51,9 +51,18 @@ namespace Neo.UI.Editor
         /// The Lucide icon font asset, pre-baked with the curated <see cref="IconMap"/> glyph set
         /// and registered on the settings asset (the exporter detects icon texts by this font).
         /// </summary>
+        private static bool s_iconFontToppedUp;
+
         public static TMP_FontAsset EnsureIconFont(NeoUISettings settings)
         {
             TMP_FontAsset icons = EnsureFontAsset($"{FontsFolder}/Lucide.ttf", LucideAssetPath, IconMap.AllGlyphs());
+            // repair semantics: the pre-bake only ran at creation, so curated icons added since
+            // then would be missing from the committed atlas — top it up once per session
+            if (icons != null && !s_iconFontToppedUp)
+            {
+                s_iconFontToppedUp = true;
+                icons.TryAddCharacters(IconMap.AllGlyphs());
+            }
             if (settings != null && icons != null && settings.iconFont != icons)
             {
                 settings.iconFont = icons;

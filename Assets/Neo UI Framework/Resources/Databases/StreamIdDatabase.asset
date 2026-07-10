@@ -13,10 +13,6 @@ MonoBehaviour:
   m_Name: StreamIdDatabase
   m_EditorClassIdentifier: Neo.UI::Neo.UI.StreamIdDatabase
   categories:
-  - category: App
-    names:
-    - OpenDiscord
-    - Quit
   - category: Audio
     names:
     - MusicVolume
@@ -25,24 +21,13 @@ MonoBehaviour:
     names:
     - Cancel
     - Confirm
-  - category: Effects
-    names:
-    - On
-    - Softness
-    - Speed
-  - category: FX
-    names:
-    - Firework
-    - Sparkle
   - category: Game
     names:
     - Attack
     - Block
     - Dash
-    - Hint
     - Pause
     - Score
-    - Victory
   - category: Gameplay
     names:
     - StartPainting
@@ -53,18 +38,10 @@ MonoBehaviour:
     names:
     - Items
     - Pick
-  - category: Palette
-    names:
-    - Next
-    - Prev
-  - category: Reward
-    names:
-    - Claimed
   - category: Shop
     names:
     - Buy
     - Deals
-    - Purchase
   - category: UI
     names:
     - CloseSettings

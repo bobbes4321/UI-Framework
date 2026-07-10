@@ -56,7 +56,13 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   `NeoGUI.BeginFoldoutSection`. Header accents come from `NeoColors` (Interactive=blue,
   Containers=cyan, Animation=orange, Flow=purple, Theming=pink, Signals=teal, Data=yellow).
 - Any category/name string gets a searchable dropdown: `IdDatabaseOptions.DrawCategoryNamePair`
-  (databases live on `NeoUISettings`). Plain string pickers use `NeoDropdown.StringPopup/ValuePopup`
+  (databases live on `NeoUISettings`). The pair carries two tail buttons (auto-hidden on very narrow
+  rects, opt out with `inlineTools: false`): `+` = one-step quick add (a `NeoInputPopup` — type
+  `Name` or `Category/Name`, persists to the database AND assigns both halves;
+  `IdDatabaseOptions.ParseQuickAdd` is the tested split) and `…` = one-click jump into the ID
+  Database Manager deep-linked to that database/category/name
+  (`IdDatabaseManagerWindow.Open(db, cat, name)`). Plain string pickers use
+  `NeoDropdown.StringPopup/ValuePopup`
   with an inline "+ Add" row — never modal dialogs. Theme-color-token pickers additionally pass
   `optionSwatch` (a `token → Color?` resolver; colors are resolved once when the popup opens) so
   every option row shows its color swatch — any new token picker must do the same.
@@ -100,6 +106,19 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
 - **No silent failures**: registry/name-addressed commands that match nothing must
   `Debug.LogWarning` (see `UIView.ProcessCommand`, `FlowController.StartFlow`). When adding new
   string-addressed lookups, keep this invariant.
+- **Back navigation (Doozy-parity, zero setup)**: three sources converge on `BackButton.Fire`
+  (`Runtime/Interactive/BackButton.cs` — cooldown-gated, ref-counted `Disable`/`Enable`): hardware
+  input (`BackButtonInput` — Escape + gamepad east + optional `InputActionReference`; a
+  `FlowController` with `goBackOnBackButton` auto-adds one when the scene has none,
+  `autoCreateBackInput`), ANY clicked `UIButton` whose id Name matches
+  `NeoUISettings.backButtonName` ("Back", case-insensitive — the button bridge,
+  `BackButton.EnsureButtonBridge`; projects add names via `BackButton.RegisterButtonName`), and
+  direct `Fire()` calls. A button-originated fire carries its `ButtonSignalData` payload on the
+  back signal. `FlowController.OnBackSignal` makes history-back the FALLBACK: explicit wiring for
+  the same press (a Back-trigger edge on the active/global nodes, or a ButtonClick edge matching
+  the pressed back-named button — checked both before-advance and via a consume-once
+  advanced-this-frame record, since receiver order within a dispatch is arbitrary) consumes it, so
+  one press never navigates twice. Tests: `BackNavigationTests`.
 - **Lifecycle**: components that *command* others on startup (FlowController) defer their first
   action to `Start()` — OnEnable order across a loading scene is arbitrary and registries fill in
   OnEnable. Never auto-start cross-object behavior from OnEnable.
@@ -183,9 +202,14 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   include (Starter Kit / Fonts / Widget Presets / **Animation Library** / Effect Assets), then one click
   orchestrates the existing idempotent bootstraps in order and applies the look last. Also picks **Motion
   defaults** (optional) — a preset per headline animator role (View show/hide, Button hover/press) written
-  to `NeoUISettings.animatorDefaults` so new widgets feel like the project by default. Safe to re-run:
+  to `NeoUISettings.animatorDefaults` so new widgets feel like the project by default; the role rows use
+  the SAME `AnimationPresetBrowserPopup.DrawRoleRow` picker as the Design System Motion tab (grouped
+  presets, search, hover-dwell LIVE preview — on the scene selection when a RectTransform is selected,
+  else on the POPUP'S OWN lazy `MotionPreviewStage`, rendered in an inline viewport pinned at the
+  popup's top, so the preview is always visible whichever way the popup opens and whatever it covers
+  — the popup owns + disposes that fallback stage; hosts never draw a viewport for it). Safe to re-run:
   every step is create-or-repair, and reopening the wizard reloads the CURRENT project state into its
-  fields (custom-color swatches, motion-role dropdowns) plus a per-include-toggle installed-✓ indicator
+  fields (custom-color swatches, motion-role pickers) plus a per-include-toggle installed-✓ indicator
   (`NeoSetupStatus`, shared with the Hub's setup strip) — it never silently reverts to neutral defaults.
   Surfaced in the Hub Tools tab; covered by `HubToolCoverageTests` (every Setup/Advanced menu item must
   have a Hub tool).
@@ -217,10 +241,19 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   variants incl. success; the shared-across-variants sizes table sits below the detail form),
   **Shapes** (master-detail with full `ShapeStyle` fidelity — uniform/per-corner radius, fill
   mode/gradient, elevation, in-place rename — with a real `NeoShape` render and Duplicate/Delete),
+  **Icons** (dual-pane: left = search over every resolvable icon — overlay sprites/glyphs + curated
+  Lucide + the full ~1960-name table behind search — with provenance badges and two pinned add
+  flows: **Add From Texture**, the PNG → named-icon pipeline via `NeoIconSpriteAssets.AddProjectIcon`
+  (sprite import → per-icon `TMP_SpriteAsset` under `Assets/Neo UI Icons` → overlay entry,
+  creating/assigning the `IconMapOverlay` asset on first use), and **Add Glyph Entry** (hex
+  codepoint with a pick-from-font grid, `FontGlyphPickerPopup`); right = preview + copy-name +
+  codepoint/aliases + in-place overlay-entry editing and delete),
   **Presets** (dual-pane master-detail sharing the `NeoWidgetPresetEditor` form: left = search +
   two-column thumbnail-card grid + create/from-selection, right = the embedded editor with an
   empty-state hint when nothing's selected), **Motion** (dual-pane master-detail: left = collapsible
-  role defaults + search + grouped preset browser — rows show per-channel M/R/S/F/C badges and
+  role defaults (rows via the shared `AnimationPresetBrowserPopup.DrawRoleRow` — the same browser +
+  hover-preview picker the animator inspectors and the Setup wizard use) + search + grouped preset
+  browser — rows show per-channel M/R/S/F/C badges and
   hover-dwell live preview, parity with `AnimationPresetBrowserPopup` — + New-preset row; right = the
   embedded channel editor for the selected preset (Ping/Duplicate/Delete, rename-to-convention notice,
   scrub slider + channel-lanes strip via the shared `AnimationPreview.DrawChannelLanes`); previews play
@@ -232,7 +265,7 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   seam: `NeoDesignSystemTabs` (a `NeoKeyedRegistry<DesignSystemTabDescriptor>`, an `ownsLayout` flag lets
   a tab own its full height + scrolling instead of the window's outer scroll view — via
   `DesignSystemGUI`'s `BeginSplitPane`/`BeginSplitLeft`/`BeginSplitRight` dual-pane helpers, as
-  Typography/Buttons/Shapes/Presets/Motion do — the built-in EIGHT each in their own
+  Typography/Buttons/Shapes/Presets/Motion do — the built-in NINE each in their own
   `Editor/DesignSystem/*Tab.cs` file over shared `DesignSystemGUI` helpers) — a project adds its
   own design-system tab via `NeoDesignSystemTabs.Register` without forking the window. Master-detail
   tabs share `Editor/DesignSystem/DesignSystemCatalog.cs` — the catalog row/chrome vocabulary (search
@@ -286,8 +319,8 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
     stamps `UIAnimation.sourcePreset` so the row shows/highlights what's applied). Every selectable
     state maps to a role — `Selectable/Normal`/`Selected`/`Disabled` joined the built-ins, and
     `UISelectableUIAnimator.Reset()` seeds all five slots from `animatorDefaults`.
-    (`AnimationPresetRegistry.FullNamesForRole`/`GetByFullName` remain the shared option source for
-    the wizard and Motion tab.)
+    (The wizard's and Motion tab's role-default rows go through the shared
+    `AnimationPresetBrowserPopup.DrawRoleRow` — same browser, same hover preview.)
   - **Per-element spec field** `"animations": { "hover", "press", "selected", "disabled", "loop" }` (preset
     NAMES, like a view's `showAnimation`): hover/press/selected/disabled drive a `UISelectableUIAnimator`,
     `loop` adds a play-on-start `UIAnimator`. The applied names are stamped on a `NeoAnimationSourceTag` so
@@ -470,7 +503,20 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   `controls` below), overlay (z-stack: children keep anchors/positions inside layout cells —
   card art + corner badges + pinned labels; `UIOverlay` marker round-trips it), spacer, text,
   image, shape (incl. Ring/Arc + `thickness`/`arcStart`/`arcSweep`),
-  icon (Lucide name via `IconMap`), counter, input, stepper, safearea (SafeAreaFitter container
+  icon (name via `IconMap` — an editor façade over the runtime `IconLibrary`; resolution order is
+  project `IconMapOverlay` SPRITES (PNG art wrapped in a per-icon `TMP_SpriteAsset` — the
+  `NeoIconSpriteAssets.AddProjectIcon` pipeline, zero font authoring, per-entry `tint` opts white
+  art into label-color tinting) → overlay glyphs → the curated ~185 subset (defines the font
+  pre-bake + what pickers feature) → the FULL generated Lucide 1.17.0 table
+  (`IconLibrary.Lucide.cs`, ~1960 names — any lucide.dev name just works; non-curated glyphs bake
+  into the committed atlas on first use so builds never rely on dynamic-font addition, and
+  `ValidateDesign` warns when a resolvable icon can't actually render). Materializes as a TMP
+  glyph/sprite-tag stamped with a `NeoIcon` component — the name-addressed source of truth the
+  exporter reads back (pre-NeoIcon prefabs still export via the legacy icon-font glyph sniff) —
+  whose inspector is a searchable glyph-grid picker (`NeoIconPickerPopup`; its `DrawIconPreview`
+  renders glyphs through the committed `Lucide.ttf` and sprites off their sheet, shared with the
+  Design System Icons tab; search matches aliases) and whose runtime `SetIcon("volume-x")` swaps
+  icons by name, warning on unknown ones), counter, input, stepper, safearea (SafeAreaFitter container
   with free-anchored children). Styling fields: `textStyle` (theme TextStyle by name — owns the
   size, raw `fontSize` is the styleless fallback), button `variant` (primary/secondary/ghost/
   danger/success — seeded as editable `NeoUISettings.buttonVariants` entries by

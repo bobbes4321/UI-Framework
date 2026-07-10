@@ -13,11 +13,6 @@ MonoBehaviour:
   m_Name: ToggleIdDatabase
   m_EditorClassIdentifier: Neo.UI::Neo.UI.ToggleIdDatabase
   categories:
-  - category: AnimTabs
-    names:
-    - Hover
-    - Loop
-    - Press
   - category: Audio
     names:
     - Music
@@ -31,17 +26,6 @@ MonoBehaviour:
     names:
     - Home
     - Shop
-  - category: DemoTabs
-    names:
-    - About
-    - Overview
-    - Stats
-  - category: FxTabs
-    names:
-    - Combos
-    - Gallery
-    - Interactive
-    - Playground
   - category: Gameplay
     names:
     - ScreenShake
@@ -56,17 +40,11 @@ MonoBehaviour:
   - category: Lint
     names:
     - Mute
-  - category: Particles
-    names:
-    - SparkleToggle
   - category: Player
     names:
     - God
     - GodMode
     - InfiniteBoost
-  - category: Playground
-    names:
-    - OnCtl
   - category: RT
     names:
     - Agree
@@ -75,20 +53,10 @@ MonoBehaviour:
     names:
     - Light
     - Sidebar
-  - category: Set
-    names:
-    - AutoRotate
-    - FancyCursor
-    - Fullscreen
-    - InvertCam
   - category: SetTabs
     names:
     - Audio
-    - Controls
-    - Display
     - General
-    - Interface
-    - Painting
   - category: Settings
     names:
     - Fullscreen
@@ -105,11 +73,6 @@ MonoBehaviour:
     - Display
     - Game
     - Video
-  - category: Sort
-    names:
-    - NameAsc
-    - NameDesc
-    - None
   - category: Spec
     names:
     - Sound
@@ -120,31 +83,12 @@ MonoBehaviour:
   - category: Switch
     names:
     - New
-  - category: Switches
-    names:
-    - Fullscreen
-    - VSync
-  - category: Tab
-    names:
-    - Tab1
-  - category: Tabs
-    names:
-    - Collection
-    - News
-    - Settings
-    - Shop
   - category: Toggle
     names:
     - New
-  - category: Toggles
-    names:
-    - Autosave
-    - Muted
-    - Notifications
   - category: Typo
     names:
     - Music
   - category: Video
     names:
-    - Fullscreen
     - VSync

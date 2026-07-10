@@ -104,6 +104,32 @@ namespace Neo.UI.Editor
             {
                 if (prefab.GetComponent<UIView>() == null) continue;
 
+                // icons that resolve by name but can't actually RENDER (glyph missing from the icon
+                // font atlas + fallbacks, or a sprite name absent from its sprite asset) draw tofu
+                foreach (NeoIcon icon in prefab.GetComponentsInChildren<NeoIcon>(true))
+                {
+                    if (string.IsNullOrEmpty(icon.icon)) continue;
+                    if (!IconMap.TryResolveIcon(icon.icon, out ResolvedIcon resolved))
+                    {
+                        warnings.Add($"'{prefab.name}': icon '{icon.icon}' no longer resolves " +
+                                     "(removed overlay entry?) — it will keep its baked visual but can't re-bake");
+                        continue;
+                    }
+                    if (resolved.isSprite)
+                    {
+                        if (resolved.spriteAsset == null ||
+                            resolved.spriteAsset.GetSpriteIndexFromName(resolved.spriteName) < 0)
+                            warnings.Add($"'{prefab.name}': sprite icon '{icon.icon}' has no sprite " +
+                                         $"character '{resolved.spriteName}' in its sprite asset — it will render blank");
+                    }
+                    else if (settings.iconFont != null && !settings.iconFont.HasCharacter(resolved.glyph, true))
+                    {
+                        warnings.Add($"'{prefab.name}': icon '{icon.icon}' glyph U+{(int)resolved.glyph:X4} " +
+                                     "is not in the icon font atlas or its fallbacks — it will render as a square " +
+                                     "(re-run Tools → Neo UI → Setup → Create or Repair Fonts)");
+                    }
+                }
+
                 if (hasTextStyles)
                 {
                     foreach (TMPro.TMP_Text text in prefab.GetComponentsInChildren<TMPro.TMP_Text>(true))

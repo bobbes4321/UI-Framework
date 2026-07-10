@@ -16,13 +16,5 @@ MonoBehaviour:
   displayName: Dissolve
   sharedMaterial: {fileID: 2100000, guid: 99592e657589b724f98c768906b4d780, type: 2}
   batchSafe: 0
-  floatParams:
-  - name: _DissolveAmount
-    value: 0.4
-  - name: _EdgeWidth
-    value: 0.12
-  - name: _ScanlineStrength
-    value: 0.18
-  colorParams:
-  - name: _EdgeColor
-    value: {r: 0.231, g: 0.745, b: 1, a: 1}
+  floatParams: []
+  colorParams: []

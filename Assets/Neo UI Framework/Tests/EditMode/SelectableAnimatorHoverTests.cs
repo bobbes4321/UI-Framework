@@ -184,6 +184,73 @@ namespace Neo.UI.Tests
             Assert.AreEqual(0, UITick.count);
         }
 
+        private const float TiltDegrees = 6f;
+
+        private void EnableHoverTilt()
+        {
+            // Mirror the library's Hover/TiltLeft-style presets: hover rotates, press only scales.
+            RotateAnimation tilt = _animator.highlightedAnimation.rotate;
+            tilt.enabled = true;
+            tilt.fromReference = ReferenceValue.StartValue;
+            tilt.toReference = ReferenceValue.StartValue;
+            tilt.toOffset = new Vector3(0f, 0f, TiltDegrees);
+            tilt.settings.duration = HoverDuration;
+            tilt.settings.ease = Ease.OutQuad;
+        }
+
+        private static float SignedZ(RectTransform rect)
+        {
+            float z = rect.localEulerAngles.z;
+            return z > 180f ? z - 360f : z;
+        }
+
+        [Test]
+        public void PressDuringHoverTilt_RestoresRotation_UncoveredChannel()
+        {
+            // The stuck-tilt bug: hover tilts (rotate channel), press only scales. Pressing
+            // stopped the tilt mid-flight without restoring rotation, and the later
+            // return-to-Normal only reversed the PRESS animation — the button stayed
+            // permanently tilted after click + mouse-away.
+            EnableHoverTilt();
+            Hover();
+            Tick(HoverDuration); // fully tilted
+            Assume.That(SignedZ(_rect), Is.EqualTo(TiltDegrees).Within(1e-2f),
+                "precondition: hover tilted the button");
+
+            Press();
+            Assert.That(SignedZ(_rect), Is.EqualTo(0f).Within(1e-2f),
+                "pressing must restore the rotation the press animation does not drive");
+
+            Tick(PressDuration);
+            Unhover();
+            Tick(PressDuration * 2f);
+
+            Assert.That(SignedZ(_rect), Is.EqualTo(0f).Within(1e-2f),
+                "after click + mouse-away the button must not stay tilted");
+            Assert.That(_rect.localScale.x, Is.EqualTo(1f).Within(1e-3f),
+                "scale must also settle back at rest");
+        }
+
+        [Test]
+        public void ReturnToRest_MidHover_RestoresRestPose()
+        {
+            // Clicking a button that navigates away disables it while still Highlighted/Pressed —
+            // OnDisable routes through ReturnToRest so the view comes back untilted. (Lifecycle
+            // methods don't run for AddComponent in EditMode, so the seam is exercised directly.)
+            EnableHoverTilt();
+            Hover();
+            Tick(HoverDuration * 0.5f); // mid-flight: partially tilted and grown
+            Assume.That(SignedZ(_rect), Is.GreaterThan(0.1f));
+            Assume.That(_rect.localScale.x, Is.GreaterThan(1f));
+
+            _animator.ReturnToRest();
+
+            Assert.That(SignedZ(_rect), Is.EqualTo(0f).Within(1e-2f),
+                "disabling mid-hover must restore the rest rotation");
+            Assert.That(_rect.localScale.x, Is.EqualTo(1f).Within(1e-3f),
+                "disabling mid-hover must restore the rest scale");
+        }
+
         [Test]
         public void RepeatedClickCycles_NeverDrift()
         {

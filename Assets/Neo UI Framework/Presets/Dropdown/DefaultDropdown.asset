@@ -24,7 +24,7 @@ MonoBehaviour:
   background: 
   labelColor: 
   icon: 
-  radius: 10
+  radius: 6
   padding: -1
   padding4: []
   spacing: -1

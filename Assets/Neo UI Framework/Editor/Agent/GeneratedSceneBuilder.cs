@@ -90,7 +90,7 @@ namespace Neo.UI.Editor
 
             var eventSystemGo = new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
             _ = eventSystemGo;
-            var backInputGo = new GameObject("Back Button Input (Esc)", typeof(BackButtonInput));
+            var backInputGo = new GameObject("Back Button Input (Esc / Gamepad)", typeof(BackButtonInput));
             _ = backInputGo;
 
             RectTransform canvasRect = CreateCanvas("Canvas", sortingOrder: 0);

@@ -1,4 +1,5 @@
 using System;
+using Neo.EditorUI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -8,9 +9,10 @@ using UnityEngine.SceneManagement;
 namespace Neo.UI.Editor
 {
     /// <summary>
-    /// A self-contained, offscreen "stage" the Design System <see cref="MotionTab"/> previews animation
-    /// presets on when NOTHING suitable is selected in the scene — so the tab is fully self-sufficient
-    /// for browsing motion (scene selection still WINS via <see cref="MotionTab.ResolvePreviewTarget"/>;
+    /// A self-contained, offscreen "stage" motion previews play on when NOTHING suitable is selected in
+    /// the scene — owned by the Design System <see cref="MotionTab"/> (long-lived, right-pane viewport)
+    /// and by <see cref="AnimationPresetBrowserPopup"/> in stage-fallback mode (popup-lived, inline
+    /// viewport), so both are fully self-sufficient for browsing motion (a scene selection still WINS;
     /// previewing in real context beats this synthetic card). It owns a hidden, never-saved GameObject
     /// hierarchy in an isolated preview scene (the same world-space-canvas / orthographic-camera recipe
     /// <see cref="UIScreenshotter"/> and <see cref="PresetThumbnailRenderer"/> use), a stage camera
@@ -53,8 +55,12 @@ namespace Neo.UI.Editor
         private bool _rendered;            // the RT holds a valid frame since the last (re)build / RT (re)create
         private bool _lastWasLive;         // last frame rendered was an animating frame (forces one static re-render on live→static)
 
+        /// <summary> The stage viewport's width:height aspect as a compile-time constant — for sizing a
+        /// viewport rect BEFORE any stage instance exists (the preset browser popup's window size). </summary>
+        internal const float AspectRatio = CanvasWidth / CanvasHeight;
+
         /// <summary> The stage viewport's width:height aspect (for <c>GUILayoutUtility.GetAspectRect</c>). </summary>
-        public float Aspect => CanvasWidth / CanvasHeight;
+        public float Aspect => AspectRatio;
 
         /// <summary>
         /// The stage card's <see cref="RectTransform"/> — the target Motion-tab previews (button /
@@ -64,6 +70,31 @@ namespace Neo.UI.Editor
         public RectTransform Target
         {
             get { EnsureBuilt(); return _cardRect; }
+        }
+
+        /// <summary>
+        /// Aspect-correct IMGUI viewport over the stage's RenderTexture — the one presentation of the
+        /// stage (Design System Motion tab right pane + the preset browser popup's inline fallback).
+        /// Re-renders the stage ONLY on Repaint and ONLY while <paramref name="live"/> (a preview/scrub
+        /// is posing the card); idle frames return the cached RT — zero render cost when nothing is
+        /// animating. The caller's preview machinery owns repainting its window while live.
+        /// </summary>
+        public void DrawViewport(bool live, float maxWidth = 460f) =>
+            DrawViewport(GUILayoutUtility.GetAspectRect(Aspect, GUILayout.MaxWidth(maxWidth)), live);
+
+        /// <summary> Rect-positioned variant for manual-layout hosts (the preset browser popup). </summary>
+        public void DrawViewport(Rect rect, bool live)
+        {
+            if (Event.current.type != EventType.Repaint) return;
+            Texture tex = live ? RenderLive() : RenderStatic();
+            if (tex != null)
+                GUI.DrawTexture(rect, tex, ScaleMode.ScaleToFit);
+            else
+            {
+                // Headless (-nographics) / stage build failure: keep the layout, say why (no silent gap).
+                EditorGUI.DrawRect(rect, NeoColors.SectionBackground);
+                GUI.Label(rect, "Stage preview needs a graphics device.", EditorStyles.centeredGreyMiniLabel);
+            }
         }
 
         /// <summary>

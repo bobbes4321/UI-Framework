@@ -305,21 +305,39 @@ namespace Neo.UI.Editor
         public static TextMeshProUGUI CreateIcon(RectTransform parent, string iconName, float size = 32f,
             string colorToken = TokenTextDefault, string name = IconName)
         {
-            if (!IconMap.TryGetGlyph(iconName, out char glyph))
+            if (!IconMap.TryResolveIcon(iconName, out ResolvedIcon resolved))
             {
                 Debug.LogWarning($"[Neo.UI] Unknown icon '{iconName}' — using 'circle-help'. " +
-                                 $"Valid names: see IconMap (Lucide subset).");
-                IconMap.TryGetGlyph("circle-help", out glyph);
+                                 $"Valid names: see IconMap (Lucide set) + the project's IconMapOverlay.");
+                IconMap.TryResolveIcon("circle-help", out resolved);
             }
             GameObject go = CreateRect(parent, name, new Vector2(size, size));
             var text = go.AddComponent<TextMeshProUGUI>();
-            TMP_FontAsset iconFont = FontAssetBootstrap.EnsureIconFont(NeoUISettings.instance);
-            if (iconFont != null) text.font = iconFont;
-            text.text = glyph.ToString();
+            if (resolved.isSprite)
+            {
+                text.spriteAsset = resolved.spriteAsset;
+                text.richText = true; // sprite tags need rich text
+            }
+            else
+            {
+                TMP_FontAsset iconFont = FontAssetBootstrap.EnsureIconFont(NeoUISettings.instance);
+                if (iconFont != null)
+                {
+                    text.font = iconFont;
+                    // bake-on-use: full-table glyphs outside the pre-baked curated set land in the
+                    // committed atlas NOW, so builds never depend on runtime dynamic-font addition
+                    if (!iconFont.HasCharacter(resolved.glyph))
+                        iconFont.TryAddCharacters(resolved.glyph.ToString());
+                }
+            }
+            text.text = resolved.BakedText;
             text.fontSize = size;
             text.alignment = TextAlignmentOptions.Center;
             text.overflowMode = TextOverflowModes.Overflow; // glyph metrics may exceed the square rect
             text.raycastTarget = false;
+            // name-addressed identity (canonical, so aliases never leak into exported specs);
+            // the exporter reads this back instead of reverse-sniffing the glyph
+            go.AddComponent<NeoIcon>().icon = resolved.name;
             if (!string.IsNullOrEmpty(colorToken)) AddColorToken(go, colorToken);
             WithLayoutSize(go, size, size, flexibleWidth: 0f, flexibleHeight: 0f);
             return text;

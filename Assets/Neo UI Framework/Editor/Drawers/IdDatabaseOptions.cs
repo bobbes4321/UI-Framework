@@ -116,13 +116,59 @@ namespace Neo.UI.Editor
         }
 
         /// <summary>
+        /// Splits a quick-add entry into its category/name halves: "Category/Name" (split on the FIRST
+        /// slash) names both; a plain "Name" lands in <paramref name="currentCategory"/> (or the default
+        /// category when none is set). A leading slash falls back to the default category; a trailing
+        /// slash (no name) is rejected. Whitespace around either half is trimmed.
+        /// </summary>
+        public static bool ParseQuickAdd(string input, string currentCategory,
+            out string category, out string name)
+        {
+            category = name = null;
+            string trimmed = (input ?? "").Trim();
+            if (trimmed.Length == 0) return false;
+
+            int slash = trimmed.IndexOf('/');
+            if (slash >= 0)
+            {
+                category = trimmed.Substring(0, slash).Trim();
+                name = trimmed.Substring(slash + 1).Trim();
+            }
+            else
+            {
+                category = (currentCategory ?? "").Trim();
+                name = trimmed;
+            }
+            if (string.IsNullOrEmpty(category)) category = CategoryNameId.DefaultCategory;
+            return !string.IsNullOrEmpty(name);
+        }
+
+        /// <summary>
         /// Draws the standard category/name dropdown pair into <paramref name="rect"/>, with inline
-        /// add-new rows writing to <paramref name="database"/> (when assigned).
+        /// add-new rows writing to <paramref name="database"/> (when assigned). Unless the rect is too
+        /// narrow, the pair carries two tail buttons: <c>+</c> opens a one-field quick-add popup
+        /// (type <c>Name</c> or <c>Category/Name</c> — persists to the database AND assigns both
+        /// halves in one step) and <c>…</c> jumps into the ID Database Manager pre-selected to this
+        /// database/category/name.
         /// </summary>
         public static void DrawCategoryNamePair(Rect rect, SerializedProperty categoryProperty,
-            SerializedProperty nameProperty, IdDatabase database)
+            SerializedProperty nameProperty, IdDatabase database) =>
+            DrawCategoryNamePair(rect, categoryProperty, nameProperty, database, inlineTools: true);
+
+        /// <summary> <see cref="DrawCategoryNamePair(Rect,SerializedProperty,SerializedProperty,IdDatabase)"/>
+        /// with the quick-add / manager tail buttons optional (pass false where every pixel counts). </summary>
+        public static void DrawCategoryNamePair(Rect rect, SerializedProperty categoryProperty,
+            SerializedProperty nameProperty, IdDatabase database, bool inlineTools)
         {
-            NeoGUI.SplitHorizontal(rect, out Rect categoryRect, out Rect nameRect);
+            const float ButtonWidth = 20f;
+            const float Gap = 2f;
+            const float MinWidthForTools = 160f; // below this the dropdowns need every pixel
+
+            bool tools = inlineTools && rect.width >= MinWidthForTools;
+            Rect pairRect = rect;
+            if (tools) pairRect.width -= (ButtonWidth + Gap) * 2f;
+
+            NeoGUI.SplitHorizontal(pairRect, out Rect categoryRect, out Rect nameRect);
 
             NeoDropdown.StringPopup(categoryRect, categoryProperty,
                 () => Categories(database),
@@ -134,6 +180,58 @@ namespace Neo.UI.Editor
                 () => Names(database, category),
                 CategoryNameId.DefaultName,
                 database == null ? (Action<string>)null : newName => AddName(database, category, newName));
+
+            if (!tools) return;
+            var addRect = new Rect(pairRect.xMax + Gap, rect.y, ButtonWidth, rect.height);
+            var manageRect = new Rect(addRect.xMax + Gap, rect.y, ButtonWidth, rect.height);
+
+            if (GUI.Button(addRect, AddButtonContent, EditorStyles.miniButton))
+                ShowQuickAdd(addRect, categoryProperty, nameProperty, database);
+
+            if (GUI.Button(manageRect, ManageButtonContent, EditorStyles.miniButton))
+                IdDatabaseManagerWindow.Open(database, category, nameProperty.stringValue);
+        }
+
+        private static readonly GUIContent AddButtonContent =
+            new GUIContent("+", "Add a new id in one step — type Name or Category/Name");
+        private static readonly GUIContent ManageButtonContent =
+            new GUIContent("…", "Open in the ID Database Manager");
+
+        /// <summary>
+        /// The one-step add: a single-field popup accepting <c>Name</c> (into the current category) or
+        /// <c>Category/Name</c>; on commit the id is added to <paramref name="database"/> (when
+        /// assigned) and both property halves are set. The popup outlives this IMGUI pass, so the
+        /// properties are re-resolved from (serializedObject, path) at commit time — same pattern as
+        /// <see cref="NeoDropdown.StringPopup"/>.
+        /// </summary>
+        private static void ShowQuickAdd(Rect activatorRect, SerializedProperty categoryProperty,
+            SerializedProperty nameProperty, IdDatabase database)
+        {
+            SerializedObject serializedObject = categoryProperty.serializedObject;
+            string categoryPath = categoryProperty.propertyPath;
+            string namePath = nameProperty.propertyPath;
+            string currentCategory = categoryProperty.stringValue;
+
+            NeoInputPopup.Show(activatorRect, "Add id", "Name or Category/Name", value =>
+            {
+                if (!ParseQuickAdd(value, currentCategory, out string category, out string name)) return;
+                AddName(database, category, name); // Undo + SetDirty; null database just skips persistence
+                try
+                {
+                    if (serializedObject.targetObject == null) return;
+                    serializedObject.Update();
+                    SerializedProperty resolvedCategory = serializedObject.FindProperty(categoryPath);
+                    SerializedProperty resolvedName = serializedObject.FindProperty(namePath);
+                    if (resolvedCategory == null || resolvedName == null) return;
+                    resolvedCategory.stringValue = category;
+                    resolvedName.stringValue = name;
+                    serializedObject.ApplyModifiedProperties();
+                }
+                catch (Exception)
+                {
+                    // disposed SerializedObject — selection changed while the popup was open
+                }
+            });
         }
     }
 }

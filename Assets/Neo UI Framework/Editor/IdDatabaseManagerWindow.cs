@@ -31,6 +31,40 @@ namespace Neo.UI.Editor
             window.minSize = new Vector2(560f, 360f);
         }
 
+        /// <summary>
+        /// Deep-linked open — the one-click jump from an id dropdown row: lands on the Browse tab with
+        /// <paramref name="database"/> (and, when given, <paramref name="category"/>/<paramref name="name"/>)
+        /// pre-selected. A null/unregistered database (or missing category) just opens the window.
+        /// </summary>
+        public static void Open(IdDatabase database, string category = null, string name = null)
+        {
+            Open();
+            SessionState.SetInt(TabKey, 0); // Browse & Edit
+            GetWindow<IdDatabaseManagerWindow>("ID Databases").FocusEntry(database, category, name);
+        }
+
+        private void FocusEntry(IdDatabase database, string category, string name)
+        {
+            NeoUISettings settings = NeoUISettings.instance;
+            if (settings == null || database == null) return;
+
+            List<IdDatabaseDescriptor> databases = CollectDescriptors(settings);
+            for (int i = 0; i < databases.Count; i++)
+            {
+                if (databases[i].database != database) continue;
+                _selectedDatabase = i;
+                CancelEdit();
+                _selName = null;
+                if (!string.IsNullOrEmpty(category) && database.ContainsCategory(category))
+                {
+                    SelectCategory(databases[i], category);
+                    if (!string.IsNullOrEmpty(name)) _selName = name;
+                }
+                break;
+            }
+            Repaint();
+        }
+
         // selection / browse state
         private int _selectedDatabase;
         private Vector2 _listScroll;     // databases rail (pane 1)

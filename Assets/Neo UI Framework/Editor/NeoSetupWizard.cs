@@ -347,7 +347,8 @@ namespace Neo.UI.Editor
             }
 
             Hint("Pick how widgets feel by default — these presets are copied into new animator " +
-                 "components and generated buttons/views. Leave a row blank to keep the built-in feel.");
+                 "components and generated buttons/views. Hover a preset in a picker to preview it " +
+                 "live; leave a row blank to keep the built-in feel.");
 
             if (AnimationPresetRegistry.All.Count == 0)
             {
@@ -368,19 +369,30 @@ namespace Neo.UI.Editor
             NeoGUI.EndFoldoutSection();
         }
 
+        // The same browser row the Design System Motion tab and the animator inspectors use — grouped
+        // presets, search, None row, hover-dwell LIVE preview (played on the scene selection when a
+        // RectTransform is selected, else on the popup's own inline stage viewport — the popup owns
+        // the fallback so the preview is never covered by the popup itself). The wizard's semantics
+        // stay additive: an empty row means "don't touch this role at setup", so clearing removes the
+        // dict entry rather than scheduling a clear of the project default.
         private void DrawMotionRow(string role)
         {
-            NeoAnimatorRoles.TryGet(role, out NeoAnimatorRole info);
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                EditorGUILayout.LabelField(info != null ? info.DisplayName : role, GUILayout.Width(150f));
-                _motionDefaults.TryGetValue(role, out string current);
-                Rect rect = GUILayoutUtility.GetRect(GUIContent.none, EditorStyles.popup);
-                NeoDropdown.ValuePopup(rect, current,
-                    () => AnimationPresetRegistry.FullNamesForRole(role),
-                    chosen => _motionDefaults[role] = chosen, emptyLabel: "(keep built-in)");
-            }
+            _motionDefaults.TryGetValue(role, out string current);
+            AnimationPresetBrowserPopup.DrawRoleRow(role, current, 150f,
+                SceneSelectionTarget,
+                chosen =>
+                {
+                    if (chosen == null) _motionDefaults.Remove(role);
+                    else _motionDefaults[role] = chosen.fullName;
+                    Repaint();
+                },
+                emptyLabel: "(keep built-in)");
         }
+
+        private static RectTransform SceneSelectionTarget() =>
+            Selection.activeGameObject != null
+                ? Selection.activeGameObject.transform as RectTransform
+                : null;
 
         // ---------------------------------------------------------------- run
 

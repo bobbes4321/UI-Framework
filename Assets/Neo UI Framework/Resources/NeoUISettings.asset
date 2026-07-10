@@ -15,16 +15,17 @@ MonoBehaviour:
   theme: {fileID: 11400000, guid: 0852788dac4549a49ad210d24e1ca82c, type: 2}
   iconFont: {fileID: 11400000, guid: 5f1b298af17d2614f8332dcbe6c51e11, type: 2}
   animationPresets: {fileID: 11400000, guid: 624df2d6a410c40458af64eba0a88f90, type: 2}
-  animatorDefaults: []
+  animatorDefaults:
+  - role: View/Show
+    preset: {fileID: 11400000, guid: 0620537c6da75ad408b98bdc4e3beefa, type: 2}
+  - role: View/Hide
+    preset: {fileID: 11400000, guid: f940789502265cd4b9a9d9c1327e9f53, type: 2}
+  - role: Button/Hover
+    preset: {fileID: 11400000, guid: b0b94214f56e578439caed7b9543d8ca, type: 2}
+  - role: Button/Press
+    preset: {fileID: 11400000, guid: 774e2b1160eb23445a68034a21b1ee2a, type: 2}
   viewTransitions:
-  - {fileID: 11400000, guid: 55fbb5d6a487ffa4984af9a97688441b, type: 2}
-  - {fileID: 11400000, guid: 86e4a1249583f2445bda9c09b9bf1be4, type: 2}
   - {fileID: 11400000, guid: 005328b4ed6c4254dab4909e045c90ec, type: 2}
-  - {fileID: 11400000, guid: 311abaf91499aed4091517655bdea324, type: 2}
-  - {fileID: 11400000, guid: 0f8fd41afd0990544b31e6dd5139fa10, type: 2}
-  - {fileID: 11400000, guid: 3ada87b4f06ebe843b79b33eab431f7c, type: 2}
-  - {fileID: 11400000, guid: adfe7606b5d41614280f2de791fd8550, type: 2}
-  - {fileID: 11400000, guid: 2c90e020c468d5b42b4af4561eb58fab, type: 2}
   defaultViewTransition: 
   popupDatabase: {fileID: 11400000, guid: 0dfe29634ae01fe4aab74466df901075, type: 2}
   popupsCanvasName: PopupsCanvas
@@ -33,6 +34,7 @@ MonoBehaviour:
   toggleOnSound: {fileID: 0}
   toggleOffSound: {fileID: 0}
   backButtonCooldown: 0.1
+  backButtonName: Back
   runtimeFpsCap: 0
   previewReferenceResolution: {x: 1080, y: 1920}
   previewMatchWidthOrHeight: 0.5
@@ -44,31 +46,8 @@ MonoBehaviour:
   streamIds: {fileID: 11400000, guid: 8ea990a424e56a14aa67dd067061bb1b, type: 2}
   panelIds: {fileID: 11400000, guid: 8bc78860e6e74d747b379ac8aa66375f, type: 2}
   dropdownIds: {fileID: 0}
-  menuWidgets: {fileID: 11400000, guid: d72f57cb1ab5b8d4dbdbac0bf88d9c8e, type: 2}
+  menuWidgets: {fileID: 0}
   buttonVariants:
-  - name: Baller
-    colors:
-      normal:
-        useToken: 0
-        token: Primary
-        color: {r: 0.8396226, g: 0.07524917, b: 0.8001264, a: 1}
-      highlighted:
-        useToken: 0
-        token: PrimaryHover
-        color: {r: 0.9528302, g: 0.4719206, b: 0.92816824, a: 1}
-      pressed:
-        useToken: 0
-        token: PrimaryPressed
-        color: {r: 0.6320754, g: 0.11627804, b: 0.6056243, a: 1}
-      selected:
-        useToken: 0
-        token: PrimaryHover
-        color: {r: 0.6313726, g: 0.11764707, b: 0.6039216, a: 1}
-      disabled:
-        useToken: 1
-        token: Outline
-        color: {r: 1, g: 1, b: 1, a: 1}
-    contentToken: TextDefault
   - name: primary
     colors:
       normal:
@@ -184,11 +163,8 @@ MonoBehaviour:
         token: Outline
         color: {r: 1, g: 1, b: 1, a: 1}
     contentToken: TextOnPrimary
-  buttonSizes:
-  - name: xl
-    height: 64
-    labelStyle: ButtonLabel
-  iconOverlay: {fileID: 0}
+  buttonSizes: []
+  iconOverlay: {fileID: 11400000, guid: 29348a2d0889ddc44a5bdea43e9568b9, type: 2}
   spacingScale:
   - 0
   - 4

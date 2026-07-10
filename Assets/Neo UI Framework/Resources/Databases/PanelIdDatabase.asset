@@ -13,91 +13,38 @@ MonoBehaviour:
   m_Name: PanelIdDatabase
   m_EditorClassIdentifier: Neo.UI::Neo.UI.PanelIdDatabase
   categories:
-  - category: AnimPanels
-    names:
-    - Hover
-    - Loop
-    - Press
   - category: Bp
     names:
     - Anchor
     - Card
     - Plain
-  - category: Cheats
-    names:
-    - Player
-    - World
   - category: Debug
     names:
     - Economy
     - Player
-    - Test
     - World
-  - category: DemoPanels
-    names:
-    - About
-    - Overview
-    - Stats
-  - category: EffectsPanel
-    names:
-    - Dissolve
-    - EffectOverArt
-    - GlowPulse
-    - GradientCycle
-    - SheenSweep
-  - category: FxPanels
-    names:
-    - Combos
-    - Gallery
-    - Interactive
-    - Playground
   - category: HUD
     names:
     - Minimap
   - category: Menu
     names:
     - Audio
-    - Balls
     - Controls
     - Gameplay
     - Graphics
     - Yippie
-  - category: Panel
-    names:
-    - Tab1
   - category: Panels
     names:
     - Audio
     - General
+    - Main
     - Panel0
-    - Panel2
-    - Panel3
-    - SetAudio
-    - SetControls
-    - SetDisplay
-    - SetGeneral
-    - SetInterface
-    - SetPainting
-  - category: ParticlesPanel
-    names:
-    - Ambient
-    - CoinBurst
-    - CoinFountain
-    - Confetti
-    - ConfettiCannon
-    - Fireworks
-    - Legendary
-    - Sparkle
   - category: Pause
     names:
     - Dim
-  - category: Presets
-    names:
-    - CardSurface
   - category: Settings
     names:
     - Audio
-    - Controls
     - Video
   - category: SettingsPanels
     names:
@@ -106,7 +53,3 @@ MonoBehaviour:
     - Display
     - Game
     - Video
-  - category: TogglesPanel
-    names:
-    - Switches
-    - Toggles

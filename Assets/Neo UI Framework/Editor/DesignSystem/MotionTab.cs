@@ -438,39 +438,30 @@ namespace Neo.UI.Editor
                     "Default motion per animator role", defaultOpen: true))
             {
                 EditorGUILayout.LabelField("Copied into new animator components and generated buttons/views. " +
-                    "Pick a preset per role, or clear (✕) to keep the built-in feel.",
-                    EditorStyles.wordWrappedMiniLabel);
+                    "Pick a preset per role (hover a row to preview it live), or clear (✕) to keep the " +
+                    "built-in feel.", EditorStyles.wordWrappedMiniLabel);
                 foreach (NeoAnimatorRole role in NeoAnimatorRoles.All)
                     DrawMotionRole(settings, role);
             }
             NeoGUI.EndFoldoutSection();
         }
 
+        // The shared browser row (grouped presets + search + hover-dwell live preview) — parity with the
+        // animator inspectors' Preset row and the Setup wizard. Only the scene selection is passed as the
+        // target; with none, the popup previews on its OWN stage in an inline viewport (never this tab's
+        // stage — a popup can open over the right pane, hiding it). Label narrower than the old
+        // full-width tab: the master column is only 260px (tooltip carries the role name + description).
         private static void DrawMotionRole(NeoUISettings settings, NeoAnimatorRole role)
         {
             settings.TryGetDefaultAnimation(role.Id, out UIAnimationPreset current);
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                // Narrower label than the old full-width tab — the master column is only 260px (tooltip
-                // carries the full role name + description).
-                EditorGUILayout.LabelField(new GUIContent(role.DisplayName, role.Description), GUILayout.Width(104f));
-                Rect rect = GUILayoutUtility.GetRect(GUIContent.none, EditorStyles.popup);
-                NeoDropdown.ValuePopup(rect, current != null ? current.fullName : "",
-                    () => AnimationPresetRegistry.FullNamesForRole(role.Id),
-                    chosen =>
-                    {
-                        Undo.RecordObject(settings, "Set motion default");
-                        settings.SetDefaultAnimation(role.Id, AnimationPresetRegistry.GetByFullName(chosen));
-                        EditorUtility.SetDirty(settings);
-                    }, emptyLabel: "(built-in)");
-                using (new EditorGUI.DisabledScope(current == null))
-                    if (GUILayout.Button("✕", GUILayout.Width(22f)))
-                    {
-                        Undo.RecordObject(settings, "Clear motion default");
-                        settings.SetDefaultAnimation(role.Id, null);
-                        EditorUtility.SetDirty(settings);
-                    }
-            }
+            AnimationPresetBrowserPopup.DrawRoleRow(role.Id, current != null ? current.fullName : null,
+                104f, SceneSelectionTarget,
+                chosen =>
+                {
+                    Undo.RecordObject(settings, chosen != null ? "Set motion default" : "Clear motion default");
+                    settings.SetDefaultAnimation(role.Id, chosen);
+                    EditorUtility.SetDirty(settings);
+                });
         }
 
         // Rebuild the browser model only when the discovered set changes (create/delete) — never per OnGUI.
@@ -775,26 +766,15 @@ namespace Neo.UI.Editor
             DrawStageViewport(s);
         }
 
-        // Aspect-correct viewport over the stage's RenderTexture. Re-renders the stage ONLY on Repaint
-        // and ONLY live while a preview/scrub is actually posing the stage card (RenderLive); idle frames
-        // return the cached RT (RenderStatic) — zero render cost when nothing is animating. The preview
-        // Tick already repaints the window while a preview is live, so no extra update subscription.
+        // The stage's shared viewport (MotionPreviewStage.DrawViewport — chrome + render policy live
+        // there, also used by the preset browser popup's inline fallback). Live only while this tab's
+        // OWN preview machinery poses the card (button/hover/scrub); the preview Tick already repaints
+        // the window while a preview is live, so no extra update subscription.
         private static void DrawStageViewport(State s)
         {
             MotionPreviewStage stage = s.stage;
             if (stage == null) return;
-            Rect rect = GUILayoutUtility.GetAspectRect(stage.Aspect, GUILayout.MaxWidth(460f));
-            if (Event.current.type != EventType.Repaint) return;
-            bool live = s.Previewing && s.PreviewTarget == stage.Target;
-            Texture tex = live ? stage.RenderLive() : stage.RenderStatic();
-            if (tex != null)
-                GUI.DrawTexture(rect, tex, ScaleMode.ScaleToFit);
-            else
-            {
-                // Headless (-nographics) / stage build failure: keep the layout, say why (no silent gap).
-                EditorGUI.DrawRect(rect, NeoColors.SectionBackground);
-                GUI.Label(rect, "Stage preview needs a graphics device.", EditorStyles.centeredGreyMiniLabel);
-            }
+            stage.DrawViewport(s.Previewing && s.PreviewTarget == stage.Target);
         }
 
         // ---------------------------------------------------------------- rename-to-convention (item 7)

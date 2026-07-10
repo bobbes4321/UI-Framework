@@ -21,7 +21,6 @@ MonoBehaviour:
     - Volume
   - category: Controls
     names:
-    - Reset
     - Sensitivity
   - category: Gameplay
     names:
@@ -32,14 +31,6 @@ MonoBehaviour:
   - category: Lint
     names:
     - Vol
-  - category: Playground
-    names:
-    - SoftnessCtl
-    - SpeedCtl
-  - category: Set
-    names:
-    - CursorSize
-    - MasterVol
   - category: Settings
     names:
     - MasterVolume

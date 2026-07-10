@@ -15,7 +15,6 @@ MonoBehaviour:
   categories:
   - category: A
     names:
-    - Continue
     - Play
   - category: Action
     names:
@@ -31,78 +30,35 @@ MonoBehaviour:
   - category: Anim
     names:
     - Hero
-  - category: AnimHover
-    names:
-    - GlowPulse
-    - LiftUp
-    - ScaleDown
-    - ScaleUp
-    - ScaleUpBig
-    - TiltLeft
-    - TiltRight
-    - TintPrimary
-  - category: AnimPress
-    names:
-    - BarrelRoll
-    - Jello
-    - PressDip
-    - PunchScale
-    - RubberBand
-    - Spin360
-    - SquashStretch
-    - Wobble
-  - category: Audio
-    names:
-    - Tonya_Minus
-    - Tonya_Plus
   - category: B
     names:
     - Go
-    - Play
   - category: Base
     names:
     - Play
   - category: Bundle
     names:
     - Go
-  - category: Buttons
-    names:
-    - DangerLg
-    - DangerMd
-    - DangerSm
-    - GhostLg
-    - GhostMd
-    - GhostSm
-    - Play
-    - PrimaryLg
-    - PrimaryMd
-    - PrimarySm
-    - SecondaryLg
-    - SecondaryMd
-    - SecondarySm
-    - Settings
-    - Shop
-    - SuccessLg
-    - SuccessMd
-    - SuccessSm
   - category: Cheats
     names:
     - Close
   - category: Controls
     names:
     - Attack_Rebind
-    - Fire_Rebind
     - Jump_Rebind
     - Reset
-    - ResetDefaults
     - Sprint_Rebind
-    - Yet Another Control
   - category: Deco
     names:
     - Play
     - Quit
     - Settings
     - Skip
+  - category: Demo
+    names:
+    - Back
+    - None
+    - Settings
   - category: DesignSystem
     names:
     - PreviewButton
@@ -115,16 +71,6 @@ MonoBehaviour:
     - Give10k
     - Give1k
     - UnlockAll
-  - category: Effects
-    names:
-    - GlowButton
-  - category: Game
-    names:
-    - Hint
-    - OpenSettings
-    - Pause
-    - Resume
-    - SaveLeave
   - category: Gameplay
     names:
     - Difficulty_Minus
@@ -151,7 +97,6 @@ MonoBehaviour:
   - category: Juice
     names:
     - Inbox
-    - Play
   - category: Lint
     names:
     - Empty
@@ -164,25 +109,11 @@ MonoBehaviour:
   - category: Menu
     names:
     - Cheats
-    - CheatsBack
     - Garage
-    - OpenCheats
-    - OpenSettings
     - Options
     - Play
     - Quit
     - Settings
-    - SettingsBack
-  - category: Nav
-    names:
-    - Back
-    - BuyBench
-    - CupidPack
-    - Discord
-    - OpenPack
-    - PaintModel
-    - PlayFree
-    - Quit
   - category: None
     names:
     - None
@@ -193,46 +124,20 @@ MonoBehaviour:
     names:
     - OwnLoop
     - Plain
-  - category: Palette
-    names:
-    - Next
-    - Prev
-  - category: Particles
-    names:
-    - Buy
-    - Firework
-    - Win
   - category: Player
     names:
     - GiveGold
     - HealFull
-    - Lives_Minus
-    - Lives_Plus
     - XpMultiplier_Minus
     - XpMultiplier_Plus
   - category: Popup
     names:
-    - ConfirmBench
     - GetPack
-  - category: Popups
-    names:
-    - OpenPlain
-    - OpenRich
   - category: Pre
     names:
     - Ghosted
     - Override
     - Plain
-  - category: Presets
-    names:
-    - CardAction
-    - Danger
-    - Ghost
-    - Primary
-    - PrimaryAsDanger
-    - PrimaryDefault
-    - PrimarySmall
-    - Secondary
   - category: Prev
     names:
     - Go
@@ -244,9 +149,6 @@ MonoBehaviour:
     names:
     - Del
     - Save
-  - category: RewardClaim
-    names:
-    - Claim
   - category: Round
     names:
     - Play
@@ -266,7 +168,6 @@ MonoBehaviour:
     - Difficulty_Plus
     - FpsCap_Minus
     - FpsCap_Plus
-    - NewItem
     - Quality_Minus
     - Quality_Plus
   - category: Shop
@@ -294,34 +195,14 @@ MonoBehaviour:
   - category: Sync
     names:
     - Play
-  - category: Test
-    names:
-    - Penis
-  - category: Transitions
-    names:
-    - DetailBack
-    - GalleryBack
-    - GoFadeBlack
-    - GoFadeCross
-    - GoSheetUp
-    - GoSlideDown
-    - GoSlideLeft
-    - GoSlideRight
-    - GoSlideUp
-    - GoZoomIn
   - category: Typo
     names:
     - Apply
   - category: Victory
     names:
-    - Button
     - Continue
     - Rematch
-  - category: WhatHappensWithAVeryLongCategoryName
-    names:
-    - None
   - category: World
     names:
     - FinishRace
-    - SpawnEnemy
     - Twerk It

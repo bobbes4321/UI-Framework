@@ -1,0 +1,88 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e9083e81da51ea4db53e503d1d0a745, type: 3}
+  m_Name: Demo
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.FlowGraph
+  graphName: 
+  graphDescription: 
+  startNode: 
+  nodes:
+  - rid: 1801259753486942283
+  - rid: 1801259753486942284
+  - rid: 1801259753486942285
+  groups: []
+  editorPan: {x: 0, y: 0}
+  editorZoom: 1
+  references:
+    version: 2
+    RefIds:
+    - rid: 1801259753486942283
+      type: {class: StartNode, ns: Neo.UI, asm: Neo.UI}
+      data:
+        name: Start
+        position: {x: 580, y: 283}
+        outputs:
+        - portName: Next
+          toNode: UI
+          allowsBack: 1
+          trigger:
+            type: 0
+            category: 
+            name: 
+            timerDuration: 1
+            customKind: 
+          weight: 100
+          transition: 
+    - rid: 1801259753486942284
+      type: {class: UINode, ns: Neo.UI, asm: Neo.UI}
+      data:
+        name: UI
+        position: {x: 793, y: 281}
+        outputs:
+        - portName: Next
+          toNode: UI 2
+          allowsBack: 1
+          trigger:
+            type: 1
+            category: Demo
+            name: Settings
+            timerDuration: 1
+            customKind: 
+          weight: 100
+          transition: 
+        showViews:
+        - category: Demo
+          viewName: Main
+        hideViews: []
+        hideShownViewsOnExit: 1
+    - rid: 1801259753486942285
+      type: {class: UINode, ns: Neo.UI, asm: Neo.UI}
+      data:
+        name: UI 2
+        position: {x: 1130, y: 283}
+        outputs:
+        - portName: Next
+          toNode: 
+          allowsBack: 1
+          trigger:
+            type: 0
+            category: 
+            name: 
+            timerDuration: 1
+            customKind: 
+          weight: 100
+          transition: 
+        showViews:
+        - category: Demo
+          viewName: Settings
+        hideViews: []
+        hideShownViewsOnExit: 1

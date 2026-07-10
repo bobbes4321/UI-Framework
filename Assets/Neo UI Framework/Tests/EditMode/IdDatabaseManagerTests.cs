@@ -240,5 +240,67 @@ namespace Neo.UI.Tests
             Assert.AreEqual(typeof(DropdownId), IdUsageScanner.IdTypeForKind("dropdown"));
             Assert.IsNull(IdUsageScanner.IdTypeForKind("text"));
         }
+
+        // ------------------------------------------------------------------ quick-add parse
+
+        [Test]
+        public void ParseQuickAdd_SlashForm_NamesBothHalves()
+        {
+            Assert.IsTrue(IdDatabaseOptions.ParseQuickAdd("Audio/Muted", "Menu", out string category, out string name));
+            Assert.AreEqual("Audio", category);
+            Assert.AreEqual("Muted", name);
+        }
+
+        [Test]
+        public void ParseQuickAdd_PlainName_LandsInCurrentCategory()
+        {
+            Assert.IsTrue(IdDatabaseOptions.ParseQuickAdd("Play", "Action", out string category, out string name));
+            Assert.AreEqual("Action", category);
+            Assert.AreEqual("Play", name);
+        }
+
+        [Test]
+        public void ParseQuickAdd_PlainName_NoCurrentCategory_FallsBackToDefault()
+        {
+            Assert.IsTrue(IdDatabaseOptions.ParseQuickAdd("Play", "", out string category, out string name));
+            Assert.AreEqual(CategoryNameId.DefaultCategory, category);
+            Assert.AreEqual("Play", name);
+
+            Assert.IsTrue(IdDatabaseOptions.ParseQuickAdd("Play", null, out category, out _));
+            Assert.AreEqual(CategoryNameId.DefaultCategory, category);
+        }
+
+        [Test]
+        public void ParseQuickAdd_LeadingSlash_FallsBackToDefaultCategory()
+        {
+            Assert.IsTrue(IdDatabaseOptions.ParseQuickAdd("/Muted", "Menu", out string category, out string name));
+            Assert.AreEqual(CategoryNameId.DefaultCategory, category);
+            Assert.AreEqual("Muted", name);
+        }
+
+        [Test]
+        public void ParseQuickAdd_TrimsWhitespaceAroundHalves()
+        {
+            Assert.IsTrue(IdDatabaseOptions.ParseQuickAdd("  Audio / Muted  ", "Menu", out string category, out string name));
+            Assert.AreEqual("Audio", category);
+            Assert.AreEqual("Muted", name);
+        }
+
+        [Test]
+        public void ParseQuickAdd_SplitsOnFirstSlashOnly()
+        {
+            Assert.IsTrue(IdDatabaseOptions.ParseQuickAdd("A/B/C", null, out string category, out string name));
+            Assert.AreEqual("A", category);
+            Assert.AreEqual("B/C", name);
+        }
+
+        [Test]
+        public void ParseQuickAdd_RejectsEmptyAndNameless()
+        {
+            Assert.IsFalse(IdDatabaseOptions.ParseQuickAdd("", "Menu", out _, out _));
+            Assert.IsFalse(IdDatabaseOptions.ParseQuickAdd("   ", "Menu", out _, out _));
+            Assert.IsFalse(IdDatabaseOptions.ParseQuickAdd(null, "Menu", out _, out _));
+            Assert.IsFalse(IdDatabaseOptions.ParseQuickAdd("Audio/", "Menu", out _, out _), "trailing slash = no name");
+        }
     }
 }

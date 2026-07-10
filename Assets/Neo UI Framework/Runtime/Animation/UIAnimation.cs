@@ -183,6 +183,23 @@ namespace Neo.UI
             if (color.enabled) color.RestoreStartColor();
         }
 
+        /// <summary>
+        /// Restores the captured rest state for channels this animation animates that
+        /// <paramref name="incoming"/> does NOT — the hand-off when one state animation replaces
+        /// another. Channels the incoming animation drives are left alone (it re-drives them from
+        /// its own endpoints); channels it doesn't drive would otherwise stay frozen wherever the
+        /// outgoing animation left them (e.g. a hover tilt's rotation surviving into Pressed).
+        /// </summary>
+        public void RestoreStartValuesNotCoveredBy(UIAnimation incoming)
+        {
+            if (_rectTransform == null || !_hasStartValues || incoming == null) return;
+            if (move.enabled && !incoming.move.enabled) _rectTransform.anchoredPosition3D = startPosition;
+            if (rotate.enabled && !incoming.rotate.enabled) _rectTransform.localEulerAngles = startRotation;
+            if (scale.enabled && !incoming.scale.enabled) _rectTransform.localScale = startScale;
+            if (fade.enabled && !incoming.fade.enabled && _canvasGroup != null) _canvasGroup.alpha = startAlpha;
+            if (color.enabled && !incoming.color.enabled) color.RestoreStartColor();
+        }
+
         // ------------------------------------------------------------------ playback
 
         public void Play(bool inReverse) => Play(inReverse ? PlayDirection.Reverse : PlayDirection.Forward);

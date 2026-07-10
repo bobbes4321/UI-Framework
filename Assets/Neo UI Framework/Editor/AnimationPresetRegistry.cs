@@ -63,9 +63,10 @@ namespace Neo.UI.Editor
 
         /// <summary>
         /// Discovered preset full-names ("Category/Name") ordered so those whose category suits the given
-        /// animator role (<see cref="NeoAnimatorRoles"/>) come first — the SHARED option source for the
-        /// per-state inspector picker, the Setup wizard and the Design System motion tab (so all three
-        /// surface the same, role-relevant presets). A null/empty role lists every preset alphabetically.
+        /// animator role (<see cref="NeoAnimatorRoles"/>) come first. The package's own role pickers
+        /// (animator inspectors, Setup wizard, Design System Motion tab) now browse through
+        /// <c>AnimationPresetBrowserPopup</c> instead; this stays public as the flat option source for a
+        /// consuming project's simpler pickers. A null/empty role lists every preset alphabetically.
         /// </summary>
         public static List<string> FullNamesForRole(string role)
         {

@@ -48,12 +48,18 @@ namespace Neo.UI
         [Tooltip("Navigate back through the history when the back-button signal fires")]
         public bool goBackOnBackButton = true;
 
+        [Tooltip("Add a BackButtonInput (Escape / gamepad cancel) to this GameObject on start when " +
+                 "the scene has none, so back input works without manual setup")]
+        public bool autoCreateBackInput = true;
+
         private static readonly HashSet<FlowController> Registry = new HashSet<FlowController>();
 
         private readonly Stack<string> _history = new Stack<string>();
         private readonly SignalReceiver _backReceiver = new SignalReceiver(BackButton.StreamCategory, BackButton.StreamName);
         private FlowGraph _runtimeGraph;
         private bool _goingBack;
+        private FlowTrigger _lastTriggerAdvance;
+        private int _lastTriggerAdvanceFrame = -1;
 
         public FlowGraphState graphState { get; private set; } = FlowGraphState.Idle;
 
@@ -151,8 +157,11 @@ namespace Neo.UI
 
             if (goBackOnBackButton)
             {
-                _backReceiver.SetOnSignalCallback(_ => GoBack());
+                _backReceiver.SetOnSignalCallback(OnBackSignal);
                 _backReceiver.Connect();
+                // back-named buttons fire back automatically wherever back navigation is live
+                BackButton.EnsureButtonBridge();
+                if (autoCreateBackInput && Application.isPlaying) EnsureBackInput();
             }
 
             OnFlowStarted?.Invoke();
@@ -184,6 +193,8 @@ namespace Neo.UI
 
             _backReceiver.Disconnect();
             _history.Clear();
+            _lastTriggerAdvance = null;
+            _lastTriggerAdvanceFrame = -1;
             UITick.Unregister(this);
 
             if (graphState != FlowGraphState.Idle)
@@ -232,6 +243,14 @@ namespace Neo.UI
             {
                 Debug.LogWarning($"[Neo.UI] Flow edge points to missing node '{edge.toNode}'.", this);
                 return;
+            }
+            // remember trigger-driven advances so OnBackSignal can tell an already-handled back
+            // press apart (signal receiver order within a dispatch is arbitrary)
+            if (edge.trigger != null && (edge.trigger.type == FlowTrigger.TriggerType.Back ||
+                                          edge.trigger.type == FlowTrigger.TriggerType.ButtonClick))
+            {
+                _lastTriggerAdvance = edge.trigger;
+                _lastTriggerAdvanceFrame = Time.frameCount;
             }
             // thread the crossed edge through so SetActiveNode can resolve its transition/portName
             // and OnAdvanced subscribers (the graph window's edge-pulse hook) see which edge fired
@@ -293,6 +312,56 @@ namespace Neo.UI
             var plan = new ViewTransitionPlan { asset = asset };
             previous.pendingTransition = plan;
             next.pendingTransition = plan;
+        }
+
+        /// <summary>
+        /// The back-button signal handler: history-back is the FALLBACK — explicit graph wiring for
+        /// the same press (a Back-trigger edge on the active/global nodes, or a ButtonClick edge
+        /// matching the back-named button the press came from) wins, so a press never navigates
+        /// twice. The already-advanced check covers the arbitrary receiver order within one signal
+        /// dispatch (the edge's own listener may run before or after this).
+        /// </summary>
+        private void OnBackSignal(Signal signal)
+        {
+            if (graphState != FlowGraphState.Playing) return;
+
+            bool fromButton = signal.TryGetValue(out ButtonSignalData button);
+
+            // consume-once: the record only ever excuses the press being dispatched right now
+            FlowTrigger advanced = _lastTriggerAdvanceFrame == Time.frameCount ? _lastTriggerAdvance : null;
+            _lastTriggerAdvance = null;
+            _lastTriggerAdvanceFrame = -1;
+            if (TriggerConsumesBack(advanced, fromButton, button)) return;
+
+            foreach (FlowNode node in NodesListeningForTriggers())
+                foreach (FlowEdge edge in node.outputs)
+                    if (edge != null && !string.IsNullOrEmpty(edge.toNode) &&
+                        TriggerConsumesBack(edge.trigger, fromButton, button)) return;
+
+            GoBack();
+        }
+
+        private IEnumerable<FlowNode> NodesListeningForTriggers()
+        {
+            if (activeNode != null) yield return activeNode;
+            if (_runtimeGraph == null) yield break;
+            foreach (FlowNode node in _runtimeGraph.nodes)
+                if (node != null && node.isGlobal && node != activeNode) yield return node;
+        }
+
+        private static bool TriggerConsumesBack(FlowTrigger trigger, bool fromButton, ButtonSignalData button)
+        {
+            if (trigger == null) return false;
+            if (trigger.type == FlowTrigger.TriggerType.Back) return true;
+            return fromButton && trigger.type == FlowTrigger.TriggerType.ButtonClick &&
+                   trigger.category == button.category && trigger.name == button.buttonName;
+        }
+
+        /// <summary> Adds a <see cref="BackButtonInput"/> to this GameObject when the scene has none. </summary>
+        private void EnsureBackInput()
+        {
+            if (FindAnyObjectByType<BackButtonInput>(FindObjectsInactive.Include) != null) return;
+            gameObject.AddComponent<BackButtonInput>();
         }
 
         /// <summary> Returns to the previously active node (history stack). </summary>

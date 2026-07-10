@@ -19,9 +19,9 @@ namespace Neo.UI.Tests
         public void Reset() => NeoDesignSystemTabs.ResetForTests();
 
         [Test]
-        public void Ordered_IsExactlyTheEightBuiltins_InDisplayOrder()
+        public void Ordered_IsExactlyTheNineBuiltins_InDisplayOrder()
         {
-            var expected = new[] { "overview", "colors", "typography", "buttons", "shapes", "presets", "motion", "bundles" };
+            var expected = new[] { "overview", "colors", "typography", "buttons", "shapes", "icons", "presets", "motion", "bundles" };
             CollectionAssert.AreEqual(expected, NeoDesignSystemTabs.Ordered.Select(t => t.id).ToArray());
         }
 
@@ -45,7 +45,7 @@ namespace Neo.UI.Tests
         }
 
         [Test]
-        public void ResetForTests_RestoresExactlyTheEightBuiltins()
+        public void ResetForTests_RestoresExactlyTheNineBuiltins()
         {
             NeoDesignSystemTabs.Register(new DesignSystemTabDescriptor(FakeId, "Fake", 15, null, _ => { }));
             Assert.IsTrue(NeoDesignSystemTabs.TryGet(FakeId, out _));
@@ -53,7 +53,7 @@ namespace Neo.UI.Tests
             NeoDesignSystemTabs.ResetForTests();
 
             Assert.IsFalse(NeoDesignSystemTabs.TryGet(FakeId, out _), "reset drops project registrations");
-            Assert.AreEqual(8, NeoDesignSystemTabs.Ordered.Count, "reset re-seeds exactly the eight built-ins");
+            Assert.AreEqual(9, NeoDesignSystemTabs.Ordered.Count, "reset re-seeds exactly the nine built-ins");
         }
     }
 }

@@ -849,10 +849,17 @@ namespace Neo.UI.Editor
             var text = go.GetComponent<TMP_Text>();
             if (text != null)
             {
-                // glyphs in the icon font are icon elements, not text
-                NeoUISettings settings = NeoUISettings.instance;
-                if (settings != null && settings.iconFont != null && text.font == settings.iconFont
-                    && !string.IsNullOrEmpty(text.text) && IconMap.TryGetName(text.text[0], out string iconName))
+                // glyphs in the icon font are icon elements, not text: the NeoIcon name stamp is
+                // authoritative; pre-NeoIcon prefabs fall back to the icon-font + reverse-glyph sniff
+                string iconName = go.GetComponent<NeoIcon>()?.icon;
+                if (string.IsNullOrEmpty(iconName))
+                {
+                    NeoUISettings settings = NeoUISettings.instance;
+                    if (settings != null && settings.iconFont != null && text.font == settings.iconFont
+                        && !string.IsNullOrEmpty(text.text))
+                        IconMap.TryGetName(text.text[0], out iconName);
+                }
+                if (!string.IsNullOrEmpty(iconName))
                 {
                     return new ElementSpec
                     {
@@ -1158,11 +1165,15 @@ namespace Neo.UI.Editor
             return true;
         }
 
-        /// <summary> Reverse-maps a widget's Icon child glyph back to its Lucide name. </summary>
+        /// <summary> Reads a widget's Icon child name back — the NeoIcon stamp when present,
+        /// else the legacy reverse-glyph map (pre-NeoIcon prefabs). </summary>
         private static string ExportIconName(GameObject go)
         {
             TMP_Text iconText = FindChildText(go, UIWidgetFactory.IconName);
-            if (iconText == null || string.IsNullOrEmpty(iconText.text)) return null;
+            if (iconText == null) return null;
+            string stamped = iconText.GetComponent<NeoIcon>()?.icon;
+            if (!string.IsNullOrEmpty(stamped)) return stamped;
+            if (string.IsNullOrEmpty(iconText.text)) return null;
             return IconMap.TryGetName(iconText.text[0], out string name) ? name : null;
         }
 

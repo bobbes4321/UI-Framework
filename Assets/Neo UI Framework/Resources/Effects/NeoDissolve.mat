@@ -34,11 +34,11 @@ Material:
     m_Ints: []
     m_Floats:
     - _ColorMask: 15
-    - _DissolveAmount: 0.4
-    - _EdgeWidth: 0.12
+    - _DissolveAmount: 0
+    - _EdgeWidth: 0.08
     - _NoiseScale: 4
     - _ScanlineCount: 80
-    - _ScanlineStrength: 0.18
+    - _ScanlineStrength: 0.15
     - _Stencil: 0
     - _StencilComp: 8
     - _StencilOp: 0
@@ -47,6 +47,6 @@ Material:
     - _UseUIAlphaClip: 0
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _EdgeColor: {r: 0.231, g: 0.745, b: 1, a: 1}
+    - _EdgeColor: {r: 1, g: 0.6, b: 0.09999997, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

@@ -35,8 +35,27 @@ namespace Neo.UI
             public string target;
         }
 
+        [Serializable]
+        public class SpriteEntry
+        {
+            [Tooltip("Icon name referenced in specs (\"icon\": \"currency\")")]
+            public string name;
+
+            [Tooltip("TMP sprite asset wrapping the icon art (create one via the Design System Icons tab)")]
+            public TMPro.TMP_SpriteAsset spriteAsset;
+
+            [Tooltip("Sprite character name inside the asset; empty = same as the icon name")]
+            public string spriteName;
+
+            [Tooltip("Tint with the label color (white/alpha art) instead of rendering as-is (color art)")]
+            public bool tint;
+        }
+
         [Tooltip("Custom name → glyph entries; blended in before the built-in Lucide dict")]
         public List<Entry> glyphs = new List<Entry>();
+
+        [Tooltip("Custom name → sprite entries (PNG art via TMP sprite assets); resolved before everything else")]
+        public List<SpriteEntry> sprites = new List<SpriteEntry>();
 
         [Tooltip("Forgiving aliases for the overlay glyphs; consulted before the built-in aliases")]
         public List<Alias> aliases = new List<Alias>();
@@ -76,9 +95,34 @@ namespace Neo.UI
             return false;
         }
 
-        /// <summary> All overlay icon names (for the picker / icon font baking). </summary>
+        /// <summary> Resolves a name (or overlay alias) to a sprite-backed entry. </summary>
+        public bool TryGetSprite(string name, out SpriteEntry entry)
+        {
+            entry = null;
+            if (string.IsNullOrEmpty(name) || sprites == null) return false;
+            if (aliases != null)
+                foreach (Alias a in aliases)
+                    if (a != null && string.Equals(a.alias, name, StringComparison.Ordinal))
+                    {
+                        name = a.target;
+                        break;
+                    }
+            foreach (SpriteEntry e in sprites)
+            {
+                if (e == null || e.spriteAsset == null) continue;
+                if (!string.Equals(e.name, name, StringComparison.Ordinal)) continue;
+                entry = e;
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary> All overlay icon names — sprites first, then glyphs (picker / font baking). </summary>
         public IEnumerable<string> Names()
         {
+            if (sprites != null)
+                foreach (SpriteEntry e in sprites)
+                    if (e != null && !string.IsNullOrEmpty(e.name)) yield return e.name;
             if (glyphs == null) yield break;
             foreach (Entry e in glyphs)
                 if (e != null && !string.IsNullOrEmpty(e.name)) yield return e.name;

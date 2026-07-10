@@ -10,9 +10,10 @@ using UnityEngine.UI;
 namespace Neo.UI.Tests
 {
     /// <summary>
-    /// Beautification P3 (Lucide icons: IconMap, CreateIcon, button/tab icon slots) and
-    /// P2 (button variants/sizes + the WidgetStyleTag round-trip) — including the polymorphic
-    /// spec "size" key (string variant vs [w,h] array) and the fixed-point guarantee.
+    /// Beautification P3 (Lucide icons: IconMap/IconLibrary, CreateIcon, button/tab icon slots,
+    /// the NeoIcon name stamp + runtime SetIcon) and P2 (button variants/sizes + the
+    /// WidgetStyleTag round-trip) — including the polymorphic spec "size" key (string variant
+    /// vs [w,h] array) and the fixed-point guarantee.
     /// </summary>
     public class IconAndVariantTests
     {
@@ -69,6 +70,126 @@ namespace Neo.UI.Tests
 
             Assert.IsFalse(IconMap.TryGetGlyph("definitely-not-an-icon", out _));
             Assert.AreEqual(IconMap.Count, IconMap.AllGlyphs().Length);
+
+            Assert.IsTrue(IconMap.TryResolve("home", out string homeCanonical, out char homeGlyph),
+                "TryResolve must accept aliases");
+            Assert.AreEqual("house", homeCanonical, "TryResolve returns the canonical name");
+            Assert.AreEqual(house, homeGlyph);
+            Assert.IsTrue(IconMap.TryResolve("play", out string playCanonical, out _));
+            Assert.AreEqual("play", playCanonical, "canonical names resolve to themselves");
+        }
+
+        [Test]
+        public void GeneratedIcons_CarryNeoIcon_WithCanonicalNames()
+        {
+            GameObject prefab = GenerateDecoView();
+
+            NeoIcon playIcon = Button(prefab, "Play").transform
+                .Find(UIWidgetFactory.IconName)?.GetComponent<NeoIcon>();
+            Assert.IsNotNull(playIcon, "factory icons carry the NeoIcon name stamp");
+            Assert.AreEqual("play", playIcon.icon);
+
+            UITab home = prefab.GetComponentsInChildren<UITab>(true).First(t => t.id.Matches("DecoTabs", "Home"));
+            Assert.AreEqual("house", home.transform.Find(UIWidgetFactory.IconName)?.GetComponent<NeoIcon>()?.icon,
+                "the 'home' alias stamps its canonical name so it never leaks into exports");
+
+            NeoIcon trophy = prefab.GetComponentsInChildren<NeoIcon>(true)
+                .First(i => i.transform.parent.GetComponent<UIButton>() == null
+                            && i.transform.parent.GetComponent<UITab>() == null);
+            Assert.AreEqual("trophy", trophy.icon, "standalone icon elements are stamped too");
+        }
+
+        [Test]
+        public void NeoIcon_SetIcon_SwapsGlyphByName_AndWarnsOnUnknown()
+        {
+            var go = new GameObject("RuntimeIcon", typeof(RectTransform));
+            try
+            {
+                var text = go.AddComponent<TextMeshProUGUI>();
+                var neoIcon = go.AddComponent<NeoIcon>();
+
+                neoIcon.SetIcon("volume-mute"); // alias — must canonicalize
+                Assert.AreEqual("volume-x", neoIcon.icon);
+                Assert.IsTrue(IconLibrary.TryGetGlyph("volume-x", out char muted));
+                Assert.AreEqual(muted.ToString(), text.text, "SetIcon bakes the glyph into the TMP");
+
+                UnityEngine.TestTools.LogAssert.Expect(LogType.Warning,
+                    new System.Text.RegularExpressions.Regex("Unknown icon"));
+                neoIcon.SetIcon("definitely-not-an-icon");
+                Assert.AreEqual("volume-x", neoIcon.icon, "unknown names warn and keep the current icon");
+                Assert.AreEqual(muted.ToString(), text.text);
+            }
+            finally
+            {
+                Object.DestroyImmediate(go);
+            }
+        }
+
+        [Test]
+        public void FullLucideTable_ResolvesBeyondTheCuratedSubset()
+        {
+            Assert.IsFalse(IconLibrary.IsCurated("a-arrow-down"), "sanity: not in the curated subset");
+            Assert.IsTrue(IconMap.TryResolve("a-arrow-down", out string canonical, out char glyph),
+                "full-table names must resolve without package edits");
+            Assert.AreEqual("a-arrow-down", canonical);
+            Assert.AreEqual(0xE585, (int)glyph, "codepoint from the generated full table");
+
+            Assert.IsTrue(IconMap.TryGetGlyph("play", out char play));
+            Assert.AreEqual(0xE13C, (int)play, "curated names keep their curated codepoints");
+            Assert.AreEqual(IconMap.Count, IconMap.AllGlyphs().Length,
+                "Count/AllGlyphs stay the curated pre-bake subset");
+            CollectionAssert.Contains(IconMap.Names.ToList(), "a-arrow-down",
+                "full-table names are browsable (after the featured set)");
+        }
+
+        [Test]
+        public void SpriteBackedOverlayIcon_ResolvesAndBakes()
+        {
+            NeoUISettings settings = NeoUISettings.instance;
+            IconMapOverlay previous = settings.iconOverlay;
+            var texture = new Texture2D(32, 32);
+            Sprite sprite = Sprite.Create(texture, new Rect(0, 0, 32, 32), new Vector2(0.5f, 0.5f));
+            var spriteAsset = ScriptableObject.CreateInstance<TMP_SpriteAsset>();
+            var spriteGlyph = new TMP_SpriteGlyph
+            {
+                index = 0,
+                glyphRect = new UnityEngine.TextCore.GlyphRect(0, 0, 32, 32),
+                metrics = new UnityEngine.TextCore.GlyphMetrics(32, 32, 0, 28, 32),
+                scale = 1f,
+                sprite = sprite
+            };
+            spriteAsset.spriteGlyphTable.Add(spriteGlyph);
+            spriteAsset.spriteCharacterTable.Add(new TMP_SpriteCharacter(0xFFFE, spriteGlyph)
+                { name = "currency", scale = 1f });
+            spriteAsset.UpdateLookupTables();
+            var overlay = ScriptableObject.CreateInstance<IconMapOverlay>();
+            overlay.sprites.Add(new IconMapOverlay.SpriteEntry { name = "currency", spriteAsset = spriteAsset });
+            var go = new GameObject("SpriteIcon", typeof(RectTransform));
+            try
+            {
+                settings.iconOverlay = overlay;
+                Assert.IsTrue(IconLibrary.TryResolveIcon("currency", out ResolvedIcon resolved),
+                    "overlay sprite entries resolve by name");
+                Assert.IsTrue(resolved.isSprite);
+                Assert.AreEqual("<sprite name=\"currency\">", resolved.BakedText);
+
+                var text = go.AddComponent<TextMeshProUGUI>();
+                var neoIcon = go.AddComponent<NeoIcon>();
+                neoIcon.SetIcon("currency");
+                Assert.AreEqual("currency", neoIcon.icon);
+                Assert.AreEqual("<sprite name=\"currency\">", text.text, "SetIcon bakes the sprite tag");
+                Assert.AreEqual(spriteAsset, text.spriteAsset, "SetIcon assigns the sprite asset");
+                Assert.IsTrue(text.richText, "sprite tags need rich text");
+            }
+            finally
+            {
+                settings.iconOverlay = previous;
+                Object.DestroyImmediate(go);
+                Object.DestroyImmediate(overlay);
+                Object.DestroyImmediate(spriteAsset);
+                Object.DestroyImmediate(sprite);
+                Object.DestroyImmediate(texture);
+            }
         }
 
         [Test]

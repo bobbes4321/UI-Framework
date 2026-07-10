@@ -41,6 +41,10 @@ MonoBehaviour:
   - category: Deco
     names:
     - Screen
+  - category: Demo
+    names:
+    - Main
+    - Settings
   - category: Depth
     names:
     - Screen
@@ -61,8 +65,6 @@ MonoBehaviour:
     names:
     - HUD
     - Inventory
-    - Painting
-    - Paused
   - category: Gap
     names:
     - Form
@@ -79,7 +81,6 @@ MonoBehaviour:
   - category: Juice
     names:
     - Screen
-    - Screen Two
   - category: Lib
     names:
     - Screen
@@ -94,14 +95,10 @@ MonoBehaviour:
   - category: Menu
     names:
     - Cheats
-    - Collection
-    - Detail
     - Main
-    - News
     - Options
     - Pause
     - Settings
-    - Shop
   - category: Mig
     names:
     - View
@@ -151,16 +148,6 @@ MonoBehaviour:
     names:
     - Root
     - Store
-  - category: Showcase
-    names:
-    - Animations
-    - Buttons
-    - Effects
-    - Particles
-    - Popups
-    - Presets
-    - TabsPanels
-    - TogglesSwitches
   - category: Sort
     names:
     - Alpha
@@ -187,11 +174,6 @@ MonoBehaviour:
   - category: Sync
     names:
     - Main
-  - category: Transitions
-    names:
-    - Detail
-    - Gallery
-    - Home
   - category: Typo
     names:
     - Screen
