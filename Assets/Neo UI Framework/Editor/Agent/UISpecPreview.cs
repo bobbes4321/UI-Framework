@@ -100,7 +100,7 @@ namespace Neo.UI.Editor
 
             foreach (ViewSpec view in spec.views)
             {
-                string viewName = Sanitize($"{view.category}_{view.viewName}");
+                string viewName = NeoIdNaming.Sanitize($"{view.category}_{view.viewName}");
                 foreach ((string name, int width, int height) res in resolutions)
                 {
                     // build fresh per render — CaptureLive consumes (destroys) the root
@@ -111,13 +111,6 @@ namespace Neo.UI.Editor
                 }
             }
             return written;
-        }
-
-        private static string Sanitize(string value)
-        {
-            foreach (char invalid in System.IO.Path.GetInvalidFileNameChars())
-                value = value.Replace(invalid, '_');
-            return value;
         }
     }
 }

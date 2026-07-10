@@ -22,8 +22,11 @@ namespace Neo.UI.Editor
         public static IdDatabase ForTrigger(FlowTrigger.TriggerType type) => ForTrigger(type, null);
 
         /// <summary>
-        /// The id database a trigger's category/name dropdown should offer. Built-ins map by enum;
-        /// a <see cref="FlowTrigger.TriggerType.Custom"/> trigger consults its registered kind's
+        /// The id database a trigger's category/name dropdown should offer. Built-ins map by
+        /// <see cref="FlowTrigger.TriggerType"/> enum value (a closed set, unlike element kinds — a
+        /// built-in trigger has no string key a project could re-register under, so there's no cheap
+        /// registry-first flip here); a <see cref="FlowTrigger.TriggerType.Custom"/> trigger — the one
+        /// case that IS string-addressed (<c>customKind</c>) — consults its registered kind's
         /// <see cref="ITriggerKindIdDatabase.PreferredIdType"/> (when it implements that seam).
         /// </summary>
         public static IdDatabase ForTrigger(FlowTrigger.TriggerType type, string customKind)
@@ -51,16 +54,30 @@ namespace Neo.UI.Editor
         /// <summary>
         /// The ID database a spec element's Category/Name picker should offer, by element kind — an
         /// element's <c>id</c> field dropdown uses this so it autocompletes against the same database the
-        /// generator registers that kind into (button/stepper → buttonIds, toggle/switch/tab → toggleIds,
-        /// slider → sliderIds, dropdown → dropdownIds). A project-registered kind that implements
-        /// <see cref="IElementKindIdDatabase"/> carries its own preference (the extension seam, exactly as
-        /// <see cref="ForTrigger"/> consults <see cref="ITriggerKindIdDatabase"/>). Anything else returns
-        /// null — the picker still lets you type and add a Category/Name, it just doesn't persist a reusable entry.
+        /// generator registers that kind into. Resolution order: the <see cref="NeoElementKinds"/>
+        /// registry is consulted FIRST — if <paramref name="kind"/> is registered and implements
+        /// <see cref="IElementKindIdDatabase"/> with a non-null <see cref="IElementKindIdDatabase.PreferredIdType"/>,
+        /// that database wins. This lets a project re-route a BUILT-IN kind too (e.g. re-register
+        /// "button" with a different <c>PreferredIdType</c>) by re-registering its <c>Kind</c> string —
+        /// <see cref="NeoKeyedRegistry{T}.Register"/> replaces same-key entries in place, and built-in
+        /// kinds aren't pre-seeded here (Phase 1), so this is a pure addition with no behavior change for
+        /// anyone who hasn't registered one of the built-in kind strings. Only when the registry has no
+        /// (usable) entry does the hardcoded default mapping apply (button/stepper → buttonIds,
+        /// toggle/switch/tab → toggleIds, slider → sliderIds, dropdown → dropdownIds) — mirrors how
+        /// <see cref="ForTrigger"/> consults <see cref="ITriggerKindIdDatabase"/> for
+        /// <see cref="FlowTrigger.TriggerType.Custom"/>. Anything unresolved returns null — the picker
+        /// still lets you type and add a Category/Name, it just doesn't persist a reusable entry.
         /// </summary>
         public static IdDatabase ForElementKind(string kind)
         {
             NeoUISettings settings = NeoUISettings.instance;
             if (settings == null) return null;
+
+            if (NeoElementKinds.TryGet(kind, out INeoElementKind ek)
+                && ek is IElementKindIdDatabase withDb
+                && withDb.PreferredIdType != null)
+                return settings.GetDatabaseFor(withDb.PreferredIdType);
+
             switch (kind)
             {
                 case "button":
@@ -70,12 +87,7 @@ namespace Neo.UI.Editor
                 case "tab":      return settings.toggleIds;
                 case "slider":   return settings.sliderIds;
                 case "dropdown": return settings.dropdownIds;
-                default:
-                    if (NeoElementKinds.TryGet(kind, out INeoElementKind ek)
-                        && ek is IElementKindIdDatabase withDb
-                        && withDb.PreferredIdType != null)
-                        return settings.GetDatabaseFor(withDb.PreferredIdType);
-                    return null;
+                default:         return null;
             }
         }
 
@@ -158,15 +170,26 @@ namespace Neo.UI.Editor
         /// <summary> <see cref="DrawCategoryNamePair(Rect,SerializedProperty,SerializedProperty,IdDatabase)"/>
         /// with the quick-add / manager tail buttons optional (pass false where every pixel counts). </summary>
         public static void DrawCategoryNamePair(Rect rect, SerializedProperty categoryProperty,
-            SerializedProperty nameProperty, IdDatabase database, bool inlineTools)
+            SerializedProperty nameProperty, IdDatabase database, bool inlineTools) =>
+            DrawCategoryNamePair(rect, categoryProperty, nameProperty, database, inlineTools,
+                extraTool: null, onExtraTool: null);
+
+        /// <summary> <see cref="DrawCategoryNamePair(Rect,SerializedProperty,SerializedProperty,IdDatabase,bool)"/>
+        /// plus an optional third tail button (the seam a caller uses to attach a context action to the
+        /// pair — e.g. the id drawer's rename-GameObject-to-id button); drawn after <c>+</c>/<c>…</c>,
+        /// hidden with them on very narrow rects. </summary>
+        public static void DrawCategoryNamePair(Rect rect, SerializedProperty categoryProperty,
+            SerializedProperty nameProperty, IdDatabase database, bool inlineTools,
+            GUIContent extraTool, Action onExtraTool)
         {
             const float ButtonWidth = 20f;
             const float Gap = 2f;
             const float MinWidthForTools = 160f; // below this the dropdowns need every pixel
 
             bool tools = inlineTools && rect.width >= MinWidthForTools;
+            bool extra = tools && extraTool != null && onExtraTool != null;
             Rect pairRect = rect;
-            if (tools) pairRect.width -= (ButtonWidth + Gap) * 2f;
+            if (tools) pairRect.width -= (ButtonWidth + Gap) * (extra ? 3f : 2f);
 
             NeoGUI.SplitHorizontal(pairRect, out Rect categoryRect, out Rect nameRect);
 
@@ -190,6 +213,11 @@ namespace Neo.UI.Editor
 
             if (GUI.Button(manageRect, ManageButtonContent, EditorStyles.miniButton))
                 IdDatabaseManagerWindow.Open(database, category, nameProperty.stringValue);
+
+            if (!extra) return;
+            var extraRect = new Rect(manageRect.xMax + Gap, rect.y, ButtonWidth, rect.height);
+            if (GUI.Button(extraRect, extraTool, EditorStyles.miniButton))
+                onExtraTool();
         }
 
         private static readonly GUIContent AddButtonContent =

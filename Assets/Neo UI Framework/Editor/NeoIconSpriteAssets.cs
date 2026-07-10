@@ -53,6 +53,18 @@ namespace Neo.UI.Editor
                 asset = ScriptableObject.CreateInstance<TMP_SpriteAsset>();
                 AssetDatabase.CreateAsset(asset, assetPath);
             }
+            // A fresh instance has an empty m_Version and a NULL legacy spriteInfoList; the first
+            // spriteCharacterTable access below would then run TMP's UpgradeSpriteAsset, which
+            // iterates that list and throws. Stamp the version up front (privately serialized, so
+            // via SerializedObject) so the legacy-upgrade path never runs on an asset we authored.
+            var versionStamp = new SerializedObject(asset);
+            SerializedProperty version = versionStamp.FindProperty("m_Version");
+            if (string.IsNullOrEmpty(version.stringValue))
+            {
+                version.stringValue = "1.1.0";
+                versionStamp.ApplyModifiedPropertiesWithoutUndo();
+            }
+
             asset.spriteSheet = sprite.texture;
             if (asset.material == null)
             {
@@ -82,10 +94,9 @@ namespace Neo.UI.Editor
             asset.spriteCharacterTable.Add(new TMP_SpriteCharacter(0xFFFE, glyph) { name = iconName, scale = 1f });
             asset.UpdateLookupTables();
 
-            // version 1.1.0 + faceInfo drive TMP's modern sprite scaling (currentFontSize / pointSize);
-            // both serialize privately, so write them through a SerializedObject
+            // faceInfo drives TMP's modern sprite scaling (currentFontSize / pointSize, active
+            // because of the version stamped above); privately serialized, so via SerializedObject
             var serialized = new SerializedObject(asset);
-            serialized.FindProperty("m_Version").stringValue = "1.1.0";
             SerializedProperty face = serialized.FindProperty("m_FaceInfo");
             face.FindPropertyRelative("m_PointSize").floatValue = rect.height;
             face.FindPropertyRelative("m_Scale").floatValue = 1f;

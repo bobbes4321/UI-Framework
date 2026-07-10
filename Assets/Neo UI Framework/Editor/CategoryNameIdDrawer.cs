@@ -27,7 +27,20 @@ namespace Neo.UI.Editor
 
             EditorGUI.BeginProperty(position, label, property);
             Rect content = EditorGUI.PrefixLabel(position, label);
-            IdDatabaseOptions.DrawCategoryNamePair(content, categoryProperty, nameProperty, GetDatabase());
+            // A component's OWN identity gets a third tail button: rename the GameObject to the
+            // id's canonical name (NeoIdNaming — the same convention the generator uses), so
+            // hand-built and generated hierarchies read alike. The widget itself declares its
+            // identity via INeoIdOwner; reference fields (triggers, signal streams,
+            // containerReference, …) and any non-identity id never match.
+            bool isOwnId = property.serializedObject.targetObject is Component component
+                           && component is INeoIdOwner owner
+                           && ReferenceEquals(fieldInfo.GetValue(component), owner.OwnId);
+            if (isOwnId)
+                IdDatabaseOptions.DrawCategoryNamePair(content, categoryProperty, nameProperty,
+                    GetDatabase(), inlineTools: true, RenameButtonContent,
+                    () => RenameTargetsToId(property));
+            else
+                IdDatabaseOptions.DrawCategoryNamePair(content, categoryProperty, nameProperty, GetDatabase());
             EditorGUI.EndProperty();
         }
 
@@ -38,47 +51,19 @@ namespace Neo.UI.Editor
             else if (idType.IsArray) idType = idType.GetElementType();
             return IdDatabaseOptions.For(idType);
         }
-    }
 
-    /// <summary> Minimal modal text-input dialog (kept for tools that need a one-off prompt). </summary>
-    public class EditorInputDialog : EditorWindow
-    {
-        private string _value = "";
-        private string _message;
-        private bool _confirmed;
-        private bool _focused;
-
-        public static string Show(string title, string message)
+        private void RenameTargetsToId(SerializedProperty property)
         {
-            var window = CreateInstance<EditorInputDialog>();
-            window.titleContent = new GUIContent(title);
-            window._message = message;
-            window.minSize = new Vector2(300f, 80f);
-            window.maxSize = new Vector2(300f, 80f);
-            window.ShowModalUtility();
-            return window._confirmed ? window._value : null;
+            // Multi-edit renames every selected target from its OWN id value, not the (possibly
+            // mixed) serialized view — the field instance is read straight off each component.
+            foreach (UnityEngine.Object target in property.serializedObject.targetObjects)
+                if (target is Component component)
+                    NeoIdNaming.RenameToId(component, fieldInfo.GetValue(component) as CategoryNameId);
         }
 
-        private void OnGUI()
-        {
-            EditorGUILayout.LabelField(_message);
-            GUI.SetNextControlName("InputField");
-            _value = EditorGUILayout.TextField(_value);
-            if (!_focused)
-            {
-                EditorGUI.FocusTextInControl("InputField");
-                _focused = true;
-            }
-
-            EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button("OK") ||
-                (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return))
-            {
-                _confirmed = true;
-                Close();
-            }
-            if (GUILayout.Button("Cancel")) Close();
-            EditorGUILayout.EndHorizontal();
-        }
+        private static GUIContent _renameButtonContent;
+        private static GUIContent RenameButtonContent => _renameButtonContent ??= new GUIContent(
+            EditorGUIUtility.IconContent("editicon.sml").image,
+            "Rename the GameObject to match this id (\"Button - Category_Name\" — the generated-content naming)");
     }
 }

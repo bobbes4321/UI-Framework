@@ -11,9 +11,10 @@ namespace Neo.UI
     /// panels addressable by name for agents and tooling (mirrors <see cref="UIView"/>/<see cref="UITag"/>).
     /// </summary>
     [AddComponentMenu("Neo/UI/Containers/UI Panel")]
-    public class UIPanel : UIContainer
+    public class UIPanel : UIContainer, INeoIdOwner
     {
         public PanelId id = new PanelId();
+        CategoryNameId INeoIdOwner.OwnId => id;
 
         [Tooltip("Fade the panel's content in when it activates — tab switches read as a transition " +
                  "instead of an instant swap")]

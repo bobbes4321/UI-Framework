@@ -301,6 +301,37 @@ namespace Neo.UI.Tests
         }
 
         [Test]
+        public void IconSpriteAsset_CreateOrUpdate_FreshAsset_DoesNotTripTmpLegacyUpgrade()
+        {
+            // Regression: a freshly CreateInstance'd TMP_SpriteAsset has an empty m_Version and a
+            // NULL legacy spriteInfoList — the first spriteCharacterTable access used to run TMP's
+            // UpgradeSpriteAsset and NRE (Design System Icons tab "Add From Texture" failed on the
+            // first click, then worked on the second because the half-written asset deserialized
+            // with a non-null empty list).
+            var texture = new Texture2D(32, 32);
+            Sprite sprite = Sprite.Create(texture, new Rect(0, 0, 32, 32), new Vector2(0.5f, 0.5f));
+            DesignSystemGUI.EnsureFolder(UISpecGenerator.GeneratedRoot);
+            string assetPath = $"{UISpecGenerator.GeneratedRoot}/FreshIconTest Icon.asset";
+            try
+            {
+                TMP_SpriteAsset asset = NeoIconSpriteAssets.CreateOrUpdate(sprite, "fresh-icon-test", assetPath);
+                Assert.IsNotNull(asset, "fresh sprite asset must be created on the FIRST call");
+                Assert.AreEqual(1, asset.spriteCharacterTable.Count);
+                Assert.AreEqual("fresh-icon-test", asset.spriteCharacterTable[0].name);
+
+                TMP_SpriteAsset again = NeoIconSpriteAssets.CreateOrUpdate(sprite, "fresh-icon-test", assetPath);
+                Assert.AreSame(asset, again, "second call must update the existing asset in place");
+                Assert.AreEqual(1, again.spriteCharacterTable.Count, "update must not duplicate the character");
+            }
+            finally
+            {
+                AssetDatabase.DeleteAsset(assetPath);
+                Object.DestroyImmediate(sprite);
+                Object.DestroyImmediate(texture);
+            }
+        }
+
+        [Test]
         public void ColorUtils_DerivesStateColors()
         {
             var baseColor = new Color(0.3f, 0.6f, 0.9f);

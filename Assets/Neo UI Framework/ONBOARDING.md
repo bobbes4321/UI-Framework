@@ -356,8 +356,12 @@ The standalone look-and-feel kit every inspector/drawer routes through so everyt
   dropdown backed by the databases on `NeoUISettings`). Every pair carries two tail buttons:
   **`+`** quick-adds a new id in one step (type `Name` or `Category/Name` into a `NeoInputPopup` —
   it's written to the database and assigned to the field at once) and **`…`** jumps straight into
-  the ID Database Manager pre-selected to that database/category/name. Plain string pickers use
-  `NeoDropdown.StringPopup/ValuePopup` with an inline **"+ Add"** row — **never modal dialogs**.
+  the ID Database Manager pre-selected to that database/category/name. A component's own `id` field
+  adds a third **pencil** button that renames the GameObject to the id's canonical name
+  (`NeoIdNaming` — `"Button - Category_Name"`, a type prefix derived from the component's type plus
+  the id, the same convention generated content uses; views are the exception — prefab roots keep
+  the file's `Category_Name`). Plain string pickers use `NeoDropdown.StringPopup/ValuePopup` with an
+  inline **"+ Add"** row — **never modal dialogs**.
 
 **IMGUI performance rules** (these are why selection stays snappy):
 - Never create `GUIStyle`s / `ReorderableList`s / `SerializedObject`s per `OnGUI` pass — cache them.

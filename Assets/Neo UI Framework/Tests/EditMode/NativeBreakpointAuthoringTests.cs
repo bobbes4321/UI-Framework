@@ -89,7 +89,7 @@ namespace Neo.UI.Tests
         public void CaptureLayoutOverride_WritesExpectedDelta_PreservesOtherOverrides_AndRestoresBase()
         {
             UIView view = _instance.GetComponent<UIView>();
-            Transform cardTransform = _instance.transform.Find("Bp_Card");
+            Transform cardTransform = _instance.transform.Find("Panel - Bp_Card");
             Assert.IsNotNull(cardTransform, "fixture sanity: the card element must exist");
             GameObject card = cardTransform.gameObject;
             var rect = (RectTransform)card.transform;
@@ -160,7 +160,7 @@ namespace Neo.UI.Tests
         public void CaptureLayoutOverride_NoChangeSinceSelection_WarnsAndReturnsNull()
         {
             UIView view = _instance.GetComponent<UIView>();
-            Transform cardTransform = _instance.transform.Find("Bp_Card");
+            Transform cardTransform = _instance.transform.Find("Panel - Bp_Card");
             GameObject card = cardTransform.gameObject;
 
             ElementSpec captured = NeoSceneAuthoring.TryExportForPresetWorkflow(card);

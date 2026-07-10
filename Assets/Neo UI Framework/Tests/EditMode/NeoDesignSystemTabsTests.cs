@@ -40,7 +40,7 @@ namespace Neo.UI.Tests
 
             var ids = NeoDesignSystemTabs.Ordered.Select(t => t.id).ToArray();
             CollectionAssert.AreEqual(
-                new[] { "overview", "colors", "typography", "buttons", FakeId, "shapes", "presets", "motion", "bundles" }, ids,
+                new[] { "overview", "colors", "typography", "buttons", FakeId, "shapes", "icons", "presets", "motion", "bundles" }, ids,
                 "the tab lands at its sort order (15), between Buttons and Shapes");
         }
 

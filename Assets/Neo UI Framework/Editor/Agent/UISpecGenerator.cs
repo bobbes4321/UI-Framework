@@ -283,7 +283,7 @@ namespace Neo.UI.Editor
         private static void GeneratePreset(PresetSpec presetSpec, NeoUISettings settings, GenerateReport report)
         {
             EnsureFolder(PresetsFolder);
-            string path = $"{PresetsFolder}/{Sanitize(presetSpec.name)}.asset";
+            string path = $"{PresetsFolder}/{NeoIdNaming.Sanitize(presetSpec.name)}.asset";
 
             var preset = AssetDatabase.LoadAssetAtPath<UIAnimationPreset>(path);
             bool created = preset == null;
@@ -415,7 +415,7 @@ namespace Neo.UI.Editor
 
         internal static GameObject BuildViewGameObject(ViewSpec viewSpec, NeoUISettings settings, GenerateReport report)
         {
-            var root = new GameObject(Sanitize($"{viewSpec.category}_{viewSpec.viewName}"), typeof(RectTransform), typeof(CanvasGroup));
+            var root = new GameObject(NeoIdNaming.Sanitize($"{viewSpec.category}_{viewSpec.viewName}"), typeof(RectTransform), typeof(CanvasGroup));
             var rootRect = (RectTransform)root.transform;
             Stretch(rootRect);
 
@@ -1052,8 +1052,9 @@ namespace Neo.UI.Editor
                     return null;
             }
 
+            Component idOwner = OwnIdComponent(go);
             string elementName = !string.IsNullOrEmpty(element.id)
-                ? Sanitize(element.id.Replace('/', '_'))
+                ? NeoIdNaming.GameObjectNameFor(idOwner, element.id)
                 : $"{element.kind}_{index}";
             go.name = elementName;
 
@@ -1062,7 +1063,7 @@ namespace Neo.UI.Editor
             // so every spec-addressable element survives generate ↔ export (the spec is the source of
             // truth — an authored id must not be silently dropped). Interactive widgets already round-trip
             // their id through their own NeoId, so skip them and keep the widget prefab lean.
-            if (!string.IsNullOrEmpty(element.id) && !ElementCarriesOwnId(go))
+            if (!string.IsNullOrEmpty(element.id) && idOwner == null)
                 go.AddComponent<NeoElementId>().id = element.id;
 
             // a container with visual fields gets an NeoShape on its layout host (card/sheet look) —
@@ -1570,7 +1571,7 @@ namespace Neo.UI.Editor
         private static void GeneratePopup(PopupSpec popupSpec, NeoUISettings settings, GenerateReport report)
         {
             EnsureFolder(PopupsFolder);
-            string path = $"{PopupsFolder}/{Sanitize(popupSpec.name)}.prefab";
+            string path = $"{PopupsFolder}/{NeoIdNaming.Sanitize(popupSpec.name)}.prefab";
 
             GameObject existing = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             bool created = existing == null;
@@ -1701,7 +1702,7 @@ namespace Neo.UI.Editor
         private static void GenerateFlow(FlowSpec flowSpec, NeoUISettings settings, GenerateReport report)
         {
             EnsureFolder(FlowFolder);
-            string path = $"{FlowFolder}/{Sanitize(flowSpec.name)}.asset";
+            string path = $"{FlowFolder}/{NeoIdNaming.Sanitize(flowSpec.name)}.asset";
 
             var graph = AssetDatabase.LoadAssetAtPath<FlowGraph>(path);
             bool created = graph == null;
@@ -1824,13 +1825,6 @@ namespace Neo.UI.Editor
             return ParseVector3(value, fallback);
         }
 
-        private static string Sanitize(string value)
-        {
-            foreach (char invalid in Path.GetInvalidFileNameChars())
-                value = value.Replace(invalid, '_');
-            return value;
-        }
-
         /// <summary>
         /// The prefab asset path a view of (<paramref name="category"/>, <paramref name="viewName"/>)
         /// generates to under the current <see cref="GeneratedRoot"/>. Single source of the naming so the
@@ -1838,18 +1832,17 @@ namespace Neo.UI.Editor
         /// would, letting the two converge instead of duplicating.
         /// </summary>
         internal static string ViewPrefabPath(string category, string viewName) =>
-            $"{ViewsFolder}/{Sanitize($"{category}_{viewName}")}.prefab";
+            $"{ViewsFolder}/{NeoIdNaming.Sanitize($"{category}_{viewName}")}.prefab";
 
         /// <summary>
-        /// True when the element already exposes its id through an interactive widget's own NeoId, so the
-        /// exporter reads it back without a <see cref="NeoElementId"/> marker. Mirrors the id-bearing
-        /// component branches in <c>UISpecExporter.ExportElementBody</c>.
+        /// The widget component through which the element already exposes its own id (so the exporter
+        /// reads it back without a <see cref="NeoElementId"/> marker), null when there is none. The
+        /// widget declares this itself via <see cref="INeoIdOwner"/> — the extension seam, so a
+        /// project's id-bearing widget participates without this file keeping a component-type list.
+        /// Also the source of the element's <see cref="NeoIdNaming.TypePrefix"/> hierarchy name prefix.
         /// </summary>
-        private static bool ElementCarriesOwnId(GameObject go) =>
-            go.GetComponent<UIButton>() != null || go.GetComponent<UIToggle>() != null
-            || go.GetComponent<UITab>() != null || go.GetComponent<UISlider>() != null
-            || go.GetComponent<UIDropdown>() != null || go.GetComponent<UIToggleGroup>() != null
-            || go.GetComponent<UIPanel>() != null || go.GetComponent<UIStepper>() != null;
+        private static Component OwnIdComponent(GameObject go) =>
+            go.TryGetComponent(out INeoIdOwner owner) ? owner as Component : null;
 
         private static void EnsureFolder(string path)
         {

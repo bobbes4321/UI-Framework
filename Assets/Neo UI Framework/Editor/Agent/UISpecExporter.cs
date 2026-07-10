@@ -543,14 +543,10 @@ namespace Neo.UI.Editor
                     value = stepper.currentValue,
                     step = stepper.stepSize
                 };
-                // the stepper itself carries no id — recover it from the derived minus-button id
-                if (stepper.minusButton != null && !stepper.minusButton.id.isDefault)
-                {
-                    string buttonName = stepper.minusButton.id.Name;
-                    if (buttonName.EndsWith(UIWidgetFactory.StepperButtonSuffixMinus, System.StringComparison.Ordinal))
-                        element.id = $"{stepper.minusButton.id.Category}/" +
-                                     buttonName.Substring(0, buttonName.Length - UIWidgetFactory.StepperButtonSuffixMinus.Length);
-                }
+                // the stepper itself carries no id field — it derives its logical id from its minus button
+                // (INeoIdOwner.OwnId owns that convention; null when the button ids don't follow it)
+                CategoryNameId stepperId = ((INeoIdOwner)stepper).OwnId;
+                if (stepperId != null && !stepperId.isDefault) element.id = stepperId.ToString();
                 return element;
             }
 

@@ -18,6 +18,10 @@ MonoBehaviour:
     - Anchor
     - Card
     - Plain
+  - category: Cheats
+    names:
+    - Player
+    - World
   - category: Debug
     names:
     - Economy
@@ -45,6 +49,7 @@ MonoBehaviour:
   - category: Settings
     names:
     - Audio
+    - Controls
     - Video
   - category: SettingsPanels
     names:

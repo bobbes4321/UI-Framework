@@ -117,8 +117,11 @@ namespace Neo.UI.Editor.Authoring
         private float _cardW = DefaultCardW;
         private string _targetHint = "";
 
-        // press-to-drag tracking (a click spawns, a drag past the threshold starts DnD instead)
-        private string _pressedKey;
+        // press-to-drag tracking (a click spawns, a drag past the threshold starts DnD instead).
+        // Presses are tracked via GUIUtility.hotControl with a per-CARD control id — never by tile
+        // key: a tile in the Recent/Favorites strip is the SAME key as its category-section card, so
+        // a key match let the strip's copy (drawn first) swallow the MouseUp meant for the card the
+        // user actually clicked, making every already-recent tile spawn exactly nothing.
         private Vector2 _pressPos;
 
         // favorites / recents are static + EditorPrefs-backed so drop-handler spawns (no window
@@ -175,14 +178,14 @@ namespace Neo.UI.Editor.Authoring
             PresetThumbnailCache.Clear();
         }
 
-        // Mirrors NeoSceneAuthoring.ResolveParent so the hint tells the truth about where a click lands.
+        // The REAL resolution (NeoSceneAuthoring.FindDropParent, shared — not a hand-kept mirror) so the
+        // hint tells the truth about where a click lands, including the climb out of leaf widgets.
         private void OnSelectionChanged()
         {
-            GameObject sel = Selection.activeGameObject;
-            if (sel != null && sel.GetComponent<RectTransform>() != null
-                && sel.GetComponentInParent<Canvas>() != null)
+            RectTransform target = NeoSceneAuthoring.FindDropParent(Selection.activeGameObject);
+            if (target != null)
             {
-                _targetHint = sel.name;
+                _targetHint = target.name;
             }
             else
             {
@@ -203,10 +206,6 @@ namespace Neo.UI.Editor.Authoring
             EnsureSections();
             DrawGrid();
             DrawStatusBar();
-
-            // A release anywhere (even outside every card) ends a pending press so a stale press can
-            // never turn a later stray MouseDrag into a phantom drag.
-            if (e.rawType == EventType.MouseUp) _pressedKey = null;
         }
 
         private void DrawToolbar()
@@ -344,7 +343,10 @@ namespace Neo.UI.Editor.Authoring
                         favorite ? StarOn : StarOff);
             }
 
-            switch (e.type)
+            // One control id per drawn CARD (hotControl also captures the release when the mouse
+            // leaves the window mid-press, replacing the old rawType-MouseUp sweep).
+            int controlId = GUIUtility.GetControlID(FocusType.Passive, rect);
+            switch (e.GetTypeForControl(controlId))
             {
                 case EventType.MouseDown when e.button == 0 && rect.Contains(e.mousePosition):
                     if (starRect.Contains(e.mousePosition))
@@ -354,23 +356,23 @@ namespace Neo.UI.Editor.Authoring
                     }
                     else
                     {
-                        _pressedKey = tile.key;
+                        GUIUtility.hotControl = controlId;
                         _pressPos = e.mousePosition;
                     }
                     e.Use();
                     break;
 
-                case EventType.MouseDrag when e.button == 0 && _pressedKey == tile.key:
+                case EventType.MouseDrag when GUIUtility.hotControl == controlId:
                     if ((e.mousePosition - _pressPos).sqrMagnitude > 25f)
                     {
+                        GUIUtility.hotControl = 0; // DragAndDrop owns the gesture from here
                         StartTileDrag(tile);
-                        _pressedKey = null;
                     }
                     e.Use();
                     break;
 
-                case EventType.MouseUp when e.button == 0 && _pressedKey == tile.key:
-                    _pressedKey = null;
+                case EventType.MouseUp when GUIUtility.hotControl == controlId:
+                    GUIUtility.hotControl = 0;
                     if (rect.Contains(e.mousePosition)) SpawnTile(tile);
                     e.Use();
                     break;

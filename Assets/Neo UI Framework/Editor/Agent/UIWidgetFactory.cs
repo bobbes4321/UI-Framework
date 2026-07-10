@@ -89,8 +89,8 @@ namespace Neo.UI.Editor
         public const string ValueName = "Value";
         public const string MinusName = "Minus";
         public const string PlusName = "Plus";
-        public const string StepperButtonSuffixMinus = "_Minus";
-        public const string StepperButtonSuffixPlus = "_Plus";
+        public const string StepperButtonSuffixMinus = UIStepper.ButtonSuffixMinus;
+        public const string StepperButtonSuffixPlus = UIStepper.ButtonSuffixPlus;
 
         // tab child-name prefix — the exporter/generator address a tabbar's tab GameObjects by this
         public const string TabPrefix = "Tab_";

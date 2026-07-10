@@ -31,6 +31,36 @@ namespace Neo.UI.Tests
             AssetDatabase.SaveAssets();
         }
 
+        private UIAnimationPreset _savedHoverDefault;
+        private UIAnimationPreset _savedPressDefault;
+
+        // Buttons_GetDefaultPressFeel/hover asserts the built-in scale-pop FALLBACK
+        // (UIWidgetFactory.AddHoverAndPressFeel) — that fallback only runs when the project's
+        // NeoUISettings has no Button/Hover or Button/Press animatorDefaults configured. The live
+        // project settings asset can legitimately have those roles set (Setup wizard / Design
+        // System Motion tab), which would make this test environment-dependent instead of testing
+        // the fallback it names. Save/restore around each test so it deterministically exercises
+        // the fallback regardless of what the project has configured.
+        [SetUp]
+        public void ClearAnimatorRoleDefaults()
+        {
+            NeoUISettings settings = NeoUISettings.instance;
+            if (settings == null) return;
+            settings.TryGetDefaultAnimation(NeoAnimatorRoles.ButtonHover, out _savedHoverDefault);
+            settings.TryGetDefaultAnimation(NeoAnimatorRoles.ButtonPress, out _savedPressDefault);
+            settings.SetDefaultAnimation(NeoAnimatorRoles.ButtonHover, null);
+            settings.SetDefaultAnimation(NeoAnimatorRoles.ButtonPress, null);
+        }
+
+        [TearDown]
+        public void RestoreAnimatorRoleDefaults()
+        {
+            NeoUISettings settings = NeoUISettings.instance;
+            if (settings == null) return;
+            settings.SetDefaultAnimation(NeoAnimatorRoles.ButtonHover, _savedHoverDefault);
+            settings.SetDefaultAnimation(NeoAnimatorRoles.ButtonPress, _savedPressDefault);
+        }
+
         private static GameObject GenerateJuiceView()
         {
             GenerateReport report = UISpecGenerator.Generate(UISpec.FromJson(JuiceSpecJson));

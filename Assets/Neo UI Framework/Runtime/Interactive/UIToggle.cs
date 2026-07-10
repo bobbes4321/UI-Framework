@@ -29,12 +29,13 @@ namespace Neo.UI
     /// animation), category/name lookup, optional <see cref="UIToggleGroup"/> exclusivity.
     /// </summary>
     [AddComponentMenu("Neo/UI/Interactive/UI Toggle")]
-    public class UIToggle : UISelectable, IPointerClickHandler, ISubmitHandler
+    public class UIToggle : UISelectable, IPointerClickHandler, ISubmitHandler, INeoIdOwner
     {
         public const string StreamCategory = "UIToggle";
         public const string StreamName = "Behaviour";
 
         public ToggleId id = new ToggleId();
+        CategoryNameId INeoIdOwner.OwnId => id;
 
         [Tooltip("Optional domain stream this toggle publishes its bool value to, in addition to the " +
                  "standard \"UIToggle/Behaviour\" stream — lets game code do Signals.On<bool>(category, name, …) " +
@@ -165,6 +166,7 @@ namespace Neo.UI
         {
             if (!interactable || eventData.button != PointerEventData.InputButton.Left) return;
             Toggle();
+            DeselectAfterPointerClick();
         }
 
         public virtual void OnSubmit(BaseEventData eventData)

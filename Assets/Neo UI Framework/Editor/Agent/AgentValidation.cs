@@ -663,7 +663,14 @@ namespace Neo.UI.Editor
                 if (view != null) knownViews.Add(view.id.ToString());
             }
 
-            foreach (string guid in AssetDatabase.FindAssets("t:FlowGraph"))
+            // Scan ONLY the current GeneratedRoot — the same scope as every other per-asset lint here.
+            // Validation checks what THIS root's generation produced; a project-wide t:FlowGraph scan
+            // would pull in every committed showcase's flow graph (each lives in its own isolated
+            // Assets/Showcases/{id}/Generated root) and lint it against the current root's views —
+            // every reference reads as "unknown". A showcase's own flows get validated when validate
+            // runs inside its NeoWorkspace scope (GeneratedRoot = that showcase's root).
+            if (!AssetDatabase.IsValidFolder(UISpecGenerator.GeneratedRoot)) return;
+            foreach (string guid in AssetDatabase.FindAssets("t:FlowGraph", new[] { UISpecGenerator.GeneratedRoot }))
             {
                 var graph = AssetDatabase.LoadAssetAtPath<FlowGraph>(AssetDatabase.GUIDToAssetPath(guid));
                 if (graph == null) continue;

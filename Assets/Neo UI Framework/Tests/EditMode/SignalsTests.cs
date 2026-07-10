@@ -118,6 +118,12 @@ namespace Neo.UI.Tests
         [Test]
         public void BackButton_RespectsDisableLevels()
         {
+            // Static BackButton state (disable level + fire cooldown) is not reset by Signals.ClearAll(),
+            // so isolate it from whatever an adjacent test in this run left behind (same pattern as
+            // BackNavigationTests).
+            BackButton.EnableByForce();
+            BackButton.ResetCooldown();
+
             int fired = 0;
             Signals.On(BackButton.StreamCategory, BackButton.StreamName, () => fired++);
 

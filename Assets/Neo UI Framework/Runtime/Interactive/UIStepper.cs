@@ -7,8 +7,25 @@ namespace Neo.UI
     /// Plus/minus stepper: a value stepped by buttons (or code) with step size, min/max and value events.
     /// </summary>
     [AddComponentMenu("Neo/UI/Interactive/UI Stepper")]
-    public class UIStepper : MonoBehaviour
+    public class UIStepper : MonoBehaviour, INeoIdOwner
     {
+        // A stepper has no id field of its own — its logical element id is derived from its minus
+        // button's id ("{name}{ButtonSuffixMinus}"), the naming convention this component owns.
+        public const string ButtonSuffixMinus = "_Minus";
+        public const string ButtonSuffixPlus = "_Plus";
+
+        CategoryNameId INeoIdOwner.OwnId
+        {
+            get
+            {
+                if (minusButton == null) return null;
+                string buttonName = minusButton.id.Name;
+                if (!buttonName.EndsWith(ButtonSuffixMinus, System.StringComparison.Ordinal)) return null;
+                return new CategoryNameId(minusButton.id.Category,
+                    buttonName.Substring(0, buttonName.Length - ButtonSuffixMinus.Length));
+            }
+        }
+
         [Header("Value")]
         [SerializeField] private float value;
         public float stepSize = 1f;

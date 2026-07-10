@@ -33,7 +33,7 @@ namespace Neo.UI.Editor
         {
             EnsureFolder($"{GeneratedRoot}/Menus");
             bool isCheat = spec.kind == MenuCatalogSpec.CheatKind;
-            string assetName = Sanitize($"{spec.category}_{spec.menuName}");
+            string assetName = NeoIdNaming.Sanitize($"{spec.category}_{spec.menuName}");
             string path = $"{GeneratedRoot}/Menus/{assetName}.asset";
 
             var existing = AssetDatabase.LoadAssetAtPath<MenuCatalog>(path);
@@ -151,7 +151,7 @@ namespace Neo.UI.Editor
             CategoryNameId.Parse(id, out string category, out string name);
             string key = $"{category}/{name}";
             if (s_catalogs.TryGetValue(key, out MenuCatalog catalog)) return catalog;
-            string assetName = Sanitize($"{category}_{name}");
+            string assetName = NeoIdNaming.Sanitize($"{category}_{name}");
             return AssetDatabase.LoadAssetAtPath<MenuCatalog>($"{GeneratedRoot}/Menus/{assetName}.asset");
         }
 

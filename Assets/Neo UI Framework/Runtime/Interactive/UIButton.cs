@@ -26,7 +26,7 @@ namespace Neo.UI
     /// the channel flow-graph nodes listen to.
     /// </summary>
     [AddComponentMenu("Neo/UI/Interactive/UI Button")]
-    public class UIButton : UISelectable, IPointerClickHandler, ISubmitHandler, ITickable
+    public class UIButton : UISelectable, IPointerClickHandler, ISubmitHandler, ITickable, INeoIdOwner
     {
         public const string StreamCategory = "UIButton";
         public const string StreamName = "Behaviour";
@@ -35,6 +35,7 @@ namespace Neo.UI
         public const float LongClickThreshold = 0.5f;
 
         public ButtonId id = new ButtonId();
+        CategoryNameId INeoIdOwner.OwnId => id;
 
         [Tooltip("Configured reactions; add one per trigger you care about")]
         public List<UIActionBehaviour> behaviours = new List<UIActionBehaviour>
@@ -135,9 +136,9 @@ namespace Neo.UI
             }
 
             if (eventData.button != PointerEventData.InputButton.Left) return;
-            if (_longClickFired) return; // a long click consumed this press
 
-            Click();
+            if (!_longClickFired) Click(); // a long click consumed this press
+            DeselectAfterPointerClick();
         }
 
         public virtual void OnSubmit(BaseEventData eventData)

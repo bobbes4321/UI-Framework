@@ -107,5 +107,57 @@ namespace Neo.UI.Tests
             GameObject widget = NeoSceneAuthoring.CreateWidgetDetached("button", "NoSuchPalettePreset", _viewRoot);
             Assert.IsNotNull(widget, "an unresolvable preset must still create the bare kind (never nothing)");
         }
+
+        [Test]
+        public void CreateWidget_SelectionOnAJustSpawnedButton_AddsASiblingUnderTheStack()
+        {
+            GameObject stack = NeoSceneAuthoring.CreateWidget("vstack", _viewRoot);
+            Assert.IsNotNull(stack);
+
+            // The palette workflow: every create selects what it made, so the second click's
+            // parentSelection IS the first button — it must land as a sibling under the stack, never
+            // nest inside the button's own label row.
+            GameObject first = NeoSceneAuthoring.CreateWidget("button", stack);
+            Assert.IsNotNull(first);
+            Assert.AreSame(stack.transform, first.transform.parent, "first button lands in the stack");
+
+            GameObject second = NeoSceneAuthoring.CreateWidget("button", first);
+            Assert.IsNotNull(second, "a create targeted at a leaf widget must still build");
+            Assert.AreSame(stack.transform, second.transform.parent,
+                "a create targeted at a button must climb to the button's container");
+            Assert.AreEqual(2, CountChildButtons(stack.transform),
+                "repeat clicks must accumulate sibling buttons under the stack");
+        }
+
+        [Test]
+        public void FindDropParent_ClimbsOutOfWidgetInternalsAndLeafElements()
+        {
+            GameObject stack = NeoSceneAuthoring.CreateWidget("vstack", _viewRoot);
+            GameObject button = NeoSceneAuthoring.CreateWidget("button", stack);
+            GameObject text = NeoSceneAuthoring.CreateWidget("text", stack);
+
+            Assert.AreSame(stack.transform, (Transform)NeoSceneAuthoring.FindDropParent(stack),
+                "a layout-group container is its own drop parent");
+            Assert.AreSame(stack.transform, (Transform)NeoSceneAuthoring.FindDropParent(button),
+                "a Selectable widget resolves to its container");
+            Assert.AreSame(stack.transform, (Transform)NeoSceneAuthoring.FindDropParent(text),
+                "a leaf text element resolves to its container");
+
+            // deep inside the button (its label) still resolves to the stack, not the button's own row
+            Transform label = button.transform.childCount > 0 ? button.transform.GetChild(0) : null;
+            if (label != null)
+                Assert.AreSame(stack.transform, (Transform)NeoSceneAuthoring.FindDropParent(label.gameObject),
+                    "widget internals resolve to the widget's container");
+
+            Assert.IsNull(NeoSceneAuthoring.FindDropParent(null), "no selection resolves to null (canvas fallback)");
+        }
+
+        private static int CountChildButtons(Transform parent)
+        {
+            int count = 0;
+            for (int i = 0; i < parent.childCount; i++)
+                if (parent.GetChild(i).GetComponent<UIButton>() != null) count++;
+            return count;
+        }
     }
 }

@@ -1,0 +1,1182 @@
+[Licensing::Module] Trying to connect to existing licensing client channel...
+Built from '6000.4/staging' branch; Version is '6000.4.10f1 (feeafc12a938) revision 16706300'; Using compiler version '194234433'; Build Type 'Release'
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-maxim" at "2026-07-10T20:37:18.3443779Z"
+OS: 'Windows 11  (10.0.26200) Core' Language: 'en' Physical Memory: 32485 MB
+BatchMode: 1, IsHumanControllingUs: 0, StartBugReporterOnCrash: 0, Is64bit: 1
+System  architecture: x64
+Process architecture: x64
+Date: 2026-07-10T20:37:18Z
+
+COMMAND LINE ARGUMENTS:
+C:\Program Files\Unity\Hub\Editor\6000.4.10f1\Editor\Unity.exe
+-batchmode
+-runTests
+-testPlatform
+PlayMode
+-projectPath
+.
+-testResults
+C:\Users\maxim\RiderProjects\UI-Framework\TestResults-PlayMode.xml
+-logFile
+C:\Users\maxim\RiderProjects\UI-Framework\unity-playmode-tests.log
+Successfully changed project path to: C:/Users/maxim/RiderProjects/UI-Framework
+C:/Users/maxim/RiderProjects/UI-Framework
+[UnityMemory] Configuration Parameters - Can be set up in boot.config
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-nav-mesh-worker=65536"
+    "memorysetup-temp-allocator-size-audio-worker=65536"
+    "memorysetup-temp-allocator-size-cloud-worker=32768"
+    "memorysetup-temp-allocator-size-gfx=262144"
+    "memorysetup-temp-allocator-size-preload-manager=33554432"
+    "memorysetup-temp-allocator-size-job-worker=262144"
+    "memorysetup-temp-allocator-size-background-worker=32768"
+    "memorysetup-allocator-temp-initial-block-size-main=262144"
+    "memorysetup-allocator-temp-initial-block-size-worker=262144"
+    "memorysetup-bucket-allocator-granularity=16"
+    "memorysetup-bucket-allocator-bucket-count=8"
+    "memorysetup-bucket-allocator-block-size=33554432"
+    "memorysetup-bucket-allocator-block-count=8"
+    "memorysetup-main-allocator-block-size=16777216"
+    "memorysetup-thread-allocator-block-size=16777216"
+    "memorysetup-gfx-main-allocator-block-size=16777216"
+    "memorysetup-gfx-thread-allocator-block-size=16777216"
+    "memorysetup-cache-allocator-block-size=4194304"
+    "memorysetup-typetree-allocator-block-size=2097152"
+    "memorysetup-profiler-bucket-allocator-granularity=16"
+    "memorysetup-profiler-bucket-allocator-bucket-count=8"
+    "memorysetup-profiler-bucket-allocator-block-size=33554432"
+    "memorysetup-profiler-bucket-allocator-block-count=8"
+    "memorysetup-profiler-allocator-block-size=16777216"
+    "memorysetup-profiler-editor-allocator-block-size=1048576"
+    "memorysetup-temp-allocator-size-main=16777216"
+    "memorysetup-job-temp-allocator-block-size=2097152"
+    "memorysetup-job-temp-allocator-block-size-background=1048576"
+    "memorysetup-job-temp-allocator-reduction-small-platforms=262144"
+Player connection [30988]  Target information:
+
+Player connection [30988]  * "[IP] 192.168.1.243 [Port] 55504 [Flags] 2 [Guid] 3340308430 [EditorId] 3340308430 [Version] 1048832 [Id] WindowsEditor(7,Lenovo-Max) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" 
+
+Player connection [30988]  * "[IP] 169.254.83.107 [Port] 55504 [Flags] 2 [Guid] 3340308430 [EditorId] 3340308430 [Version] 1048832 [Id] WindowsEditor(7,Lenovo-Max) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" 
+
+Player connection [30988] Host joined multi-casting on [225.0.0.222:54997]...
+Player connection [30988] Host joined alternative multi-casting on [225.0.0.222:34997]...
+Input System module state changed to: Initialized.
+[Physics::Module] Initialized fallback backend.
+[Physics::Module] Id: 0xdecafbad
+[Package Manager] Connected to IPC stream "Upm-17864" after 0.3 seconds.
+[Licensing::Module] Licensing is not yet initialized.
+[Licensing::Client] Error: HandshakeResponse reported an error:
+	ResponseCode: 505
+	ResponseStatus: Unsupported protocol version '1.18.1'.
+[Licensing::Module] Error: Failed to handshake to channel: "LicenseClient-maxim"
+[Licensing::IpcConnector] LicenseClient-maxim channel disconnected successfully.
+[Licensing::IpcConnector] Channel LicenseClient-maxim-6000.4.10 doesn't exist
+[Licensing::Module] Successfully launched the LicensingClient (PId: 1812)
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-maxim-6000.4.10" at "2026-07-10T20:37:19.9299761Z"
+[Licensing::Client] Code 10 while verifying Licensing Client signature (process Id: 1812, path: "C:/Program Files/Unity/Hub/Editor/6000.4.10f1/Editor/Data/Resources/Licensing/Client/Unity.Licensing.Client.exe")
+[Licensing::Module] LicensingClient has failed validation; ignoring
+[Licensing::Client] Handshaking with LicensingClient:
+  Version:                 1.18.1+9fbee8e
+  Session Id:              628a463ae7ad4b5aae21de25dde1d2d1
+  Correlation Id:          3250e251e28c07d75f09f24f25074670
+  External correlation Id: 6188805861647511269
+  Machine Id:              FWU+CB9PqZLMDwmjp2a6gPFuoXw=
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-maxim-6000.4.10" (connect: 0.37s, validation: 0.05s, handshake: 0.01s)
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-maxim-6000.4.10-notifications" at "2026-07-10T20:37:19.9873693Z"
+[Licensing::Module] Connected to LicensingClient (PId: 1812, launch time: 0.00, total connection time: 0.43s)
+[Licensing::Module] Error: Access token is unavailable; failed to update
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] License group:
+  Id: 1255990-UnityPersXXXX
+  Product: Unity Personal
+  Type: Assigned
+  Expiration: Unlimited
+[Licensing::Client] Successfully updated license, isAsync: True, time: 0.01
+[Licensing::Module] Licensing Background thread has ended after 1.68s
+[Licensing::Module] Licensing is initialized (took 1.12s).
+[Licensing::Client] Successfully resolved entitlement details
+Library Redirect Path: Library/
+[Physics::Module] Selected backend.
+[Physics::Module] Name: PhysX
+[Physics::Module] Id: 0xf2b8ea05
+[Physics::Module] SDK Version: 4.1.2
+[Physics::Module] Integration Version: 1.0.0
+[Physics::Module] Threading Mode: Multi-Threaded
+Artifact Garbage Collection - Removed 7 unused hashed content files
+Initialize engine version: 6000.4.10f1 (feeafc12a938)
+[Subsystems] Discovering subsystems at path C:/Program Files/Unity/Hub/Editor/6000.4.10f1/Editor/Data/Resources/UnitySubsystems
+[Subsystems] Discovering subsystems at path C:/Users/maxim/RiderProjects/UI-Framework/Assets
+GfxDevice: creating device client; kGfxThreadingModeNonThreaded
+d3d12: failed to query info queue interface (0x80004002).
+Direct3D:
+    Version:         Direct3D 12 [level 12.2]
+    Renderer:        NVIDIA GeForce RTX 3070 (ID=0x2488)
+    Vendor:          NVIDIA
+    VRAM:            8017 MB
+    App VRAM Budget: 7249 MB
+    Driver:          32.0.15.9595
+Initialize mono
+Mono path[0] = 'C:/Program Files/Unity/Hub/Editor/6000.4.10f1/Editor/Data/Managed'
+Mono path[1] = 'C:/Program Files/Unity/Hub/Editor/6000.4.10f1/Editor/Data/MonoBleedingEdge/lib/mono/unityjit-win32'
+Mono config path = 'C:/Program Files/Unity/Hub/Editor/6000.4.10f1/Editor/Data/MonoBleedingEdge/etc'
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56864
+CodeReloadManager initialized
+Using cacheserver namespaces - metadata:defaultmetadata, artifacts:defaultartifacts
+Using cacheserver namespaces - metadata:defaultmetadata, artifacts:defaultartifacts
+ImportWorker Server TCP listen port: 0
+AcceleratorClientConnectionCallback - disconnected - :0
+Begin MonoManager ReloadAssembly
+Registering precompiled unity dll's ...
+Register platform support module: C:/Program Files/Unity/Hub/Editor/6000.4.10f1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll
+Registered in 0.002083 seconds.
+Native extension for WindowsStandalone target not found
+Package Manager log level set to [2]
+ScheduleIndexationOnStartup MainProcess:False IndexOnStartup:True
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  0.389 seconds
+Domain Reload Profiling: 821ms
+	BeginReloadAssembly (130ms)
+		CreateAndSetChildDomain (8ms)
+	RebuildCommonClasses (35ms)
+	RebuildNativeTypeToScriptingClass (11ms)
+	initialDomainReloadingComplete (62ms)
+	LoadAllAssembliesAndSetupDomain (191ms)
+		LoadAssemblies (119ms)
+		AnalyzeDomain (181ms)
+			TypeCache.Refresh (180ms)
+				TypeCache.ScanAssembly (168ms)
+	FinalizeReload (391ms)
+		SetupLoadedEditorAssemblies (0ms)
+			InitializePlatformSupportModulesInManaged (42ms)
+			BeforeProcessingInitializeOnLoad (88ms)
+			ProcessInitializeOnLoadAttributes (101ms)
+			ProcessInitializeOnLoadMethodAttributes (92ms)
+[Licensing::Client] Successfully resolved entitlement details
+Application.AssetDatabase Initial Refresh Start
+[Package Manager] Restoring resolved packages state from cache
+[Licensing::Client] Successfully resolved entitlement details
+[Package Manager] Registered 57 packages:
+  Packages from [https://packages.unity.com]:
+    com.unity.ai.navigation@2.0.12 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.ai.navigation@734c2c4c5591)
+    com.unity.collab-proxy@2.12.4 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.collab-proxy@0b1559bcd34e)
+    com.unity.ide.rider@3.0.40 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.ide.rider@e4950c6d131b)
+    com.unity.ide.visualstudio@2.0.27 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.ide.visualstudio@dc1ddd4f09b6)
+    com.unity.inputsystem@1.19.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.inputsystem@21a28c3a6c83)
+    com.unity.timeline@1.8.12 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.timeline@8cd8509afae5)
+    com.unity.visualscripting@1.9.11 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.visualscripting@8bed5ad90189)
+    com.unity.searcher@4.9.4 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.searcher@d45a78918735)
+    com.unity.burst@1.8.29 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.burst@6bb9aca3ef38)
+    com.unity.mathematics@1.3.3 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.mathematics@19a9377c4ffa)
+    com.unity.nuget.mono-cecil@1.11.6 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.nuget.mono-cecil@ecb9724e46ff)
+    com.unity.test-framework.performance@3.4.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.test-framework.performance@aa81a99c4a75)
+  Built-in packages:
+    com.unity.multiplayer.center@1.0.1 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.multiplayer.center@f01f4ba8d00a)
+    com.unity.render-pipelines.universal@17.4.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.render-pipelines.universal@cdf909593d80)
+    com.unity.test-framework@1.6.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.test-framework@996f223345ba)
+    com.unity.ugui@2.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.ugui@1f2d1ab0d950)
+    com.unity.modules.accessibility@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.accessibility)
+    com.unity.modules.adaptiveperformance@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.adaptiveperformance)
+    com.unity.modules.ai@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.ai)
+    com.unity.modules.androidjni@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.androidjni)
+    com.unity.modules.animation@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.animation)
+    com.unity.modules.assetbundle@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.assetbundle)
+    com.unity.modules.audio@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.audio)
+    com.unity.modules.cloth@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.cloth)
+    com.unity.modules.director@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.director)
+    com.unity.modules.imageconversion@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.imageconversion)
+    com.unity.modules.imgui@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.imgui)
+    com.unity.modules.jsonserialize@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.jsonserialize)
+    com.unity.modules.particlesystem@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.particlesystem)
+    com.unity.modules.physics@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.physics)
+    com.unity.modules.physics2d@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.physics2d)
+    com.unity.modules.screencapture@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.screencapture)
+    com.unity.modules.terrain@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.terrain)
+    com.unity.modules.terrainphysics@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.terrainphysics)
+    com.unity.modules.tilemap@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.tilemap)
+    com.unity.modules.ui@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.ui)
+    com.unity.modules.uielements@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.uielements)
+    com.unity.modules.umbra@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.umbra)
+    com.unity.modules.unityanalytics@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.unityanalytics)
+    com.unity.modules.unitywebrequest@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.unitywebrequest)
+    com.unity.modules.unitywebrequestassetbundle@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.unitywebrequestassetbundle)
+    com.unity.modules.unitywebrequestaudio@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.unitywebrequestaudio)
+    com.unity.modules.unitywebrequesttexture@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.unitywebrequesttexture)
+    com.unity.modules.unitywebrequestwww@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.unitywebrequestwww)
+    com.unity.modules.vectorgraphics@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.vectorgraphics)
+    com.unity.modules.vehicles@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.vehicles)
+    com.unity.modules.video@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.video)
+    com.unity.modules.vr@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.vr)
+    com.unity.modules.wind@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.wind)
+    com.unity.modules.xr@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.xr)
+    com.unity.modules.subsystems@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.subsystems)
+    com.unity.modules.hierarchycore@1.0.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.modules.hierarchycore)
+    com.unity.ext.nunit@2.0.5 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.ext.nunit@d8c07649098d)
+    com.unity.render-pipelines.core@17.4.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.render-pipelines.core@5aab14b68499)
+    com.unity.shadergraph@17.4.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.shadergraph@93ee0fdc6ad8)
+    com.unity.render-pipelines.universal-config@17.4.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.render-pipelines.universal-config@0db4263b9e6b)
+    com.unity.collections@6.4.0 (location: C:\Users\maxim\RiderProjects\UI-Framework\Library\PackageCache\com.unity.collections@5b6ebd78ccc0)
+[Subsystems] No new subsystems found in resolved package list.
+[Package Manager] Done registering packages in 0.02 seconds
+[ScriptCompilation] Requested script compilation because: AssetDatabase observed changes in script compilation related files
+Starting: C:\Program Files\Unity\Hub\Editor\6000.4.10f1\Editor\Data\Tools\BuildPipeline\bee_backend.exe --ipc --defer-dag-verification --dagfile="Library/Bee/1900b0aEDbg.dag" --continue-on-failure --profile="Library/Bee/backend1.traceevents" ScriptAssemblies
+WorkingDir: C:/Users/maxim/RiderProjects/UI-Framework
+DisplayProgressbar: Compiling Scripts
+ExitCode: 0 Duration: 0s480ms
+[746/955    0s] ILPP-Configuration Library/ilpp-configuration.nevergeneratedoutput
+[951/955    0s] Csc Library/Bee/artifacts/1900b0aEDbg.dag/Neo.UI.Tests.PlayMode.dll (+2 others)
+[952/955    0s] ILPostProcess Library/Bee/artifacts/1900b0aEDbg.dag/post-processed/Neo.UI.Tests.PlayMode.dll (+pdb)
+Processing assembly Library/Bee/artifacts/1900b0aEDbg.dag/Neo.UI.Tests.PlayMode.dll, with 139 defines and 265 references
+
+processors: Unity.Jobs.CodeGen.JobsILPostProcessor, zzzUnity.Burst.CodeGen.BurstILPostProcessor
+
+running Unity.Jobs.CodeGen.JobsILPostProcessor
+
+running zzzUnity.Burst.CodeGen.BurstILPostProcessor
+[953/955    0s] CopyFiles Library/ScriptAssemblies/Neo.UI.Tests.PlayMode.dll
+[954/955    0s] CopyFiles Library/ScriptAssemblies/Neo.UI.Tests.PlayMode.pdb
+*** Tundra build success (0.45 seconds), 5 items updated, 955 evaluated
+AssetDatabase: script compilation time: 0.990492s
+Begin MonoManager ReloadAssembly
+Assembly Assembly-CSharp-Editor-firstpass.dll at Library/ScriptAssemblies/Assembly-CSharp-Editor-firstpass.dll not valid. Loading of assembly skipped.
+Assembly Assembly-CSharp-firstpass.dll at Library/ScriptAssemblies/Assembly-CSharp-firstpass.dll not valid. Loading of assembly skipped.
+Assembly DocCodeExamples.dll at Library/ScriptAssemblies/DocCodeExamples.dll not valid. Loading of assembly skipped.
+Assembly TestNewCustomAssembly.dll at Library/ScriptAssemblies/TestNewCustomAssembly.dll not valid. Loading of assembly skipped.
+Assembly Unity.Collections.BurstCompatibilityGen.dll at Library/ScriptAssemblies/Unity.Collections.BurstCompatibilityGen.dll not valid. Loading of assembly skipped.
+Assembly Unity.Collections.DocCodeSamples.dll at Library/ScriptAssemblies/Unity.Collections.DocCodeSamples.dll not valid. Loading of assembly skipped.
+Assembly Unity.Collections.PerformanceTests.dll at Library/ScriptAssemblies/Unity.Collections.PerformanceTests.dll not valid. Loading of assembly skipped.
+Assembly Unity.Collections.Tests.dll at Library/ScriptAssemblies/Unity.Collections.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.Collections.Tests.Playmode.dll at Library/ScriptAssemblies/Unity.Collections.Tests.Playmode.dll not valid. Loading of assembly skipped.
+Assembly Unity.InputSystem.IntegrationTests.dll at Library/ScriptAssemblies/Unity.InputSystem.IntegrationTests.dll not valid. Loading of assembly skipped.
+Assembly Unity.Mathematics.Tests.dll at Library/ScriptAssemblies/Unity.Mathematics.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.Multiplayer.Center.Editor.Tests.dll at Library/ScriptAssemblies/Unity.Multiplayer.Center.Editor.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.Multiplayer.Center.Tests.dll at Library/ScriptAssemblies/Unity.Multiplayer.Center.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.Nuget.Mono-Cecil.dll at Library/ScriptAssemblies/Unity.Nuget.Mono-Cecil.dll not valid. Loading of assembly skipped.
+Assembly Unity.PathTracing.Editor.Tests.dll at Library/ScriptAssemblies/Unity.PathTracing.Editor.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.PathTracing.Runtime.Tests.dll at Library/ScriptAssemblies/Unity.PathTracing.Runtime.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.RenderPipelines.Core.Editor.Tests.dll at Library/ScriptAssemblies/Unity.RenderPipelines.Core.Editor.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.RenderPipelines.Core.Runtime.Tests.dll at Library/ScriptAssemblies/Unity.RenderPipelines.Core.Runtime.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.RenderPipelines.Universal.Config.Editor.Tests.dll at Library/ScriptAssemblies/Unity.RenderPipelines.Universal.Config.Editor.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.RenderPipelines.Universal.Editor.Tests.dll at Library/ScriptAssemblies/Unity.RenderPipelines.Universal.Editor.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.RenderPipelines.Universal.Runtime.Tests.dll at Library/ScriptAssemblies/Unity.RenderPipelines.Universal.Runtime.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.Searcher.EditorTests.dll at Library/ScriptAssemblies/Unity.Searcher.EditorTests.dll not valid. Loading of assembly skipped.
+Assembly Unity.ShaderGraph.Editor.Tests.dll at Library/ScriptAssemblies/Unity.ShaderGraph.Editor.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.TextMeshPro.Editor.Tests.dll at Library/ScriptAssemblies/Unity.TextMeshPro.Editor.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.TextMeshPro.Tests.dll at Library/ScriptAssemblies/Unity.TextMeshPro.Tests.dll not valid. Loading of assembly skipped.
+Assembly Unity.UnifiedRayTracing.Editor.Tests.dll at Library/ScriptAssemblies/Unity.UnifiedRayTracing.Editor.Tests.dll not valid. Loading of assembly skipped.
+Assembly UnityEditor.UI.Common.Tests.dll at Library/ScriptAssemblies/UnityEditor.UI.Common.Tests.dll not valid. Loading of assembly skipped.
+Assembly UnityEditor.UI.EditorTests.dll at Library/ScriptAssemblies/UnityEditor.UI.EditorTests.dll not valid. Loading of assembly skipped.
+Assembly UnityEngine.UI.Tests.dll at Library/ScriptAssemblies/UnityEngine.UI.Tests.dll not valid. Loading of assembly skipped.
+Native extension for WindowsStandalone target not found
+Refreshing native plugins compatible for Editor in 2.33 ms, found 4 plugins.
+ScheduleIndexationOnStartup MainProcess:True IndexOnStartup:True
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  4.934 seconds
+Domain Reload Profiling: 5943ms
+	BeginReloadAssembly (307ms)
+		DisableScriptedObjects (21ms)
+		CreateAndSetChildDomain (141ms)
+	RebuildCommonClasses (36ms)
+	RebuildNativeTypeToScriptingClass (12ms)
+	initialDomainReloadingComplete (68ms)
+	LoadAllAssembliesAndSetupDomain (586ms)
+		LoadAssemblies (408ms)
+		AnalyzeDomain (268ms)
+			TypeCache.Refresh (186ms)
+				TypeCache.ScanAssembly (174ms)
+			BuildScriptInfoCaches (68ms)
+			ResolveRequiredComponents (13ms)
+	FinalizeReload (4935ms)
+		SetupLoadedEditorAssemblies (0ms)
+			InitializePlatformSupportModulesInManaged (22ms)
+			BeforeProcessingInitializeOnLoad (243ms)
+			ProcessInitializeOnLoadAttributes (4286ms)
+			ProcessInitializeOnLoadMethodAttributes (92ms)
+			AfterProcessingInitializeOnLoad (9ms)
+		AwakeInstancesAfterBackupRestoration (20ms)
+Refreshing native plugins compatible for Editor in 2.20 ms, found 4 plugins.
+(Values over 0.050ms)
+Asset Pipeline Refresh (id=b31b5683a5ca33a47a49d17a0eb190bf): Total: 7.813 seconds - Initiated by InitialRefreshV2(ForceSynchronousImport)
+	Summary:
+		Imports: total=0 (actual=0, local cache=0, cache server=0)
+		Asset DB Process Time: managed=0 ms, native=5437 ms
+		Asset DB Callback time: managed=225 ms, native=35 ms
+		Scripting: domain reloads=1, domain reload time=1015 ms, compile time=992 ms, other=106 ms
+		Project Asset Count: scripts=1447, non-scripts=2889
+		Asset File Changes: new=0, changed=1, moved=0, deleted=0
+		Scan Filter Count: 0
+	InvokePackagesCallback: 29.018ms
+	ApplyChangesToAssetFolders: 0.804ms
+	Scan: 105.983ms
+	OnSourceAssetsModified: 0.740ms
+	CategorizeScriptCompilationAssets: 50.813ms
+	ProcessAssetsWithTransientArtifactChanges: 75.981ms
+	CategorizeAssets: 55.563ms
+	CompileScripts: 991.564ms
+	ImportOutOfDateAssets: 4944.764ms (4943.117ms without children)
+		UnloadImportedAssets: 0.687ms
+		EnsureUptoDateAssetsAreRegisteredWithGuidPM: 0.540ms
+		OnDemandSchedulerStart: 0.388ms
+	PostProcessAllAssets: 227.213ms
+		VCAutoAddAssetPostprocess 1.100ms
+		XRBuildSystem.XRAssetImported 0.804ms
+		MonoPostProcessAllAssets: 224.578ms
+			AssetPostprocessor.OnPostprocessAllAssets 145.734ms
+			UniversalRenderPipelineGlobalSettingsPostprocessor.OnPostprocessAllAssets 22.052ms
+			StyleCatalogPostProcessor.OnPostprocessAllAssets 19.464ms
+			BuilderAssetPostprocessor.OnPostprocessAllAssets 4.601ms
+			SpeedTree9Postprocessor.OnPostprocessAllAssets 2.798ms
+			AssetChangedListener.OnPostprocessAllAssets 2.123ms
+			ShaderGraphAssetPostProcessor.OnPostprocessAllAssets 2.091ms
+			SyncVS.PostprocessSyncProject 1.963ms
+			WindowAssetPostprocessingWatcher.OnPostprocessAllAssets 1.821ms
+			RetainedModeAssetPostprocessor.OnPostprocessAllAssets 1.092ms
+			MaterialPostprocessor.OnPostprocessAllAssets 0.752ms
+			NeoAssetRegistryPostprocessor.OnPostprocessAllAssets 0.674ms
+			RenderPipelineGlobalSettingsPostprocessor.OnPostprocessAllAssets 0.673ms
+			ArtifactBrowserPostProcessor.OnPostprocessAllAssets 0.597ms
+			InputActionAssetPostprocessor.OnPostprocessAllAssets 0.521ms
+			UVCSAssetPostprocessor.OnPostprocessAllAssets 0.504ms
+			TextAssetPostProcessor.OnPostprocessAllAssets 0.427ms
+			PostProcessor.OnPostprocessAllAssets 0.363ms
+			SamplePostprocessor.OnPostprocessAllAssets 0.355ms
+			TMPro_TexturePostProcessor.OnPostprocessAllAssets 0.340ms
+			InputActionJsonNameModifierAssetProcessor.OnPostprocessAllAssets 0.331ms
+			AudioMixerPostprocessor.OnPostprocessAllAssets 0.271ms
+			ReferencedClipsPostProcessor.OnPostprocessAllAssets 0.266ms
+			TerrainToolbarOverlayPostProcessor.OnPostprocessAllAssets 0.233ms
+			AssetEvents.OnPostprocessAllAssets 0.230ms
+			ProjectSettingsPostprocessor.OnPostprocessAllAssets 0.218ms
+			SpeedTreePostProcessor.OnPostprocessAllAssets 0.176ms
+			ConfigAssetsTracker.OnPostprocessAllAssets 0.172ms
+			AssetDatabaseCallbacks.OnPostprocessAllAssets 0.165ms
+			ScenarioDriftAssetsTracker.OnPostprocessAllAssets 0.151ms
+			AudioContainerPostProcessor.OnPostprocessAllAssets 0.080ms
+	PostAssetChangesProfiler: 6.136ms
+	UnloadStreamsBegin: 3.656ms
+	PersistCurrentRevisions: 0.177ms
+	GenerateScriptTypeHashes: 3.253ms
+	GenerateScriptTypeSerializationHashes: 5.688ms
+	Untracked: 1312.939ms
+
+Application.AssetDatabase Initial Refresh End
+Launched and connected shader compiler UnityShaderCompiler.exe after 0.01 seconds
+Scanning for USB devices : 4.123ms
+Initializing Unity extensions:
+[MODES] ModeService[none].Initialize
+[MODES] ModeService[none].LoadModes
+[MODES] Loading mode Default (0) for mode-current-id-UI Package
+Unloading 27 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 6994 unused Assets / (6.4 MB). Loaded Objects now: 7869.
+Memory consumption went from 216.4 MB to 210.0 MB.
+Total: 15.294500 ms (FindLiveObjects: 0.913700 ms CreateObjectMapping: 0.663500 ms MarkObjects: 6.176800 ms  DeleteObjects: 7.537100 ms)
+
+[Project] Loading completed in 11.619 seconds
+	Project init time: 				11.191 seconds
+		Template init time: 		0.000 seconds
+		Package Manager init time: 		1.407 seconds
+		Asset Database init time: 		0.152 seconds
+		Global illumination init time: 	0.002 seconds
+		Assemblies load time: 			0.866 seconds
+		Unity extensions init time: 	0.007 seconds
+		Asset Database refresh time: 	7.813 seconds
+	Scene opening time: 			0.162 seconds
+##utp:{"type":"ProjectInfo","version":2,"phase":"Immediate","time":1783715849955,"processId":17864,"projectLoad":11.6189841,"projectInit":11.1907872,"templateInit":0.0,"packageManagerInit":1.4074139,"assetDatabaseInit":0.1524632,"globalIlluminationInit":0.0021894,"assembliesLoad":0.8661092,"unityExtensionsInit":0.0072227,"assetDatabaseRefresh":7.8130653,"sceneOpening":0.1615104}
+##utp:{"type":"EditorInfo","version":2,"phase":"Immediate","time":1783715849955,"processId":17864,"editorVersion":"6000.4.10f1 (feeafc12a938)","branch":"6000.4/staging","buildType":"Release","platform":"Windows"}
+[Licensing::Client] Successfully resolved entitlement details
+Running tests for ExecutionSettings with details:
+targetPlatform = 
+playerHeartbeatTimeout = 600
+filters[0] = 
+   Filter with settings:
+   testMode = PlayMode
+   targetPlatform = 
+   testNames = null
+   groupNames = null
+   categoryNames = null
+   assemblyNames = null
+ignoreTests = {}
+featureFlags = null
+
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+UnityEditor.TestTools.TestRunner.CommandLineTest.Executer:InitializeAndExecuteRun (string[]) (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEditor.TestRunner/CommandLineTest/Executer.cs:53)
+UnityEditor.TestTools.TestRunner.CommandLineTest.TestStarter:InitializeAndExecuteRun () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEditor.TestRunner/CommandLineTest/TestStarter.cs:64)
+UnityEditor.EditorApplication:Internal_CallUpdateFunctions ()
+
+(Filename: ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEditor.TestRunner/CommandLineTest/Executer.cs Line: 53)
+
+Start Indexing on Editor startup
+[Indexing] Starting Initial Indexing for Assets
+[UnityConnectServicesConfig] config is NOT valid, switching to default
+Created GICache directory at C:/Users/maxim/AppData/LocalLow/Unity/Caches/GiCache. Took: 0.014s, timestamps: [11.621 - 11.635]
+[Licensing::Client] Successfully resolved entitlement details
+Unloading 6 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 4 unused Assets / (57.2 KB). Loaded Objects now: 7889.
+Memory consumption went from 201.2 MB to 201.2 MB.
+Total: 8.600900 ms (FindLiveObjects: 0.436200 ms CreateObjectMapping: 0.290400 ms MarkObjects: 7.754200 ms  DeleteObjects: 0.118300 ms)
+
+Start importing Assets/InitTestScene05644b39-f6fe-4528-b9a6-e3aae9206787.unity using Guid(3e5c7997f6b22e34a8e6e814295f2ae7) (DefaultImporter) -> (Import Result ID: 'a1718d9e15689d470fdfc959a834a1c4') in 0.0067502 seconds [static dependencies only]. Details - ImportResultOutputID=ca44f7c8626a53540094c18975a92d50 DependenciesID=ad36861f34024b03fca15e82e2775c0e StaticDependenciesID=10d16b789b379f98abb279d6b8158fce 
+Asset Pipeline Refresh (id=8750499ba00d2e144a4622ed1de0a0d4): Total: 0.075 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Executing IPrebuildSetup for: Unity.PerformanceTesting.Editor.TestRunBuilder.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+UnityEditor.TestTools.TestRunner.TestRun.Tasks.BuildActionTaskBase`1/<ExecuteMethods>d__8<UnityEngine.TestTools.IPrebuildSetup>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEditor.TestRunner/TestRun/Tasks/BuildActionTaskBase.cs:48)
+UnityEditor.TestTools.TestRunner.TestRun.Tasks.BuildActionTaskBase`1/<Execute>d__7<UnityEngine.TestTools.IPrebuildSetup>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEditor.TestRunner/TestRun/Tasks/BuildActionTaskBase.cs:34)
+UnityEditor.TestTools.TestRunner.TestRun.TestJobRunner:ExecuteStep () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEditor.TestRunner/TestRun/TestJobRunner.cs:173)
+UnityEditor.TestTools.TestRunner.TestRun.TestJobRunner:ExecuteCallback () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEditor.TestRunner/TestRun/TestJobRunner.cs:108)
+UnityEditor.EditorApplication:Internal_CallUpdateFunctions ()
+
+(Filename: ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEditor.TestRunner/TestRun/Tasks/BuildActionTaskBase.cs Line: 48)
+
+Entering Playmode with Reload Domain disabled.
+If you experience any issues, please disable "Enter Play Mode Options" in Editor Settings
+Loaded scene 'Temp/__Backupscenes/0.backup'
+	Deserialize:            1.532 ms
+	Integration:            242.833 ms
+	Integration of assets:  0.003 ms
+	Thread Wait Time:       0.015 ms
+	Total Operation Time:   244.382 ms
+ThemeColorTarget on 'Title': theme token 'TextStrong' not found in theme ''.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object,UnityEngine.Object)
+UnityEngine.Debug:LogWarning (object,UnityEngine.Object)
+Neo.UI.ThemeColorTarget:ApplyColor () (at Assets/Neo UI Framework/Runtime/Theming/ThemeColorTarget.cs:104)
+Neo.UI.ThemeColorTarget:OnValidate () (at Assets/Neo UI Framework/Runtime/Theming/ThemeColorTarget.cs:57)
+UnityEngine.ResourcesAPIInternal:Load (string,System.Type)
+UnityEngine.ResourcesAPI:Load (string,System.Type)
+UnityEngine.Resources:Load (string,System.Type)
+UnityEngine.Resources:Load<Neo.UI.NeoUISettings> (string)
+Neo.UI.NeoUISettings:get_instance () (at Assets/Neo UI Framework/Runtime/Settings/NeoUISettings.cs:22)
+Neo.UI.BackButton:get_configuredButtonName () (at Assets/Neo UI Framework/Runtime/Interactive/BackButton.cs:40)
+Neo.UI.BackButton:IsBackButtonName (string) (at Assets/Neo UI Framework/Runtime/Interactive/BackButton.cs:81)
+Neo.UI.BackButton/ButtonBridge:OnSignal (Neo.UI.Signal) (at Assets/Neo UI Framework/Runtime/Interactive/BackButton.cs:108)
+Neo.UI.SignalStream:Deliver (Neo.UI.Signal) (at Assets/Neo UI Framework/Runtime/Signals/SignalStream.cs:94)
+Neo.UI.SignalStream:SendSignal<Neo.UI.ButtonSignalData> (Neo.UI.ButtonSignalData,object,string) (at Assets/Neo UI Framework/Runtime/Signals/SignalStream.cs:68)
+Neo.UI.Signals:Send<Neo.UI.ButtonSignalData> (string,string,Neo.UI.ButtonSignalData,object,string) (at Assets/Neo UI Framework/Runtime/Signals/Signals.cs:55)
+Neo.UI.UIButton:PublishSignal (Neo.UI.BehaviourTrigger) (at Assets/Neo UI Framework/Runtime/Interactive/UIButton.cs:210)
+Neo.UI.UIButton:ExecuteTrigger (Neo.UI.BehaviourTrigger) (at Assets/Neo UI Framework/Runtime/Interactive/UIButton.cs:196)
+Neo.UI.UIButton:Click () (at Assets/Neo UI Framework/Runtime/Interactive/UIButton.cs:177)
+Neo.UI.Tests.FullStackEndToEndTest/<WorkedExample_ThemeAnimationSignalsAndFlow_AllCooperate>d__2:MoveNext () (at Assets/Neo UI Framework/Tests/PlayMode/FullStackEndToEndTest.cs:115)
+UnityEngine.TestTools.TestEnumerator/<Execute>d__7:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:44)
+UnityEngine.TestTools.EnumerableTestMethodCommand/<ExecuteEnumerableAndRecordExceptions>d__4:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/EnumerableTestMethodCommand.cs:79)
+UnityEngine.TestTools.EnumerableTestMethodCommand:AdvanceEnumerator (System.Collections.IEnumerator) (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/EnumerableTestMethodCommand.cs:64)
+UnityEngine.TestTools.EnumerableTestMethodCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/EnumerableTestMethodCommand.cs:47)
+UnityEngine.TestRunner.NUnitExtensions.Runner.UnityLogCheckDelegatingCommand/<ExecuteEnumerable>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Runner/UnityLogCheckDelegatingCommand.cs:48)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<NUnit.Framework.ITestAction>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<UnityEngine.TestTools.IOuterUnityTestAction>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.RetryCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RetryCommand.cs:37)
+UnityEngine.TestTools.RepeatCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RepeatCommand.cs:36)
+UnityEngine.TestTools.IgnoreTestCommand/<ExecuteEnumerable>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/IgnoreTestCommand.cs:42)
+UnityEngine.TestTools.StrictCheckCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/StrictCheckCommand.cs:29)
+UnityEngine.TestTools.Utils.CoroutineRunner/<WrapEnumeratorForChecks>d__8:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/Utils/CoroutineRunner.cs:58)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+(Filename: Assets/Neo UI Framework/Runtime/Theming/ThemeColorTarget.cs Line: 104)
+
+ThemeColorTarget on 'Overlay': theme token 'Shadow' not found in theme ''.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object,UnityEngine.Object)
+UnityEngine.Debug:LogWarning (object,UnityEngine.Object)
+Neo.UI.ThemeColorTarget:ApplyColor () (at Assets/Neo UI Framework/Runtime/Theming/ThemeColorTarget.cs:104)
+Neo.UI.ThemeColorTarget:OnValidate () (at Assets/Neo UI Framework/Runtime/Theming/ThemeColorTarget.cs:57)
+UnityEngine.ResourcesAPIInternal:Load (string,System.Type)
+UnityEngine.ResourcesAPI:Load (string,System.Type)
+UnityEngine.Resources:Load (string,System.Type)
+UnityEngine.Resources:Load<Neo.UI.NeoUISettings> (string)
+Neo.UI.NeoUISettings:get_instance () (at Assets/Neo UI Framework/Runtime/Settings/NeoUISettings.cs:22)
+Neo.UI.BackButton:get_configuredButtonName () (at Assets/Neo UI Framework/Runtime/Interactive/BackButton.cs:40)
+Neo.UI.BackButton:IsBackButtonName (string) (at Assets/Neo UI Framework/Runtime/Interactive/BackButton.cs:81)
+Neo.UI.BackButton/ButtonBridge:OnSignal (Neo.UI.Signal) (at Assets/Neo UI Framework/Runtime/Interactive/BackButton.cs:108)
+Neo.UI.SignalStream:Deliver (Neo.UI.Signal) (at Assets/Neo UI Framework/Runtime/Signals/SignalStream.cs:94)
+Neo.UI.SignalStream:SendSignal<Neo.UI.ButtonSignalData> (Neo.UI.ButtonSignalData,object,string) (at Assets/Neo UI Framework/Runtime/Signals/SignalStream.cs:68)
+Neo.UI.Signals:Send<Neo.UI.ButtonSignalData> (string,string,Neo.UI.ButtonSignalData,object,string) (at Assets/Neo UI Framework/Runtime/Signals/Signals.cs:55)
+Neo.UI.UIButton:PublishSignal (Neo.UI.BehaviourTrigger) (at Assets/Neo UI Framework/Runtime/Interactive/UIButton.cs:210)
+Neo.UI.UIButton:ExecuteTrigger (Neo.UI.BehaviourTrigger) (at Assets/Neo UI Framework/Runtime/Interactive/UIButton.cs:196)
+Neo.UI.UIButton:Click () (at Assets/Neo UI Framework/Runtime/Interactive/UIButton.cs:177)
+Neo.UI.Tests.FullStackEndToEndTest/<WorkedExample_ThemeAnimationSignalsAndFlow_AllCooperate>d__2:MoveNext () (at Assets/Neo UI Framework/Tests/PlayMode/FullStackEndToEndTest.cs:115)
+UnityEngine.TestTools.TestEnumerator/<Execute>d__7:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:44)
+UnityEngine.TestTools.EnumerableTestMethodCommand/<ExecuteEnumerableAndRecordExceptions>d__4:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/EnumerableTestMethodCommand.cs:79)
+UnityEngine.TestTools.EnumerableTestMethodCommand:AdvanceEnumerator (System.Collections.IEnumerator) (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/EnumerableTestMethodCommand.cs:64)
+UnityEngine.TestTools.EnumerableTestMethodCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/EnumerableTestMethodCommand.cs:47)
+UnityEngine.TestRunner.NUnitExtensions.Runner.UnityLogCheckDelegatingCommand/<ExecuteEnumerable>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Runner/UnityLogCheckDelegatingCommand.cs:48)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<NUnit.Framework.ITestAction>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<UnityEngine.TestTools.IOuterUnityTestAction>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.RetryCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RetryCommand.cs:37)
+UnityEngine.TestTools.RepeatCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RepeatCommand.cs:36)
+UnityEngine.TestTools.IgnoreTestCommand/<ExecuteEnumerable>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/IgnoreTestCommand.cs:42)
+UnityEngine.TestTools.StrictCheckCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/StrictCheckCommand.cs:29)
+UnityEngine.TestTools.Utils.CoroutineRunner/<WrapEnumeratorForChecks>d__8:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/Utils/CoroutineRunner.cs:58)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+(Filename: Assets/Neo UI Framework/Runtime/Theming/ThemeColorTarget.cs Line: 104)
+
+ThemeColorTarget on 'Message': theme token 'TextDefault' not found in theme ''.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object,UnityEngine.Object)
+UnityEngine.Debug:LogWarning (object,UnityEngine.Object)
+Neo.UI.ThemeColorTarget:ApplyColor () (at Assets/Neo UI Framework/Runtime/Theming/ThemeColorTarget.cs:104)
+Neo.UI.ThemeColorTarget:OnValidate () (at Assets/Neo UI Framework/Runtime/Theming/ThemeColorTarget.cs:57)
+UnityEngine.ResourcesAPIInternal:Load (string,System.Type)
+UnityEngine.ResourcesAPI:Load (string,System.Type)
+UnityEngine.Resources:Load (string,System.Type)
+UnityEngine.Resources:Load<Neo.UI.NeoUISettings> (string)
+Neo.UI.NeoUISettings:get_instance () (at Assets/Neo UI Framework/Runtime/Settings/NeoUISettings.cs:22)
+Neo.UI.BackButton:get_configuredButtonName () (at Assets/Neo UI Framework/Runtime/Interactive/BackButton.cs:40)
+Neo.UI.BackButton:IsBackButtonName (string) (at Assets/Neo UI Framework/Runtime/Interactive/BackButton.cs:81)
+Neo.UI.BackButton/ButtonBridge:OnSignal (Neo.UI.Signal) (at Assets/Neo UI Framework/Runtime/Interactive/BackButton.cs:108)
+Neo.UI.SignalStream:Deliver (Neo.UI.Signal) (at Assets/Neo UI Framework/Runtime/Signals/SignalStream.cs:94)
+Neo.UI.SignalStream:SendSignal<Neo.UI.ButtonSignalData> (Neo.UI.ButtonSignalData,object,string) (at Assets/Neo UI Framework/Runtime/Signals/SignalStream.cs:68)
+Neo.UI.Signals:Send<Neo.UI.ButtonSignalData> (string,string,Neo.UI.ButtonSignalData,object,string) (at Assets/Neo UI Framework/Runtime/Signals/Signals.cs:55)
+Neo.UI.UIButton:PublishSignal (Neo.UI.BehaviourTrigger) (at Assets/Neo UI Framework/Runtime/Interactive/UIButton.cs:210)
+Neo.UI.UIButton:ExecuteTrigger (Neo.UI.BehaviourTrigger) (at Assets/Neo UI Framework/Runtime/Interactive/UIButton.cs:196)
+Neo.UI.UIButton:Click () (at Assets/Neo UI Framework/Runtime/Interactive/UIButton.cs:177)
+Neo.UI.Tests.FullStackEndToEndTest/<WorkedExample_ThemeAnimationSignalsAndFlow_AllCooperate>d__2:MoveNext () (at Assets/Neo UI Framework/Tests/PlayMode/FullStackEndToEndTest.cs:115)
+UnityEngine.TestTools.TestEnumerator/<Execute>d__7:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:44)
+UnityEngine.TestTools.EnumerableTestMethodCommand/<ExecuteEnumerableAndRecordExceptions>d__4:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/EnumerableTestMethodCommand.cs:79)
+UnityEngine.TestTools.EnumerableTestMethodCommand:AdvanceEnumerator (System.Collections.IEnumerator) (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/EnumerableTestMethodCommand.cs:64)
+UnityEngine.TestTools.EnumerableTestMethodCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/EnumerableTestMethodCommand.cs:47)
+UnityEngine.TestRunner.NUnitExtensions.Runner.UnityLogCheckDelegatingCommand/<ExecuteEnumerable>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Runner/UnityLogCheckDelegatingCommand.cs:48)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<NUnit.Framework.ITestAction>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<UnityEngine.TestTools.IOuterUnityTestAction>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.RetryCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RetryCommand.cs:37)
+UnityEngine.TestTools.RepeatCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RepeatCommand.cs:36)
+UnityEngine.TestTools.IgnoreTestCommand/<ExecuteEnumerable>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/IgnoreTestCommand.cs:42)
+UnityEngine.TestTools.StrictCheckCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/StrictCheckCommand.cs:29)
+UnityEngine.TestTools.Utils.CoroutineRunner/<WrapEnumeratorForChecks>d__8:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/Utils/CoroutineRunner.cs:58)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+(Filename: Assets/Neo UI Framework/Runtime/Theming/ThemeColorTarget.cs Line: 104)
+
+ThemeColorTarget on 'Shadow': theme token 'Shadow' not found in theme ''.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object,UnityEngine.Object)
+UnityEngine.Debug:LogWarning (object,UnityEngine.Object)
+Neo.UI.ThemeColorTarget:ApplyColor () (at Assets/Neo UI Framework/Runtime/Theming/ThemeColorTarget.cs:104)
+Neo.UI.ThemeColorTarget:OnValidate () (at Assets/Neo UI Framework/Runtime/Theming/ThemeColorTarget.cs:57)
+UnityEngine.ResourcesAPIInternal:Load (string,System.Type)
+UnityEngine.ResourcesAPI:Load (string,System.Type)
+UnityEngine.Resources:Load (string,System.Type)
+UnityEngine.Resources:Load<Neo.UI.NeoUISettings> (string)
+Neo.UI.NeoUISettings:get_instance () (at Assets/Neo UI Framework/Runtime/Settings/NeoUISettings.cs:22)
+Neo.UI.BackButton:get_configuredButtonName () (at Assets/Neo UI Framework/Runtime/Interactive/BackButton.cs:40)
+Neo.UI.BackButton:IsBackButtonName (string) (at Assets/Neo UI Framework/Runtime/Interactive/BackButton.cs:81)
+Neo.UI.BackButton/ButtonBridge:OnSignal (Neo.UI.Signal) (at Assets/Neo UI Framework/Runtime/Interactive/BackButton.cs:108)
+Neo.UI.SignalStream:Deliver (Neo.UI.Signal) (at Assets/Neo UI Framework/Runtime/Signals/SignalStream.cs:94)
+Neo.UI.SignalStream:SendSignal<Neo.UI.ButtonSignalData> (Neo.UI.ButtonSignalData,object,string) (at Assets/Neo UI Framework/Runtime/Signals/SignalStream.cs:68)
+Neo.UI.Signals:Send<Neo.UI.ButtonSignalData> (string,string,Neo.UI.ButtonSignalData,object,string) (at Assets/Neo UI Framework/Runtime/Signals/Signals.cs:55)
+Neo.UI.UIButton:PublishSignal (Neo.UI.BehaviourTrigger) (at Assets/Neo UI Framework/Runtime/Interactive/UIButton.cs:210)
+Neo.UI.UIButton:ExecuteTrigger (Neo.UI.BehaviourTrigger) (at Assets/Neo UI Framework/Runtime/Interactive/UIButton.cs:196)
+Neo.UI.UIButton:Click () (at Assets/Neo UI Framework/Runtime/Interactive/UIButton.cs:177)
+Neo.UI.Tests.FullStackEndToEndTest/<WorkedExample_ThemeAnimationSignalsAndFlow_AllCooperate>d__2:MoveNext () (at Assets/Neo UI Framework/Tests/PlayMode/FullStackEndToEndTest.cs:115)
+UnityEngine.TestTools.TestEnumerator/<Execute>d__7:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:44)
+UnityEngine.TestTools.EnumerableTestMethodCommand/<ExecuteEnumerableAndRecordExceptions>d__4:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/EnumerableTestMethodCommand.cs:79)
+UnityEngine.TestTools.EnumerableTestMethodCommand:AdvanceEnumerator (System.Collections.IEnumerator) (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/EnumerableTestMethodCommand.cs:64)
+UnityEngine.TestTools.EnumerableTestMethodCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/EnumerableTestMethodCommand.cs:47)
+UnityEngine.TestRunner.NUnitExtensions.Runner.UnityLogCheckDelegatingCommand/<ExecuteEnumerable>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Runner/UnityLogCheckDelegatingCommand.cs:48)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<NUnit.Framework.ITestAction>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<UnityEngine.TestTools.IOuterUnityTestAction>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.RetryCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RetryCommand.cs:37)
+UnityEngine.TestTools.RepeatCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RepeatCommand.cs:36)
+UnityEngine.TestTools.IgnoreTestCommand/<ExecuteEnumerable>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/IgnoreTestCommand.cs:42)
+UnityEngine.TestTools.StrictCheckCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/StrictCheckCommand.cs:29)
+UnityEngine.TestTools.Utils.CoroutineRunner/<WrapEnumeratorForChecks>d__8:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/Utils/CoroutineRunner.cs:58)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+(Filename: Assets/Neo UI Framework/Runtime/Theming/ThemeColorTarget.cs Line: 104)
+
+ThemeColorTarget on 'Surface': theme token 'Surface' not found in theme ''.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object,UnityEngine.Object)
+UnityEngine.Debug:LogWarning (object,UnityEngine.Object)
+Neo.UI.ThemeColorTarget:ApplyColor () (at Assets/Neo UI Framework/Runtime/Theming/ThemeColorTarget.cs:104)
+Neo.UI.ThemeColorTarget:OnValidate () (at Assets/Neo UI Framework/Runtime/Theming/ThemeColorTarget.cs:57)
+UnityEngine.ResourcesAPIInternal:Load (string,System.Type)
+UnityEngine.ResourcesAPI:Load (string,System.Type)
+UnityEngine.Resources:Load (string,System.Type)
+UnityEngine.Resources:Load<Neo.UI.NeoUISettings> (string)
+Neo.UI.NeoUISettings:get_instance () (at Assets/Neo UI Framework/Runtime/Settings/NeoUISettings.cs:22)
+Neo.UI.BackButton:get_configuredButtonName () (at Assets/Neo UI Framework/Runtime/Interactive/BackButton.cs:40)
+Neo.UI.BackButton:IsBackButtonName (string) (at Assets/Neo UI Framework/Runtime/Interactive/BackButton.cs:81)
+Neo.UI.BackButton/ButtonBridge:OnSignal (Neo.UI.Signal) (at Assets/Neo UI Framework/Runtime/Interactive/BackButton.cs:108)
+Neo.UI.SignalStream:Deliver (Neo.UI.Signal) (at Assets/Neo UI Framework/Runtime/Signals/SignalStream.cs:94)
+Neo.UI.SignalStream:SendSignal<Neo.UI.ButtonSignalData> (Neo.UI.ButtonSignalData,object,string) (at Assets/Neo UI Framework/Runtime/Signals/SignalStream.cs:68)
+Neo.UI.Signals:Send<Neo.UI.ButtonSignalData> (string,string,Neo.UI.ButtonSignalData,object,string) (at Assets/Neo UI Framework/Runtime/Signals/Signals.cs:55)
+Neo.UI.UIButton:PublishSignal (Neo.UI.BehaviourTrigger) (at Assets/Neo UI Framework/Runtime/Interactive/UIButton.cs:210)
+Neo.UI.UIButton:ExecuteTrigger (Neo.UI.BehaviourTrigger) (at Assets/Neo UI Framework/Runtime/Interactive/UIButton.cs:196)
+Neo.UI.UIButton:Click () (at Assets/Neo UI Framework/Runtime/Interactive/UIButton.cs:177)
+Neo.UI.Tests.FullStackEndToEndTest/<WorkedExample_ThemeAnimationSignalsAndFlow_AllCooperate>d__2:MoveNext () (at Assets/Neo UI Framework/Tests/PlayMode/FullStackEndToEndTest.cs:115)
+UnityEngine.TestTools.TestEnumerator/<Execute>d__7:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:44)
+UnityEngine.TestTools.EnumerableTestMethodCommand/<ExecuteEnumerableAndRecordExceptions>d__4:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/EnumerableTestMethodCommand.cs:79)
+UnityEngine.TestTools.EnumerableTestMethodCommand:AdvanceEnumerator (System.Collections.IEnumerator) (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/EnumerableTestMethodCommand.cs:64)
+UnityEngine.TestTools.EnumerableTestMethodCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/EnumerableTestMethodCommand.cs:47)
+UnityEngine.TestRunner.NUnitExtensions.Runner.UnityLogCheckDelegatingCommand/<ExecuteEnumerable>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Runner/UnityLogCheckDelegatingCommand.cs:48)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<NUnit.Framework.ITestAction>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<UnityEngine.TestTools.IOuterUnityTestAction>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.RetryCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RetryCommand.cs:37)
+UnityEngine.TestTools.RepeatCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RepeatCommand.cs:36)
+UnityEngine.TestTools.IgnoreTestCommand/<ExecuteEnumerable>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/IgnoreTestCommand.cs:42)
+UnityEngine.TestTools.StrictCheckCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/StrictCheckCommand.cs:29)
+UnityEngine.TestTools.Utils.CoroutineRunner/<WrapEnumeratorForChecks>d__8:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/Utils/CoroutineRunner.cs:58)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+(Filename: Assets/Neo UI Framework/Runtime/Theming/ThemeColorTarget.cs Line: 104)
+
+ThemeColorTarget on 'Label': theme token 'TextOnPrimary' not found in theme ''.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object,UnityEngine.Object)
+UnityEngine.Debug:LogWarning (object,UnityEngine.Object)
+Neo.UI.ThemeColorTarget:ApplyColor () (at Assets/Neo UI Framework/Runtime/Theming/ThemeColorTarget.cs:104)
+Neo.UI.ThemeColorTarget:OnValidate () (at Assets/Neo UI Framework/Runtime/Theming/ThemeColorTarget.cs:57)
+UnityEngine.ResourcesAPIInternal:Load (string,System.Type)
+UnityEngine.ResourcesAPI:Load (string,System.Type)
+UnityEngine.Resources:Load (string,System.Type)
+UnityEngine.Resources:Load<Neo.UI.NeoUISettings> (string)
+Neo.UI.NeoUISettings:get_instance () (at Assets/Neo UI Framework/Runtime/Settings/NeoUISettings.cs:22)
+Neo.UI.BackButton:get_configuredButtonName () (at Assets/Neo UI Framework/Runtime/Interactive/BackButton.cs:40)
+Neo.UI.BackButton:IsBackButtonName (string) (at Assets/Neo UI Framework/Runtime/Interactive/BackButton.cs:81)
+Neo.UI.BackButton/ButtonBridge:OnSignal (Neo.UI.Signal) (at Assets/Neo UI Framework/Runtime/Interactive/BackButton.cs:108)
+Neo.UI.SignalStream:Deliver (Neo.UI.Signal) (at Assets/Neo UI Framework/Runtime/Signals/SignalStream.cs:94)
+Neo.UI.SignalStream:SendSignal<Neo.UI.ButtonSignalData> (Neo.UI.ButtonSignalData,object,string) (at Assets/Neo UI Framework/Runtime/Signals/SignalStream.cs:68)
+Neo.UI.Signals:Send<Neo.UI.ButtonSignalData> (string,string,Neo.UI.ButtonSignalData,object,string) (at Assets/Neo UI Framework/Runtime/Signals/Signals.cs:55)
+Neo.UI.UIButton:PublishSignal (Neo.UI.BehaviourTrigger) (at Assets/Neo UI Framework/Runtime/Interactive/UIButton.cs:210)
+Neo.UI.UIButton:ExecuteTrigger (Neo.UI.BehaviourTrigger) (at Assets/Neo UI Framework/Runtime/Interactive/UIButton.cs:196)
+Neo.UI.UIButton:Click () (at Assets/Neo UI Framework/Runtime/Interactive/UIButton.cs:177)
+Neo.UI.Tests.FullStackEndToEndTest/<WorkedExample_ThemeAnimationSignalsAndFlow_AllCooperate>d__2:MoveNext () (at Assets/Neo UI Framework/Tests/PlayMode/FullStackEndToEndTest.cs:115)
+UnityEngine.TestTools.TestEnumerator/<Execute>d__7:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:44)
+UnityEngine.TestTools.EnumerableTestMethodCommand/<ExecuteEnumerableAndRecordExceptions>d__4:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/EnumerableTestMethodCommand.cs:79)
+UnityEngine.TestTools.EnumerableTestMethodCommand:AdvanceEnumerator (System.Collections.IEnumerator) (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/EnumerableTestMethodCommand.cs:64)
+UnityEngine.TestTools.EnumerableTestMethodCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/EnumerableTestMethodCommand.cs:47)
+UnityEngine.TestRunner.NUnitExtensions.Runner.UnityLogCheckDelegatingCommand/<ExecuteEnumerable>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Runner/UnityLogCheckDelegatingCommand.cs:48)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<NUnit.Framework.ITestAction>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<UnityEngine.TestTools.IOuterUnityTestAction>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.RetryCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RetryCommand.cs:37)
+UnityEngine.TestTools.RepeatCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RepeatCommand.cs:36)
+UnityEngine.TestTools.IgnoreTestCommand/<ExecuteEnumerable>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/IgnoreTestCommand.cs:42)
+UnityEngine.TestTools.StrictCheckCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/StrictCheckCommand.cs:29)
+UnityEngine.TestTools.Utils.CoroutineRunner/<WrapEnumeratorForChecks>d__8:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/Utils/CoroutineRunner.cs:58)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+(Filename: Assets/Neo UI Framework/Runtime/Theming/ThemeColorTarget.cs Line: 104)
+
+[Neo.UI] UIView.Hide: no registered view matches 'Menu/Main' (0 views registered).
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogWarning (object)
+Neo.UI.UIView:ProcessCommand (Neo.UI.ViewCommand) (at Assets/Neo UI Framework/Runtime/Containers/UIView.cs:168)
+Neo.UI.UIView/ViewCommandReceiver:OnSignal (Neo.UI.Signal) (at Assets/Neo UI Framework/Runtime/Containers/UIView.cs:59)
+Neo.UI.SignalStream:Deliver (Neo.UI.Signal) (at Assets/Neo UI Framework/Runtime/Signals/SignalStream.cs:94)
+Neo.UI.SignalStream:SendSignal<Neo.UI.ViewCommand> (Neo.UI.ViewCommand,object,string) (at Assets/Neo UI Framework/Runtime/Signals/SignalStream.cs:68)
+Neo.UI.Signals:Send<Neo.UI.ViewCommand> (string,string,Neo.UI.ViewCommand,object,string) (at Assets/Neo UI Framework/Runtime/Signals/Signals.cs:55)
+Neo.UI.UIView:SendCommand (Neo.UI.ViewCommand) (at Assets/Neo UI Framework/Runtime/Containers/UIView.cs:108)
+Neo.UI.UIView:Hide (string,string,bool) (at Assets/Neo UI Framework/Runtime/Containers/UIView.cs:90)
+Neo.UI.UINode:OnExit (Neo.UI.FlowController) (at Assets/Neo UI Framework/Runtime/Flow/FlowNodes.cs:152)
+Neo.UI.FlowController:StopFlow () (at Assets/Neo UI Framework/Runtime/Flow/FlowController.cs:180)
+Neo.UI.FlowController:RunBehaviour (Neo.UI.FlowController/ControllerBehaviour) (at Assets/Neo UI Framework/Runtime/Flow/FlowController.cs:130)
+Neo.UI.FlowController:OnDisable () (at Assets/Neo UI Framework/Runtime/Flow/FlowController.cs:121)
+UnityEngine.Object:Destroy (UnityEngine.Object,single)
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Neo.UI.Tests.PlayModeTestBase:TearDown () (at Assets/Neo UI Framework/Tests/PlayMode/PlayModeTestBase.cs:29)
+System.Reflection.RuntimeMethodInfo:Invoke (object,System.Reflection.BindingFlags,System.Reflection.Binder,object[],System.Globalization.CultureInfo)
+System.Reflection.MethodBase:Invoke (object,object[])
+NUnit.Framework.Internal.Reflect:InvokeMethod (System.Reflection.MethodInfo,object,object[])
+NUnit.Framework.Internal.Reflect:InvokeMethod (System.Reflection.MethodInfo,object)
+UnityEngine.TestTools.SetUpTearDownCommand/<InvokeAfter>d__5:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/SetUpTearDownCommand.cs:84)
+UnityEngine.TestTools.EnumeratorHelper/<ProgressOnEnumerator>d__5:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Attributes/EnumeratorHelper.cs:35)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:248)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<UnityEngine.TestTools.IOuterUnityTestAction>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.RetryCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RetryCommand.cs:37)
+UnityEngine.TestTools.RepeatCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RepeatCommand.cs:36)
+UnityEngine.TestTools.IgnoreTestCommand/<ExecuteEnumerable>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/IgnoreTestCommand.cs:42)
+UnityEngine.TestTools.StrictCheckCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/StrictCheckCommand.cs:29)
+UnityEngine.TestTools.Utils.CoroutineRunner/<WrapEnumeratorForChecks>d__8:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/Utils/CoroutineRunner.cs:58)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+(Filename: Assets/Neo UI Framework/Runtime/Containers/UIView.cs Line: 168)
+
+[Neo.UI] NeoSignalParamBinding on 'BoundGlow': NeoGlowPulse does not recognize param 'notARealParam' (bound from signal 'Effects/Softness').
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object,UnityEngine.Object)
+UnityEngine.Debug:LogWarning (object,UnityEngine.Object)
+Neo.UI.NeoSignalParamBinding/<>c__DisplayClass9_0:<SubscribeFloat>b__0 (single) (at Assets/Neo UI Framework/Runtime/Graphics/Effects/NeoSignalParamBinding.cs:117)
+Neo.UI.Signals/<>c__DisplayClass12_0`1<single>:<On>b__0 (Neo.UI.Signal) (at Assets/Neo UI Framework/Runtime/Signals/Signals.cs:79)
+Neo.UI.Signals/DelegateReceiver:OnSignal (Neo.UI.Signal) (at Assets/Neo UI Framework/Runtime/Signals/Signals.cs:22)
+Neo.UI.SignalStream:Deliver (Neo.UI.Signal) (at Assets/Neo UI Framework/Runtime/Signals/SignalStream.cs:94)
+Neo.UI.SignalStream:SendSignal<single> (single,object,string) (at Assets/Neo UI Framework/Runtime/Signals/SignalStream.cs:68)
+Neo.UI.Signals:Send<single> (string,string,single,object,string) (at Assets/Neo UI Framework/Runtime/Signals/Signals.cs:55)
+Neo.UI.Tests.NoSilentFailurePlayModeTests/<SignalParamBinding_UnknownParam_WarnsOnceDespiteTwoSends>d__1:MoveNext () (at Assets/Neo UI Framework/Tests/PlayMode/NoSilentFailurePlayModeTests.cs:47)
+UnityEngine.TestTools.TestEnumerator/<Execute>d__7:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:44)
+UnityEngine.TestTools.EnumerableTestMethodCommand/<ExecuteEnumerableAndRecordExceptions>d__4:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/EnumerableTestMethodCommand.cs:79)
+UnityEngine.TestTools.EnumerableTestMethodCommand:AdvanceEnumerator (System.Collections.IEnumerator) (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/EnumerableTestMethodCommand.cs:64)
+UnityEngine.TestTools.EnumerableTestMethodCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/EnumerableTestMethodCommand.cs:47)
+UnityEngine.TestRunner.NUnitExtensions.Runner.UnityLogCheckDelegatingCommand/<ExecuteEnumerable>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Runner/UnityLogCheckDelegatingCommand.cs:48)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<NUnit.Framework.ITestAction>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<UnityEngine.TestTools.IOuterUnityTestAction>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.RetryCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RetryCommand.cs:37)
+UnityEngine.TestTools.RepeatCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RepeatCommand.cs:36)
+UnityEngine.TestTools.IgnoreTestCommand/<ExecuteEnumerable>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/IgnoreTestCommand.cs:42)
+UnityEngine.TestTools.StrictCheckCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/StrictCheckCommand.cs:29)
+UnityEngine.TestTools.Utils.CoroutineRunner/<WrapEnumeratorForChecks>d__8:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/Utils/CoroutineRunner.cs:58)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+(Filename: Assets/Neo UI Framework/Runtime/Graphics/Effects/NeoSignalParamBinding.cs Line: 117)
+
+[Neo.UI] UIView.Hide: no registered view matches 'Menu/Main' (0 views registered).
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogWarning (object)
+Neo.UI.UIView:ProcessCommand (Neo.UI.ViewCommand) (at Assets/Neo UI Framework/Runtime/Containers/UIView.cs:168)
+Neo.UI.UIView/ViewCommandReceiver:OnSignal (Neo.UI.Signal) (at Assets/Neo UI Framework/Runtime/Containers/UIView.cs:59)
+Neo.UI.SignalStream:Deliver (Neo.UI.Signal) (at Assets/Neo UI Framework/Runtime/Signals/SignalStream.cs:94)
+Neo.UI.SignalStream:SendSignal<Neo.UI.ViewCommand> (Neo.UI.ViewCommand,object,string) (at Assets/Neo UI Framework/Runtime/Signals/SignalStream.cs:68)
+Neo.UI.Signals:Send<Neo.UI.ViewCommand> (string,string,Neo.UI.ViewCommand,object,string) (at Assets/Neo UI Framework/Runtime/Signals/Signals.cs:55)
+Neo.UI.UIView:SendCommand (Neo.UI.ViewCommand) (at Assets/Neo UI Framework/Runtime/Containers/UIView.cs:108)
+Neo.UI.UIView:Hide (string,string,bool) (at Assets/Neo UI Framework/Runtime/Containers/UIView.cs:90)
+Neo.UI.UINode:OnExit (Neo.UI.FlowController) (at Assets/Neo UI Framework/Runtime/Flow/FlowNodes.cs:152)
+Neo.UI.FlowController:StopFlow () (at Assets/Neo UI Framework/Runtime/Flow/FlowController.cs:180)
+Neo.UI.FlowController:RunBehaviour (Neo.UI.FlowController/ControllerBehaviour) (at Assets/Neo UI Framework/Runtime/Flow/FlowController.cs:130)
+Neo.UI.FlowController:OnDisable () (at Assets/Neo UI Framework/Runtime/Flow/FlowController.cs:121)
+UnityEngine.Object:Destroy (UnityEngine.Object,single)
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Neo.UI.Tests.PlayModeTestBase:TearDown () (at Assets/Neo UI Framework/Tests/PlayMode/PlayModeTestBase.cs:29)
+System.Reflection.RuntimeMethodInfo:Invoke (object,System.Reflection.BindingFlags,System.Reflection.Binder,object[],System.Globalization.CultureInfo)
+System.Reflection.MethodBase:Invoke (object,object[])
+NUnit.Framework.Internal.Reflect:InvokeMethod (System.Reflection.MethodInfo,object,object[])
+NUnit.Framework.Internal.Reflect:InvokeMethod (System.Reflection.MethodInfo,object)
+UnityEngine.TestTools.SetUpTearDownCommand/<InvokeAfter>d__5:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/SetUpTearDownCommand.cs:84)
+UnityEngine.TestTools.EnumeratorHelper/<ProgressOnEnumerator>d__5:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Attributes/EnumeratorHelper.cs:35)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:248)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<UnityEngine.TestTools.IOuterUnityTestAction>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.RetryCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RetryCommand.cs:37)
+UnityEngine.TestTools.RepeatCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RepeatCommand.cs:36)
+UnityEngine.TestTools.IgnoreTestCommand/<ExecuteEnumerable>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/IgnoreTestCommand.cs:42)
+UnityEngine.TestTools.StrictCheckCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/StrictCheckCommand.cs:29)
+UnityEngine.TestTools.Utils.CoroutineRunner/<WrapEnumeratorForChecks>d__8:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/Utils/CoroutineRunner.cs:58)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+(Filename: Assets/Neo UI Framework/Runtime/Containers/UIView.cs Line: 168)
+
+[Neo.UI] UIView.Hide: no registered view matches 'Menu/Settings' (0 views registered).
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogWarning (object)
+Neo.UI.UIView:ProcessCommand (Neo.UI.ViewCommand) (at Assets/Neo UI Framework/Runtime/Containers/UIView.cs:168)
+Neo.UI.UIView/ViewCommandReceiver:OnSignal (Neo.UI.Signal) (at Assets/Neo UI Framework/Runtime/Containers/UIView.cs:59)
+Neo.UI.SignalStream:Deliver (Neo.UI.Signal) (at Assets/Neo UI Framework/Runtime/Signals/SignalStream.cs:94)
+Neo.UI.SignalStream:SendSignal<Neo.UI.ViewCommand> (Neo.UI.ViewCommand,object,string) (at Assets/Neo UI Framework/Runtime/Signals/SignalStream.cs:68)
+Neo.UI.Signals:Send<Neo.UI.ViewCommand> (string,string,Neo.UI.ViewCommand,object,string) (at Assets/Neo UI Framework/Runtime/Signals/Signals.cs:55)
+Neo.UI.UIView:SendCommand (Neo.UI.ViewCommand) (at Assets/Neo UI Framework/Runtime/Containers/UIView.cs:108)
+Neo.UI.UIView:Hide (string,string,bool) (at Assets/Neo UI Framework/Runtime/Containers/UIView.cs:90)
+Neo.UI.UINode:OnExit (Neo.UI.FlowController) (at Assets/Neo UI Framework/Runtime/Flow/FlowNodes.cs:152)
+Neo.UI.FlowController:StopFlow () (at Assets/Neo UI Framework/Runtime/Flow/FlowController.cs:180)
+Neo.UI.FlowController:RunBehaviour (Neo.UI.FlowController/ControllerBehaviour) (at Assets/Neo UI Framework/Runtime/Flow/FlowController.cs:130)
+Neo.UI.FlowController:OnDisable () (at Assets/Neo UI Framework/Runtime/Flow/FlowController.cs:121)
+UnityEngine.Object:Destroy (UnityEngine.Object,single)
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Neo.UI.Tests.PlayModeTestBase:TearDown () (at Assets/Neo UI Framework/Tests/PlayMode/PlayModeTestBase.cs:29)
+System.Reflection.RuntimeMethodInfo:Invoke (object,System.Reflection.BindingFlags,System.Reflection.Binder,object[],System.Globalization.CultureInfo)
+System.Reflection.MethodBase:Invoke (object,object[])
+NUnit.Framework.Internal.Reflect:InvokeMethod (System.Reflection.MethodInfo,object,object[])
+NUnit.Framework.Internal.Reflect:InvokeMethod (System.Reflection.MethodInfo,object)
+UnityEngine.TestTools.SetUpTearDownCommand/<InvokeAfter>d__5:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/SetUpTearDownCommand.cs:84)
+UnityEngine.TestTools.EnumeratorHelper/<ProgressOnEnumerator>d__5:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Attributes/EnumeratorHelper.cs:35)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:248)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<UnityEngine.TestTools.IOuterUnityTestAction>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.RetryCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RetryCommand.cs:37)
+UnityEngine.TestTools.RepeatCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RepeatCommand.cs:36)
+UnityEngine.TestTools.IgnoreTestCommand/<ExecuteEnumerable>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/IgnoreTestCommand.cs:42)
+UnityEngine.TestTools.StrictCheckCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/StrictCheckCommand.cs:29)
+UnityEngine.TestTools.Utils.CoroutineRunner/<WrapEnumeratorForChecks>d__8:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/Utils/CoroutineRunner.cs:58)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+(Filename: Assets/Neo UI Framework/Runtime/Containers/UIView.cs Line: 168)
+
+[Neo.UI] FlowController has no executable node named 'DoesNotExist'.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object,UnityEngine.Object)
+UnityEngine.Debug:LogWarning (object,UnityEngine.Object)
+Neo.UI.FlowController:SetActiveNodeByName (string) (at Assets/Neo UI Framework/Runtime/Flow/FlowController.cs:230)
+Neo.UI.Tests.PopupAndFlowTests/<Flow_SetActiveNodeByName_Jumps>d__9:MoveNext () (at Assets/Neo UI Framework/Tests/PlayMode/PopupAndFlowTests.cs:212)
+UnityEngine.TestTools.TestEnumerator/<Execute>d__7:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:44)
+UnityEngine.TestTools.EnumerableTestMethodCommand/<ExecuteEnumerableAndRecordExceptions>d__4:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/EnumerableTestMethodCommand.cs:79)
+UnityEngine.TestTools.EnumerableTestMethodCommand:AdvanceEnumerator (System.Collections.IEnumerator) (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/EnumerableTestMethodCommand.cs:64)
+UnityEngine.TestTools.EnumerableTestMethodCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/EnumerableTestMethodCommand.cs:47)
+UnityEngine.TestRunner.NUnitExtensions.Runner.UnityLogCheckDelegatingCommand/<ExecuteEnumerable>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Runner/UnityLogCheckDelegatingCommand.cs:48)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<NUnit.Framework.ITestAction>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<UnityEngine.TestTools.IOuterUnityTestAction>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.RetryCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RetryCommand.cs:37)
+UnityEngine.TestTools.RepeatCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RepeatCommand.cs:36)
+UnityEngine.TestTools.IgnoreTestCommand/<ExecuteEnumerable>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/IgnoreTestCommand.cs:42)
+UnityEngine.TestTools.StrictCheckCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/StrictCheckCommand.cs:29)
+UnityEngine.TestTools.Utils.CoroutineRunner/<WrapEnumeratorForChecks>d__8:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/Utils/CoroutineRunner.cs:58)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+(Filename: Assets/Neo UI Framework/Runtime/Flow/FlowController.cs Line: 230)
+
+[Neo.UI] UIView.Hide: no registered view matches 'Menu/Settings' (0 views registered).
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogWarning (object)
+Neo.UI.UIView:ProcessCommand (Neo.UI.ViewCommand) (at Assets/Neo UI Framework/Runtime/Containers/UIView.cs:168)
+Neo.UI.UIView/ViewCommandReceiver:OnSignal (Neo.UI.Signal) (at Assets/Neo UI Framework/Runtime/Containers/UIView.cs:59)
+Neo.UI.SignalStream:Deliver (Neo.UI.Signal) (at Assets/Neo UI Framework/Runtime/Signals/SignalStream.cs:94)
+Neo.UI.SignalStream:SendSignal<Neo.UI.ViewCommand> (Neo.UI.ViewCommand,object,string) (at Assets/Neo UI Framework/Runtime/Signals/SignalStream.cs:68)
+Neo.UI.Signals:Send<Neo.UI.ViewCommand> (string,string,Neo.UI.ViewCommand,object,string) (at Assets/Neo UI Framework/Runtime/Signals/Signals.cs:55)
+Neo.UI.UIView:SendCommand (Neo.UI.ViewCommand) (at Assets/Neo UI Framework/Runtime/Containers/UIView.cs:108)
+Neo.UI.UIView:Hide (string,string,bool) (at Assets/Neo UI Framework/Runtime/Containers/UIView.cs:90)
+Neo.UI.UINode:OnExit (Neo.UI.FlowController) (at Assets/Neo UI Framework/Runtime/Flow/FlowNodes.cs:152)
+Neo.UI.FlowController:StopFlow () (at Assets/Neo UI Framework/Runtime/Flow/FlowController.cs:180)
+Neo.UI.FlowController:RunBehaviour (Neo.UI.FlowController/ControllerBehaviour) (at Assets/Neo UI Framework/Runtime/Flow/FlowController.cs:130)
+Neo.UI.FlowController:OnDisable () (at Assets/Neo UI Framework/Runtime/Flow/FlowController.cs:121)
+UnityEngine.Object:Destroy (UnityEngine.Object,single)
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Neo.UI.Tests.PlayModeTestBase:TearDown () (at Assets/Neo UI Framework/Tests/PlayMode/PlayModeTestBase.cs:29)
+System.Reflection.RuntimeMethodInfo:Invoke (object,System.Reflection.BindingFlags,System.Reflection.Binder,object[],System.Globalization.CultureInfo)
+System.Reflection.MethodBase:Invoke (object,object[])
+NUnit.Framework.Internal.Reflect:InvokeMethod (System.Reflection.MethodInfo,object,object[])
+NUnit.Framework.Internal.Reflect:InvokeMethod (System.Reflection.MethodInfo,object)
+UnityEngine.TestTools.SetUpTearDownCommand/<InvokeAfter>d__5:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/SetUpTearDownCommand.cs:84)
+UnityEngine.TestTools.EnumeratorHelper/<ProgressOnEnumerator>d__5:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Attributes/EnumeratorHelper.cs:35)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:248)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<UnityEngine.TestTools.IOuterUnityTestAction>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.RetryCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RetryCommand.cs:37)
+UnityEngine.TestTools.RepeatCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RepeatCommand.cs:36)
+UnityEngine.TestTools.IgnoreTestCommand/<ExecuteEnumerable>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/IgnoreTestCommand.cs:42)
+UnityEngine.TestTools.StrictCheckCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/StrictCheckCommand.cs:29)
+UnityEngine.TestTools.Utils.CoroutineRunner/<WrapEnumeratorForChecks>d__8:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/Utils/CoroutineRunner.cs:58)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+(Filename: Assets/Neo UI Framework/Runtime/Containers/UIView.cs Line: 168)
+
+Start importing Assets/NeoUITestScratch using Guid(abfc1a8141cac2545a0b73178422ca9f) (DefaultImporter) -> (Import Result ID: 'a58646ecdb0e485b538c78f57a945c31') in 0.003495 seconds [static dependencies only]. Details - ImportResultOutputID=b13a5578e82c2a86204cbd4f40db229d DependenciesID=b74bb700637159613eb3937b61b331ff StaticDependenciesID=fee045f35033aabecd2ca70ccdcbff90 
+Refreshing native plugins compatible for Editor in 2.30 ms, found 4 plugins.
+Asset Pipeline Refresh (id=c002e0cce359a1b48b4fc4a38cf348f4): Total: 0.047 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Start importing Assets/NeoUITestScratch/Presets using Guid(b6f7b0821a61e634283edcb3d1cb249b) (DefaultImporter) -> (Import Result ID: '09b4cd33793ad2dd454bdc19acf5e150') in 0.0033527 seconds [static dependencies only]. Details - ImportResultOutputID=fc44a422666b0a6fe2dbeed6c4ddbb9e DependenciesID=6ab6655a9256383efe2d3ba2c76bfd35 StaticDependenciesID=d372b63098713b9ddb2fcec0c0da7732 
+Asset Pipeline Refresh (id=70855df879ccdf04f98a6557b7f9eea7): Total: 0.037 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Start importing Assets/NeoUITestScratch/Presets/ShowDefault.asset using Guid(0d39d26ace8e31b408a78da8281ddfcb) (NativeFormatImporter) -> (Import Result ID: '6a110c0d80b87996f02a2707795dba48') in 0.002581 seconds [static dependencies only]. Details - ImportResultOutputID=618d1eba99b82a22a20ce76e1102a386 DependenciesID=ccf483c211a4466c549fa1fa59a85a24 StaticDependenciesID=1a959d9e0abc2d3d9c0b93da648632c3 
+Asset Pipeline Refresh (id=762e4a585a6886f488382b2394369cc4): Total: 0.035 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Start importing Assets/NeoUITestScratch/Presets/HideDefault.asset using Guid(e8feb69a34854bd46b9a397e5816332e) (NativeFormatImporter) -> (Import Result ID: '5938316d38a8fcc24555c4804a362725') in 0.0025786 seconds [static dependencies only]. Details - ImportResultOutputID=fc253ed72fd46b6662eec80081b94a67 DependenciesID=46190ea97746e128cd4a7285e4cbf09a StaticDependenciesID=165e68139ad71c5d9fb0bfd6aba84085 
+Refreshing native plugins compatible for Editor in 2.34 ms, found 4 plugins.
+Asset Pipeline Refresh (id=8ad1f03ef0b6ef945a3854e4ffc43403): Total: 0.037 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Start importing Assets/Neo UI Framework/Presets/Button/PrimaryButton.asset using Guid(20393a65f0fefeb4e863bd6efda04297) (NativeFormatImporter) -> (Import Result ID: '82bbcfcd808f7b2d7f74445547ac4071') in 0.0021379 seconds [static dependencies only]. Details - ImportResultOutputID=2f720e3dc263a7f91f521321678eef08 DependenciesID=49033a170bf11682c02c47cad97ee831 StaticDependenciesID=83f8045b3bf42386a5bcf9424aed786d 
+Start importing Assets/Neo UI Framework/Presets/Tab/FilledTab.asset using Guid(308b7d7ae5e736847aa53e84dd1cd373) (NativeFormatImporter) -> (Import Result ID: '21891546fe3fd9e19916d5e0c8464bd0') in 0.0021155 seconds [static dependencies only]. Details - ImportResultOutputID=bc9dd06e7dd4f4fddeb244dd904bee01 DependenciesID=ccd9882ffd0a77ca404282120d7cec71 StaticDependenciesID=bc73aa2a92d9109c621db9b0b765ca69 
+Start importing Assets/Neo UI Framework/Presets/Button/FloatingAction.asset using Guid(a1ffa7f7fa88e0843adad77c60d5fa3a) (NativeFormatImporter) -> (Import Result ID: '9c69962161b05c7a2b017ad57e44a701') in 0.0020007 seconds [static dependencies only]. Details - ImportResultOutputID=7dd80cfa79bcb6d8788fb8c3a0f1af38 DependenciesID=aca0bc68540342665d5781d7b6991ab8 StaticDependenciesID=6f14aec8a3bb1a8cf397eec294906444 
+Start importing Assets/Neo UI Framework/Presets/Text/SectionHeader.asset using Guid(b13ecbe41a73e494389ebc4e5ef34de1) (NativeFormatImporter) -> (Import Result ID: '19f46a653d02b8509f49de31a558ba81') in 0.0017487 seconds [static dependencies only]. Details - ImportResultOutputID=5a254e2c810286baf9616408900dbc59 DependenciesID=2f9a63583a8e325d2ba7ef0444e6257b StaticDependenciesID=6b4d45f122cbf25626f5aaa09303b5e0 
+Start importing Assets/Neo UI Framework/Presets/Button/GhostButton.asset using Guid(c14a1d55090c44f499d19bd36cb4e4d7) (NativeFormatImporter) -> (Import Result ID: '0f3f82178d278e20d0a8c504fbe7aed6') in 0.0024969 seconds [static dependencies only]. Details - ImportResultOutputID=e82c6ef906fa167275ebdbab7f7f7faa DependenciesID=da56c760bfee4f87c3e5eeea48f2defc StaticDependenciesID=b20280ee5352717bf520b381e66d246b 
+Start importing Assets/Neo UI Framework/Presets/Input/TextInput.asset using Guid(6203f8688b398904b91944e8a5beeb7f) (NativeFormatImporter) -> (Import Result ID: '0659835ef1da3d41bc78fdd4b087d4fc') in 0.0022598 seconds [static dependencies only]. Details - ImportResultOutputID=e5ec60d813fca5e1815fbee5464ccda3 DependenciesID=dc6ef5df8e20494f946b9b4bd2146495 StaticDependenciesID=f892a69911f642b1ef10fc9a291bb81b 
+Start importing Assets/Neo UI Framework/Resources/Databases/AnimationPresetDatabase.asset using Guid(624df2d6a410c40458af64eba0a88f90) (NativeFormatImporter) -> (Import Result ID: '99549f4f7bee917790edacd221e35332') in 0.0024817 seconds [static dependencies only]. Details - ImportResultOutputID=56e89e56d350b26fb1fedfcacf60c3fe DependenciesID=80cc939986b79b6f4a2c32a6fd98b77b StaticDependenciesID=0e8e7670d08364d56e116b3060042f9c 
+Start importing Assets/Neo UI Framework/Presets/Row/LargeRow.asset using Guid(f3a5065a142047940aeb589e1c7ba502) (NativeFormatImporter) -> (Import Result ID: '348d2a1d0af673575f30fb6a7f1cb76e') in 0.0020999 seconds [static dependencies only]. Details - ImportResultOutputID=98c9e1d4997d9bea0f2b57e869f719f2 DependenciesID=b391f9e23bca902cf23168efb0a207f2 StaticDependenciesID=bb0b1e6c2832dc297386fb7b53fd9b4f 
+Start importing Assets/Neo UI Framework/Presets/Text/DisplayText.asset using Guid(2437839a46d1a23428aad7e85ce28e1a) (NativeFormatImporter) -> (Import Result ID: '008bd8fe0dc130299692f3a72ad6a1ea') in 0.0021154 seconds [static dependencies only]. Details - ImportResultOutputID=129fe17a7952a663404c8d7624811b47 DependenciesID=74852f03f0afe0ac38e32c3c8dd1911f StaticDependenciesID=347a31751f13aa0cbb4dd8584d471edb 
+Start importing Assets/Neo UI Framework/Presets/Slider/DefaultSlider.asset using Guid(9572ce3b0cf864346b1eee74a7946f44) (NativeFormatImporter) -> (Import Result ID: 'b7d4d2fc187f9d726126e3ea1442b7d6') in 0.0021085 seconds [static dependencies only]. Details - ImportResultOutputID=18176abe5e9515dd44a63691496e6cb7 DependenciesID=34cbe68006d901a078a86f8d7378a3ee StaticDependenciesID=153e6ed2ebf815cbf1ba1d3d83cf704a 
+Start importing Assets/Neo UI Framework/Presets/Progress/RadialProgress.asset using Guid(a532e0e517c34e04aa360835ad3118f7) (NativeFormatImporter) -> (Import Result ID: '32b1f8ea922ca119badd172c2335f62d') in 0.0025524 seconds [static dependencies only]. Details - ImportResultOutputID=aba7eb365dddfb9808e77e6ae07e8ce3 DependenciesID=5e1f297fa1b680085b3a6e287613a7a4 StaticDependenciesID=2f6b2aaeb8437f26a5f2126300ee16e8 
+Start importing Assets/Neo UI Framework/Presets/Text/Caption.asset using Guid(56a6fc897b3f41a47ac338bb658a4ec4) (NativeFormatImporter) -> (Import Result ID: 'edde53515512080aa3e726e3c5483549') in 0.0021045 seconds [static dependencies only]. Details - ImportResultOutputID=09079ad7e374bd00043b61814ed0299d DependenciesID=2a17ac85f09156244479b2b8bfd2416a StaticDependenciesID=ec804dfe9aa1b2a8de1f6088528a5484 
+Start importing Assets/Neo UI Framework/Presets/Dropdown/DefaultDropdown.asset using Guid(96429068537474e4aab404524f68829d) (NativeFormatImporter) -> (Import Result ID: '3dd8b6e5a9e027348c5587e173216d81') in 0.0020538 seconds [static dependencies only]. Details - ImportResultOutputID=e204aa1715337b8dad927bd3cbd5f379 DependenciesID=bdc59af12a95ce9ac2896626c519966b StaticDependenciesID=02b641bfafc8fd57d4d047bd95bb321d 
+Start importing Assets/Neo UI Framework/Presets/Text/BodyText.asset using Guid(9683c98a37b4b3c42807d969ba0b65fb) (NativeFormatImporter) -> (Import Result ID: '8fbdaffd9f5f182094ece2871a6fb19f') in 0.0017004 seconds [static dependencies only]. Details - ImportResultOutputID=a3f0549ef746eef8fc6ece4931343cef DependenciesID=ce77a05531ba2ca0a1fc377674bd7dc9 StaticDependenciesID=02e96214f90bec791bc59d12173c6280 
+Start importing Assets/NeoUITestScratch/Presets/HideDefault.asset using Guid(e8feb69a34854bd46b9a397e5816332e) (NativeFormatImporter) -> (Import Result ID: '5938316d38a8fcc24555c4804a362725') in 0.0015918 seconds [static dependencies only]. Details - ImportResultOutputID=fc253ed72fd46b6662eec80081b94a67 DependenciesID=46190ea97746e128cd4a7285e4cbf09a StaticDependenciesID=165e68139ad71c5d9fb0bfd6aba84085 
+Start importing Assets/Neo UI Framework/Presets/Row/ListRow.asset using Guid(0994ec7a63acc9545af0520494871d42) (NativeFormatImporter) -> (Import Result ID: 'd569682008c4f0e2641955261ab9dd3c') in 0.0018019 seconds [static dependencies only]. Details - ImportResultOutputID=509efdc31c4a91e11a377ec24c450499 DependenciesID=4261e7b00e63429fdfa225e687a58289 StaticDependenciesID=ba8f31faba333a4322c1adb11b57cd1f 
+Start importing Assets/Neo UI Framework/Presets/Surface/Panel.asset using Guid(094d10df5a35ff449bd4abfb2d720b5f) (NativeFormatImporter) -> (Import Result ID: 'a0fef176130289aaf39be0c432014c46') in 0.0017699 seconds [static dependencies only]. Details - ImportResultOutputID=811040136fa2f1bee4cbabc6f8d490ec DependenciesID=8e194adcd998dbe5de9f05255bce0467 StaticDependenciesID=cba78b10f95a7c8765f74209b98a00e0 
+Start importing Assets/Neo UI Framework/Presets/Button/PrimaryButtonLarge.asset using Guid(194fac3dc321df641a3718c82fb7b757) (NativeFormatImporter) -> (Import Result ID: 'edd1d5b4d7cd547334d55eb30f8d4a73') in 0.0017986 seconds [static dependencies only]. Details - ImportResultOutputID=64e6dd9ae7c6891c6fae177b54b36cd0 DependenciesID=caf1c3f5ad6ecb7c58954a57b4bab829 StaticDependenciesID=05f68f87e8f576c51f488b8e23e4fdfd 
+Start importing Assets/Neo UI Framework/Presets/Button/PrimaryButtonSmall.asset using Guid(793f9bbb4e1b1c14abceea5a1749d7dd) (NativeFormatImporter) -> (Import Result ID: '66c39ae093f04dc6b638e24b9eb3fd25') in 0.0018768 seconds [static dependencies only]. Details - ImportResultOutputID=0e3fc33efc3686f97f99eae9fe6f892c DependenciesID=5e176cfb19599456843e8c4ad21526e8 StaticDependenciesID=04e50e7aaf898f9ff4a9776a6c51a1af 
+Start importing Assets/Neo UI Framework/Presets/Tab/DefaultTab.asset using Guid(99792f6b1de8da9459078fc9064496b2) (NativeFormatImporter) -> (Import Result ID: 'd00ffcfe9e5cec4601051a08e9705718') in 0.0018898 seconds [static dependencies only]. Details - ImportResultOutputID=44cdff3f88d24c752ca3ae1bffee132d DependenciesID=be4b02d5d4cefc30500c097c31cce21c StaticDependenciesID=4b65dc005e792b7d0c4b9df3f9e61359 
+Start importing Assets/Neo UI Framework/Presets/Button/IconButton.asset using Guid(e99f1f4d168d6e64eb27b11f059e4926) (NativeFormatImporter) -> (Import Result ID: '5a0aad73b35624d03ec1e9c6c5cc08ea') in 0.0020227 seconds [static dependencies only]. Details - ImportResultOutputID=1cdfea580035221462f340a963ccad37 DependenciesID=6c1b0a1b985f0ee5553401a9634bfd1b StaticDependenciesID=8e03a1f49b38496ae3a2d2f0bb12d48a 
+Start importing Assets/Neo UI Framework/Presets/Button/DangerButton.asset using Guid(6a8c4ef293376d6409ff74bbb963395b) (NativeFormatImporter) -> (Import Result ID: 'b632e2a410ceb9c620dbb3c0e969cd9c') in 0.0016498 seconds [static dependencies only]. Details - ImportResultOutputID=fa0a919e1684863157394b534571a325 DependenciesID=789faf2a467b0f21b4338b6f5c46ddbe StaticDependenciesID=71b05cfe16b9bd4ddc389c85b1f7944f 
+Start importing Assets/Neo UI Framework/Presets/Surface/Card.asset using Guid(9a1bfe993ce67ba40b4cdec06ace578f) (NativeFormatImporter) -> (Import Result ID: '6d17a80241e46b26755894afa084acaa') in 0.001922 seconds [static dependencies only]. Details - ImportResultOutputID=ad7981cd065598fe852e2c9cf83cf840 DependenciesID=e3852b058c88aa029998703afa0f0bd4 StaticDependenciesID=68c266d0bfb24b408deaf55ac082b2f2 
+Start importing Assets/Neo UI Framework/Presets/Toggle/DefaultToggle.asset using Guid(ca32ba818a2735e4cb300ef3215de188) (NativeFormatImporter) -> (Import Result ID: 'ccfd69e7bd18cbe6abd7efc7e1f456c9') in 0.0017707 seconds [static dependencies only]. Details - ImportResultOutputID=7e67660b68ed74f95ed5ec19f38cb69f DependenciesID=3cf3f1300ad4ad5b7e4a2ce32751b5d2 StaticDependenciesID=c1d431dcdd7c4761fd592ee4b321b170 
+Start importing Assets/Neo UI Framework/Presets/Switch/DefaultSwitch.asset using Guid(9c3793d316c5e0b47988408a7ad860e0) (NativeFormatImporter) -> (Import Result ID: 'ac47062cb4df80460675d5330124153f') in 0.0015655 seconds [static dependencies only]. Details - ImportResultOutputID=3aa0754a0c654b863c054a67c56bc344 DependenciesID=4443960733e2dfa419d89a45b5006780 StaticDependenciesID=a992618795868b103cafdf8f00355030 
+Start importing Assets/Neo UI Framework/Presets/Button/SecondaryButton.asset using Guid(acd19db842eafef4892b9f748fb57f51) (NativeFormatImporter) -> (Import Result ID: '76d64aee1c98592f84a3e8817f8be8df') in 0.0018951 seconds [static dependencies only]. Details - ImportResultOutputID=bd5044508ec9d1105fcb53c0b8d586a6 DependenciesID=bf3796514a3039671c757e1e2a00cb2a StaticDependenciesID=bb19df1c0e2a64a9ca68627e765298f1 
+Start importing Assets/Neo UI Framework/Presets/Progress/LinearProgress.asset using Guid(bc7fed0914e5e4640ae0e5f1d6507401) (NativeFormatImporter) -> (Import Result ID: '868bec95aa9fa6eeb7dc65b4bcd92b83') in 0.001831 seconds [static dependencies only]. Details - ImportResultOutputID=adf34a1503ccadce27d4bb194e21a7e8 DependenciesID=20d29d3c866dcfb72bc37f21d2372eb3 StaticDependenciesID=98df60cc61c0c8f46ed0ab3e0aa1cf98 
+Start importing Assets/NeoUITestScratch/Presets/ShowDefault.asset using Guid(0d39d26ace8e31b408a78da8281ddfcb) (NativeFormatImporter) -> (Import Result ID: '6a110c0d80b87996f02a2707795dba48') in 0.0015619 seconds [static dependencies only]. Details - ImportResultOutputID=618d1eba99b82a22a20ce76e1102a386 DependenciesID=ccf483c211a4466c549fa1fa59a85a24 StaticDependenciesID=1a959d9e0abc2d3d9c0b93da648632c3 
+Start importing Assets/Neo UI Framework/Resources/Databases/PopupDatabase.asset using Guid(0dfe29634ae01fe4aab74466df901075) (NativeFormatImporter) -> (Import Result ID: '5266190c71c605d9f9fef29c9987c151') in 0.0021566 seconds [static dependencies only]. Details - ImportResultOutputID=56b015b0d71eb1011af1a882562d46e4 DependenciesID=5882e6eb2f2d9852c1f17132aee30065 StaticDependenciesID=bda99c0697484c0f6c6df9b9040771b4 
+Start importing Assets/Neo UI Framework/Presets/Row/CompactRow.asset using Guid(6dd36e4e81d670245b9d69ea7d5a83be) (NativeFormatImporter) -> (Import Result ID: 'cbd401fc964b18e975886eeb3351742c') in 0.0018936 seconds [static dependencies only]. Details - ImportResultOutputID=ccd788e586778905fc3537dd0c0ec359 DependenciesID=6954629dd5b4435415fed28060a5ed20 StaticDependenciesID=a1d7ac604a277ca6dabc8d7540fb8084 
+Start importing Assets/Neo UI Framework/Presets/Button/LinkButton.asset using Guid(0f4176a70aaa7ac48a7f6f5e7f18374e) (NativeFormatImporter) -> (Import Result ID: 'cb4cf409018f69602d10416561ce9ebe') in 0.001765 seconds [static dependencies only]. Details - ImportResultOutputID=d0e84305e07301ace7b6d1810bfe7a36 DependenciesID=d6d7f72edacacb758a201b3b1d192dc0 StaticDependenciesID=0e4fb45bf3aadc02b4ad22b359e69699 
+Start importing Assets/Neo UI Framework/Presets/Text/TitleText.asset using Guid(0fc82c05e796d674c979d1960fb5b75c) (NativeFormatImporter) -> (Import Result ID: '8fb23ac632e6b0f2337b9cf96745816d') in 0.0018239 seconds [static dependencies only]. Details - ImportResultOutputID=4ef21443de7d520e5cb44e8707959742 DependenciesID=02d6c6ee5b8d676d5b4c7166241e2dc9 StaticDependenciesID=d930089cd264c2608292012485a319c6 
+Asset Pipeline Refresh (id=c1f7cebdc2ad8f5428eceff37aaece4d): Total: 0.114 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Start importing Assets/Neo UI Framework/Presets/Button/PrimaryButton.asset using Guid(20393a65f0fefeb4e863bd6efda04297) (NativeFormatImporter) -> (Import Result ID: 'cc45e696ddb8fcccd04681ec571c7151') in 0.0022667 seconds [static dependencies only]. Details - ImportResultOutputID=2f720e3dc263a7f91f521321678eef08 DependenciesID=700a678972d49879fb1b5b682ee9e157 StaticDependenciesID=a0b34f4431d381de67a4aaace8c481cb 
+Start importing Assets/Neo UI Framework/Presets/Tab/FilledTab.asset using Guid(308b7d7ae5e736847aa53e84dd1cd373) (NativeFormatImporter) -> (Import Result ID: '6a24f5eb9ae8ee8bec4bb7cfb348937b') in 0.00236 seconds [static dependencies only]. Details - ImportResultOutputID=bc9dd06e7dd4f4fddeb244dd904bee01 DependenciesID=32ae128e93f33e9a1bd7c262d23302ca StaticDependenciesID=033f7de260d369f71f7669462e6ec267 
+Start importing Assets/Neo UI Framework/Presets/Button/GhostButton.asset using Guid(c14a1d55090c44f499d19bd36cb4e4d7) (NativeFormatImporter) -> (Import Result ID: '3a5ba285acf2b46d97ccf447e9dded02') in 0.0024164 seconds [static dependencies only]. Details - ImportResultOutputID=e82c6ef906fa167275ebdbab7f7f7faa DependenciesID=65c60c90a9b21f88645e9905315f1bb2 StaticDependenciesID=6bd32b4b808ece85ba3ffedde266dc01 
+Start importing Assets/Neo UI Framework/Presets/Input/TextInput.asset using Guid(6203f8688b398904b91944e8a5beeb7f) (NativeFormatImporter) -> (Import Result ID: 'dfc51305e04aa5065ef69cb69467d229') in 0.0026038 seconds [static dependencies only]. Details - ImportResultOutputID=e5ec60d813fca5e1815fbee5464ccda3 DependenciesID=125298a125b2174c85b2faa1ce537ecc StaticDependenciesID=4897d3ebeb34f7d121c4a87fa8d57705 
+Start importing Assets/Neo UI Framework/Presets/Dropdown/DefaultDropdown.asset using Guid(96429068537474e4aab404524f68829d) (NativeFormatImporter) -> (Import Result ID: '846ac3bdd2d021d566d9ee71762a8d2b') in 0.002965 seconds [static dependencies only]. Details - ImportResultOutputID=e204aa1715337b8dad927bd3cbd5f379 DependenciesID=a8e0ed3df5c17fcb3ee5bb802e746245 StaticDependenciesID=9f93a832fedcf9f27f9a85fe132b9f04 
+Start importing Assets/Neo UI Framework/Presets/Surface/Panel.asset using Guid(094d10df5a35ff449bd4abfb2d720b5f) (NativeFormatImporter) -> (Import Result ID: '2213096294ab38188a4f5aba498f4f8e') in 0.0026558 seconds [static dependencies only]. Details - ImportResultOutputID=811040136fa2f1bee4cbabc6f8d490ec DependenciesID=dbdac91e9971ff222158defe3f8ef5ba StaticDependenciesID=b38de5e983d5c00cde72ac0d536d21d8 
+Start importing Assets/Neo UI Framework/Presets/Button/PrimaryButtonLarge.asset using Guid(194fac3dc321df641a3718c82fb7b757) (NativeFormatImporter) -> (Import Result ID: 'b3940f00d3fbce9dc3cfc8554736eeb1') in 0.0025166 seconds [static dependencies only]. Details - ImportResultOutputID=64e6dd9ae7c6891c6fae177b54b36cd0 DependenciesID=b30ac66ea0676101f2cb09ff7a0532ae StaticDependenciesID=7fbc8bac1edeea9c61176049929832a5 
+Start importing Assets/Neo UI Framework/Presets/Button/PrimaryButtonSmall.asset using Guid(793f9bbb4e1b1c14abceea5a1749d7dd) (NativeFormatImporter) -> (Import Result ID: '08124e4267866857c0813c1aea7e4d6c') in 0.0024709 seconds [static dependencies only]. Details - ImportResultOutputID=0e3fc33efc3686f97f99eae9fe6f892c DependenciesID=ff40732524ece58d08de7fcb2d14d397 StaticDependenciesID=c49503da885ed76657440df467de33a3 
+Start importing Assets/Neo UI Framework/Presets/Tab/DefaultTab.asset using Guid(99792f6b1de8da9459078fc9064496b2) (NativeFormatImporter) -> (Import Result ID: 'df78ce27be3e19c00c7bb8659ab389cb') in 0.002401 seconds [static dependencies only]. Details - ImportResultOutputID=44cdff3f88d24c752ca3ae1bffee132d DependenciesID=6d5a99927fd26fb3e08c2ccbb3f0e996 StaticDependenciesID=708f4976496af31f86a6f036fae41ef3 
+Start importing Assets/Neo UI Framework/Presets/Button/IconButton.asset using Guid(e99f1f4d168d6e64eb27b11f059e4926) (NativeFormatImporter) -> (Import Result ID: '779204acadd49b34a987f63b6e837fa8') in 0.0019241 seconds [static dependencies only]. Details - ImportResultOutputID=1cdfea580035221462f340a963ccad37 DependenciesID=7d6fa43d485401906806714be1866ce3 StaticDependenciesID=773b47ecf538eae71894577e84205fdb 
+Start importing Assets/Neo UI Framework/Presets/Button/DangerButton.asset using Guid(6a8c4ef293376d6409ff74bbb963395b) (NativeFormatImporter) -> (Import Result ID: '478543db6c115574e446d426e43f0255') in 0.0021639 seconds [static dependencies only]. Details - ImportResultOutputID=fa0a919e1684863157394b534571a325 DependenciesID=6307da660374c694edd572a027c9c85f StaticDependenciesID=b9b074c30a238d8226bce479348bafcb 
+Start importing Assets/Neo UI Framework/Presets/Surface/Card.asset using Guid(9a1bfe993ce67ba40b4cdec06ace578f) (NativeFormatImporter) -> (Import Result ID: 'e3bb924bfad28829e1a32995e029b197') in 0.0019767 seconds [static dependencies only]. Details - ImportResultOutputID=ad7981cd065598fe852e2c9cf83cf840 DependenciesID=a10a6a504877c682722f1ffded35a99e StaticDependenciesID=30a634543be615e459e3615f4de04117 
+Start importing Assets/Neo UI Framework/Presets/Button/SecondaryButton.asset using Guid(acd19db842eafef4892b9f748fb57f51) (NativeFormatImporter) -> (Import Result ID: '7363367fa419d70e92bea9ec74197b92') in 0.0018745 seconds [static dependencies only]. Details - ImportResultOutputID=bd5044508ec9d1105fcb53c0b8d586a6 DependenciesID=5d2cad2876bff761b28c3c4784d95b6a StaticDependenciesID=503630e0221507450b03eb72bd1d98f4 
+Start importing Assets/Neo UI Framework/Presets/Button/LinkButton.asset using Guid(0f4176a70aaa7ac48a7f6f5e7f18374e) (NativeFormatImporter) -> (Import Result ID: '71c5519462c9ddc1196e37e8696fdfc6') in 0.0018964 seconds [static dependencies only]. Details - ImportResultOutputID=d0e84305e07301ace7b6d1810bfe7a36 DependenciesID=08e1dc03aeb57e4879cd4fafb92c1cd8 StaticDependenciesID=1f0ad6882cd176e5da2573dd0067413b 
+Asset Pipeline Refresh (id=d89a114b98ae861409bb67bc318482b9): Total: 0.078 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Start importing Assets/Neo UI Framework/Resources/NeoUISettings.asset using Guid(0673a2548153af6429564bf29ee11dfb) (NativeFormatImporter) -> (Import Result ID: '50b1f3027de0557bf3315e3e7cf1e5eb') in 0.0023641 seconds [static dependencies only]. Details - ImportResultOutputID=188d614bfb1cc6e66f45d15908c2d572 DependenciesID=897c481d48e139562d10bb7086ff18d9 StaticDependenciesID=92a8d26ea57776d4d12a6a1f70daa0cf 
+Start importing Assets/Neo UI Framework/Resources/DefaultTheme.asset using Guid(0852788dac4549a49ad210d24e1ca82c) (NativeFormatImporter) -> (Import Result ID: '5a9a27f7ca496483d7fdbda09554ac10') in 0.0019131 seconds [static dependencies only]. Details - ImportResultOutputID=9560384711a572a73ce4262416934cc7 DependenciesID=acda7f8518cfa4d5dc0e12dbb60bc55e StaticDependenciesID=b380451cd4ea6e111107b4639dbe7aa8 
+Asset Pipeline Refresh (id=d7892f9aad80ed34ca2d00901f3ee20a): Total: 0.025 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Start importing Assets/NeoUITestScratch/Presets/MenuIn.asset using Guid(5385aab8d2774f44ba2826611ed36930) (NativeFormatImporter) -> (Import Result ID: 'e7bda5376d9e5b4caf5371d16da777af') in 0.0022902 seconds [static dependencies only]. Details - ImportResultOutputID=8a96adc144af7be7de649605ed0cfa40 DependenciesID=abb4b29b506a669e3d3169dda1a906a9 StaticDependenciesID=55671868414c763002f9cbdb4a6795d0 
+Asset Pipeline Refresh (id=0dca0a4e8bb974e4c8ea021fba41d030): Total: 0.038 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Start importing Assets/NeoUITestScratch/Presets/MenuOut.asset using Guid(85419d057055e9e47924982f25fec0ff) (NativeFormatImporter) -> (Import Result ID: '0999c7de092895d60b61e53d72205c55') in 0.0022938 seconds [static dependencies only]. Details - ImportResultOutputID=99474b8d04d750607ff1172153204206 DependenciesID=ffab364fed717dd9145450db254b8fa5 StaticDependenciesID=131a8fd77681fd646ea4280e2af8ba86 
+Asset Pipeline Refresh (id=98dee880efa3f9c438f5131851780b79): Total: 0.035 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Start importing Assets/NeoUITestScratch/Menus using Guid(6fd05652b7b0ac54eba3044445687e5e) (DefaultImporter) -> (Import Result ID: '73b164e26dd1325048c01b7698153971') in 0.002558 seconds [static dependencies only]. Details - ImportResultOutputID=9ef51ab0de5a4b52adf4cac7169643da DependenciesID=330a3e28fbc464b7face7e51d60d8a6f StaticDependenciesID=0c562bb78c4a2fb62dc7e998532dd779 
+Asset Pipeline Refresh (id=a57a1adff7287ef46a0111e68c388180): Total: 0.037 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Start importing Assets/NeoUITestScratch/Menus/Settings_Game.asset using Guid(d09c73f0198eb1c4b96a0feb7a371c2f) (NativeFormatImporter) -> (Import Result ID: 'a11e6b4715abb8fb8d62900f6926dfbb') in 0.0022351 seconds [static dependencies only]. Details - ImportResultOutputID=6663fac3f3547ce98be6dcd4ef8a25ce DependenciesID=480a8f23a6d23849be55dda289e199a0 StaticDependenciesID=f3b2ef6ee788c00d2c46da5d4ffd8a1d 
+Asset Pipeline Refresh (id=a19e6bbe06c487d45bfd5d794458aaca): Total: 0.037 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Start importing Assets/NeoUITestScratch/Menus/Cheats_Main.asset using Guid(264f2a40d5b79e74599790fa5d4adb95) (NativeFormatImporter) -> (Import Result ID: 'fccbd19579533aea6ea12dcfb3eea1fd') in 0.0022027 seconds [static dependencies only]. Details - ImportResultOutputID=d844b612656602a0c282fcddcbec2d1e DependenciesID=6ae6147238cb41c0437c48829e0bdd9d StaticDependenciesID=d3bdf090607136de61d1069ac66ff5a7 
+Asset Pipeline Refresh (id=e2eab1b73d2e5424aa398d4711e37a50): Total: 0.036 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Start importing Assets/NeoUITestScratch/Views using Guid(9a57729372966e44da490b14cc186e99) (DefaultImporter) -> (Import Result ID: '491cc8e6f60885984f33dfd3a6225826') in 0.003621 seconds [static dependencies only]. Details - ImportResultOutputID=0a24c312869b0ccd5f6f926a7d42d0dc DependenciesID=236783a886c3f97170b9b74230d70cb8 StaticDependenciesID=adf682ec99e762c7158a8f79c3d80911 
+Refreshing native plugins compatible for Editor in 2.17 ms, found 4 plugins.
+Asset Pipeline Refresh (id=454fceaa785c6f145a155106f98af292): Total: 0.039 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Start importing Assets/NeoUITestScratch/Views/Menu_Main.prefab using Guid(c48a2962e5eb25c4d95714b9736987a8) (PrefabImporter) -> (Import Result ID: '40171d172b14c3decafa85b205ce04e1') in 0.0177561 seconds [static and dynamic dependencies]. Details - ImportResultOutputID=a3588f001596efe1b0cbbf4479cf9804 DependenciesID=5e80ae43152605bb5b3c7e16d7db653c StaticDependenciesID=6e80212de16574c3ce966f34fcf1e0f5 
+Asset Pipeline Refresh (id=06074e604b25c454081348097264e80a): Total: 0.057 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Start importing Assets/NeoUITestScratch/Views/Menu_Settings.prefab using Guid(52bc9dec9d7bd3244a1146050b165131) (PrefabImporter) -> (Import Result ID: '246f4647445a15041a93a371e52b0c08') in 0.0319174 seconds [static and dynamic dependencies]. Details - ImportResultOutputID=c85a02fd1531fc246cfed633a96743f4 DependenciesID=ebf7fbcb299d31d0de1ef70cd15cf02e StaticDependenciesID=d456b81e2fdcf8cb83d8765dd98c31b4 
+Asset Pipeline Refresh (id=d2e2a43814d5f0349b7adbde4435d48e): Total: 0.069 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Start importing Assets/NeoUITestScratch/Views/Menu_Cheats.prefab using Guid(76e90606436013a4ea69abfbdd4550a2) (PrefabImporter) -> (Import Result ID: '302a5677ee9ea02c7b58d2cb4cf2eba1') in 0.0221133 seconds [static and dynamic dependencies]. Details - ImportResultOutputID=d1df10b7a7cedf2a666ca0aa5370f6b9 DependenciesID=ee2bd1317ec00c677c22b0bd0518c715 StaticDependenciesID=fba67daae9b62b600199a0657d29c282 
+Refreshing native plugins compatible for Editor in 2.82 ms, found 4 plugins.
+Asset Pipeline Refresh (id=3dc35bb18c6ee034aaf35c7d95eaef32): Total: 0.060 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Start importing Assets/NeoUITestScratch/Flow using Guid(f2badae9f5add8b4b8528169f5a6bc80) (DefaultImporter) -> (Import Result ID: '38dc5bf05adf79d7038c1dd3cb9a9c47') in 0.0029394 seconds [static dependencies only]. Details - ImportResultOutputID=5ad2f1c776ea740524d1465fb7e1e686 DependenciesID=23366ce2ef6031b65b794742dce64a01 StaticDependenciesID=ca5b8cfe7e9278121e849c65d8ebb08b 
+Asset Pipeline Refresh (id=d59410170d0c9b847b88254341236dd4): Total: 0.038 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Start importing Assets/NeoUITestScratch/Flow/UI.asset using Guid(0c7f910e273a32748aa5bc582b6a0f16) (NativeFormatImporter) -> (Import Result ID: 'c089fd9af9423e0006c8e2e7b56556bb') in 0.0021257 seconds [static dependencies only]. Details - ImportResultOutputID=eb1df9570f8459e72bcb1a057d20afe2 DependenciesID=83d83c71be387fb949e7d65622353a71 StaticDependenciesID=083a0362ddf4eafa9e5b39320a9c65d2 
+Asset Pipeline Refresh (id=e45f96a5845dbca40896b8b9e7a8a9dc): Total: 0.035 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Start importing Assets/NeoUITestScratch/Menus/Settings_Game.asset using Guid(d09c73f0198eb1c4b96a0feb7a371c2f) (NativeFormatImporter) -> (Import Result ID: 'a11e6b4715abb8fb8d62900f6926dfbb') in 0.002117 seconds [static dependencies only]. Details - ImportResultOutputID=6663fac3f3547ce98be6dcd4ef8a25ce DependenciesID=480a8f23a6d23849be55dda289e199a0 StaticDependenciesID=f3b2ef6ee788c00d2c46da5d4ffd8a1d 
+Start importing Assets/Neo UI Framework/Resources/Databases/AnimationPresetDatabase.asset using Guid(624df2d6a410c40458af64eba0a88f90) (NativeFormatImporter) -> (Import Result ID: 'c9146a2153d0f39bfcf8567efd32c2a1') in 0.0019374 seconds [static dependencies only]. Details - ImportResultOutputID=56e89e56d350b26fb1fedfcacf60c3fe DependenciesID=833269f8b3a83bbabaa1942cb72be8e6 StaticDependenciesID=7d3e0090ec930cc5c28d2e60fd55d9d5 
+Start importing Assets/NeoUITestScratch/Presets/MenuIn.asset using Guid(5385aab8d2774f44ba2826611ed36930) (NativeFormatImporter) -> (Import Result ID: 'e7bda5376d9e5b4caf5371d16da777af') in 0.0025195 seconds [static dependencies only]. Details - ImportResultOutputID=8a96adc144af7be7de649605ed0cfa40 DependenciesID=abb4b29b506a669e3d3169dda1a906a9 StaticDependenciesID=55671868414c763002f9cbdb4a6795d0 
+Start importing Assets/Neo UI Framework/Resources/Databases/ViewIdDatabase.asset using Guid(c44bbd33a62afb54fabd9ff58c608604) (NativeFormatImporter) -> (Import Result ID: '692e6a17a7386bac24da2dff7d464920') in 0.0022953 seconds [static dependencies only]. Details - ImportResultOutputID=3f4d054c5fc0048f0d1c108f620823b4 DependenciesID=570aa6638ced277c5b89bcb2e0209ca4 StaticDependenciesID=f35b171b86d58f5db874ee8dc01b5cbd 
+Start importing Assets/NeoUITestScratch/Presets/MenuOut.asset using Guid(85419d057055e9e47924982f25fec0ff) (NativeFormatImporter) -> (Import Result ID: '0999c7de092895d60b61e53d72205c55') in 0.0017918 seconds [static dependencies only]. Details - ImportResultOutputID=99474b8d04d750607ff1172153204206 DependenciesID=ffab364fed717dd9145450db254b8fa5 StaticDependenciesID=131a8fd77681fd646ea4280e2af8ba86 
+Start importing Assets/Neo UI Framework/Resources/Databases/ButtonIdDatabase.asset using Guid(c51472ca43f50a44aac2ffdbf85ab459) (NativeFormatImporter) -> (Import Result ID: '67ce550c8559449f4c280eb4d6ccf898') in 0.0015996 seconds [static dependencies only]. Details - ImportResultOutputID=0bbe24a37b38b3889bce998526f798f0 DependenciesID=c6e96231461ab843765f33dbfd0238b7 StaticDependenciesID=2522a6af8c71daf2e965e6e767dde07d 
+Start importing Assets/NeoUITestScratch/Menus/Cheats_Main.asset using Guid(264f2a40d5b79e74599790fa5d4adb95) (NativeFormatImporter) -> (Import Result ID: 'fccbd19579533aea6ea12dcfb3eea1fd') in 0.0018292 seconds [static dependencies only]. Details - ImportResultOutputID=d844b612656602a0c282fcddcbec2d1e DependenciesID=6ae6147238cb41c0437c48829e0bdd9d StaticDependenciesID=d3bdf090607136de61d1069ac66ff5a7 
+Start importing Assets/Neo UI Framework/Resources/DefaultTheme.asset using Guid(0852788dac4549a49ad210d24e1ca82c) (NativeFormatImporter) -> (Import Result ID: '5a9a27f7ca496483d7fdbda09554ac10') in 0.0019168 seconds [static dependencies only]. Details - ImportResultOutputID=9560384711a572a73ce4262416934cc7 DependenciesID=acda7f8518cfa4d5dc0e12dbb60bc55e StaticDependenciesID=b380451cd4ea6e111107b4639dbe7aa8 
+Start importing Assets/Neo UI Framework/Resources/Databases/SliderIdDatabase.asset using Guid(88169c51169c9e2419c7085c50745d0f) (NativeFormatImporter) -> (Import Result ID: 'd21fc8df6f24e1abbcd9443da5fb3581') in 0.0017218 seconds [static dependencies only]. Details - ImportResultOutputID=9684f79746c46b62d7458b3e8801ac8d DependenciesID=b657bfd3109e443a1150a2f8e4a367c9 StaticDependenciesID=e83db4bad7712ead1ad74dcd2eb87ed0 
+Start importing Assets/Neo UI Framework/Fonts/Inter-SemiBold SDF.asset using Guid(b9ae1e09a6e6caa4498f353e671fe7c1) (NativeFormatImporter) -> (Import Result ID: 'dea5c248d55ccd9316d9c0998619b184') in 0.0059287 seconds [static dependencies only]. Details - ImportResultOutputID=dd729d63631ed8c068ccbbc3f22ec177 DependenciesID=8b7825a9846e7b71185d46c28eca10c4 StaticDependenciesID=d7308cc2695ab2575154b62e5289738d 
+Start importing Assets/Neo UI Framework/Resources/Databases/PanelIdDatabase.asset using Guid(8bc78860e6e74d747b379ac8aa66375f) (NativeFormatImporter) -> (Import Result ID: '74fe099d9de1360bc7fbaff51201e727') in 0.0023621 seconds [static dependencies only]. Details - ImportResultOutputID=89bcb462a9198119ef5224a4db5d6955 DependenciesID=a5817820c3edff98e617cef4874aae7e StaticDependenciesID=fd1ebbceb1295c7ccde700aba62b2253 
+Start importing Assets/NeoUITestScratch/Flow/UI.asset using Guid(0c7f910e273a32748aa5bc582b6a0f16) (NativeFormatImporter) -> (Import Result ID: 'c089fd9af9423e0006c8e2e7b56556bb') in 0.0019887 seconds [static dependencies only]. Details - ImportResultOutputID=eb1df9570f8459e72bcb1a057d20afe2 DependenciesID=83d83c71be387fb949e7d65622353a71 StaticDependenciesID=083a0362ddf4eafa9e5b39320a9c65d2 
+Start importing Assets/Neo UI Framework/Fonts/Inter-Regular SDF.asset using Guid(2fa276f5f181d5e4f8aee3a61c798e0d) (NativeFormatImporter) -> (Import Result ID: '5c3248a8d44b45c91428afae8e3ca8ff') in 0.0055625 seconds [static dependencies only]. Details - ImportResultOutputID=ec6fe87b5fc538cb3d5d75d019a91128 DependenciesID=1373b0b16bb831fd5bff0961efd8245f StaticDependenciesID=f6cd9e1b3edcaea132b725962fccfec6 
+Start importing Assets/Neo UI Framework/Fonts/Lucide SDF.asset using Guid(5f1b298af17d2614f8332dcbe6c51e11) (NativeFormatImporter) -> (Import Result ID: '16c1a8b91b8c96a7c5b4780b86150f8b') in 0.010697 seconds [static dependencies only]. Details - ImportResultOutputID=be438e514edb87afa15a5f1590f9efcd DependenciesID=8caf623a585b1b53030e6d2f6c4f8904 StaticDependenciesID=bccb3da3b5e0f3a7f2d1c13bb63247c5 
+Start importing Assets/Neo UI Framework/Resources/Databases/ToggleIdDatabase.asset using Guid(cfc3a51d11c2c6b4083b8c7e5dfd4bd4) (NativeFormatImporter) -> (Import Result ID: '9d8450073ca1225d67d32b0fd5c8ac46') in 0.0029387 seconds [static dependencies only]. Details - ImportResultOutputID=e27e6e04a38c2ff9aaf29bc607965f07 DependenciesID=7d6e906dc7aaf01c978024cacd70e345 StaticDependenciesID=f785471d0b61f4feb72ecee9c3a30f1f 
+Refreshing native plugins compatible for Editor in 2.31 ms, found 4 plugins.
+Asset Pipeline Refresh (id=0826814b3d8fe174a975ff229606a325): Total: 0.120 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Asset Pipeline Refresh (id=60809917c8b50844f8a09c4086d2948c): Total: 0.014 seconds - Initiated by RefreshV2(NoUpdateAssetOptions)
+Asset Pipeline Refresh (id=eb2df56b80f9b8d438e0dfe53d9afa21): Total: 0.037 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Start importing Assets/Neo UI Framework/Resources/Databases/AnimationPresetDatabase.asset using Guid(624df2d6a410c40458af64eba0a88f90) (NativeFormatImporter) -> (Import Result ID: '9d75f1d1a788cf03ef70a00e68d6b418') in 0.0024485 seconds [static dependencies only]. Details - ImportResultOutputID=56e89e56d350b26fb1fedfcacf60c3fe DependenciesID=a5c5e984dac7e3ff787eeea346c9417e StaticDependenciesID=847d0049e097db38040dc12b4c1cd47e 
+Start importing Assets/Neo UI Framework/Fonts/Inter-SemiBold SDF.asset using Guid(b9ae1e09a6e6caa4498f353e671fe7c1) (NativeFormatImporter) -> (Import Result ID: '1967b17957adbfd6cf4b9fa85798cc33') in 0.007081 seconds [static dependencies only]. Details - ImportResultOutputID=dd729d63631ed8c068ccbbc3f22ec177 DependenciesID=5127a6819b3bc060690069b167b6dd7a StaticDependenciesID=e0fcac6dd212316f0c5cdc7114ee6528 
+Start importing Assets/Neo UI Framework/Fonts/Inter-Regular SDF.asset using Guid(2fa276f5f181d5e4f8aee3a61c798e0d) (NativeFormatImporter) -> (Import Result ID: 'e1bdea0f99ec8bbf2529a738a0b5dc0b') in 0.0061368 seconds [static dependencies only]. Details - ImportResultOutputID=ec6fe87b5fc538cb3d5d75d019a91128 DependenciesID=ecce37d22fd0fc6a17dd566fbb3b9704 StaticDependenciesID=45acc5c4d6ecd34067a8b054a4efc457 
+Asset Pipeline Refresh (id=9c923ab15e1a24046a741d986ff0844e): Total: 0.074 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+[Neo.UI] UIView.Hide: no registered view matches 'TxPose/A' (0 views registered).
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogWarning (object)
+Neo.UI.UIView:ProcessCommand (Neo.UI.ViewCommand) (at Assets/Neo UI Framework/Runtime/Containers/UIView.cs:168)
+Neo.UI.UIView/ViewCommandReceiver:OnSignal (Neo.UI.Signal) (at Assets/Neo UI Framework/Runtime/Containers/UIView.cs:59)
+Neo.UI.SignalStream:Deliver (Neo.UI.Signal) (at Assets/Neo UI Framework/Runtime/Signals/SignalStream.cs:94)
+Neo.UI.SignalStream:SendSignal<Neo.UI.ViewCommand> (Neo.UI.ViewCommand,object,string) (at Assets/Neo UI Framework/Runtime/Signals/SignalStream.cs:68)
+Neo.UI.Signals:Send<Neo.UI.ViewCommand> (string,string,Neo.UI.ViewCommand,object,string) (at Assets/Neo UI Framework/Runtime/Signals/Signals.cs:55)
+Neo.UI.UIView:SendCommand (Neo.UI.ViewCommand) (at Assets/Neo UI Framework/Runtime/Containers/UIView.cs:108)
+Neo.UI.UIView:Hide (string,string,bool) (at Assets/Neo UI Framework/Runtime/Containers/UIView.cs:90)
+Neo.UI.UINode:OnExit (Neo.UI.FlowController) (at Assets/Neo UI Framework/Runtime/Flow/FlowNodes.cs:152)
+Neo.UI.FlowController:StopFlow () (at Assets/Neo UI Framework/Runtime/Flow/FlowController.cs:180)
+Neo.UI.FlowController:RunBehaviour (Neo.UI.FlowController/ControllerBehaviour) (at Assets/Neo UI Framework/Runtime/Flow/FlowController.cs:130)
+Neo.UI.FlowController:OnDisable () (at Assets/Neo UI Framework/Runtime/Flow/FlowController.cs:121)
+UnityEngine.Object:Destroy (UnityEngine.Object,single)
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Neo.UI.Tests.ViewTransitionRuntimeTests:TearDown () (at Assets/Neo UI Framework/Tests/PlayMode/ViewTransitionRuntimeTests.cs:57)
+System.Reflection.RuntimeMethodInfo:Invoke (object,System.Reflection.BindingFlags,System.Reflection.Binder,object[],System.Globalization.CultureInfo)
+System.Reflection.MethodBase:Invoke (object,object[])
+NUnit.Framework.Internal.Reflect:InvokeMethod (System.Reflection.MethodInfo,object,object[])
+NUnit.Framework.Internal.Reflect:InvokeMethod (System.Reflection.MethodInfo,object)
+UnityEngine.TestTools.SetUpTearDownCommand/<InvokeAfter>d__5:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/SetUpTearDownCommand.cs:84)
+UnityEngine.TestTools.EnumeratorHelper/<ProgressOnEnumerator>d__5:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Attributes/EnumeratorHelper.cs:35)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:248)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<System.Reflection.MethodInfo>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<UnityEngine.TestTools.IOuterUnityTestAction>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:212)
+UnityEngine.TestTools.RetryCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RetryCommand.cs:37)
+UnityEngine.TestTools.RepeatCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/RepeatCommand.cs:36)
+UnityEngine.TestTools.IgnoreTestCommand/<ExecuteEnumerable>d__3:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/IgnoreTestCommand.cs:42)
+UnityEngine.TestTools.StrictCheckCommand/<ExecuteEnumerable>d__2:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/NUnitExtensions/Commands/StrictCheckCommand.cs:29)
+UnityEngine.TestTools.Utils.CoroutineRunner/<WrapEnumeratorForChecks>d__8:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEngine.TestRunner/Utils/CoroutineRunner.cs:58)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+(Filename: Assets/Neo UI Framework/Runtime/Containers/UIView.cs Line: 168)
+
+Saving results to: C:/Users/maxim/AppData/LocalLow/DefaultCompany/UI Package\TestResults.xml
+Saving results to: C:\Users\maxim\RiderProjects\UI-Framework\TestResults-PlayMode.xml
+Unloading 0 Unused Serialized files (Serialized files now loaded: 0)
+Loaded scene 'Temp/__Backupscenes/0.backup'
+	Deserialize:            0.655 ms
+	Integration:            175.846 ms
+	Integration of assets:  0.002 ms
+	Thread Wait Time:       0.280 ms
+	Total Operation Time:   176.783 ms
+Unloading 167 unused Assets / (17.8 MB). Loaded Objects now: 8047.
+Memory consumption went from 234.8 MB to 217.0 MB.
+Total: 11.936100 ms (FindLiveObjects: 0.452200 ms CreateObjectMapping: 0.342300 ms MarkObjects: 10.112500 ms  DeleteObjects: 1.027800 ms)
+
+Starting new worker id: 0 with log in C:/Users/maxim/RiderProjects/UI-Framework/Logs/AssetImportWorker0.log
+Starting new worker id: 1 with log in C:/Users/maxim/RiderProjects/UI-Framework/Logs/AssetImportWorker1.log
+Starting new worker id: 2 with log in C:/Users/maxim/RiderProjects/UI-Framework/Logs/AssetImportWorker2.log
+Starting new worker id: 3 with log in C:/Users/maxim/RiderProjects/UI-Framework/Logs/AssetImportWorker3.log
+Executing IPostBuildCleanup for: Unity.PerformanceTesting.Editor.TestRunBuilder.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+UnityEditor.TestTools.TestRunner.TestRun.Tasks.BuildActionTaskBase`1/<ExecuteMethods>d__8<UnityEngine.TestTools.IPostBuildCleanup>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEditor.TestRunner/TestRun/Tasks/BuildActionTaskBase.cs:48)
+UnityEditor.TestTools.TestRunner.TestRun.Tasks.BuildActionTaskBase`1/<Execute>d__7<UnityEngine.TestTools.IPostBuildCleanup>:MoveNext () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEditor.TestRunner/TestRun/Tasks/BuildActionTaskBase.cs:34)
+UnityEditor.TestTools.TestRunner.TestRun.TestJobRunner:ExecuteStep () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEditor.TestRunner/TestRun/TestJobRunner.cs:173)
+UnityEditor.TestTools.TestRunner.TestRun.TestJobRunner:ExecuteCallback () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEditor.TestRunner/TestRun/TestJobRunner.cs:108)
+UnityEditor.EditorApplication:Internal_CallUpdateFunctions ()
+
+(Filename: ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEditor.TestRunner/TestRun/Tasks/BuildActionTaskBase.cs Line: 48)
+
+Unloading 0 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 0 unused Assets / (0 B). Loaded Objects now: 8052.
+Memory consumption went from 216.7 MB to 216.7 MB.
+Total: 13.885800 ms (FindLiveObjects: 0.603300 ms CreateObjectMapping: 0.607600 ms MarkObjects: 12.647400 ms  DeleteObjects: 0.025800 ms)
+
+Refreshing native plugins compatible for Editor in 2.85 ms, found 4 plugins.
+Asset Pipeline Refresh (id=7187f62992fcda34ab5c42dfe6291e83): Total: 0.062 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+DisplayProgressbar: Undo
+Test run completed. Exiting with code 0 (Ok). Run completed.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+UnityEditor.TestTools.TestRunner.CommandLineTest.Executer:ExitApplication (UnityEditor.TestTools.TestRunner.CommandLineTest.Executer/ReturnCodes,string) (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEditor.TestRunner/CommandLineTest/Executer.cs:81)
+UnityEditor.TestTools.TestRunner.CommandLineTest.Executer:ExitIfRunIsCompleted () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEditor.TestRunner/CommandLineTest/Executer.cs:74)
+UnityEditor.EditorApplication:Internal_CallUpdateFunctions ()
+
+(Filename: ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEditor.TestRunner/CommandLineTest/Executer.cs Line: 81)
+
+Clearing [Inter-Regular SDF] dynamic font asset data.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+TMPro.EditorEventCallbacks/<>c:<InitializeFontAssetResourceChangeCallBacks>b__0_0 () (at ./Library/PackageCache/com.unity.ugui@1f2d1ab0d950/Editor/TMP/TMP_EditorResourceManager.cs:36)
+UnityEditor.EditorApplication:Internal_EditorApplicationQuit ()
+UnityEditor.TestTools.TestRunner.CommandLineTest.Executer:ExitApplication (UnityEditor.TestTools.TestRunner.CommandLineTest.Executer/ReturnCodes,string) (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEditor.TestRunner/CommandLineTest/Executer.cs:83)
+UnityEditor.TestTools.TestRunner.CommandLineTest.Executer:ExitIfRunIsCompleted () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEditor.TestRunner/CommandLineTest/Executer.cs:74)
+UnityEditor.EditorApplication:Internal_CallUpdateFunctions ()
+
+(Filename: ./Library/PackageCache/com.unity.ugui@1f2d1ab0d950/Editor/TMP/TMP_EditorResourceManager.cs Line: 36)
+
+Clearing [Inter-SemiBold SDF] dynamic font asset data.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+TMPro.EditorEventCallbacks/<>c:<InitializeFontAssetResourceChangeCallBacks>b__0_0 () (at ./Library/PackageCache/com.unity.ugui@1f2d1ab0d950/Editor/TMP/TMP_EditorResourceManager.cs:36)
+UnityEditor.EditorApplication:Internal_EditorApplicationQuit ()
+UnityEditor.TestTools.TestRunner.CommandLineTest.Executer:ExitApplication (UnityEditor.TestTools.TestRunner.CommandLineTest.Executer/ReturnCodes,string) (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEditor.TestRunner/CommandLineTest/Executer.cs:83)
+UnityEditor.TestTools.TestRunner.CommandLineTest.Executer:ExitIfRunIsCompleted () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEditor.TestRunner/CommandLineTest/Executer.cs:74)
+UnityEditor.EditorApplication:Internal_CallUpdateFunctions ()
+
+(Filename: ./Library/PackageCache/com.unity.ugui@1f2d1ab0d950/Editor/TMP/TMP_EditorResourceManager.cs Line: 36)
+
+Clearing [Lucide SDF] dynamic font asset data.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+TMPro.EditorEventCallbacks/<>c:<InitializeFontAssetResourceChangeCallBacks>b__0_0 () (at ./Library/PackageCache/com.unity.ugui@1f2d1ab0d950/Editor/TMP/TMP_EditorResourceManager.cs:36)
+UnityEditor.EditorApplication:Internal_EditorApplicationQuit ()
+UnityEditor.TestTools.TestRunner.CommandLineTest.Executer:ExitApplication (UnityEditor.TestTools.TestRunner.CommandLineTest.Executer/ReturnCodes,string) (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEditor.TestRunner/CommandLineTest/Executer.cs:83)
+UnityEditor.TestTools.TestRunner.CommandLineTest.Executer:ExitIfRunIsCompleted () (at ./Library/PackageCache/com.unity.test-framework@996f223345ba/UnityEditor.TestRunner/CommandLineTest/Executer.cs:74)
+UnityEditor.EditorApplication:Internal_CallUpdateFunctions ()
+
+(Filename: ./Library/PackageCache/com.unity.ugui@1f2d1ab0d950/Editor/TMP/TMP_EditorResourceManager.cs Line: 36)
+
+Start importing Assets/Neo UI Framework/Fonts/Inter-SemiBold SDF.asset using Guid(b9ae1e09a6e6caa4498f353e671fe7c1) (NativeFormatImporter) -> (Import Result ID: '414d5dc5b940a9563f0bfc47d932e3c0') in 0.0050306 seconds [static dependencies only]. Details - ImportResultOutputID=dd729d63631ed8c068ccbbc3f22ec177 DependenciesID=f165ecfeb1868c3c5089da3e3edd7b30 StaticDependenciesID=e9c44fcfbaebc1584bb70002e406b9e1 
+Start importing Assets/Neo UI Framework/Fonts/Inter-Regular SDF.asset using Guid(2fa276f5f181d5e4f8aee3a61c798e0d) (NativeFormatImporter) -> (Import Result ID: 'b5b7c01f294c731d439699ef89318196') in 0.0033081 seconds [static dependencies only]. Details - ImportResultOutputID=ec6fe87b5fc538cb3d5d75d019a91128 DependenciesID=ea804dcc027565cae47345762de75426 StaticDependenciesID=9aaca0f19cd79bf489cf54e41854944f 
+Start importing Assets/Neo UI Framework/Fonts/Lucide SDF.asset using Guid(5f1b298af17d2614f8332dcbe6c51e11) (NativeFormatImporter) -> (Import Result ID: '1b7cd07bd6dbce854c12eeec86c71e0a') in 0.0030117 seconds [static dependencies only]. Details - ImportResultOutputID=cc76980008b5fdc882940234d43e509a DependenciesID=b6f20ff7bfe1d7659bffdf43edeb99e1 StaticDependenciesID=a392c1b0ad0ee50315f9e974e51ecfa6 
+Refreshing native plugins compatible for Editor in 2.55 ms, found 4 plugins.
+Asset Pipeline Refresh (id=4315f8edbd7c2c8488cfba467d22fc53): Total: 0.060 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+[Physics::Module] Cleanup current backend.
+[Physics::Module] Id: 0xf2b8ea05
+Input System module state changed to: ShutdownInProgress.
+Input Polling Thread exited.
+Input System module state changed to: Shutdown.
+[Licensing::IpcConnector] LicenseClient-maxim-6000.4.10-notifications channel disconnected successfully.
+[Licensing::IpcConnector] LicenseClient-maxim-6000.4.10 channel disconnected successfully.
+AcceleratorClientConnectionCallback - disconnected - :0
+Cleanup mono
+CodeReloadManager destroyed
+22:37:39.514 |V| RiderPlugin                    | :1                             | AppDomain.CurrentDomain.DomainUnload lifetimeDefinition.Terminate
+Checking for leaked weakptr:
+  Found no leaked weakptrs.
+[Package Manager] Server process was shutdown
+##utp:{"type":"MemoryLeaks","version":2,"phase":"Immediate","time":1783715859746,"processId":17864,"allocatedMemory":15586019,"memoryLabels":[{"Default":196859},{"Permanent":15276},{"NewDelete":66883},{"Thread":4237512},{"Manager":34605},{"VertexData":8},{"Geometry":816},{"Texture":24},{"Shader":850388},{"Material":24},{"GfxDevice":57360},{"Animation":392},{"Audio":3008},{"FreeType":8},{"FontEngine":736},{"Physics":2090},{"Physics2D":16},{"Input":9880},{"JobScheduler":33024},{"TextLib":216},{"Mono":32},{"MonoCode":1536},{"ScriptingNativeRuntime":155052},{"BaseObject":1620304},{"Resource":1184},{"Renderer":3008},{"Transform":4685},{"File":9851},{"WebCam":616},{"Culling":32},{"Terrain":11394},{"Wind":24},{"STL":40},{"String":13011},{"StaticString":6718},{"Utility":2673318},{"Curl":2559},{"PoolAlloc":2168},{"AI":80},{"TypeTree":11341},{"ScriptManager":448},{"RuntimeInitializeOnLoadManager":64},{"SpriteAtlas":120},{"GI":7792},{"Director":8320},{"CloudService":288},{"WebRequest":808},{"VR":48050},{"SceneManager":504},{"Video":208},{"LazyScriptCache":32},{"Camera":17},{"Secure":2377},{"SerializationCache":1576},{"APIUpdating":10320},{"Subsystems":336},{"VirtualTexturing":57888},{"StaticSafetyDebugInfo":278528},{"Analytics":344},{"Hierarchy":608},{"CoreStats":13112},{"Identifiers":12960},{"Gui":128},{"EditorUtility":114641},{"VersionControl":4},{"Undo":931},{"AssetDatabase":4946182},{"EditorGi":328},{"UnityConnect":37777},{"Upm":1912},{"UpmDiagnostics":8},{"AssetCompliance":64},{"DrivenProperties":72},{"LocalIPC":211},{"ProfilerEditor":9746},{"CoreBusinessMetrics":2613},{"Windowing":456},{"Licensing":664},{"AssetReference":32},{"IPCStream":32}]}

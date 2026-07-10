@@ -1,0 +1,558 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="66" result="Passed" total="66" passed="66" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-07-10 20:37:31Z" end-time="2026-07-10 20:37:38Z" duration="6.9643284">
+  <test-suite type="TestSuite" id="1091" name="UI Package" fullname="UI Package" runstate="Runnable" testcasecount="66" result="Passed" start-time="2026-07-10 20:37:31Z" end-time="2026-07-10 20:37:38Z" duration="6.964328" total="66" passed="66" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="Assembly" id="1084" name="Neo.UI.Tests.PlayMode.dll" fullname="C:/Users/maxim/RiderProjects/UI-Framework/Library/ScriptAssemblies/Neo.UI.Tests.PlayMode.dll" runstate="Runnable" testcasecount="66" result="Passed" start-time="2026-07-10 20:37:31Z" end-time="2026-07-10 20:37:38Z" duration="6.957244" total="66" passed="66" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="17864" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="1085" name="Neo" fullname="Neo" runstate="Runnable" testcasecount="66" result="Passed" start-time="2026-07-10 20:37:31Z" end-time="2026-07-10 20:37:38Z" duration="6.956479" total="66" passed="66" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1086" name="UI" fullname="Neo.UI" runstate="Runnable" testcasecount="66" result="Passed" start-time="2026-07-10 20:37:31Z" end-time="2026-07-10 20:37:38Z" duration="6.956083" total="66" passed="66" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1087" name="Tests" fullname="Neo.UI.Tests" runstate="Runnable" testcasecount="66" result="Passed" start-time="2026-07-10 20:37:31Z" end-time="2026-07-10 20:37:38Z" duration="6.955557" total="66" passed="66" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestFixture" id="1001" name="ContainerPlayModeTests" fullname="Neo.UI.Tests.ContainerPlayModeTests" classname="Neo.UI.Tests.ContainerPlayModeTests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-07-10 20:37:31Z" end-time="2026-07-10 20:37:31Z" duration="0.613931" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1003" name="AnimatedShow_TransitionsThroughIsShowing" fullname="Neo.UI.Tests.ContainerPlayModeTests.AnimatedShow_TransitionsThroughIsShowing" methodname="AnimatedShow_TransitionsThroughIsShowing" classname="Neo.UI.Tests.ContainerPlayModeTests" runstate="Runnable" seed="208541526" result="Passed" start-time="2026-07-10 20:37:31Z" end-time="2026-07-10 20:37:31Z" duration="0.175253" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1006" name="AutoHide_HidesAfterDelay" fullname="Neo.UI.Tests.ContainerPlayModeTests.AutoHide_HidesAfterDelay" methodname="AutoHide_HidesAfterDelay" classname="Neo.UI.Tests.ContainerPlayModeTests" runstate="Runnable" seed="250970925" result="Passed" start-time="2026-07-10 20:37:31Z" end-time="2026-07-10 20:37:31Z" duration="0.203758" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1004" name="HideDuringShow_ReversesAndEndsHidden" fullname="Neo.UI.Tests.ContainerPlayModeTests.HideDuringShow_ReversesAndEndsHidden" methodname="HideDuringShow_ReversesAndEndsHidden" classname="Neo.UI.Tests.ContainerPlayModeTests" runstate="Runnable" seed="962311741" result="Passed" start-time="2026-07-10 20:37:31Z" end-time="2026-07-10 20:37:31Z" duration="0.211230" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1002" name="InstantShowAndHide_SetStatesAndFireEvents" fullname="Neo.UI.Tests.ContainerPlayModeTests.InstantShowAndHide_SetStatesAndFireEvents" methodname="InstantShowAndHide_SetStatesAndFireEvents" classname="Neo.UI.Tests.ContainerPlayModeTests" runstate="Runnable" seed="1342438358" result="Passed" start-time="2026-07-10 20:37:31Z" end-time="2026-07-10 20:37:31Z" duration="0.003756" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1005" name="TotalShowDuration_ReflectsAnimator" fullname="Neo.UI.Tests.ContainerPlayModeTests.TotalShowDuration_ReflectsAnimator" methodname="TotalShowDuration_ReflectsAnimator" classname="Neo.UI.Tests.ContainerPlayModeTests" runstate="Runnable" seed="1429850390" result="Passed" start-time="2026-07-10 20:37:31Z" end-time="2026-07-10 20:37:31Z" duration="0.002894" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1007" name="WhenHidden_DisablesGameObjectIfConfigured" fullname="Neo.UI.Tests.ContainerPlayModeTests.WhenHidden_DisablesGameObjectIfConfigured" methodname="WhenHidden_DisablesGameObjectIfConfigured" classname="Neo.UI.Tests.ContainerPlayModeTests" runstate="Runnable" seed="2109827686" result="Passed" start-time="2026-07-10 20:37:31Z" end-time="2026-07-10 20:37:31Z" duration="0.002300" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1008" name="DataBoundListRuntimeTests" fullname="Neo.UI.Tests.DataBoundListRuntimeTests" classname="Neo.UI.Tests.DataBoundListRuntimeTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-07-10 20:37:31Z" end-time="2026-07-10 20:37:32Z" duration="0.141384" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1011" name="DataSetBeforeList_IsPickedUpOnEnable" fullname="Neo.UI.Tests.DataBoundListRuntimeTests.DataSetBeforeList_IsPickedUpOnEnable" methodname="DataSetBeforeList_IsPickedUpOnEnable" classname="Neo.UI.Tests.DataBoundListRuntimeTests" runstate="Runnable" seed="670252035" result="Passed" start-time="2026-07-10 20:37:31Z" end-time="2026-07-10 20:37:32Z" duration="0.127039" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1010" name="SetData_RebuildsAndClears" fullname="Neo.UI.Tests.DataBoundListRuntimeTests.SetData_RebuildsAndClears" methodname="SetData_RebuildsAndClears" classname="Neo.UI.Tests.DataBoundListRuntimeTests" runstate="Runnable" seed="1864618635" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.008323" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1009" name="SetData_SpawnsBoundRows" fullname="Neo.UI.Tests.DataBoundListRuntimeTests.SetData_SpawnsBoundRows" methodname="SetData_SpawnsBoundRows" classname="Neo.UI.Tests.DataBoundListRuntimeTests" runstate="Runnable" seed="646810868" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.003851" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1012" name="DomainSignalTests" fullname="Neo.UI.Tests.DomainSignalTests" classname="Neo.UI.Tests.DomainSignalTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.023235" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1016" name="Dropdown_DomainSignal_FiresIndexOnChange" fullname="Neo.UI.Tests.DomainSignalTests.Dropdown_DomainSignal_FiresIndexOnChange" methodname="Dropdown_DomainSignal_FiresIndexOnChange" classname="Neo.UI.Tests.DomainSignalTests" runstate="Runnable" seed="242656632" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.010177" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1015" name="Slider_DomainSignal_FiresFloatOnCommit" fullname="Neo.UI.Tests.DomainSignalTests.Slider_DomainSignal_FiresFloatOnCommit" methodname="Slider_DomainSignal_FiresFloatOnCommit" classname="Neo.UI.Tests.DomainSignalTests" runstate="Runnable" seed="1598169807" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.005539" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1013" name="Toggle_DomainSignal_FiresAlongsideStandardStream" fullname="Neo.UI.Tests.DomainSignalTests.Toggle_DomainSignal_FiresAlongsideStandardStream" methodname="Toggle_DomainSignal_FiresAlongsideStandardStream" classname="Neo.UI.Tests.DomainSignalTests" runstate="Runnable" seed="614845968" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.003989" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1014" name="Toggle_WithoutDomainSignal_OnlyFiresStandardStream" fullname="Neo.UI.Tests.DomainSignalTests.Toggle_WithoutDomainSignal_OnlyFiresStandardStream" methodname="Toggle_WithoutDomainSignal_OnlyFiresStandardStream" classname="Neo.UI.Tests.DomainSignalTests" runstate="Runnable" seed="2076505121" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.001738" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1017" name="EmptyContainerAnimatorTests" fullname="Neo.UI.Tests.EmptyContainerAnimatorTests" classname="Neo.UI.Tests.EmptyContainerAnimatorTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.003408" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1018" name="AnimationlessView_HidesAndShowsItsAlpha" fullname="Neo.UI.Tests.EmptyContainerAnimatorTests.AnimationlessView_HidesAndShowsItsAlpha" methodname="AnimationlessView_HidesAndShowsItsAlpha" classname="Neo.UI.Tests.EmptyContainerAnimatorTests" runstate="Runnable" seed="99823915" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.002638" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1019" name="FullStackEndToEndTest" fullname="Neo.UI.Tests.FullStackEndToEndTest" classname="Neo.UI.Tests.FullStackEndToEndTest" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.538122" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1020" name="WorkedExample_ThemeAnimationSignalsAndFlow_AllCooperate" fullname="Neo.UI.Tests.FullStackEndToEndTest.WorkedExample_ThemeAnimationSignalsAndFlow_AllCooperate" methodname="WorkedExample_ThemeAnimationSignalsAndFlow_AllCooperate" classname="Neo.UI.Tests.FullStackEndToEndTest" runstate="Runnable" seed="201732716" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.537229" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[ThemeColorTarget on 'Title': theme token 'TextStrong' not found in theme ''.
+ThemeColorTarget on 'Overlay': theme token 'Shadow' not found in theme ''.
+ThemeColorTarget on 'Message': theme token 'TextDefault' not found in theme ''.
+ThemeColorTarget on 'Shadow': theme token 'Shadow' not found in theme ''.
+ThemeColorTarget on 'Surface': theme token 'Surface' not found in theme ''.
+ThemeColorTarget on 'Label': theme token 'TextOnPrimary' not found in theme ''.
+[Neo.UI] UIView.Hide: no registered view matches 'Menu/Main' (0 views registered).
+]]></output>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1021" name="GraphicsPlayModeTests" fullname="Neo.UI.Tests.GraphicsPlayModeTests" classname="Neo.UI.Tests.GraphicsPlayModeTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.021077" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1022" name="NeoShape_OnCanvas_EnablesVertexChannels" fullname="Neo.UI.Tests.GraphicsPlayModeTests.NeoShape_OnCanvas_EnablesVertexChannels" methodname="NeoShape_OnCanvas_EnablesVertexChannels" classname="Neo.UI.Tests.GraphicsPlayModeTests" runstate="Runnable" seed="723589377" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.007797" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1023" name="NeoShape_RendersWithSharedShapeShader" fullname="Neo.UI.Tests.GraphicsPlayModeTests.NeoShape_RendersWithSharedShapeShader" methodname="NeoShape_RendersWithSharedShapeShader" classname="Neo.UI.Tests.GraphicsPlayModeTests" runstate="Runnable" seed="1881133972" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.004341" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1024" name="ThemeShapeStyleTarget_AppliesStyle_AndFollowsThemeEdits" fullname="Neo.UI.Tests.GraphicsPlayModeTests.ThemeShapeStyleTarget_AppliesStyle_AndFollowsThemeEdits" methodname="ThemeShapeStyleTarget_AppliesStyle_AndFollowsThemeEdits" classname="Neo.UI.Tests.GraphicsPlayModeTests" runstate="Runnable" seed="966910460" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.007014" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1025" name="NoSilentFailurePlayModeTests" fullname="Neo.UI.Tests.NoSilentFailurePlayModeTests" classname="Neo.UI.Tests.NoSilentFailurePlayModeTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.011222" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1026" name="SignalParamBinding_UnknownParam_WarnsOnceDespiteTwoSends" fullname="Neo.UI.Tests.NoSilentFailurePlayModeTests.SignalParamBinding_UnknownParam_WarnsOnceDespiteTwoSends" methodname="SignalParamBinding_UnknownParam_WarnsOnceDespiteTwoSends" classname="Neo.UI.Tests.NoSilentFailurePlayModeTests" runstate="Runnable" seed="989185403" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.009261" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[[Neo.UI] NeoSignalParamBinding on 'BoundGlow': NeoGlowPulse does not recognize param 'notARealParam' (bound from signal 'Effects/Softness').
+]]></output>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1027" name="ParticleEmitterRuntimeTests" fullname="Neo.UI.Tests.ParticleEmitterRuntimeTests" classname="Neo.UI.Tests.ParticleEmitterRuntimeTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.232082" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1028" name="Burst_DoesNotPerturbHostLayout" fullname="Neo.UI.Tests.ParticleEmitterRuntimeTests.Burst_DoesNotPerturbHostLayout" methodname="Burst_DoesNotPerturbHostLayout" classname="Neo.UI.Tests.ParticleEmitterRuntimeTests" runstate="Runnable" seed="1914924536" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.019101" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1031" name="Burst_Spreads_ParticlesToVariedPositions" fullname="Neo.UI.Tests.ParticleEmitterRuntimeTests.Burst_Spreads_ParticlesToVariedPositions" methodname="Burst_Spreads_ParticlesToVariedPositions" classname="Neo.UI.Tests.ParticleEmitterRuntimeTests" runstate="Runnable" seed="1573020660" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.103357" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1030" name="HighDrag_DoesNotInstantlyFreezeVelocity" fullname="Neo.UI.Tests.ParticleEmitterRuntimeTests.HighDrag_DoesNotInstantlyFreezeVelocity" methodname="HighDrag_DoesNotInstantlyFreezeVelocity" classname="Neo.UI.Tests.ParticleEmitterRuntimeTests" runstate="Runnable" seed="1676307245" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.102301" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1029" name="Particles_SpawnIntoLayoutIgnoredContainer" fullname="Neo.UI.Tests.ParticleEmitterRuntimeTests.Particles_SpawnIntoLayoutIgnoredContainer" methodname="Particles_SpawnIntoLayoutIgnoredContainer" classname="Neo.UI.Tests.ParticleEmitterRuntimeTests" runstate="Runnable" seed="1556305858" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.004955" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1032" name="PointerClickDeselectTests" fullname="Neo.UI.Tests.PointerClickDeselectTests" classname="Neo.UI.Tests.PointerClickDeselectTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.013480" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1033" name="ButtonPointerClick_ClearsSelection_SoSelectedColorDoesNotStick" fullname="Neo.UI.Tests.PointerClickDeselectTests.ButtonPointerClick_ClearsSelection_SoSelectedColorDoesNotStick" methodname="ButtonPointerClick_ClearsSelection_SoSelectedColorDoesNotStick" classname="Neo.UI.Tests.PointerClickDeselectTests" runstate="Runnable" seed="238903394" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.007839" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1034" name="ButtonPointerClick_KeepsSelection_WhenDeselectAfterClickIsOff" fullname="Neo.UI.Tests.PointerClickDeselectTests.ButtonPointerClick_KeepsSelection_WhenDeselectAfterClickIsOff" methodname="ButtonPointerClick_KeepsSelection_WhenDeselectAfterClickIsOff" classname="Neo.UI.Tests.PointerClickDeselectTests" runstate="Runnable" seed="1801716892" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.001543" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1035" name="ButtonSubmit_KeepsSelection_SoKeyboardNavigationStillWorks" fullname="Neo.UI.Tests.PointerClickDeselectTests.ButtonSubmit_KeepsSelection_SoKeyboardNavigationStillWorks" methodname="ButtonSubmit_KeepsSelection_SoKeyboardNavigationStillWorks" classname="Neo.UI.Tests.PointerClickDeselectTests" runstate="Runnable" seed="1942685233" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.001219" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1036" name="TogglePointerClick_ClearsSelection" fullname="Neo.UI.Tests.PointerClickDeselectTests.TogglePointerClick_ClearsSelection" methodname="TogglePointerClick_ClearsSelection" classname="Neo.UI.Tests.PointerClickDeselectTests" runstate="Runnable" seed="1018892891" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.001414" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1037" name="PopupAndFlowTests" fullname="Neo.UI.Tests.PopupAndFlowTests" classname="Neo.UI.Tests.PopupAndFlowTests" runstate="Runnable" testcasecount="8" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:33Z" duration="0.432989" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1041" name="Flow_NavigatesOnButtonSignal_AndGoesBack" fullname="Neo.UI.Tests.PopupAndFlowTests.Flow_NavigatesOnButtonSignal_AndGoesBack" methodname="Flow_NavigatesOnButtonSignal_AndGoesBack" classname="Neo.UI.Tests.PopupAndFlowTests" runstate="Runnable" seed="407911033" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.004756" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[[Neo.UI] UIView.Hide: no registered view matches 'Menu/Main' (0 views registered).
+]]></output>
+              </test-case>
+              <test-case id="1042" name="Flow_PortalJumpsFromAnywhere" fullname="Neo.UI.Tests.PopupAndFlowTests.Flow_PortalJumpsFromAnywhere" methodname="Flow_PortalJumpsFromAnywhere" classname="Neo.UI.Tests.PopupAndFlowTests" runstate="Runnable" seed="516439879" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.003434" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[[Neo.UI] UIView.Hide: no registered view matches 'Menu/Settings' (0 views registered).
+]]></output>
+              </test-case>
+              <test-case id="1043" name="Flow_SetActiveNodeByName_Jumps" fullname="Neo.UI.Tests.PopupAndFlowTests.Flow_SetActiveNodeByName_Jumps" methodname="Flow_SetActiveNodeByName_Jumps" classname="Neo.UI.Tests.PopupAndFlowTests" runstate="Runnable" seed="368338958" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:32Z" duration="0.003898" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[[Neo.UI] FlowController has no executable node named 'DoesNotExist'.
+[Neo.UI] UIView.Hide: no registered view matches 'Menu/Settings' (0 views registered).
+]]></output>
+              </test-case>
+              <test-case id="1044" name="Flow_TimerTriggerAdvances" fullname="Neo.UI.Tests.PopupAndFlowTests.Flow_TimerTriggerAdvances" methodname="Flow_TimerTriggerAdvances" classname="Neo.UI.Tests.PopupAndFlowTests" runstate="Runnable" seed="2089944096" result="Passed" start-time="2026-07-10 20:37:32Z" end-time="2026-07-10 20:37:33Z" duration="0.201825" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1039" name="Popup_FluentSetTexts_WritesLabels" fullname="Neo.UI.Tests.PopupAndFlowTests.Popup_FluentSetTexts_WritesLabels" methodname="Popup_FluentSetTexts_WritesLabels" classname="Neo.UI.Tests.PopupAndFlowTests" runstate="Runnable" seed="836285385" result="Passed" start-time="2026-07-10 20:37:33Z" end-time="2026-07-10 20:37:33Z" duration="0.005647" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1040" name="Popup_HideOnBackButton_Hides" fullname="Neo.UI.Tests.PopupAndFlowTests.Popup_HideOnBackButton_Hides" methodname="Popup_HideOnBackButton_Hides" classname="Neo.UI.Tests.PopupAndFlowTests" runstate="Runnable" seed="46779645" result="Passed" start-time="2026-07-10 20:37:33Z" end-time="2026-07-10 20:37:33Z" duration="0.003591" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1038" name="PopupQueue_ShowsOneAtATime_Fifo" fullname="Neo.UI.Tests.PopupAndFlowTests.PopupQueue_ShowsOneAtATime_Fifo" methodname="PopupQueue_ShowsOneAtATime_Fifo" classname="Neo.UI.Tests.PopupAndFlowTests" runstate="Runnable" seed="627761345" result="Passed" start-time="2026-07-10 20:37:33Z" end-time="2026-07-10 20:37:33Z" duration="0.003514" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1045" name="Progressor_AnimatesValueAndUpdatesTargets" fullname="Neo.UI.Tests.PopupAndFlowTests.Progressor_AnimatesValueAndUpdatesTargets" methodname="Progressor_AnimatesValueAndUpdatesTargets" classname="Neo.UI.Tests.PopupAndFlowTests" runstate="Runnable" seed="8913101" result="Passed" start-time="2026-07-10 20:37:33Z" end-time="2026-07-10 20:37:33Z" duration="0.203655" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1046" name="ResponsiveDriverTests" fullname="Neo.UI.Tests.ResponsiveDriverTests" classname="Neo.UI.Tests.ResponsiveDriverTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-07-10 20:37:33Z" end-time="2026-07-10 20:37:33Z" duration="0.014493" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1050" name="EmptyCondition_NeverMatches_FallsBackToBase" fullname="Neo.UI.Tests.ResponsiveDriverTests.EmptyCondition_NeverMatches_FallsBackToBase" methodname="EmptyCondition_NeverMatches_FallsBackToBase" classname="Neo.UI.Tests.ResponsiveDriverTests" runstate="Runnable" seed="735943420" result="Passed" start-time="2026-07-10 20:37:33Z" end-time="2026-07-10 20:37:33Z" duration="0.003253" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1051" name="ForceActiveBreakpoint_PreviewHook_OverridesViewport" fullname="Neo.UI.Tests.ResponsiveDriverTests.ForceActiveBreakpoint_PreviewHook_OverridesViewport" methodname="ForceActiveBreakpoint_PreviewHook_OverridesViewport" classname="Neo.UI.Tests.ResponsiveDriverTests" runstate="Runnable" seed="1374542062" result="Passed" start-time="2026-07-10 20:37:33Z" end-time="2026-07-10 20:37:33Z" duration="0.002639" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1048" name="NoMatch_RevertsToBakedBase" fullname="Neo.UI.Tests.ResponsiveDriverTests.NoMatch_RevertsToBakedBase" methodname="NoMatch_RevertsToBakedBase" classname="Neo.UI.Tests.ResponsiveDriverTests" runstate="Runnable" seed="198516651" result="Passed" start-time="2026-07-10 20:37:33Z" end-time="2026-07-10 20:37:33Z" duration="0.001958" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1049" name="OnlyAppliesOnChange" fullname="Neo.UI.Tests.ResponsiveDriverTests.OnlyAppliesOnChange" methodname="OnlyAppliesOnChange" classname="Neo.UI.Tests.ResponsiveDriverTests" runstate="Runnable" seed="662120032" result="Passed" start-time="2026-07-10 20:37:33Z" end-time="2026-07-10 20:37:33Z" duration="0.001872" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1047" name="Resize_ToLandscape_AppliesLandscapeOverride" fullname="Neo.UI.Tests.ResponsiveDriverTests.Resize_ToLandscape_AppliesLandscapeOverride" methodname="Resize_ToLandscape_AppliesLandscapeOverride" classname="Neo.UI.Tests.ResponsiveDriverTests" runstate="Runnable" seed="445288914" result="Passed" start-time="2026-07-10 20:37:33Z" end-time="2026-07-10 20:37:33Z" duration="0.002804" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1052" name="RuntimeBehaviourRegressionTests" fullname="Neo.UI.Tests.RuntimeBehaviourRegressionTests" classname="Neo.UI.Tests.RuntimeBehaviourRegressionTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-07-10 20:37:33Z" end-time="2026-07-10 20:37:33Z" duration="0.014109" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1055" name="CustomStartPosition_CorrectsStaleAnimatorCapture_ShowsAtRestPose" fullname="Neo.UI.Tests.RuntimeBehaviourRegressionTests.CustomStartPosition_CorrectsStaleAnimatorCapture_ShowsAtRestPose" methodname="CustomStartPosition_CorrectsStaleAnimatorCapture_ShowsAtRestPose" classname="Neo.UI.Tests.RuntimeBehaviourRegressionTests" runstate="Runnable" seed="266621245" result="Passed" start-time="2026-07-10 20:37:33Z" end-time="2026-07-10 20:37:33Z" duration="0.004801" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1053" name="FlowController_EnabledBeforeViews_StillShowsStartView" fullname="Neo.UI.Tests.RuntimeBehaviourRegressionTests.FlowController_EnabledBeforeViews_StillShowsStartView" methodname="FlowController_EnabledBeforeViews_StillShowsStartView" classname="Neo.UI.Tests.RuntimeBehaviourRegressionTests" runstate="Runnable" seed="1380345173" result="Passed" start-time="2026-07-10 20:37:33Z" end-time="2026-07-10 20:37:33Z" duration="0.002137" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1056" name="Progressor_SetCustomValue_StartsAtAuthoredValue" fullname="Neo.UI.Tests.RuntimeBehaviourRegressionTests.Progressor_SetCustomValue_StartsAtAuthoredValue" methodname="Progressor_SetCustomValue_StartsAtAuthoredValue" classname="Neo.UI.Tests.RuntimeBehaviourRegressionTests" runstate="Runnable" seed="275966523" result="Passed" start-time="2026-07-10 20:37:33Z" end-time="2026-07-10 20:37:33Z" duration="0.001112" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1054" name="StepperValueLabel_FollowsSteps" fullname="Neo.UI.Tests.RuntimeBehaviourRegressionTests.StepperValueLabel_FollowsSteps" methodname="StepperValueLabel_FollowsSteps" classname="Neo.UI.Tests.RuntimeBehaviourRegressionTests" runstate="Runnable" seed="1185726626" result="Passed" start-time="2026-07-10 20:37:33Z" end-time="2026-07-10 20:37:33Z" duration="0.004368" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1057" name="SettingsCheatsDemoPlayTest" fullname="Neo.UI.Tests.SettingsCheatsDemoPlayTest" classname="Neo.UI.Tests.SettingsCheatsDemoPlayTest" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-07-10 20:37:33Z" end-time="2026-07-10 20:37:35Z" duration="2.580871" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1059" name="CheatsMenu_TabClicksAndControls_Work" fullname="Neo.UI.Tests.SettingsCheatsDemoPlayTest.CheatsMenu_TabClicksAndControls_Work" methodname="CheatsMenu_TabClicksAndControls_Work" classname="Neo.UI.Tests.SettingsCheatsDemoPlayTest" runstate="Runnable" seed="610806697" result="Passed" start-time="2026-07-10 20:37:34Z" end-time="2026-07-10 20:37:35Z" duration="0.357037" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1058" name="SettingsMenu_TabClicks_ShowTheirPanels" fullname="Neo.UI.Tests.SettingsCheatsDemoPlayTest.SettingsMenu_TabClicks_ShowTheirPanels" methodname="SettingsMenu_TabClicks_ShowTheirPanels" classname="Neo.UI.Tests.SettingsCheatsDemoPlayTest" runstate="Runnable" seed="405926906" result="Passed" start-time="2026-07-10 20:37:35Z" end-time="2026-07-10 20:37:35Z" duration="0.528262" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1060" name="TabPanelRuntimeTests" fullname="Neo.UI.Tests.TabPanelRuntimeTests" classname="Neo.UI.Tests.TabPanelRuntimeTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-07-10 20:37:35Z" end-time="2026-07-10 20:37:35Z" duration="0.007768" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1062" name="TabGroup_ShowsOnlyTheSelectedPanel" fullname="Neo.UI.Tests.TabPanelRuntimeTests.TabGroup_ShowsOnlyTheSelectedPanel" methodname="TabGroup_ShowsOnlyTheSelectedPanel" classname="Neo.UI.Tests.TabPanelRuntimeTests" runstate="Runnable" seed="1946064102" result="Passed" start-time="2026-07-10 20:37:35Z" end-time="2026-07-10 20:37:35Z" duration="0.002709" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1061" name="TogglingTab_ActivatesAndDeactivatesItsPanel" fullname="Neo.UI.Tests.TabPanelRuntimeTests.TogglingTab_ActivatesAndDeactivatesItsPanel" methodname="TogglingTab_ActivatesAndDeactivatesItsPanel" classname="Neo.UI.Tests.TabPanelRuntimeTests" runstate="Runnable" seed="1162143099" result="Passed" start-time="2026-07-10 20:37:35Z" end-time="2026-07-10 20:37:35Z" duration="0.002164" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1063" name="TypedDataTests" fullname="Neo.UI.Tests.TypedDataTests" classname="Neo.UI.Tests.TypedDataTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-07-10 20:37:35Z" end-time="2026-07-10 20:37:35Z" duration="0.016198" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1066" name="Add_And_RemoveAt_SpawnSingleRows" fullname="Neo.UI.Tests.TypedDataTests.Add_And_RemoveAt_SpawnSingleRows" methodname="Add_And_RemoveAt_SpawnSingleRows" classname="Neo.UI.Tests.TypedDataTests" runstate="Runnable" seed="1601474642" result="Passed" start-time="2026-07-10 20:37:35Z" end-time="2026-07-10 20:37:35Z" duration="0.006367" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1064" name="SetTyped_PopulatesFromProjection" fullname="Neo.UI.Tests.TypedDataTests.SetTyped_PopulatesFromProjection" methodname="SetTyped_PopulatesFromProjection" classname="Neo.UI.Tests.TypedDataTests" runstate="Runnable" seed="1732885999" result="Passed" start-time="2026-07-10 20:37:35Z" end-time="2026-07-10 20:37:35Z" duration="0.002346" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1067" name="StringApi_StillPopulates" fullname="Neo.UI.Tests.TypedDataTests.StringApi_StillPopulates" methodname="StringApi_StillPopulates" classname="Neo.UI.Tests.TypedDataTests" runstate="Runnable" seed="639762119" result="Passed" start-time="2026-07-10 20:37:35Z" end-time="2026-07-10 20:37:35Z" duration="0.002471" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1065" name="UpdateRow_PatchesOneRow_LeavingOthers" fullname="Neo.UI.Tests.TypedDataTests.UpdateRow_PatchesOneRow_LeavingOthers" methodname="UpdateRow_PatchesOneRow_LeavingOthers" classname="Neo.UI.Tests.TypedDataTests" runstate="Runnable" seed="527482260" result="Passed" start-time="2026-07-10 20:37:35Z" end-time="2026-07-10 20:37:35Z" duration="0.003414" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1068" name="ViewAndInteractiveTests" fullname="Neo.UI.Tests.ViewAndInteractiveTests" classname="Neo.UI.Tests.ViewAndInteractiveTests" runstate="Runnable" testcasecount="10" result="Passed" start-time="2026-07-10 20:37:35Z" end-time="2026-07-10 20:37:35Z" duration="0.021371" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1071" name="Button_ClickFiresEventAndSignal" fullname="Neo.UI.Tests.ViewAndInteractiveTests.Button_ClickFiresEventAndSignal" methodname="Button_ClickFiresEventAndSignal" classname="Neo.UI.Tests.ViewAndInteractiveTests" runstate="Runnable" seed="561401242" result="Passed" start-time="2026-07-10 20:37:35Z" end-time="2026-07-10 20:37:35Z" duration="0.001770" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1072" name="Button_CooldownBlocksRapidExecution" fullname="Neo.UI.Tests.ViewAndInteractiveTests.Button_CooldownBlocksRapidExecution" methodname="Button_CooldownBlocksRapidExecution" classname="Neo.UI.Tests.ViewAndInteractiveTests" runstate="Runnable" seed="373112496" result="Passed" start-time="2026-07-10 20:37:35Z" end-time="2026-07-10 20:37:35Z" duration="0.001853" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1069" name="StaticApi_ShowsAndHidesByAddress" fullname="Neo.UI.Tests.ViewAndInteractiveTests.StaticApi_ShowsAndHidesByAddress" methodname="StaticApi_ShowsAndHidesByAddress" classname="Neo.UI.Tests.ViewAndInteractiveTests" runstate="Runnable" seed="1844789090" result="Passed" start-time="2026-07-10 20:37:35Z" end-time="2026-07-10 20:37:35Z" duration="0.002077" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1076" name="Stepper_StepsAndClamps" fullname="Neo.UI.Tests.ViewAndInteractiveTests.Stepper_StepsAndClamps" methodname="Stepper_StepsAndClamps" classname="Neo.UI.Tests.ViewAndInteractiveTests" runstate="Runnable" seed="1299317170" result="Passed" start-time="2026-07-10 20:37:35Z" end-time="2026-07-10 20:37:35Z" duration="0.001283" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1075" name="Tab_SyncsWithContainerVisibility" fullname="Neo.UI.Tests.ViewAndInteractiveTests.Tab_SyncsWithContainerVisibility" methodname="Tab_SyncsWithContainerVisibility" classname="Neo.UI.Tests.ViewAndInteractiveTests" runstate="Runnable" seed="1541011801" result="Passed" start-time="2026-07-10 20:37:35Z" end-time="2026-07-10 20:37:35Z" duration="0.002053" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1078" name="ThemeColorTarget_AppliesAndFollowsTokenChanges" fullname="Neo.UI.Tests.ViewAndInteractiveTests.ThemeColorTarget_AppliesAndFollowsTokenChanges" methodname="ThemeColorTarget_AppliesAndFollowsTokenChanges" classname="Neo.UI.Tests.ViewAndInteractiveTests" runstate="Runnable" seed="678950381" result="Passed" start-time="2026-07-10 20:37:35Z" end-time="2026-07-10 20:37:35Z" duration="0.001811" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1074" name="Toggle_EventsAndInstantVariant" fullname="Neo.UI.Tests.ViewAndInteractiveTests.Toggle_EventsAndInstantVariant" methodname="Toggle_EventsAndInstantVariant" classname="Neo.UI.Tests.ViewAndInteractiveTests" runstate="Runnable" seed="1896989719" result="Passed" start-time="2026-07-10 20:37:35Z" end-time="2026-07-10 20:37:35Z" duration="0.001744" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1073" name="ToggleGroup_OneToggleOn_EnforcesExclusivity" fullname="Neo.UI.Tests.ViewAndInteractiveTests.ToggleGroup_OneToggleOn_EnforcesExclusivity" methodname="ToggleGroup_OneToggleOn_EnforcesExclusivity" classname="Neo.UI.Tests.ViewAndInteractiveTests" runstate="Runnable" seed="1225041822" result="Passed" start-time="2026-07-10 20:37:35Z" end-time="2026-07-10 20:37:35Z" duration="0.001541" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1077" name="UITag_RegistryLookupWorks" fullname="Neo.UI.Tests.ViewAndInteractiveTests.UITag_RegistryLookupWorks" methodname="UITag_RegistryLookupWorks" classname="Neo.UI.Tests.ViewAndInteractiveTests" runstate="Runnable" seed="161925761" result="Passed" start-time="2026-07-10 20:37:35Z" end-time="2026-07-10 20:37:35Z" duration="0.002267" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1070" name="ViewVisibility_IsPublishedAsSignal" fullname="Neo.UI.Tests.ViewAndInteractiveTests.ViewVisibility_IsPublishedAsSignal" methodname="ViewVisibility_IsPublishedAsSignal" classname="Neo.UI.Tests.ViewAndInteractiveTests" runstate="Runnable" seed="193637932" result="Passed" start-time="2026-07-10 20:37:35Z" end-time="2026-07-10 20:37:35Z" duration="0.002459" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1079" name="ViewTransitionRuntimeTests" fullname="Neo.UI.Tests.ViewTransitionRuntimeTests" classname="Neo.UI.Tests.ViewTransitionRuntimeTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-07-10 20:37:35Z" end-time="2026-07-10 20:37:38Z" duration="2.266039" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1083" name="EdgeWithoutTransition_ShowsIncomingImmediately_LegacyBehavior" fullname="Neo.UI.Tests.ViewTransitionRuntimeTests.EdgeWithoutTransition_ShowsIncomingImmediately_LegacyBehavior" methodname="EdgeWithoutTransition_ShowsIncomingImmediately_LegacyBehavior" classname="Neo.UI.Tests.ViewTransitionRuntimeTests" runstate="Runnable" seed="1971956398" result="Passed" start-time="2026-07-10 20:37:35Z" end-time="2026-07-10 20:37:35Z" duration="0.003661" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1082" name="HeroFlight_ProxyKeepsSourceSize_NotOverlayStretchedSize" fullname="Neo.UI.Tests.ViewTransitionRuntimeTests.HeroFlight_ProxyKeepsSourceSize_NotOverlayStretchedSize" methodname="HeroFlight_ProxyKeepsSourceSize_NotOverlayStretchedSize" classname="Neo.UI.Tests.ViewTransitionRuntimeTests" runstate="Runnable" seed="731532545" result="Passed" start-time="2026-07-10 20:37:35Z" end-time="2026-07-10 20:37:36Z" duration="0.604000" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1080" name="NamedTransition_DelaysIncomingShow_UntilOffsetElapsed" fullname="Neo.UI.Tests.ViewTransitionRuntimeTests.NamedTransition_DelaysIncomingShow_UntilOffsetElapsed" methodname="NamedTransition_DelaysIncomingShow_UntilOffsetElapsed" classname="Neo.UI.Tests.ViewTransitionRuntimeTests" runstate="Runnable" seed="240485569" result="Passed" start-time="2026-07-10 20:37:36Z" end-time="2026-07-10 20:37:37Z" duration="0.752958" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1081" name="SlideOutHideOverride_PlainShowLater_RestoresRestPose" fullname="Neo.UI.Tests.ViewTransitionRuntimeTests.SlideOutHideOverride_PlainShowLater_RestoresRestPose" methodname="SlideOutHideOverride_PlainShowLater_RestoresRestPose" classname="Neo.UI.Tests.ViewTransitionRuntimeTests" runstate="Runnable" seed="177161770" result="Passed" start-time="2026-07-10 20:37:37Z" end-time="2026-07-10 20:37:38Z" duration="0.903907" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[[Neo.UI] UIView.Hide: no registered view matches 'TxPose/A' (0 views registered).
+Saving results to: C:/Users/maxim/AppData/LocalLow/DefaultCompany/UI Package\TestResults.xml
+]]></output>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

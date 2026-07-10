@@ -25,12 +25,13 @@ namespace Neo.UI
     /// the settings "on drag vs on release" split. A committed value also publishes on "UISlider/Behaviour".
     /// </summary>
     [AddComponentMenu("Neo/UI/Interactive/UI Slider")]
-    public class UISlider : Slider, IPointerUpHandler, IEndDragHandler
+    public class UISlider : Slider, IPointerUpHandler, IEndDragHandler, INeoIdOwner
     {
         public const string StreamCategory = "UISlider";
         public const string StreamName = "Behaviour";
 
         public SliderId id = new SliderId();
+        CategoryNameId INeoIdOwner.OwnId => id;
 
         [Tooltip("Optional domain stream this slider publishes its committed float value to, in addition " +
                  "to the standard \"UISlider/Behaviour\" stream — lets game code do " +

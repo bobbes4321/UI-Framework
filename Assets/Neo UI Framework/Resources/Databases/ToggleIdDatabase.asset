@@ -91,4 +91,5 @@ MonoBehaviour:
     - Music
   - category: Video
     names:
+    - Fullscreen
     - VSync

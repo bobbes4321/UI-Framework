@@ -11,7 +11,7 @@ namespace Neo.UI
     /// passive, one-on (allow none), one-on enforced (always exactly one), any-on enforced (at least one).
     /// </summary>
     [AddComponentMenu("Neo/UI/Interactive/UI Toggle Group")]
-    public class UIToggleGroup : MonoBehaviour
+    public class UIToggleGroup : MonoBehaviour, INeoIdOwner
     {
         public enum ControlMode
         {
@@ -26,6 +26,7 @@ namespace Neo.UI
         }
 
         public ToggleId id = new ToggleId();
+        CategoryNameId INeoIdOwner.OwnId => id;
 
         public ControlMode controlMode = ControlMode.OneToggleOn;
 

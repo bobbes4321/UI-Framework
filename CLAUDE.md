@@ -61,7 +61,20 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   `Name` or `Category/Name`, persists to the database AND assigns both halves;
   `IdDatabaseOptions.ParseQuickAdd` is the tested split) and `…` = one-click jump into the ID
   Database Manager deep-linked to that database/category/name
-  (`IdDatabaseManagerWindow.Open(db, cat, name)`). Plain string pickers use
+  (`IdDatabaseManagerWindow.Open(db, cat, name)`). A component's OWN identity (the field its
+  `INeoIdOwner.OwnId` exposes — the drawer reference-compares, so reference fields like triggers/
+  signal streams never match) gets a third pencil tail button: rename the
+  GameObject to the id's canonical name via `NeoIdNaming` (`Editor/Agent/NeoIdNaming.cs`) — the ONE
+  id→GameObject-name convention (`"Button - Category_Name"`: a type prefix derived from the
+  id-bearing component's type name — Doozy-style hierarchy readability but from one derivation, not
+  per-inspector hardcoded strings; then the id with the default category dropped), shared with the
+  generator's element naming so hand-built and generated hierarchies read alike. Which component IS
+  an element's identity is declared by the widget itself via `INeoIdOwner` (`Runtime/Ids/`) — the
+  seam the generator's `OwnIdComponent` resolves through (one `TryGetComponent`, no component-type
+  list), also gating the `NeoElementId` marker; a project's custom id-bearing widget implements it. A `UIView` gets NO prefix — view roots are prefab roots and
+  Unity pins those names to the asset file (`Category_Name`). Deliberately not configurable (tests:
+  `IdRenameTests`; the third-button seam is the `extraTool` overload of `DrawCategoryNamePair`).
+  Plain string pickers use
   `NeoDropdown.StringPopup/ValuePopup`
   with an inline "+ Add" row — never modal dialogs. Theme-color-token pickers additionally pass
   `optionSwatch` (a `token → Color?` resolver; colors are resolved once when the popup opens) so

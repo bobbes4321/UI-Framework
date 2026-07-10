@@ -173,6 +173,12 @@ namespace Neo.UI.Tests
 
             yield return null;
             yield return null;
+            // let A's own 0.05s show fade fully settle before cutting away — advancing while it is
+            // still mid-flight would interrupt it (OnHide's own-animation-reversal path), which
+            // reverses THAT fade rather than playing the transition's hide override; this test
+            // targets a clean, completed cut, not a Show/Hide interruption race.
+            yield return new WaitForSeconds(0.1f);
+            Assert.IsTrue(viewA.isVisible, "precondition: A's own show must finish before the cut to B");
 
             controller.Advance(edgeAB);
             yield return new WaitForSeconds(0.4f); // past the 0.1s slide-out + 0.2s incoming fade

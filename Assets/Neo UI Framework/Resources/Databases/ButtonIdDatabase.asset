@@ -45,8 +45,10 @@ MonoBehaviour:
   - category: Controls
     names:
     - Attack_Rebind
+    - Fire_Rebind
     - Jump_Rebind
     - Reset
+    - ResetDefaults
     - Sprint_Rebind
   - category: Deco
     names:
@@ -109,11 +111,15 @@ MonoBehaviour:
   - category: Menu
     names:
     - Cheats
+    - CheatsBack
     - Garage
+    - OpenCheats
+    - OpenSettings
     - Options
     - Play
     - Quit
     - Settings
+    - SettingsBack
   - category: None
     names:
     - None
@@ -128,6 +134,8 @@ MonoBehaviour:
     names:
     - GiveGold
     - HealFull
+    - Lives_Minus
+    - Lives_Plus
     - XpMultiplier_Minus
     - XpMultiplier_Plus
   - category: Popup
@@ -205,4 +213,5 @@ MonoBehaviour:
   - category: World
     names:
     - FinishRace
+    - SpawnEnemy
     - Twerk It

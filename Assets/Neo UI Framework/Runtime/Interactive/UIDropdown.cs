@@ -22,12 +22,13 @@ namespace Neo.UI
     /// option index. Populate at author time or runtime via <see cref="SetStringOptions"/>.
     /// </summary>
     [AddComponentMenu("Neo/UI/Interactive/UI Dropdown")]
-    public class UIDropdown : TMP_Dropdown
+    public class UIDropdown : TMP_Dropdown, INeoIdOwner
     {
         public const string StreamCategory = "UIDropdown";
         public const string StreamName = "Behaviour";
 
         public DropdownId id = new DropdownId();
+        CategoryNameId INeoIdOwner.OwnId => id;
 
         [Tooltip("Optional domain stream this dropdown publishes its selected index to, in addition to " +
                  "the standard \"UIDropdown/Behaviour\" stream — lets game code do " +

@@ -675,24 +675,67 @@ namespace Neo.UI.Editor.Authoring
 
         /// <summary>
         /// Picks the parent a new widget should drop into, mirroring Unity's built-in UI create: prefer the
-        /// selected RectTransform when it already lives under a Canvas; otherwise find-or-create a Canvas
-        /// (and an EventSystem wired for the New Input System). <paramref name="createdCanvas"/> reports
-        /// whether a Canvas was bootstrapped this call.
+        /// container resolved from the selected RectTransform (<see cref="FindDropParent"/>) when it lives
+        /// under a Canvas; otherwise find-or-create a Canvas (and an EventSystem wired for the New Input
+        /// System). <paramref name="createdCanvas"/> reports whether a Canvas was bootstrapped this call.
         /// </summary>
         private static void ResolveParent(GameObject selection, bool requireCanvas,
             out RectTransform parent, out bool createdCanvas)
         {
             createdCanvas = false;
-            if (selection != null)
+            RectTransform resolved = FindDropParent(selection);
+            if (resolved != null)
             {
-                var rt = selection.GetComponent<RectTransform>();
-                if (rt != null && selection.GetComponentInParent<Canvas>() != null)
-                {
-                    parent = rt;
-                    return;
-                }
+                parent = resolved;
+                return;
             }
             parent = (RectTransform)FindOrCreateCanvas(out createdCanvas).transform;
+        }
+
+        /// <summary>
+        /// Resolves the container a new widget lands in when <paramref name="selection"/> is selected:
+        /// the selection itself when it can host children, else the nearest ancestor that can — never
+        /// inside an interactive widget's internals. Every create (<see cref="CreateWidget(string)"/>,
+        /// the palette, drops) selects the widget it just made, so without this climb the NEXT create
+        /// would nest a button inside the previous button's label row instead of adding a sibling under
+        /// the stack. Returns null (caller falls back to find-or-create Canvas) when the selection is
+        /// null, not a RectTransform, or not under a Canvas. Shared with the palette's "Adds into" hint
+        /// so the hint always tells the truth about where a click lands.
+        /// </summary>
+        internal static RectTransform FindDropParent(GameObject selection)
+        {
+            if (selection == null) return null;
+            var rt = selection.GetComponent<RectTransform>();
+            if (rt == null || selection.GetComponentInParent<Canvas>() == null) return null;
+            for (RectTransform current = rt; current != null; current = current.parent as RectTransform)
+                if (IsDropContainer(current)) return current;
+            return null;
+        }
+
+        /// <summary>
+        /// Whether a rect can host a dropped widget as a child. Interactive widgets (any
+        /// <see cref="Selectable"/> — button/toggle/tab/slider…) and everything inside them are
+        /// internals, not containers (a button root carries its own icon/label HorizontalLayoutGroup,
+        /// so a naive layout-group check would drop INTO it); leaf elements (shape/text/icon) hold
+        /// content, not children. Containers are the layout/structure surfaces: layout groups
+        /// (vstack/hstack/grid), Neo containers (view/panel/popup), scroll views, overlays, safe areas
+        /// and the Canvas itself — plus any plain hand-made rect, matching Unity's own UI create.
+        /// </summary>
+        private static bool IsDropContainer(RectTransform rect)
+        {
+            if (rect.GetComponentInParent<Selectable>(includeInactive: true) != null) return false;
+            if (rect.GetComponent<LayoutGroup>() != null
+                || rect.GetComponent<UIContainer>() != null
+                || rect.GetComponent<ScrollRect>() != null
+                || rect.GetComponent<UIOverlay>() != null
+                || rect.GetComponent<SafeAreaFitter>() != null
+                || rect.GetComponent<Canvas>() != null)
+                return true;
+            if (rect.GetComponent<NeoShape>() != null
+                || rect.GetComponent<NeoIcon>() != null
+                || rect.GetComponent<TMPro.TMP_Text>() != null)
+                return false;
+            return true;
         }
 
         private static Canvas FindOrCreateCanvas(out bool created)

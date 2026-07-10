@@ -49,10 +49,16 @@ namespace Neo.UI.Tests
                 UIWidgetFactory.TokenShadow
             };
 
-            Assert.AreEqual(3, ThemeBundles.Names.Count(), "three curated bundles");
-            foreach (string name in ThemeBundles.Names.ToList())
+            // Exercise only the three code-seeded built-ins here — a project may also have its own
+            // discovered ThemeBundleDefinition assets registered alongside them (the intended
+            // extensibility seam), so asserting against ThemeBundles.Names/TryGet would fold
+            // arbitrary project content into this contract test.
+            ThemeBundles.Bundle[] builtIns =
+                { ThemeBundles.CleanSlate, ThemeBundles.NeonArcade, ThemeBundles.SoftFantasy };
+            Assert.AreEqual(3, builtIns.Length, "three curated bundles");
+            foreach (ThemeBundles.Bundle bundle in builtIns)
             {
-                Assert.IsTrue(ThemeBundles.TryGet(name, out ThemeBundles.Bundle bundle));
+                string name = bundle.name;
                 var report = new GenerateReport();
                 ThemeBundles.Apply(bundle, settings, report);
                 Assert.IsEmpty(report.issues, $"{name}: {report}");

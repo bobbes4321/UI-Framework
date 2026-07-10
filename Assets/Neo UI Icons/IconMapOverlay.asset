@@ -18,4 +18,8 @@ MonoBehaviour:
     spriteAsset: {fileID: 11400000, guid: 94f5ade96e9319d42a9a4e4050d8f24c, type: 2}
     spriteName: crown_yellow
     tint: 0
+  - name: header_icon_discord
+    spriteAsset: {fileID: 11400000, guid: b113b7ad51c1fd04cba0ecf5cec71a53, type: 2}
+    spriteName: header_icon_discord
+    tint: 0
   aliases: []
