@@ -79,15 +79,11 @@ namespace Neo.UI.Tests
         [OneTimeTearDown]
         public void DeleteGenerated()
         {
+            // No committed-database cleanup needed here: NeoPlayModeScratchSettings redirects
+            // NeoUISettings.instance to an in-memory scratch copy for the whole run, so every
+            // id/popup/preset this generation registered landed on throwaway clones.
             AssetDatabase.DeleteAsset(GeneratedRoot);
             RestoreGeneratorRoot();
-            NeoUISettings settings = NeoUISettings.instance;
-            if (settings != null && settings.animationPresets != null)
-            {
-                foreach (UIAnimationPreset preset in settings.animationPresets.Presets.Where(p => p == null).ToList())
-                    settings.animationPresets.Remove(preset);
-                EditorUtility.SetDirty(settings.animationPresets);
-            }
             AssetDatabase.SaveAssets();
         }
 

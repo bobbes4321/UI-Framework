@@ -56,6 +56,9 @@ namespace Neo.UI.Editor
         /// </summary>
         public static Texture2D Render(string kind, int size)
         {
+            // The palette's "View" pseudo-kind isn't an ElementSpec kind (it routes to CreateView, never
+            // BuildElementLive) and an empty view is invisible anyway — null = the card's text fallback.
+            if (kind == Authoring.NeoWidgetPalette.ViewKind) return null;
             ElementSpec element = BuildElement(kind, null, kind);
             if (element == null) return null;
             return RenderElement(element, size);

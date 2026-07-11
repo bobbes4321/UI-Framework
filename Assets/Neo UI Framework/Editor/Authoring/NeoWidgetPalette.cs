@@ -75,6 +75,15 @@ namespace Neo.UI.Editor.Authoring
         /// <summary> The category preset tiles group under (the design-system "component" layer). </summary>
         public const string ComponentsCategory = "Components";
 
+        /// <summary>
+        /// The pseudo-kind of the "View" tile. NOT an <see cref="ElementSpec"/> kind — a view is the
+        /// top-level container widgets spawn INTO — but the palette / More Widgets / Ctrl-K offer it as a
+        /// tile so "start a new screen" is reachable from the compose surface itself, not only the
+        /// GameObject menu. <see cref="NeoSceneAuthoring.CreateWidget(string,string,GameObject)"/> routes
+        /// it to <see cref="NeoSceneAuthoring.CreateView(GameObject)"/>.
+        /// </summary>
+        public const string ViewKind = "view";
+
         // Display order for the canonical built-in categories; unknown categories sort after, alpha.
         // Components (the preset layer) lead — they're the highest-level thing a designer reaches for.
         private static readonly string[] CategoryOrder =
@@ -102,7 +111,9 @@ namespace Neo.UI.Editor.Authoring
 
         private static IEnumerable<PaletteEntry> Builtins()
         {
-            // Layout containers / spacing.
+            // Layout containers / spacing. The View tile leads — it's the screen everything else spawns
+            // into (see ViewKind; CreateWidget routes it to CreateView).
+            yield return new PaletteEntry(ViewKind, "Layout", "View", "app-window", -1);
             yield return new PaletteEntry("vstack", "Layout", "Vertical Stack", "layout", 0);
             yield return new PaletteEntry("hstack", "Layout", "Horizontal Stack", "layout", 1);
             yield return new PaletteEntry("grid", "Layout", "Grid", "grid", 2);

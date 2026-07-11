@@ -109,6 +109,22 @@ namespace Neo.UI.Tests
         }
 
         [Test]
+        public void CreateWidget_ViewPseudoKind_RoutesToCreateView()
+        {
+            bool offered = false;
+            foreach (PaletteEntry e in NeoWidgetPalette.All)
+                if (e.kind == NeoWidgetPalette.ViewKind) { offered = true; break; }
+            Assert.IsTrue(offered, "the palette must offer the View tile");
+
+            GameObject created = NeoSceneAuthoring.CreateWidget(NeoWidgetPalette.ViewKind, null, _canvasRoot);
+            Assert.IsNotNull(created, "the View tile must spawn something");
+            Assert.IsNotNull(created.GetComponent<UIView>(),
+                "the View pseudo-kind must route to CreateView and build a real UIView root");
+            Assert.AreEqual(_canvasRoot.transform, created.transform.parent,
+                "the view must land under the resolved Canvas, like the GameObject-menu CreateView");
+        }
+
+        [Test]
         public void CreateWidget_SelectionOnAJustSpawnedButton_AddsASiblingUnderTheStack()
         {
             GameObject stack = NeoSceneAuthoring.CreateWidget("vstack", _viewRoot);

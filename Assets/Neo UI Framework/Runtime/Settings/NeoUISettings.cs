@@ -328,6 +328,70 @@ namespace Neo.UI
             return null;
         }
 
+        /// <summary>
+        /// An in-memory copy of this settings asset whose generator-WRITTEN sub-assets — the id
+        /// databases, the popup database and the animation preset database — are also in-memory
+        /// copies, so registrations (the generator's RegisterId, popup/preset AddOrUpdate) land on
+        /// throwaway clones instead of dirtying the committed assets. Read-only references (theme,
+        /// fonts, menu widgets, variants) stay shared. Test runs point <see cref="instance"/> at one
+        /// of these for their duration (see NeoTestScratchRoot / NeoPlayModeScratchSettings) — the
+        /// settings analog of the GeneratedRoot scratch-folder redirect. Runtime lookups still work:
+        /// ids are raw category/name strings on components, the databases are editor-picker
+        /// autocomplete only.
+        /// </summary>
+        public NeoUISettings CreateScratchCopy()
+        {
+            NeoUISettings copy = Instantiate(this);
+            copy.name = name + " (Scratch)";
+            copy.hideFlags = HideFlags.DontSave;
+            copy.viewIds = ScratchClone(viewIds);
+            copy.buttonIds = ScratchClone(buttonIds);
+            copy.toggleIds = ScratchClone(toggleIds);
+            copy.sliderIds = ScratchClone(sliderIds);
+            copy.tagIds = ScratchClone(tagIds);
+            copy.streamIds = ScratchClone(streamIds);
+            copy.panelIds = ScratchClone(panelIds);
+            copy.dropdownIds = ScratchClone(dropdownIds);
+            copy.popupDatabase = ScratchClone(popupDatabase);
+            copy.animationPresets = ScratchClone(animationPresets);
+            return copy;
+        }
+
+        /// <summary>
+        /// Destroys a copy made by <see cref="CreateScratchCopy"/> including its cloned sub-assets.
+        /// Only DontSave-flagged objects are destroyed, so a persistent asset that was assigned into
+        /// the copy afterwards is never touched.
+        /// </summary>
+        public static void DestroyScratchCopy(NeoUISettings copy)
+        {
+            if (copy == null) return;
+            DestroyIfScratch(copy.viewIds);
+            DestroyIfScratch(copy.buttonIds);
+            DestroyIfScratch(copy.toggleIds);
+            DestroyIfScratch(copy.sliderIds);
+            DestroyIfScratch(copy.tagIds);
+            DestroyIfScratch(copy.streamIds);
+            DestroyIfScratch(copy.panelIds);
+            DestroyIfScratch(copy.dropdownIds);
+            DestroyIfScratch(copy.popupDatabase);
+            DestroyIfScratch(copy.animationPresets);
+            DestroyIfScratch(copy);
+        }
+
+        private static T ScratchClone<T>(T asset) where T : ScriptableObject
+        {
+            if (asset == null) return null;
+            T copy = Instantiate(asset);
+            copy.name = asset.name + " (Scratch)";
+            copy.hideFlags = HideFlags.DontSave;
+            return copy;
+        }
+
+        private static void DestroyIfScratch(ScriptableObject obj)
+        {
+            if (obj != null && (obj.hideFlags & HideFlags.DontSave) != 0) DestroyImmediate(obj);
+        }
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatics() => s_instance = null;
     }

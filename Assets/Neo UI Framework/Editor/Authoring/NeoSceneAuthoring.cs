@@ -42,6 +42,10 @@ namespace Neo.UI.Editor.Authoring
         public static GameObject CreateWidget(string kind, string presetName, GameObject parentSelection)
         {
             if (string.IsNullOrEmpty(kind)) return null;
+            // "view" is a palette pseudo-kind, not an ElementSpec kind (a view is what widgets spawn
+            // INTO) — route it to the real view factory so every CreateWidget entry point (palette tile,
+            // drag-drop, More Widgets…, Ctrl-K) can start a new screen. Presets never target views.
+            if (kind == NeoWidgetPalette.ViewKind) return CreateView(parentSelection);
             ElementSpec element = SpecFactory.NewElement(kind);
             if (!string.IsNullOrEmpty(presetName))
             {
@@ -94,10 +98,15 @@ namespace Neo.UI.Editor.Authoring
         /// and the unit Phase 2 capture turns into a spec view. Stamps <see cref="GeneratedMarker.showcaseId"/>
         /// from the active scene's showcase when there is one, so capture can route it home with no prompt.
         /// </summary>
-        public static GameObject CreateView()
+        public static GameObject CreateView() => CreateView(Selection.activeGameObject);
+
+        /// <summary> <see cref="CreateView()"/> with an explicit parent selection — the overload the
+        /// palette's View tile / drop payloads route through (the widget-spawn parity of
+        /// <see cref="CreateWidget(string, GameObject)"/>). </summary>
+        public static GameObject CreateView(GameObject parentSelection)
         {
             NeoUISettings settings = PrepareSettings();
-            ResolveParent(Selection.activeGameObject, requireCanvas: true, out RectTransform parent, out _);
+            ResolveParent(parentSelection, requireCanvas: true, out RectTransform parent, out _);
 
             var view = new ViewSpec { category = "Main", viewName = UniqueViewName(parent) };
             var report = new GenerateReport();

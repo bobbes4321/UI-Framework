@@ -43,6 +43,7 @@ MonoBehaviour:
     - General
     - Main
     - Panel0
+    - Panel2
   - category: Pause
     names:
     - Dim

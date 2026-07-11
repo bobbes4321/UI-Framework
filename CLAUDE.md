@@ -161,8 +161,12 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
 ## Build & test workflows
 
 - **While the Unity editor is open on this project** (check `Temp/UnityLockfile` + `tasklist` for
-  Unity.exe): don't batch-compile and never kill the editor. Compile-check editor code with Unity's
-  Roslyn instead:
+  Unity.exe): don't batch-compile and never kill the editor. Default assumption is the user is at
+  the keyboard and will tab into the editor and glance at the Console themselves — that's faster
+  than a Roslyn shell-out, so after an edit just say what changed and let them check, rather than
+  reflexively running a compile-check. Only run the manual Roslyn compile-check when the user has
+  said they're stepping away / want this done autonomously, or when working headless (e.g. inside a
+  worktree with no editor to check against):
   `dotnet "<UnityDir>/Editor/Data/DotNetSdkRoslyn/csc.dll" -nologo -target:library -langversion:9.0
   -define:UNITY_EDITOR -r:<Data/Managed/UnityEngine/*.dll> -r:<Data/NetStandard/ref/2.1.0/netstandard.dll>
   -r:<Library/ScriptAssemblies/{Neo.UI,UnityEngine.UI,UnityEditor.UI,Unity.TextMeshPro,Unity.InputSystem}.dll>
@@ -179,6 +183,12 @@ All inspectors/drawers go through the EditorUI kit so everything looks and behav
   `GeneratedRoot` ONLY via `NeoWorkspace.Scoped(showcase)` (a `readonly struct IDisposable` that
   save-restores the root even on exception and THROWS if handed `UISpecGenerator.DefaultGeneratedRoot`,
   so a scope can never target/delete the committed demo); tests still use the scratch redirect.
+  **Nor the committed databases**: the same fixtures (`NeoTestScratchRoot` EditMode,
+  `NeoPlayModeScratchSettings` PlayMode) also point `NeoUISettings.instance` at an in-memory
+  `NeoUISettings.CreateScratchCopy()` — a clone whose generator-written sub-assets (the 8 id
+  databases, popup database, animation preset database) are throwaway clones too — so test-run
+  generation never dirties the committed ID databases / settings (ids are raw strings on
+  components; the databases are editor-picker autocomplete only, so behavior is unchanged).
 - **Showcases (the Hub front door)**: each self-contained demo lives under `Assets/Showcases/{id}/`
   with its OWN `Generated/` (views/popups/flow/presets + `.neo-baseline.json`) and committed
   `{id}.unity` scene — distinct ids derive distinct roots, so two showcases can never collide in one

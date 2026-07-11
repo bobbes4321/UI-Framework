@@ -77,13 +77,16 @@ namespace Neo.UI.Editor.Authoring
         }
 
         // A free-anchored drop lands where the cursor was (the Doozy "position visible in scene view"
-        // nicety, but at the actual drop point); a layout-managed child keeps its layout slot.
+        // nicety, but at the actual drop point); a layout-managed child keeps its layout slot, and a
+        // stretch-anchored root (a dropped View tile, a safearea) keeps its anchored rest position —
+        // offsetting a stretched rect's localPosition would shove it half off its parent.
         private static void PlaceAtDropPoint(GameObject created, Vector3 worldPosition)
         {
             if (created == null) return;
             var rect = created.transform as RectTransform;
             var parent = created.transform.parent as RectTransform;
             if (rect == null || parent == null || parent.GetComponent<LayoutGroup>() != null) return;
+            if (rect.anchorMin != rect.anchorMax) return; // stretched on some axis — leave it be
             Vector3 local = parent.InverseTransformPoint(worldPosition);
             rect.localPosition = new Vector3(local.x, local.y, 0f);
         }
