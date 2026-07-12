@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neo UI Framework — Containers &amp; widgets</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+  <a class="brand" href="index.html" style="display:block;color:inherit;text-decoration:none">Neo UI Framework</a>
+  <div class="brand-sub">Visual guide &amp; feature reference</div>
+  <div class="links">
+    <div class="group">Start here</div>
+    <a href="index.html#overview">Overview</a>
+    <a href="index.html#getting-started">Getting started</a>
+    <a href="index.html#concepts">Core concepts</a>
+    <div class="group">Runtime</div>
+    <a href="#containers">Containers &amp; views</a>
+    <a href="#widgets">Interactive widgets</a>
+    <a href="animation.html#animation">Animation &amp; tweens</a>
+    <a href="flow-signals.html#flow">Flow graphs</a>
+    <a href="flow-signals.html#signals">Signals</a>
+    <a href="flow-signals.html#back">Back navigation</a>
+    <a href="theming-graphics.html#theming">Theming</a>
+    <a href="theming-graphics.html#shapes">NeoShape graphics</a>
+    <a href="theming-graphics.html#icons">Icons</a>
+    <a href="menus.html#menus">Settings &amp; cheat menus</a>
+    <div class="group">Editor</div>
+    <a href="editor.html#editor-tools">Editor windows &amp; tools</a>
+    <a href="editor.html#validation">Validation</a>
+    <div class="group">Spec workflow</div>
+    <a href="spec-workflow.html#spec">The spec format</a>
+    <a href="spec-workflow.html#roundtrip">Round-trip safety</a>
+    <a href="spec-workflow.html#agent-bridge">Agent Bridge</a>
+    <a href="spec-workflow.html#showcases">Showcases</a>
+    <div class="group">Going deeper</div>
+    <a href="extending.html#extensibility">Extensibility seams</a>
+    <a href="extending.html#testing">Testing</a>
+  </div>
+</nav>
+<main>
+
+<section id="containers">
+  <div class="eyebrow">Runtime</div>
+  <h2>Containers &amp; views</h2>
+  <p class="lede">Containers are the things that show and hide. Everything visible lives inside one.</p>
+
+  <div class="scroll"><table>
+    <tr><th>Component</th><th>What it is</th></tr>
+    <tr><td><code>UIContainer</code></td><td>Base visibility container: show/hide with transitions, animator registration, interruption handling, auto-hide and auto-select behaviors.</td></tr>
+    <tr><td><code>UIView</code></td><td>A screen. Addressed by <code>Category/Name</code>, controllable from anywhere via static API, navigated by flow graphs.</td></tr>
+    <tr><td><code>UIPanel</code></td><td>Tab-content container, kept in sync with a <code>UITab</code>'s selection; optional fade-in on enable.</td></tr>
+    <tr><td><code>UIPopup</code></td><td>Modal/popup looked up by name from <code>PopupDatabase</code>, configured with a fluent API, queued FIFO (one visible per queue).</td></tr>
+    <tr><td><code>UITooltip</code></td><td>Tooltip with follow/anchor positioning and hover triggering; anchors resolve via named <code>UITag</code> targets.</td></tr>
+    <tr><td><code>UIOverlay</code></td><td>Marks children as z-stacked (overlay layout) rather than layout-group stacked.</td></tr>
+    <tr><td><code>UIResponsiveRoot</code></td><td>Responsive layout root managing breakpoint-aware canvas scaling.</td></tr>
+    <tr><td><code>UIResponsiveGridColumns</code></td><td>Grid whose column count adapts to the active screen breakpoint.</td></tr>
+  </table></div>
+
+  <h3>Controlling views from code</h3>
+  <pre><code><span class="c">// Show / hide by address — from anywhere, no references needed</span>
+UIView.<span class="k">Show</span>(<span class="s">"Menu"</span>, <span class="s">"Main"</span>);
+UIView.<span class="k">Hide</span>(<span class="s">"Menu"</span>, <span class="s">"Settings"</span>, instant: <span class="n">true</span>);
+UIView.<span class="k">ShowCategory</span>(<span class="s">"HUD"</span>);      <span class="c">// every view in a category</span>
+UIView.<span class="k">HideAllViews</span>();
+
+<span class="c">// Popups: fetch by name, configure fluently, then show</span>
+UIPopup.<span class="k">Get</span>(<span class="s">"Confirm"</span>)
+       .<span class="k">SetTexts</span>(<span class="s">"Delete save?"</span>, <span class="s">"This cannot be undone."</span>)
+       .<span class="k">SetEvents</span>(OnConfirm, OnCancel)
+       .<span class="k">SetQueue</span>(<span class="s">"dialogs"</span>)
+       .<span class="k">Show</span>();</code></pre>
+
+  <p>Every show/hide accepts an <code>instant</code> flag and an optional <code>UIAnimation</code> override. Containers handle interruption gracefully — hiding mid-show reverses from the current pose rather than snapping.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="widgets">
+  <div class="eyebrow">Runtime</div>
+  <h2>Interactive widgets</h2>
+  <p class="lede">All widgets carry a <code>Category/Name</code> id, emit signals, and animate their selection states through the same animator model.</p>
+
+  <div class="scroll"><table>
+    <tr><th>Widget</th><th>What it does</th></tr>
+    <tr><td><code>UIButton</code></td><td>Button with eleven behavior triggers (below), per-trigger cooldowns, and signal emission per behavior.</td></tr>
+    <tr><td><code>UIToggle</code></td><td>On/off control with group exclusivity, value-changed events, and domain signal publishing (e.g. emit <code>Audio/Muted</code>).</td></tr>
+    <tr><td><code>UISlider</code></td><td>Slider distinguishing <em>continuous</em> (while dragging) from <em>committed</em> (on release) values, with min/max/increment events.</td></tr>
+    <tr><td><code>UIDropdown</code></td><td>Single-choice dropdown (extends TMP_Dropdown) with an id and a selection-changed signal.</td></tr>
+    <tr><td><code>UITab</code></td><td>Toggle bound bidirectionally to a target <code>UIContainer</code> — selecting shows the container, and the container's state mirrors back.</td></tr>
+    <tr><td><code>UIStepper</code></td><td>Plus/minus value control with step size, min/max, and reach-limit events.</td></tr>
+    <tr><td><code>UICounter</code></td><td>Rolling number label that tweens its displayed value toward a target — score counters, coin totals.</td></tr>
+    <tr><td><code>UIBadge</code> / <code>UITag</code></td><td>Badge labels, and named RectTransform position targets (for popup/tooltip anchoring).</td></tr>
+    <tr><td><code>UIScrollbar</code></td><td>Scrollbar with selection-state animator integration.</td></tr>
+    <tr><td><code>UIRebindControl</code></td><td>UI for runtime input rebinding, backed by <code>InputRebindService</code>.</td></tr>
+  </table></div>
+
+  <h3>Button behavior triggers</h3>
+  <p>Each <code>UIButton</code> hosts a list of <code>UIActionBehaviour</code>s — one per trigger — each firing a UnityEvent, an optional signal, and honoring an optional cooldown:</p>
+  <div class="chips">
+    <span class="chip">Click</span><span class="chip">DoubleClick</span><span class="chip">LongClick</span><span class="chip">RightClick</span>
+    <span class="chip">PointerEnter</span><span class="chip">PointerExit</span><span class="chip">PointerDown</span><span class="chip">PointerUp</span>
+    <span class="chip">Selected</span><span class="chip">Deselected</span><span class="chip">Submit</span>
+  </div>
+
+  <h3>Selection states</h3>
+  <p>Widgets built on <code>UISelectable</code> expose five states — <b>Normal · Highlighted · Pressed · Selected · Disabled</b> — consumed by pluggable animators (<code>UISelectableColorAnimator</code>, <code>UISelectableUIAnimator</code>) via <code>SelectionStateRelay</code>. Spec-generated buttons come in variants <span class="chip hl">primary</span> <span class="chip hl">secondary</span> <span class="chip hl">danger</span> <span class="chip hl">light</span> <span class="chip hl">ghost</span> and sizes <span class="chip hl">sm</span> <span class="chip hl">md</span> <span class="chip hl">lg</span>.</p>
+
+  <div class="callout invariant"><span class="tag">Invariant</span><p><b>Dead-interaction lint.</b> A button or tab with no flow trigger, signal, popup, view command, or event is flagged by <code>Validate</code> — a control that looks alive but does nothing never ships silently.</p></div>
+</section>
+
+<div class="pagenav"><a href="index.html"><span class="dir">Previous</span>Overview &amp; getting started</a><a href="animation.html" style="text-align:right"><span class="dir">Next</span>Animation &amp; tweens</a></div>
+</main>
+</div>
+<script>
+  (function () {
+    var links = document.querySelectorAll('nav.toc a[href^="#"]');
+    var map = {};
+    links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
+    var current = null;
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          if (current) current.classList.remove('active');
+          current = map[e.target.id];
+          if (current) current.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-10% 0px -70% 0px' });
+    document.querySelectorAll('main section[id]').forEach(function (s) { observer.observe(s); });
+  })();
+</script>
+</body>
+</html>

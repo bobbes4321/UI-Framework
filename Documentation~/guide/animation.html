@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neo UI Framework — Animation &amp; tweens</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+  <a class="brand" href="index.html" style="display:block;color:inherit;text-decoration:none">Neo UI Framework</a>
+  <div class="brand-sub">Visual guide &amp; feature reference</div>
+  <div class="links">
+    <div class="group">Start here</div>
+    <a href="index.html#overview">Overview</a>
+    <a href="index.html#getting-started">Getting started</a>
+    <a href="index.html#concepts">Core concepts</a>
+    <div class="group">Runtime</div>
+    <a href="containers-widgets.html#containers">Containers &amp; views</a>
+    <a href="containers-widgets.html#widgets">Interactive widgets</a>
+    <a href="#animation">Animation &amp; tweens</a>
+    <a href="flow-signals.html#flow">Flow graphs</a>
+    <a href="flow-signals.html#signals">Signals</a>
+    <a href="flow-signals.html#back">Back navigation</a>
+    <a href="theming-graphics.html#theming">Theming</a>
+    <a href="theming-graphics.html#shapes">NeoShape graphics</a>
+    <a href="theming-graphics.html#icons">Icons</a>
+    <a href="menus.html#menus">Settings &amp; cheat menus</a>
+    <div class="group">Editor</div>
+    <a href="editor.html#editor-tools">Editor windows &amp; tools</a>
+    <a href="editor.html#validation">Validation</a>
+    <div class="group">Spec workflow</div>
+    <a href="spec-workflow.html#spec">The spec format</a>
+    <a href="spec-workflow.html#roundtrip">Round-trip safety</a>
+    <a href="spec-workflow.html#agent-bridge">Agent Bridge</a>
+    <a href="spec-workflow.html#showcases">Showcases</a>
+    <div class="group">Going deeper</div>
+    <a href="extending.html#extensibility">Extensibility seams</a>
+    <a href="extending.html#testing">Testing</a>
+  </div>
+</nav>
+<main>
+
+<section id="animation">
+  <div class="eyebrow">Runtime</div>
+  <h2>Animation &amp; tweens</h2>
+  <p class="lede">One composite animation type, a preset library, and a pooled tween engine ticked by a single central service.</p>
+
+  <h3>UIAnimation — five channels</h3>
+  <div class="chips">
+    <span class="chip hl">Move</span><span class="chip hl">Rotate</span><span class="chip hl">Scale</span><span class="chip hl">Fade</span><span class="chip hl">Color</span>
+  </div>
+  <p>Each channel has its own <code>TweenSettings</code>: duration, delay, loops, play mode (<code>Normal · PingPong · Spring · Shake</code>), and easing — either one of ~30 built-in <code>Ease</code> curves (Sine/Quad/Cubic/Quart/Quint/Expo/Circ/Back/Elastic/Bounce in In/Out/InOut flavors, plus Linear and Spring) or a custom <code>AnimationCurve</code>. Move supports directional presets (<code>UIMoveDirection</code>: Left, Top, BottomRight, CustomPosition, …) so "slide in from left" is one dropdown.</p>
+
+  <h3>The preset library</h3>
+  <p><code>UIAnimationPreset</code> assets store named, reusable animations, addressed — as always — by <code>Category/Name</code>. Any preset asset dropped under the library folder is auto-discovered; no registration needed. The setup wizard installs 40 presets across seven categories:</p>
+  <div class="scroll"><table>
+    <tr><th>Category</th><th>Shipped presets</th></tr>
+    <tr><td><b>Show</b></td><td>FadeIn · SlideInLeft · SlideInRight · SlideInUp · SlideInDown · ScalePopIn · ZoomIn · SpinIn · DropInBounce</td></tr>
+    <tr><td><b>Hide</b></td><td>FadeOut · SlideOutLeft · SlideOutRight · SlideOutUp · SlideOutDown · ZoomOut · SpinOut</td></tr>
+    <tr><td><b>Hover</b></td><td>ScaleUp · ScaleUpBig · ScaleDown · LiftUp · TiltLeft · TiltRight · TintPrimary · GlowPulse</td></tr>
+    <tr><td><b>Press</b></td><td>PressDip · PressPop · SquashStretch · FlashTint · PressLift</td></tr>
+    <tr><td><b>Click</b></td><td>Spin360 · Backflip · BarrelRoll · Jello · RubberBand · Wobble · PunchScale · ColorCycle</td></tr>
+    <tr><td><b>Toggle</b></td><td>ToggleOnPop · ToggleOffFade · KnobNudge · TintOn</td></tr>
+    <tr><td><b>Loop</b></td><td>Pulse · Heartbeat · Breathe · Bob · SpinLoop · Shimmer</td></tr>
+  </table></div>
+
+  <h3>Applying presets</h3>
+  <p><b>In the inspector:</b> every animator slot (the "Show" animation on a container animator, the "Hover" animation on a selectable) has a picker grouped by category. Hovering a preset plays a live preview; clicking it <em>copies</em> the animation data into the slot. Presets are copy-on-apply, not linked — editing a preset later never changes widgets that already used it, and you can freely tweak the copy per-widget.</p>
+  <p><b>In a spec:</b> reference presets by full name on the matching field:</p>
+  <pre><code>{ <span class="k">"id"</span>: <span class="s">"Menu/Main"</span>,
+  <span class="k">"showAnimation"</span>: <span class="s">"Show/FadeIn"</span>,
+  <span class="k">"hideAnimation"</span>: <span class="s">"Hide/SlideOutLeft"</span> }</code></pre>
+  <p><b>In the Design System window:</b> the <b>Motion</b> tab is the library's home — a searchable browser on the left, the selected preset's five-channel editor on the right, with play/scrub preview on a preview stage or any scene RectTransform.</p>
+
+  <h3>Animator roles</h3>
+  <p><code>NeoAnimatorRoles</code> names the standard animation slots, and <code>NeoUISettings</code> maps each role to a default preset — so every new widget animates consistently with zero per-widget setup, and re-mapping a role restyles the whole project's motion at once:</p>
+  <div class="chips">
+    <span class="chip">View/Show</span><span class="chip">View/Hide</span>
+    <span class="chip">Button/Hover</span><span class="chip">Button/Press</span>
+    <span class="chip">Selectable/Normal</span><span class="chip">Selectable/Selected</span><span class="chip">Selectable/Disabled</span>
+    <span class="chip">Toggle/On</span><span class="chip">Toggle/Off</span>
+    <span class="chip">Loop</span><span class="chip">OneShot</span>
+  </div>
+  <p>Each role suggests matching preset categories first in the picker (View/Show surfaces the Show category, and so on).</p>
+
+  <h3>Animator components</h3>
+  <div class="scroll"><table>
+    <tr><th>Animator</th><th>Drives</th></tr>
+    <tr><td><code>UIContainerUIAnimator</code></td><td>Container show/hide with full UIAnimation, including transition override animations.</td></tr>
+    <tr><td><code>UIContainerColorAnimator</code></td><td>CanvasGroup alpha during container transitions.</td></tr>
+    <tr><td><code>UISelectableUIAnimator</code></td><td>Per-selection-state UIAnimation on buttons/toggles.</td></tr>
+    <tr><td><code>UISelectableColorAnimator</code></td><td>Per-state color transitions (theme-token aware).</td></tr>
+    <tr><td><code>UIToggleUIAnimator</code></td><td>Toggle on/off animations.</td></tr>
+    <tr><td><code>Progressor</code> → <code>ProgressTarget</code></td><td>Normalized 0..1 progress fan-out (fills, health bars, loading indicators).</td></tr>
+  </table></div>
+
+  <h3>The tween engine</h3>
+  <p>Tweens are pooled (<code>TweenPool</code>) and ticked by <code>UITick</code>, a single central service using unscaled delta time — no per-component <code>Update()</code>. The runtime FPS cap in settings throttles it if needed.</p>
+
+  <div class="callout invariant"><span class="tag">Invariant</span><p><b>Tween lifetime.</b> Bind tweens to their targets with <code>tween.SetTarget(owner, get, set)</code> so a destroyed target self-stops the tween instead of throwing every frame. <code>UITick</code> logs-and-drops any tickable that throws — loudly, once.</p></div>
+</section>
+
+<div class="pagenav"><a href="containers-widgets.html"><span class="dir">Previous</span>Containers &amp; widgets</a><a href="flow-signals.html" style="text-align:right"><span class="dir">Next</span>Flow, signals &amp; back</a></div>
+</main>
+</div>
+<script>
+  (function () {
+    var links = document.querySelectorAll('nav.toc a[href^="#"]');
+    var map = {};
+    links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
+    var current = null;
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          if (current) current.classList.remove('active');
+          current = map[e.target.id];
+          if (current) current.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-10% 0px -70% 0px' });
+    document.querySelectorAll('main section[id]').forEach(function (s) { observer.observe(s); });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neo UI Framework — Flow, signals &amp; back</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+  <a class="brand" href="index.html" style="display:block;color:inherit;text-decoration:none">Neo UI Framework</a>
+  <div class="brand-sub">Visual guide &amp; feature reference</div>
+  <div class="links">
+    <div class="group">Start here</div>
+    <a href="index.html#overview">Overview</a>
+    <a href="index.html#getting-started">Getting started</a>
+    <a href="index.html#concepts">Core concepts</a>
+    <div class="group">Runtime</div>
+    <a href="containers-widgets.html#containers">Containers &amp; views</a>
+    <a href="containers-widgets.html#widgets">Interactive widgets</a>
+    <a href="animation.html#animation">Animation &amp; tweens</a>
+    <a href="#flow">Flow graphs</a>
+    <a href="#signals">Signals</a>
+    <a href="#back">Back navigation</a>
+    <a href="theming-graphics.html#theming">Theming</a>
+    <a href="theming-graphics.html#shapes">NeoShape graphics</a>
+    <a href="theming-graphics.html#icons">Icons</a>
+    <a href="menus.html#menus">Settings &amp; cheat menus</a>
+    <div class="group">Editor</div>
+    <a href="editor.html#editor-tools">Editor windows &amp; tools</a>
+    <a href="editor.html#validation">Validation</a>
+    <div class="group">Spec workflow</div>
+    <a href="spec-workflow.html#spec">The spec format</a>
+    <a href="spec-workflow.html#roundtrip">Round-trip safety</a>
+    <a href="spec-workflow.html#agent-bridge">Agent Bridge</a>
+    <a href="spec-workflow.html#showcases">Showcases</a>
+    <div class="group">Going deeper</div>
+    <a href="extending.html#extensibility">Extensibility seams</a>
+    <a href="extending.html#testing">Testing</a>
+  </div>
+</nav>
+<main>
+
+<section id="flow">
+  <div class="eyebrow">Runtime</div>
+  <h2>Flow graphs</h2>
+  <p class="lede">Screen navigation as a state machine: nodes show views, edges fire on triggers, history enables Back.</p>
+
+  <div class="flowline">
+    <div class="node accent"><b>StartNode</b><span>entry point</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><b>UINode “MainMenu”</b><span>shows Menu/Main</span></div>
+    <div class="arrow">→ <em>button: Menu/Play</em> →</div>
+    <div class="node"><b>UINode “Game”</b><span>shows HUD/Game</span></div>
+    <div class="arrow">→ <em>signal: Game/Over</em> →</div>
+    <div class="node"><b>UINode “Results”</b><span>shows Menu/Results</span></div>
+  </div>
+
+  <h3>Pieces</h3>
+  <div class="scroll"><table>
+    <tr><th>Type</th><th>Role</th></tr>
+    <tr><td><code>FlowGraph</code></td><td>The asset: a flat, string-addressed list of nodes — readable and diffable as data.</td></tr>
+    <tr><td><code>FlowController</code></td><td>Plays a graph (a runtime clone, so mutations never touch the asset). Global or local scope, history stack with <code>GoBack()</code>, exposes the active node for debugging.</td></tr>
+    <tr><td><code>StartNode</code></td><td>Entry point; advances immediately on start.</td></tr>
+    <tr><td><code>UINode</code></td><td>The workhorse: shows/hides views on enter/exit, listens for its edges' triggers, advances when one fires.</td></tr>
+    <tr><td><code>PortalNode</code></td><td>Global listener, active for the whole flow — jumps the flow from anywhere when its trigger fires (pause menus, error popups), optionally clearing the back history.</td></tr>
+    <tr><td><code>StickyNote</code></td><td>Non-executable annotation in the graph.</td></tr>
+    <tr><td><code>FlowEdge</code></td><td>Connection: target node name, trigger, back-allowed flag, weight, optional named transition.</td></tr>
+  </table></div>
+
+  <h3>Edge triggers</h3>
+  <div class="chips">
+    <span class="chip">button</span><span class="chip">signal</span><span class="chip">toggleOn</span><span class="chip">toggleOff</span>
+    <span class="chip">viewShown</span><span class="chip">viewHidden</span><span class="chip">back</span><span class="chip">timer</span><span class="chip hl">custom…</span>
+  </div>
+  <div class="callout seam"><span class="tag">Extensibility seam</span><p>Register your own trigger kinds via <code>NeoTriggerKinds.Register</code> — implement <code>INeoTriggerKind</code> (<code>Connect</code>, <code>Matches</code>), optionally <code>ITriggerKindIdDatabase</code> to get an id picker in the editor. Flow node kinds themselves are registry-driven too (<code>FlowNodeKinds</code>).</p></div>
+
+  <h3>What a UINode does</h3>
+  <p>On <b>enter</b>, a UINode hides its <code>hideViews</code> list, shows its <code>showViews</code> list (with transition choreography if the edge named one), then listens for its output-edge triggers. On <b>exit</b>, it optionally hides what it showed (<code>hideShownViewsOnExit</code>) — and views shared with the <em>next</em> node carry over untouched, so navigating between two screens that both show the HUD never hide-and-reshow-flashes it.</p>
+
+  <h3>Authoring in the Flow Graph Editor</h3>
+  <p><b>Creating nodes:</b> right-click the canvas for a search-as-you-type node picker, or drag off an output port into empty space — the picker appears and the new node is auto-wired to that port. Double-clicking a <code>FlowGraph</code> asset also opens the window.</p>
+  <p><b>Configuring edges:</b> each edge carries its target node (by name), its trigger, an <b>allowsBack</b> flag (may <code>GoBack()</code> return across it? default yes), an optional port label, a weight (for weighted-random selection), and an optional named transition — empty means the project default.</p>
+  <p><b>Toolbar:</b> Validate, Arrange (auto-layout), and Frame All / Frame Selection. In play mode the window pulses live: the active node highlights in place, traversed edges flash, and a breadcrumb strip tracks the controller's history.</p>
+
+  <h3>Running a flow: FlowController</h3>
+  <p>Add a <code>FlowController</code> to a scene object and assign a graph. It clones the asset at start, so runtime state never touches the asset. Key inspector options:</p>
+  <div class="scroll"><table>
+    <tr><th>Option</th><th>Meaning</th></tr>
+    <tr><td><code>flowType</code></td><td><b>Global</b> (findable from anywhere via <code>FlowController.GetGlobalController()</code>) or <b>Local</b> (a self-contained sub-flow, e.g. inside one widget).</td></tr>
+    <tr><td><code>onEnableBehaviour</code> / <code>onDisableBehaviour</code></td><td>What enabling/disabling the component does: DoNothing · StartFlow · StopFlow · PauseFlow · ResumeFlow. Default: start on enable, stop on disable.</td></tr>
+    <tr><td><code>dontDestroyOnSceneChange</code></td><td>Keep a global flow alive across scene loads.</td></tr>
+    <tr><td><code>goBackOnBackButton</code> / <code>autoCreateBackInput</code></td><td>Navigate back when the back-button signal fires, and auto-add the hardware listener if the scene lacks one.</td></tr>
+  </table></div>
+  <p>At runtime you get <code>StartFlow / StopFlow / PauseFlow / ResumeFlow</code> (pause suspends timers), <code>GoBack()</code> (pops the history stack, only across allows-back edges), <code>SetActiveNodeByName()</code> for direct jumps, and read access to <code>activeNode</code>, <code>previousNode</code>, and <code>history</code>.</p>
+
+  <h3>Flow in a spec</h3>
+  <p>The spec's <code>flow</code> section describes the same graph as data — here's a node from the <code>game-ui</code> showcase:</p>
+  <pre><code><span class="k">"flow"</span>: {
+  <span class="k">"name"</span>: <span class="s">"GameUI"</span>, <span class="k">"start"</span>: <span class="s">"MainMenu"</span>,
+  <span class="k">"nodes"</span>: [
+    { <span class="k">"name"</span>: <span class="s">"Playing"</span>, <span class="k">"view"</span>: <span class="s">"Game/HUD"</span>,
+      <span class="k">"next"</span>: [
+        { <span class="k">"to"</span>: <span class="s">"Inventory"</span>, <span class="k">"on"</span>: { <span class="k">"button"</span>: <span class="s">"HUD/Inventory"</span> } },
+        { <span class="k">"to"</span>: <span class="s">"Victory"</span>,   <span class="k">"on"</span>: { <span class="k">"button"</span>: <span class="s">"HUD/Finish"</span> },
+          <span class="k">"transition"</span>: <span class="s">"Modal/ZoomIn"</span> },
+        { <span class="k">"to"</span>: <span class="s">"MainMenu"</span>,  <span class="k">"on"</span>: { <span class="k">"back"</span>: <span class="n">true</span> } }
+      ] }
+  ] }</code></pre>
+  <p>Trigger forms: <code>{"button": "Cat/Id"}</code> · <code>{"signal": "Cat/Name"}</code> · <code>{"toggleOn"/"toggleOff": "Cat/Id"}</code> · <code>{"viewShown"/"viewHidden": "Cat/Id"}</code> · <code>{"back": true}</code> · <code>{"timer": 3.5}</code> (seconds in the node).</p>
+
+  <h3>View transitions &amp; shared elements</h3>
+  <p><code>ViewTransitionAsset</code> makes a navigation cut a first-class, named thing: it can override the outgoing view's hide and the incoming view's show, offset their timelines, cascade children, and fly <code>NeoSharedElement</code>-marked widgets across the cut (shared-element transitions). Edges reference transitions by name; <code>NeoUISettings</code> holds the project default. Eight ship with the transition library:</p>
+  <div class="chips">
+    <span class="chip">Fade/Cross</span><span class="chip">Fade/ThroughBlack</span>
+    <span class="chip">Push/SlideLeft</span><span class="chip">Push/SlideRight</span><span class="chip">Push/SlideUp</span><span class="chip">Push/SlideDown</span>
+    <span class="chip">Modal/ZoomIn</span><span class="chip">Modal/SheetUp</span>
+  </div>
+  <p>Like animation presets, transition assets are discovered automatically — add your own next to the shipped ones. The <code>transitions</code> showcase demos the library.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="signals">
+  <div class="eyebrow">Runtime</div>
+  <h2>Signals</h2>
+  <p class="lede">Named event streams that decouple senders from receivers — the framework's connective tissue.</p>
+
+  <pre><code><span class="c">// Send — creates the stream on first use</span>
+Signals.<span class="k">Send</span>(<span class="s">"Audio"</span>, <span class="s">"Muted"</span>);
+
+<span class="c">// Subscribe — parameterless or with the full Signal (sender, source, timestamp, message)</span>
+Signals.<span class="k">On</span>(<span class="s">"Audio"</span>, <span class="s">"Muted"</span>, () =&gt; audioSource.mute = <span class="n">true</span>);
+Signals.<span class="k">On</span>(<span class="s">"Game"</span>, <span class="s">"Over"</span>, (Signal s) =&gt; Debug.Log(s.message));</code></pre>
+
+  <div class="scroll"><table>
+    <tr><th>Type</th><th>Role</th></tr>
+    <tr><td><code>SignalStream</code></td><td>A named channel (<code>Category/Name</code>): send, connect/disconnect receivers.</td></tr>
+    <tr><td><code>Signal</code> / <code>MetaSignal&lt;T&gt;</code></td><td>The message — payload-less by default; <code>MetaSignal&lt;T&gt;</code> carries a typed payload.</td></tr>
+    <tr><td><code>Signals</code></td><td>Static service: get-or-create streams, <code>Send</code>, <code>On</code>/<code>Off</code> subscription.</td></tr>
+    <tr><td><code>SignalReceiver</code></td><td>Serializable receiver embeddable in any component — pick a stream in the inspector, hook a UnityEvent or callback.</td></tr>
+    <tr><td><code>SignalSenderComponent</code> / <code>SignalReceiverComponent</code></td><td>Drop-on components: send on enable/disable/destroy, or bind a stream to a UnityEvent — no code.</td></tr>
+    <tr><td><code>SignalLogger</code></td><td>Logs every signal on a stream — first stop when debugging "why didn't X react".</td></tr>
+  </table></div>
+
+  <p>Widgets emit signals natively: a toggle can publish <code>Audio/Muted</code>, a button behavior can send on click, flow edges listen for them, particle emitters can burst on them, and effects can bind signal payloads to parameters (<code>NeoSignalParamBinding</code>). Prefer signals over direct UnityEvent references whenever the sender and receiver live in different prefabs.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="back">
+  <div class="eyebrow">Runtime</div>
+  <h2>Back navigation</h2>
+  <p class="lede">One unified sink for "go back", no matter where the press came from.</p>
+  <p><code>BackButton.Fire()</code> is the single entry point, publishing on the <code>Input/BackButton</code> stream. Three sources feed it:</p>
+  <div class="cards">
+    <div class="card"><b>Hardware</b><p><code>BackButtonInput</code> converts Escape and gamepad Cancel into <code>Fire()</code>.</p></div>
+    <div class="card"><b>Named buttons</b><p>Any <code>UIButton</code> whose name matches the configured back-button name fires it automatically.</p></div>
+    <div class="card"><b>Code</b><p>Call <code>BackButton.Fire()</code> directly; <code>ForceFire()</code> bypasses the cooldown.</p></div>
+  </div>
+  <p>Flow edges with the <b>back</b> trigger consume the press and pop the flow history. <code>Disable()</code>/<code>Enable()</code> stack, so nested "back is temporarily forbidden" scopes compose correctly, and a cooldown (configurable in settings) prevents double-fires.</p>
+  <div class="callout invariant"><span class="tag">Invariant</span><p>Explicit back wiring <b>consumes</b> the press — a screen with a wired back edge never also triggers the global fallback, so you never double-navigate. Covered by <code>BackNavigationTests</code>.</p></div>
+</section>
+
+<div class="pagenav"><a href="animation.html"><span class="dir">Previous</span>Animation &amp; tweens</a><a href="theming-graphics.html" style="text-align:right"><span class="dir">Next</span>Theming &amp; graphics</a></div>
+</main>
+</div>
+<script>
+  (function () {
+    var links = document.querySelectorAll('nav.toc a[href^="#"]');
+    var map = {};
+    links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
+    var current = null;
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          if (current) current.classList.remove('active');
+          current = map[e.target.id];
+          if (current) current.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-10% 0px -70% 0px' });
+    document.querySelectorAll('main section[id]').forEach(function (s) { observer.observe(s); });
+  })();
+</script>
+</body>
+</html>

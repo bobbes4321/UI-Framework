@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neo UI Framework — Editor tooling</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+  <a class="brand" href="index.html" style="display:block;color:inherit;text-decoration:none">Neo UI Framework</a>
+  <div class="brand-sub">Visual guide &amp; feature reference</div>
+  <div class="links">
+    <div class="group">Start here</div>
+    <a href="index.html#overview">Overview</a>
+    <a href="index.html#getting-started">Getting started</a>
+    <a href="index.html#concepts">Core concepts</a>
+    <div class="group">Runtime</div>
+    <a href="containers-widgets.html#containers">Containers &amp; views</a>
+    <a href="containers-widgets.html#widgets">Interactive widgets</a>
+    <a href="animation.html#animation">Animation &amp; tweens</a>
+    <a href="flow-signals.html#flow">Flow graphs</a>
+    <a href="flow-signals.html#signals">Signals</a>
+    <a href="flow-signals.html#back">Back navigation</a>
+    <a href="theming-graphics.html#theming">Theming</a>
+    <a href="theming-graphics.html#shapes">NeoShape graphics</a>
+    <a href="theming-graphics.html#icons">Icons</a>
+    <a href="menus.html#menus">Settings &amp; cheat menus</a>
+    <div class="group">Editor</div>
+    <a href="#editor-tools">Editor windows &amp; tools</a>
+    <a href="#validation">Validation</a>
+    <div class="group">Spec workflow</div>
+    <a href="spec-workflow.html#spec">The spec format</a>
+    <a href="spec-workflow.html#roundtrip">Round-trip safety</a>
+    <a href="spec-workflow.html#agent-bridge">Agent Bridge</a>
+    <a href="spec-workflow.html#showcases">Showcases</a>
+    <div class="group">Going deeper</div>
+    <a href="extending.html#extensibility">Extensibility seams</a>
+    <a href="extending.html#testing">Testing</a>
+  </div>
+</nav>
+<main>
+
+<section id="editor-tools">
+  <div class="eyebrow">Editor</div>
+  <h2>Editor windows &amp; tools</h2>
+  <p class="lede">Everything lives under <b>Tools → Neo UI</b>, and everything under there is also findable from the Hub and the Command Palette.</p>
+
+  <div class="scroll"><table>
+    <tr><th>Window</th><th>Menu</th><th>What it does</th></tr>
+    <tr><td><b>Hub</b></td><td>Tools → Neo UI → Hub</td><td>Central launcher: every tool, wizard, and action organized by category, with search. Extensible via <code>HubToolRegistry</code>.</td></tr>
+    <tr><td><b>Command Palette</b></td><td><kbd>Ctrl</kbd>+<kbd>K</kbd></td><td>Search-as-you-type dispatcher: jump to views, widgets, windows, and commands.</td></tr>
+    <tr><td><b>Flow Graph Editor</b></td><td>… → Flow Graph Editor</td><td>Visual node editor for navigation graphs, with blueprint search, Go-To-Node, and live play-mode pulse.</td></tr>
+    <tr><td><b>Design System</b></td><td>… → Design System</td><td>Theme authoring in tabs: Overview · Colors · Typography · Buttons · Shapes · Icons · Presets · Motion · Bundles. Custom tabs via <code>NeoDesignSystemTabs.Register</code>.</td></tr>
+    <tr><td><b>Gallery</b></td><td>… → Gallery</td><td>Rendered thumbnail grid of every generated view and popup, with a built-in screenshotter.</td></tr>
+    <tr><td><b>Palette</b></td><td>… → Palette</td><td>Dockable compose palette — drag widgets, presets, and templates into the scene.</td></tr>
+    <tr><td><b>ID Database Manager</b></td><td>… → ID Database Manager</td><td>Browse and edit every category/name registry (views, buttons, signals, …).</td></tr>
+    <tr><td><b>Setup / Reset wizards</b></td><td>… → Setup → …</td><td>Guided project init and per-component clean-slate uninstall; individual create-or-repair entries for settings, starter kit, presets, fonts, effects, menus, animations, transitions.</td></tr>
+    <tr><td><b>Sync window</b></td><td>… → Advanced → Sync With Spec…</td><td>Three-way merge UI: visualize baseline vs live vs incoming, resolve conflicts, regenerate.</td></tr>
+    <tr><td><b>Drift window</b></td><td>… → Advanced → Check For Drift</td><td>Shows off-spec prefab edits — what a regenerate would lose — with a "Fold Edits" action to absorb them into the baseline.</td></tr>
+  </table></div>
+
+  <h3>The ID Database Manager</h3>
+  <p>Since everything is addressed by <code>Category/Name</code>, the id registries are the project's backbone — and this window is where you keep them healthy. Eight databases ship (Views, Buttons, Toggles, Sliders, Dropdowns, Panels, Tags, signal Streams; add your own via <code>INeoIdDatabaseProvider</code>), browsed in three panes: database → categories → names. Three tabs:</p>
+  <div class="cards">
+    <div class="card"><b>Browse &amp; Edit</b><p>Add, rename, and delete categories and names inline, with a substring filter and a row filter (All / Orphans / Dangling).</p></div>
+    <div class="card"><b>Search</b><p>One global substring search across every database at once — "where is anything called <em>Pause</em>?"</p></div>
+    <div class="card"><b>Usage / Orphans</b><p>Cross-references ids against actual use: <b>orphans</b> are registered but unused (⚠ badges), <b>dangling</b> ids are used but unregistered — with quick-fix add/delete buttons.</p></div>
+  </div>
+  <p>Renames can optionally <b>rewrite references</b>: with the toggle on, renaming an id also updates matching references in your spec files, after a preview dialog showing exactly which files and how many references change. Prefabs and scenes are not rewritten directly — run a sync/regenerate afterward to materialize the rename. Every inspector id picker links back here too: the quick-add button registers new ids without leaving the inspector, and the jump button opens this window focused on the exact id.</p>
+
+  <h3>The Advanced menu (spec &amp; agent actions)</h3>
+  <div class="scroll"><table>
+    <tr><th>Menu item</th><th>Purpose</th></tr>
+    <tr><td>Generate From Spec…</td><td>Spec JSON → prefabs, presets, ids, flow graphs.</td></tr>
+    <tr><td>Export Spec…</td><td>Live project tree → spec JSON (the inverse).</td></tr>
+    <tr><td>Validate</td><td>Run all hard checks + design/interactivity lints.</td></tr>
+    <tr><td>Sync With Spec…</td><td>Safe three-way merge + regenerate.</td></tr>
+    <tr><td>Capture My Edits</td><td>Fold hand edits into the baseline without regenerating.</td></tr>
+    <tr><td>Check For Drift</td><td>Detect off-spec prefab edits vs the baseline.</td></tr>
+    <tr><td>Generate Binding Stub</td><td>Emit a C# partial-class binding stub from a spec.</td></tr>
+    <tr><td>Generate Spec Reference</td><td>Regenerate <code>Assets/docs/spec-reference.md</code> + JSON schema from code.</td></tr>
+    <tr><td>Migrate Spec To Layout Model</td><td>Upgrade old-format specs.</td></tr>
+    <tr><td>Screenshot Selected Prefab</td><td>GPU-render the selected prefab to PNG.</td></tr>
+  </table></div>
+
+  <div class="callout tip"><span class="tag">Editor performance</span><p>By design there is no animated editor chrome, no editor-tick subscriptions, no reflection scans, and exactly one settings asset. Inspectors cache their GUIStyles and SerializedObjects. If you extend the editor, follow suit.</p></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="validation">
+  <div class="eyebrow">Editor</div>
+  <h2>Validation</h2>
+  <p class="lede">Three buckets: hard contracts that can fail CI, design lints that advise, and an interactivity lint that catches dead UI.</p>
+
+  <div class="cards">
+    <div class="card"><b>Hard contracts</b><p>Theme coverage (every variant × every token) · theme bindings resolve · popup database completeness · preset database completeness · generated views registered · flow graph syntax · flow cross-references (views/buttons exist) · menu bindings resolve.</p></div>
+    <div class="card"><b>Design lint (soft)</b><p>WCAG contrast on text/surface pairs · raw font sizes where a TextStyle exists · spacing off the 4/8/12/16/24/32/48/64 scale · missing icon glyphs · tap targets under 44px · extreme sprite stretch · fixed-size elements under force-expanding layouts · Tier-2 effect batching cost · particle emitter cost.</p></div>
+    <div class="card"><b>Interactivity lint (soft)</b><p>Dead buttons (no flow trigger, signal, popup, view command, or event) · dead tabs (no container, no flow trigger).</p></div>
+  </div>
+
+  <div class="callout seam"><span class="tag">Extensibility seam</span><p>Add project-specific rules by implementing <code>INeoValidationRule</code> and calling <code>NeoValidationRules.Register</code>, choosing which bucket (Hard / Design / Interactivity) the rule runs in.</p></div>
+</section>
+
+<div class="pagenav"><a href="menus.html"><span class="dir">Previous</span>Settings &amp; cheat menus</a><a href="spec-workflow.html" style="text-align:right"><span class="dir">Next</span>Spec workflow</a></div>
+</main>
+</div>
+<script>
+  (function () {
+    var links = document.querySelectorAll('nav.toc a[href^="#"]');
+    var map = {};
+    links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
+    var current = null;
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          if (current) current.classList.remove('active');
+          current = map[e.target.id];
+          if (current) current.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-10% 0px -70% 0px' });
+    document.querySelectorAll('main section[id]').forEach(function (s) { observer.observe(s); });
+  })();
+</script>
+</body>
+</html>

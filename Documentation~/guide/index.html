@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neo UI Framework — Overview &amp; getting started</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+  <a class="brand" href="index.html" style="display:block;color:inherit;text-decoration:none">Neo UI Framework</a>
+  <div class="brand-sub">Visual guide &amp; feature reference</div>
+  <div class="links">
+    <div class="group">Start here</div>
+    <a href="#overview">Overview</a>
+    <a href="#getting-started">Getting started</a>
+    <a href="#concepts">Core concepts</a>
+    <div class="group">Runtime</div>
+    <a href="containers-widgets.html#containers">Containers &amp; views</a>
+    <a href="containers-widgets.html#widgets">Interactive widgets</a>
+    <a href="animation.html#animation">Animation &amp; tweens</a>
+    <a href="flow-signals.html#flow">Flow graphs</a>
+    <a href="flow-signals.html#signals">Signals</a>
+    <a href="flow-signals.html#back">Back navigation</a>
+    <a href="theming-graphics.html#theming">Theming</a>
+    <a href="theming-graphics.html#shapes">NeoShape graphics</a>
+    <a href="theming-graphics.html#icons">Icons</a>
+    <a href="menus.html#menus">Settings &amp; cheat menus</a>
+    <div class="group">Editor</div>
+    <a href="editor.html#editor-tools">Editor windows &amp; tools</a>
+    <a href="editor.html#validation">Validation</a>
+    <div class="group">Spec workflow</div>
+    <a href="spec-workflow.html#spec">The spec format</a>
+    <a href="spec-workflow.html#roundtrip">Round-trip safety</a>
+    <a href="spec-workflow.html#agent-bridge">Agent Bridge</a>
+    <a href="spec-workflow.html#showcases">Showcases</a>
+    <div class="group">Going deeper</div>
+    <a href="extending.html#extensibility">Extensibility seams</a>
+    <a href="extending.html#testing">Testing</a>
+  </div>
+</nav>
+<main>
+
+<section id="overview" class="hero">
+  <div class="pill">Unity 6 &nbsp;·&nbsp; UGUI &nbsp;·&nbsp; New Input System</div>
+  <h1>Neo UI Framework</h1>
+  <p class="lede">A production-grade UI framework for Unity: addressable views, signal-driven wiring, a visual flow graph for navigation, a token-based theme system, and SDF vector graphics that batch on a single material. Everything can be authored two ways — by hand in the editor, or from a JSON spec that generates (and safely re-generates) the whole UI.</p>
+
+  <div class="pillars">
+    <div class="pillar"><b>Extensible by design</b><span>Every fixed set — widget kinds, presets, theme tokens, flow nodes — has a registration seam. You never fork the package to add your own.</span></div>
+    <div class="pillar"><b>Addressed by name</b><span>Views, buttons, signals and streams are identified by <code>Category/Name</code> strings, not object references or GUIDs. Wiring survives refactors and is readable in plain JSON.</span></div>
+    <div class="pillar"><b>Spec ⇄ prefab round-trip</b><span>A JSON spec is the source of truth; prefabs are its materialization. Generate, export, diff, and three-way-merge without losing hand edits.</span></div>
+    <div class="pillar"><b>Loud failures, quiet editor</b><span>Every string-addressed lookup that misses logs a warning. Editor tooling never polls, never scans with reflection, never animates chrome.</span></div>
+  </div>
+
+  <h3>What's in the box</h3>
+  <div class="cards">
+    <div class="card"><b>Containers</b><p>Views, panels, popups, tooltips, overlays, and responsive roots with show/hide transitions.</p></div>
+    <div class="card"><b>Widgets</b><p>Buttons, toggles, sliders, dropdowns, tabs, steppers, counters, badges — all id-addressed and signal-emitting.</p></div>
+    <div class="card"><b>Animation</b><p>Five-channel <code>UIAnimation</code> (move / rotate / scale / fade / color), preset library, pooled tween engine.</p></div>
+    <div class="card"><b>Flow graphs</b><p>A node-based state machine for screen navigation with triggers, history, and named view transitions.</p></div>
+    <div class="card"><b>Signals</b><p>Named event streams (<code>Category/Name</code>) decoupling senders from receivers, with optional typed payloads.</p></div>
+    <div class="card"><b>Theming</b><p>Color tokens × variants (Dark/Light/…), text styles, shape styles — switch a variant and the whole UI re-skins live.</p></div>
+    <div class="card"><b>NeoShape</b><p>SDF vector shapes (rounded rects, pills, rings, glyphs) with gradients, borders, shadows, effects and UI particles — one shared material.</p></div>
+    <div class="card"><b>Editor suite</b><p>Hub, Flow Graph editor, Design System window, Gallery, Palette, Command Palette, ID Database manager, setup wizards.</p></div>
+    <div class="card"><b>Agent Bridge</b><p>A JSON request/response protocol so tools and AI agents can generate, validate, preview, and sync UI with the editor open or headless.</p></div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="getting-started">
+  <div class="eyebrow">Start here</div>
+  <h2>Getting started</h2>
+  <p class="lede">From an empty project to a themed, navigable UI in five steps.</p>
+
+  <h3>1 · Open the Hub</h3>
+  <p><b>Tools → Neo UI → Hub</b> is the central launcher. Every window, wizard, and advanced action is organized there by category (Author / Data / Setup / Advanced), with search. If you only remember one menu item, remember this one — or press <kbd>Ctrl</kbd>+<kbd>K</kbd> for the Command Palette, which finds views, widgets, and windows by typing.</p>
+
+  <h3>2 · Run project setup</h3>
+  <p><b>Tools → Neo UI → Setup → New Project Setup…</b> walks you through choosing a theme and installing the pieces you want. It creates the single settings asset (<code>Resources/NeoUISettings</code>), the starter kit prefabs, widget presets, animation library, fonts, effects, and transition library. Each piece can also be created or repaired individually from the same Setup menu, and <b>Reset To Clean Slate…</b> uninstalls anything setup created, per component.</p>
+
+  <h3>3 · Learn from the showcases</h3>
+  <p>Every user-visible feature has a demo scene under <code>Assets/Showcases/</code> — buttons, toggles, tabs, popups, animations, effects, particles, transitions, a settings menu, and a complete game UI with flow navigation. Open one, press play, then read its spec in <code>Assets/Showcases/Specs/</code> to see exactly how it was described. See <a href="spec-workflow.html#showcases">Showcases</a>.</p>
+
+  <h3>4 · Build your first screen — pick a path</h3>
+  <p><b>Native authoring:</b> drag widgets from the <b>Palette</b> window (or use starter-kit prefabs), give each an id via the inspector's category/name picker, and wire navigation in the <b>Flow Graph Editor</b>.</p>
+  <p><b>Spec authoring:</b> write a JSON spec (there's a JSON Schema at <code>Assets/docs/neo-spec.schema.json</code> for IDE autocomplete) and run <b>Tools → Neo UI → Advanced → Generate From Spec…</b>. The generator creates prefabs, registers ids, builds flow graphs, and writes a baseline for future safe re-generation. See <a href="spec-workflow.html#spec">The spec format</a>.</p>
+
+  <h3>5 · Validate</h3>
+  <p><b>Tools → Neo UI → Advanced → Validate</b> runs hard contract checks (theme coverage, flow references, dead ids) plus soft design lints (WCAG contrast, tap targets, spacing scale) and an interactivity lint that flags buttons and tabs that do nothing. Run it after every generate. See <a href="editor.html#validation">Validation</a>.</p>
+
+  <div class="callout tip"><span class="tag">Tip</span><p>The framework uses the <b>New Input System</b> exclusively. If pointer events aren't reaching your UI, check that your EventSystem uses the InputSystemUIInputModule, not the legacy StandaloneInputModule.</p></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="concepts">
+  <div class="eyebrow">Start here</div>
+  <h2>Core concepts</h2>
+
+  <h3>Category/Name ids</h3>
+  <p>Almost everything is addressed by a two-part string id: a <b>category</b> and a <b>name</b> — <code>Menu/Main</code>, <code>Shop/BuyButton</code>, <code>Audio/Muted</code>. Typed id classes exist per widget family (<code>ViewId</code>, <code>ButtonId</code>, <code>ToggleId</code>, <code>SliderId</code>, <code>DropdownId</code>, <code>PanelId</code>, <code>TagId</code>, <code>StreamId</code>), each backed by an <b>IdDatabase</b> asset that powers searchable pickers in every inspector, with quick-add and jump-to buttons.</p>
+  <p>Ids also drive naming: a component implementing <code>INeoIdOwner</code> gets a canonical GameObject name derived by <code>NeoIdNaming</code> (<code>Type-Category_Name</code>, e.g. <code>UIButton-Shop_Buy</code>), shared between hand authoring and generation — so hierarchies stay predictable and greppable.</p>
+
+  <h3>Signals as glue</h3>
+  <p>Components rarely hold references to each other. Instead they publish and subscribe to <b>signal streams</b> — named channels like <code>Audio/Muted</code>. A button click, a toggle flip, a flow-graph transition, a particle burst: all can be expressed as "send this signal" / "react to this signal". This keeps prefabs self-contained and makes wiring visible as data.</p>
+
+  <h3>Spec is source of truth; prefab is materialization</h3>
+  <p>When you use the spec workflow, the JSON spec describes the UI and the generator materializes it into prefabs, id registrations, presets, and flow assets. A <b>baseline</b> file (<code>.neo-baseline.json</code>) records the spec the assets were last generated from, so the framework can always tell what you edited by hand versus what the spec says — and merge instead of clobbering. Hand-authoring without specs is fully supported too; the two paths produce identical widgets (verified by round-trip tests).</p>
+
+  <h3>WYSIWYG baking</h3>
+  <p>The state you see in the prefab is the state you get at runtime start: colors are baked, start values are serialized, disabled things start disabled. There is no "wait one frame for the theme to kick in" flash.</p>
+
+  <div class="callout invariant"><span class="tag">Invariant</span><p><b>No silent failures.</b> Any string-addressed lookup that misses — showing an unknown view, starting an unknown flow, sending to a misspelled command — logs a warning naming what was looked up. If something "does nothing", the Console will say why.</p></div>
+
+  <div class="callout invariant"><span class="tag">Invariant</span><p><b>Lifecycle ordering.</b> Registries populate in <code>OnEnable</code>; anything that commands <em>another</em> object defers to <code>Start()</code>, because enable order across objects is arbitrary. Follow the same rule in your own scripts to avoid enable-order races.</p></div>
+</section>
+
+<div class="pagenav"><span></span><a href="containers-widgets.html" style="text-align:right"><span class="dir">Next</span>Containers &amp; widgets</a></div>
+</main>
+</div>
+<script>
+  (function () {
+    var links = document.querySelectorAll('nav.toc a[href^="#"]');
+    var map = {};
+    links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
+    var current = null;
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          if (current) current.classList.remove('active');
+          current = map[e.target.id];
+          if (current) current.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-10% 0px -70% 0px' });
+    document.querySelectorAll('main section[id]').forEach(function (s) { observer.observe(s); });
+  })();
+</script>
+</body>
+</html>

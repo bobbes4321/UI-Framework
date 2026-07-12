@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neo UI Framework — Spec workflow</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+  <a class="brand" href="index.html" style="display:block;color:inherit;text-decoration:none">Neo UI Framework</a>
+  <div class="brand-sub">Visual guide &amp; feature reference</div>
+  <div class="links">
+    <div class="group">Start here</div>
+    <a href="index.html#overview">Overview</a>
+    <a href="index.html#getting-started">Getting started</a>
+    <a href="index.html#concepts">Core concepts</a>
+    <div class="group">Runtime</div>
+    <a href="containers-widgets.html#containers">Containers &amp; views</a>
+    <a href="containers-widgets.html#widgets">Interactive widgets</a>
+    <a href="animation.html#animation">Animation &amp; tweens</a>
+    <a href="flow-signals.html#flow">Flow graphs</a>
+    <a href="flow-signals.html#signals">Signals</a>
+    <a href="flow-signals.html#back">Back navigation</a>
+    <a href="theming-graphics.html#theming">Theming</a>
+    <a href="theming-graphics.html#shapes">NeoShape graphics</a>
+    <a href="theming-graphics.html#icons">Icons</a>
+    <a href="menus.html#menus">Settings &amp; cheat menus</a>
+    <div class="group">Editor</div>
+    <a href="editor.html#editor-tools">Editor windows &amp; tools</a>
+    <a href="editor.html#validation">Validation</a>
+    <div class="group">Spec workflow</div>
+    <a href="#spec">The spec format</a>
+    <a href="#roundtrip">Round-trip safety</a>
+    <a href="#agent-bridge">Agent Bridge</a>
+    <a href="#showcases">Showcases</a>
+    <div class="group">Going deeper</div>
+    <a href="extending.html#extensibility">Extensibility seams</a>
+    <a href="extending.html#testing">Testing</a>
+  </div>
+</nav>
+<main>
+
+<section id="spec">
+  <div class="eyebrow">Spec workflow</div>
+  <h2>The spec format</h2>
+  <p class="lede">One JSON file describes views, widgets, theme, popups, menus, and navigation. The generator turns it into real assets; the exporter turns assets back into a spec.</p>
+
+  <div class="callout tip"><span class="tag">Reference docs</span><p>The always-current schema lives in the repo: <code>Assets/docs/spec-reference.md</code> (human-readable, generated from code) and <code>Assets/docs/neo-spec.schema.json</code> (JSON Schema draft-07 — point your IDE at it for autocomplete and inline validation).</p></div>
+
+  <h3>Top-level structure</h3>
+  <div class="scroll"><table>
+    <tr><th>Section</th><th>Contents</th></tr>
+    <tr><td><code>theme</code></td><td>Theme bundle, color tokens, variants.</td></tr>
+    <tr><td><code>presets</code></td><td>Animation preset definitions.</td></tr>
+    <tr><td><code>views</code></td><td>The screens: id, background token, show/hide animations, element tree.</td></tr>
+    <tr><td><code>popups</code></td><td>Modal and popup definitions.</td></tr>
+    <tr><td><code>settings</code> / <code>cheats</code></td><td>Settings-menu and cheat-menu catalogs (sliders, toggles, dropdowns, rebind rows).</td></tr>
+    <tr><td><code>breakpoints</code></td><td>Responsive breakpoints.</td></tr>
+    <tr><td><code>flow</code></td><td>The navigation state machine: nodes, edges, triggers, transitions.</td></tr>
+  </table></div>
+
+  <h3>Element kinds</h3>
+  <p>Every element is written as <code>{ "kind": { …fields } }</code> — the kind is the wrapper key:</p>
+  <div class="chips">
+    <span class="chip">vstack</span><span class="chip">hstack</span><span class="chip">grid</span><span class="chip">overlay</span><span class="chip">panel</span><span class="chip">list</span><span class="chip">spacer</span><span class="chip">safearea</span>
+    <span class="chip">text</span><span class="chip">icon</span><span class="chip">image</span><span class="chip">shape</span>
+    <span class="chip">button</span><span class="chip">toggle</span><span class="chip">switch</span><span class="chip">slider</span><span class="chip">stepper</span><span class="chip">dropdown</span><span class="chip">input</span>
+    <span class="chip">tab</span><span class="chip">tabbar</span><span class="chip">progress</span><span class="chip">counter</span>
+    <span class="chip">settings</span><span class="chip">cheats</span>
+  </div>
+  <p>(<code>scroll</code> is accepted as an alias for <code>list</code>.)</p>
+
+  <h3>Layout vocabulary</h3>
+  <div class="scroll"><table>
+    <tr><th>Axis</th><th>Options</th></tr>
+    <tr><td>Horizontal constraint</td><td><code>left · right · center · leftRight · scale</code></td></tr>
+    <tr><td>Vertical constraint</td><td><code>top · bottom · center · topBottom · scale</code></td></tr>
+    <tr><td>Sizing</td><td><code>fixed · hug · fill</code></td></tr>
+  </table></div>
+
+  <h3>A real excerpt</h3>
+  <p>From the <code>toggles-switches</code> showcase — a panel with a caption and two toggles, one of which publishes a signal:</p>
+  <pre><code>{
+  <span class="k">"panel"</span>: {
+    <span class="k">"id"</span>: <span class="s">"TogglesPanel/Toggles"</span>,
+    <span class="k">"style"</span>: <span class="s">"Panel"</span>,
+    <span class="k">"spacing"</span>: <span class="n">16</span>,
+    <span class="k">"children"</span>: [
+      { <span class="k">"text"</span>: { <span class="k">"label"</span>: <span class="s">"TOGGLES"</span>, <span class="k">"color"</span>: <span class="s">"TextMuted"</span>,
+                  <span class="k">"textStyle"</span>: <span class="s">"Caption"</span>, <span class="k">"align"</span>: <span class="s">"left"</span> } },
+      { <span class="k">"toggle"</span>: { <span class="k">"id"</span>: <span class="s">"Toggles/Notifications"</span>,
+                    <span class="k">"label"</span>: <span class="s">"Notifications"</span>, <span class="k">"value"</span>: <span class="n">1</span> } },
+      { <span class="k">"toggle"</span>: { <span class="k">"id"</span>: <span class="s">"Toggles/Muted"</span>,
+                    <span class="k">"label"</span>: <span class="s">"Mute audio"</span>, <span class="k">"value"</span>: <span class="n">0</span>,
+                    <span class="k">"signal"</span>: { <span class="k">"category"</span>: <span class="s">"Audio"</span>, <span class="k">"name"</span>: <span class="s">"Muted"</span> } } }
+    ]
+  }
+}</code></pre>
+
+  <h3>Bindings — connecting spec UI to game code</h3>
+  <p>The <b>bindings</b> action (or Generate Binding Stub in the menu) derives a contract from a spec and emits a partial-class C# stub with typed accessors for its widgets. The stub lands <em>outside</em> the generated root, so it survives regenerates; you implement your game logic in the other half of the partial class.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="roundtrip">
+  <div class="eyebrow">Spec workflow</div>
+  <h2>Round-trip safety</h2>
+  <p class="lede">The reason you can regenerate without fear: the baseline, the diff, and the three-way merge.</p>
+
+  <div class="flowline">
+    <div class="node accent"><b>Spec (JSON)</b><span>source of truth</span></div>
+    <div class="arrow">→ generate →</div>
+    <div class="node"><b>Assets</b><span>prefabs · ids · flow · presets</span></div>
+    <div class="arrow">→ export →</div>
+    <div class="node"><b>Live spec</b><span>what the project looks like now</span></div>
+    <div class="arrow">→ diff vs →</div>
+    <div class="node"><b>.neo-baseline.json</b><span>what was last generated</span></div>
+  </div>
+
+  <h3>The pieces</h3>
+  <div class="scroll"><table>
+    <tr><th>Tool</th><th>Role</th></tr>
+    <tr><td><code>SpecBaseline</code></td><td><code>.neo-baseline.json</code> in the generated root — the spec the assets were last generated from. Rewritten by every successful generate, sync, or Fold Edits.</td></tr>
+    <tr><td><code>SpecDiff</code></td><td>Node-by-node comparison of two specs, with addressable paths like <code>views/Menu/Main/elements[2]/background</code>.</td></tr>
+    <tr><td><code>SpecMerge</code></td><td>The three-way merge: baseline + live project + incoming spec.</td></tr>
+    <tr><td><code>OffSpecLint</code></td><td>Flags hand edits that can't be expressed in a spec and would be dropped by a merge.</td></tr>
+  </table></div>
+
+  <h3>The sync protocol</h3>
+  <p><b>Sync</b> is the standing way to push spec changes into a project someone may have hand-edited. It exports the live project, diffs against the baseline, <b>refuses</b> if off-spec edits exist (unless forced), three-way merges, regenerates, and rewrites the baseline. Human edits a stale spec would have wiped are preserved.</p>
+  <div class="cards">
+    <div class="card"><b>Sync With Spec…</b><p>Merge an incoming spec with your hand edits, then regenerate.</p></div>
+    <div class="card"><b>Check For Drift</b><p>Inspect what you've changed by hand since the last generate.</p></div>
+    <div class="card"><b>Capture My Edits</b><p>Fold your hand edits into the baseline — no regeneration.</p></div>
+  </div>
+  <div class="callout invariant"><span class="tag">Invariant</span><p>The generated root can only be redirected through <code>NeoWorkspace.Scoped(…)</code>, which refuses the default root — so a misbehaving script or tool can never accidentally delete your committed UI. Test runs redirect to a scratch root automatically.</p></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="agent-bridge">
+  <div class="eyebrow">Spec workflow</div>
+  <h2>Agent Bridge</h2>
+  <p class="lede">A file-based JSON protocol that lets external tools — including AI agents — drive the editor: generate, validate, preview, screenshot, sync.</p>
+
+  <h3>How to use it</h3>
+  <p><b>Editor open:</b> toggle <b>Tools → Neo UI → Advanced → Agent Bridge</b>, then write <code>Temp/neo-request.json</code> and read <code>Temp/neo-result.json</code>. The bridge refreshes the AssetDatabase before each request.</p>
+  <p><b>Headless:</b></p>
+  <pre><code>Unity.exe -batchmode -projectPath . ^
+  -executeMethod Neo.UI.Editor.AgentBridge.RunBatch ^
+  -neoRequest req.json -neoResult res.json</code></pre>
+
+  <h3>Actions</h3>
+  <div class="scroll"><table>
+    <tr><th>Action</th><th>Mutates</th><th>Purpose</th></tr>
+    <tr><td><code>generate</code></td><td>yes</td><td>Spec → assets (prefabs, presets, ids, flow graphs).</td></tr>
+    <tr><td><code>export</code></td><td>no</td><td>Live project → spec JSON.</td></tr>
+    <tr><td><code>validate</code></td><td>no</td><td>Hard issues + soft <code>designWarnings</code>, structured. Run after every generate.</td></tr>
+    <tr><td><code>sync</code></td><td>yes</td><td>The safe merge-and-regenerate protocol (add <code>"force": true</code> to override off-spec refusal).</td></tr>
+    <tr><td><code>diff</code> / <code>merge</code></td><td>—</td><td>Compare two specs / three-way merge, as standalone operations.</td></tr>
+    <tr><td><code>preview</code></td><td>no commits</td><td>Render views in-memory to images — the agent render-loop for checking layout without touching assets.</td></tr>
+    <tr><td><code>screenshot</code></td><td>yes</td><td>GPU-render a prefab to PNG.</td></tr>
+    <tr><td><code>buildScene</code></td><td>yes</td><td>Flow-scoped scene build (<code>"flow"</code> + <code>"showcase"</code>), preventing multi-spec leaks.</td></tr>
+    <tr><td><code>regenerateShowcase</code></td><td>yes</td><td>Sync a showcase's spec into its isolated root — the right way to regenerate a showcase.</td></tr>
+    <tr><td><code>bindings</code></td><td>no</td><td>Derive the widget contract + emit a C# partial-class stub.</td></tr>
+    <tr><td><code>specReference</code></td><td>no</td><td>Emit the schema/catalog reference docs.</td></tr>
+    <tr><td><code>importSprites</code></td><td>no</td><td>Sprite-font character-map discovery.</td></tr>
+  </table></div>
+
+  <pre><code><span class="c">// Temp/neo-request.json — push spec changes safely</span>
+{ <span class="k">"action"</span>: <span class="s">"sync"</span>, <span class="k">"incoming"</span>: <span class="s">"spec.json"</span> }
+
+<span class="c">// render without committing anything</span>
+{ <span class="k">"action"</span>: <span class="s">"preview"</span>, <span class="k">"spec"</span>: <span class="s">"spec.json"</span>, <span class="k">"out"</span>: <span class="s">"renders/"</span> }</code></pre>
+
+  <div class="callout seam"><span class="tag">Extensibility seam</span><p>Register custom actions (or override built-ins by id) with <code>AgentBridgeActions.Register</code>. Unknown actions fail loudly with the list of available ones.</p></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="showcases">
+  <div class="eyebrow">Spec workflow</div>
+  <h2>Showcases</h2>
+  <p class="lede">Living documentation: every user-visible feature demos in a showcase scene, generated from a committed spec.</p>
+  <p>Each showcase lives under <code>Assets/Showcases/{id}/</code> with its own <code>Generated/</code> root and scene — isolated roots mean regenerating one never collides with another. <code>ShowcaseDefinition</code> ScriptableObjects are lazily discovered by <code>ShowcaseRegistry</code>; drop a new one to add your own.</p>
+
+  <div class="scroll"><table>
+    <tr><th>Spec</th><th>Demonstrates</th></tr>
+    <tr><td><code>buttons</code></td><td>Button variants, sizes, icons, badges.</td></tr>
+    <tr><td><code>toggles-switches</code></td><td>Boolean controls and signal wiring.</td></tr>
+    <tr><td><code>tabs-panels</code></td><td>Tab controls and panel switching.</td></tr>
+    <tr><td><code>popups</code></td><td>Modal confirms and rich popups.</td></tr>
+    <tr><td><code>settings-menu</code></td><td>Settings/cheats catalogs — sliders, toggles, dropdowns, rebinding.</td></tr>
+    <tr><td><code>animations</code> / <code>presets</code></td><td>The animation preset library in motion.</td></tr>
+    <tr><td><code>transitions</code></td><td>Named view transitions between screens.</td></tr>
+    <tr><td><code>effects</code></td><td>Shape effects (glow, sheen, spinners, morphs).</td></tr>
+    <tr><td><code>particles</code></td><td>UI particle emitters and modules.</td></tr>
+    <tr><td><code>game-ui</code></td><td>A complete game UI — menus, HUD, shop, inventory — with flow navigation.</td></tr>
+    <tr><td><code>color-a-cube</code></td><td>A themed game-shop UI with custom tokens.</td></tr>
+  </table></div>
+  <div class="callout agent"><span class="tag">Workflow rule</span><p>Regenerate a showcase with the <code>regenerateShowcase</code> bridge action (not plain <code>generate</code>, which targets the shared default root). And preview before you commit — render the spec with the <code>preview</code> action and check the images across resolutions instead of trusting the JSON.</p></div>
+</section>
+
+<div class="pagenav"><a href="editor.html"><span class="dir">Previous</span>Editor tooling</a><a href="extending.html" style="text-align:right"><span class="dir">Next</span>Extending &amp; testing</a></div>
+</main>
+</div>
+<script>
+  (function () {
+    var links = document.querySelectorAll('nav.toc a[href^="#"]');
+    var map = {};
+    links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
+    var current = null;
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          if (current) current.classList.remove('active');
+          current = map[e.target.id];
+          if (current) current.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-10% 0px -70% 0px' });
+    document.querySelectorAll('main section[id]').forEach(function (s) { observer.observe(s); });
+  })();
+</script>
+</body>
+</html>

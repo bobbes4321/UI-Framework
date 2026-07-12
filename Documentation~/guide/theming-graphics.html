@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neo UI Framework — Theming &amp; graphics</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+  <a class="brand" href="index.html" style="display:block;color:inherit;text-decoration:none">Neo UI Framework</a>
+  <div class="brand-sub">Visual guide &amp; feature reference</div>
+  <div class="links">
+    <div class="group">Start here</div>
+    <a href="index.html#overview">Overview</a>
+    <a href="index.html#getting-started">Getting started</a>
+    <a href="index.html#concepts">Core concepts</a>
+    <div class="group">Runtime</div>
+    <a href="containers-widgets.html#containers">Containers &amp; views</a>
+    <a href="containers-widgets.html#widgets">Interactive widgets</a>
+    <a href="animation.html#animation">Animation &amp; tweens</a>
+    <a href="flow-signals.html#flow">Flow graphs</a>
+    <a href="flow-signals.html#signals">Signals</a>
+    <a href="flow-signals.html#back">Back navigation</a>
+    <a href="#theming">Theming</a>
+    <a href="#shapes">NeoShape graphics</a>
+    <a href="#icons">Icons</a>
+    <a href="menus.html#menus">Settings &amp; cheat menus</a>
+    <div class="group">Editor</div>
+    <a href="editor.html#editor-tools">Editor windows &amp; tools</a>
+    <a href="editor.html#validation">Validation</a>
+    <div class="group">Spec workflow</div>
+    <a href="spec-workflow.html#spec">The spec format</a>
+    <a href="spec-workflow.html#roundtrip">Round-trip safety</a>
+    <a href="spec-workflow.html#agent-bridge">Agent Bridge</a>
+    <a href="spec-workflow.html#showcases">Showcases</a>
+    <div class="group">Going deeper</div>
+    <a href="extending.html#extensibility">Extensibility seams</a>
+    <a href="extending.html#testing">Testing</a>
+  </div>
+</nav>
+<main>
+
+<section id="theming">
+  <div class="eyebrow">Runtime</div>
+  <h2>Theming</h2>
+  <p class="lede">Tokens × variants: name your colors once, restyle the whole app by switching a variant.</p>
+
+  <h3>The model</h3>
+  <p>A <code>Theme</code> asset defines named <b>color tokens</b> (Primary, Background, TextMuted, …) and named <b>variants</b> (Dark, Light, seasonal skins). Each variant supplies a value for every token — the Colors tab of the Design System window edits this matrix and includes a WCAG contrast checker. Switching the active variant via <code>ThemeService.SetVariant()</code> re-applies every bound graphic live.</p>
+
+  <div class="scroll"><table>
+    <tr><th>Piece</th><th>Role</th></tr>
+    <tr><td><code>ThemeColorTarget</code></td><td>Binds a Graphic's color to a token. This is how 99% of UI gets its color.</td></tr>
+    <tr><td><code>ThemeColorRef</code></td><td>A serialized color that is either hardcoded or a token reference — used inside styles and effects.</td></tr>
+    <tr><td><code>SelectableColorSet</code></td><td>Per-selection-state colors (Normal/Highlighted/Pressed/Selected/Disabled), each optionally a token.</td></tr>
+    <tr><td><code>TextStyle</code> + <code>ThemeTextStyleTarget</code></td><td>Named typographic styles (font, size, spacing) applied to TMP texts — edited in the Typography tab.</td></tr>
+    <tr><td><code>ShapeStyle</code> + <code>ThemeShapeStyleTarget</code></td><td>Named surface styles (radius, border, softness) applied to NeoShapes — edited in the Shapes tab.</td></tr>
+    <tr><td><code>ThemeVariantCycler</code></td><td>Component that cycles variants on interaction — instant dark-mode toggle.</td></tr>
+    <tr><td><code>ThemeBundleDefinition</code></td><td>A prebuilt palette you can apply wholesale (Tools → Neo UI → Setup → Apply Theme Bundle…). Drop a new SO to add your own.</td></tr>
+  </table></div>
+
+  <div class="callout tip"><span class="tag">Good to know</span><p>When a component <em>drives</em> a graphic's color at runtime (a selectable animator, a progressor), its inspector shows a <b>ColorDriverNotice</b> warning you that hand-set colors will be overridden. Custom drivers register their detection via <code>NeoColorDrivers.Register</code>.</p></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="shapes">
+  <div class="eyebrow">Runtime</div>
+  <h2>NeoShape graphics</h2>
+  <p class="lede">Resolution-independent vector UI — rounded rects, rings, glyphs — rendered by one SDF shader so <em>everything batches on a single shared material</em>.</p>
+
+  <h3>Shapes</h3>
+  <div class="chips">
+    <span class="chip">RoundedRect</span><span class="chip">Circle</span><span class="chip">Pill</span><span class="chip">Ring</span><span class="chip">Arc</span>
+    <span class="chip">Checkmark</span><span class="chip">Chevron</span><span class="chip">Cross</span>
+  </div>
+  <p>Each <code>NeoShape</code> supports borders, solid or gradient fills (<code>Solid · LinearGradient · RadialGradient</code>, theme-token aware via <code>NeoGradient</code>), soft shadows via <code>ElevationRecipe</code> (depth levels 0–24), radius in pixels or percent, and texture fill with <code>Stretch</code> or <code>Cover</code> fit. Glyph shapes (checkmark/chevron/cross) render as strokes. For icon glyphs, see <a href="#icons">Icons</a>.</p>
+
+  <h3>Effects — two tiers</h3>
+  <p><b>Tier 1</b> effects animate existing graphic properties over a normalized timeline and <b>preserve batching</b>:</p>
+  <div class="chips">
+    <span class="chip">glowPulse</span><span class="chip">sheenSweep</span><span class="chip">gradientCycle</span><span class="chip">arcSpinner</span>
+    <span class="chip">cornerMorph</span><span class="chip">borderPulse</span><span class="chip">hueShift</span><span class="chip">transformJuice</span>
+  </div>
+  <p><b>Tier 2</b> (<code>NeoShapeVariant</code> + <code>ShapeEffectDefinition</code> assets) swaps in material variants for fragment-level effects — more power, but it breaks the batch for that element (the design lint counts these). <code>NeoEffectTrigger</code> plays effects on interaction; <code>NeoSignalParamBinding</code> binds signal payloads to effect parameters.</p>
+
+  <h3>UI particles</h3>
+  <p><code>NeoParticleEmitter</code> spawns pooled, canvas-native particles (each a NeoShape) in batch — coin bursts, confetti, sparkles — with composable modules:</p>
+  <div class="chips">
+    <span class="chip">gravity</span><span class="chip">drag</span><span class="chip">colorOverLife</span><span class="chip">sizeOverLife</span><span class="chip hl">custom via IParticleModule</span>
+  </div>
+  <p>Trigger bursts from signals (<code>NeoParticleBurstOnSignal</code>) or pointer interaction (<code>NeoParticlePointerBurst</code>); save configurations as <code>NeoParticleEmitterPreset</code> assets.</p>
+
+  <div class="callout seam"><span class="tag">Extensibility seam</span><p>Subclass <code>NeoShapeEffect</code> and register with <code>ShapeEffectRegistry</code> for custom effects; implement <code>IParticleModule</code> + a <code>ParticleModuleConfig</code> and register with <code>ParticleEffectRegistry</code> for custom particle behavior. Both become available in specs and inspectors automatically.</p></div>
+
+  <div class="callout tip"><span class="tag">Authoring tip</span><p>When placing effects or particles in a spec, attach them to <em>the element that triggers them</em>. And watch layout: a <code>vstack</code> force-expands child width — use a grid cell size or <code>hstack</code>+<code>spacer</code> when you need intrinsic sizing, and give images a grid cell with <code>fit: cover</code> so they don't stretch.</p></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="icons">
+  <div class="eyebrow">Runtime</div>
+  <h2>Icons</h2>
+  <p class="lede">Icons are addressed by name — <code>"play"</code>, <code>"arrow-right"</code>, <code>"heart"</code>, <code>"bell"</code> — and rendered as font glyphs or sprites, resolved through one lookup chain.</p>
+
+  <p>The <code>NeoIcon</code> component has a single <code>icon</code> string field; call <code>SetIcon("pause")</code> to swap at runtime. Forgiving aliases canonicalize common variants (<code>home</code> → <code>house</code>, <code>close</code> → <code>x</code>, <code>delete</code> → <code>trash-2</code>), and an unknown name warns and keeps the current glyph rather than showing a blank.</p>
+
+  <h3>Where names come from</h3>
+  <p>A name is resolved through four layers, first match wins:</p>
+  <div class="flowline">
+    <div class="node accent"><b>1 · Your sprites</b><span>IconMapOverlay sprite entries</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><b>2 · Your glyphs</b><span>IconMapOverlay codepoints</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><b>3 · Curated set</b><span>~170 pre-baked Lucide glyphs</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><b>4 · Full Lucide</b><span>all 1,962 names</span></div>
+  </div>
+  <p>The curated set is what's pre-baked into the icon font that <b>Setup → Create or Repair Fonts</b> installs (and stores on <code>NeoUISettings.iconFont</code>); the full Lucide table is the fallback for everything else. The <b>Icons</b> tab of the Design System window is the visual home: browse and pick characters from the font, configure the sprite overlay, and set fallbacks.</p>
+
+  <h3>Custom icons: the overlay</h3>
+  <p>The <code>IconMapOverlay</code> asset injects your own art at the front of the chain without touching the framework: <b>sprite entries</b> map a name to a TMP sprite (with a <code>tint</code> flag — tint with the label color, or render full-color as-is), <b>glyph entries</b> map a name to a codepoint in your own font, and <b>aliases</b> add forgiving alternate names for either. Because overlay entries resolve first, you can also override any built-in name with your own art.</p>
+
+  <h3>In specs and widgets</h3>
+  <pre><code><span class="c">// standalone icon element</span>
+{ <span class="k">"icon"</span>: { <span class="k">"name"</span>: <span class="s">"play"</span> } }
+
+<span class="c">// icon on a button</span>
+{ <span class="k">"button"</span>: { <span class="k">"id"</span>: <span class="s">"HUD/Play"</span>, <span class="k">"label"</span>: <span class="s">"Play"</span>, <span class="k">"icon"</span>: <span class="s">"play"</span> } }</code></pre>
+  <p>The featured name list (185 icons) is enumerated in <code>Assets/docs/spec-reference.md</code>; any of the 1,962 Lucide names and your overlay entries resolve at runtime too.</p>
+</section>
+
+<div class="pagenav"><a href="flow-signals.html"><span class="dir">Previous</span>Flow, signals &amp; back</a><a href="menus.html" style="text-align:right"><span class="dir">Next</span>Settings &amp; cheat menus</a></div>
+</main>
+</div>
+<script>
+  (function () {
+    var links = document.querySelectorAll('nav.toc a[href^="#"]');
+    var map = {};
+    links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
+    var current = null;
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          if (current) current.classList.remove('active');
+          current = map[e.target.id];
+          if (current) current.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-10% 0px -70% 0px' });
+    document.querySelectorAll('main section[id]').forEach(function (s) { observer.observe(s); });
+  })();
+</script>
+</body>
+</html>

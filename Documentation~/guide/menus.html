@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neo UI Framework — Settings &amp; cheat menus</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+  <a class="brand" href="index.html" style="display:block;color:inherit;text-decoration:none">Neo UI Framework</a>
+  <div class="brand-sub">Visual guide &amp; feature reference</div>
+  <div class="links">
+    <div class="group">Start here</div>
+    <a href="index.html#overview">Overview</a>
+    <a href="index.html#getting-started">Getting started</a>
+    <a href="index.html#concepts">Core concepts</a>
+    <div class="group">Runtime</div>
+    <a href="containers-widgets.html#containers">Containers &amp; views</a>
+    <a href="containers-widgets.html#widgets">Interactive widgets</a>
+    <a href="animation.html#animation">Animation &amp; tweens</a>
+    <a href="flow-signals.html#flow">Flow graphs</a>
+    <a href="flow-signals.html#signals">Signals</a>
+    <a href="flow-signals.html#back">Back navigation</a>
+    <a href="theming-graphics.html#theming">Theming</a>
+    <a href="theming-graphics.html#shapes">NeoShape graphics</a>
+    <a href="theming-graphics.html#icons">Icons</a>
+    <a href="#menus">Settings &amp; cheat menus</a>
+    <div class="group">Editor</div>
+    <a href="editor.html#editor-tools">Editor windows &amp; tools</a>
+    <a href="editor.html#validation">Validation</a>
+    <div class="group">Spec workflow</div>
+    <a href="spec-workflow.html#spec">The spec format</a>
+    <a href="spec-workflow.html#roundtrip">Round-trip safety</a>
+    <a href="spec-workflow.html#agent-bridge">Agent Bridge</a>
+    <a href="spec-workflow.html#showcases">Showcases</a>
+    <div class="group">Going deeper</div>
+    <a href="extending.html#extensibility">Extensibility seams</a>
+    <a href="extending.html#testing">Testing</a>
+  </div>
+</nav>
+<main>
+
+<section id="menus">
+  <div class="eyebrow">Runtime</div>
+  <h2>Settings &amp; cheat menus</h2>
+  <p class="lede">Describe your settings screen as a catalog — groups, items, defaults — and the framework builds the rows, persists the values, and broadcasts every change as a signal.</p>
+
+  <h3>How it fits together</h3>
+  <div class="flowline">
+    <div class="node accent"><b>Catalog</b><span>SettingsCatalog / CheatCatalog asset</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><b>MenuPresenter</b><span>builds rows from the widget library</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><b>Row + binder</b><span>widget wired to the value</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><b>UserSettingsService</b><span>get / set / persist / signal</span></div>
+  </div>
+  <p>A <code>MenuCatalog</code> ScriptableObject declares <b>groups</b> (rendered as tabs) and <b>items</b> — each item is a category/name id, a row kind, a label, and kind-specific fields like min/max or options. At startup, <code>SettingsMenu</code> / <code>CheatMenu</code> (both thin specializations of <code>MenuPresenter</code>) clone one row prefab per item from the <code>MenuWidgetLibrary</code>, and a <code>MenuControlBinder</code> on each row wires the widget to the value. You never hand-build a settings screen row by row.</p>
+
+  <h3>Row kinds</h3>
+  <div class="chips">
+    <span class="chip">label</span><span class="chip">button</span><span class="chip">toggle</span><span class="chip">switch</span>
+    <span class="chip">slider</span><span class="chip">stepper</span><span class="chip">dropdown</span><span class="chip">rebind</span>
+  </div>
+  <div class="callout seam"><span class="tag">Extensibility seam</span><p>Row kinds live in the <code>NeoMenuItemKinds</code> registry — register your own kind (say, a color picker row) and it becomes available to catalogs and specs like the built-ins.</p></div>
+
+  <h3>Values: reading, writing, persisting</h3>
+  <p><code>UserSettingsService</code> is the single door for every menu value. A read resolves in order: a live <b>code binding</b> if the game registered one, then the <b>store</b> (PlayerPrefs by default, keys namespaced <code>NeoUI.Settings.*</code> — or any <code>IUserSettingsStore</code> you inject), then the catalog's <b>default</b>. Hook a setting to real game state like this:</p>
+  <pre><code><span class="c">// route "Audio/Master" through the mixer instead of PlayerPrefs alone</span>
+UserSettingsService.<span class="k">Bind</span>&lt;float&gt;(<span class="s">"Audio"</span>, <span class="s">"Master"</span>,
+    getter: () =&gt; GetMixerVolume(),
+    setter: v  =&gt; SetMixerVolume(v),
+    persist: <span class="n">true</span>);  <span class="c">// also write the store, so the value survives restarts</span>
+
+<span class="c">// or just react to changes anywhere</span>
+Signals.<span class="k">On</span>(<span class="s">"Settings"</span>, <span class="s">"Video/VSync"</span>, ApplyVSync);</code></pre>
+  <p>Every committed change fires a signal on the <code>Settings</code> (or <code>Cheat</code>) category. Sliders can additionally emit <em>preview</em> signals while dragging (<code>emitOnDrag</code>) on a separate <code>Settings.Preview</code> stream, so you can live-preview volume without persisting every intermediate value — the commit happens on release.</p>
+
+  <h3>Cheat menus</h3>
+  <p>A cheat menu is the same machinery pointed at a different signal category (<code>Cheat</code> instead of <code>Settings</code>), so cheats never collide with real settings. On top of that, <code>CheatMenu</code> adds <b>favourites</b>: enable them on the catalog and testers can star their most-used cheats into a quick-access group (persisted per user via the same service). Typical cheat rows are buttons (fire an action), toggles (god mode), and steppers (add coins).</p>
+
+  <h3>Input rebinding</h3>
+  <p>A <b>rebind</b> row binds to a New Input System action by path (e.g. <code>Gameplay/Jump</code>) plus a binding index for composites. The row shows the current binding's display string ("Space", "Left Mouse"); clicking it starts an interactive "press a key…" rebind through <code>InputRebindService</code>, which saves overrides as JSON per action asset and restores them automatically on startup. A reset removes the override and restores the default binding.</p>
+
+  <h3>In a spec</h3>
+  <p>The top-level <code>settings</code> and <code>cheats</code> sections declare whole catalogs; place a <code>settings</code>/<code>cheats</code> element in a view to embed the generated menu:</p>
+  <pre><code><span class="k">"settings"</span>: [
+  { <span class="k">"id"</span>: <span class="s">"Settings/Game"</span>,
+    <span class="k">"groups"</span>: [<span class="s">"Audio"</span>, <span class="s">"Video"</span>, <span class="s">"Controls"</span>], <span class="k">"start"</span>: <span class="s">"Audio"</span>,
+    <span class="k">"items"</span>: [
+      { <span class="k">"slider"</span>: { <span class="k">"id"</span>: <span class="s">"Audio/Master"</span>, <span class="k">"group"</span>: <span class="s">"Audio"</span>,
+                    <span class="k">"label"</span>: <span class="s">"Master Volume"</span>,
+                    <span class="k">"min"</span>: <span class="n">0</span>, <span class="k">"max"</span>: <span class="n">1</span>, <span class="k">"value"</span>: <span class="n">0.8</span> } },
+      { <span class="k">"toggle"</span>: { <span class="k">"id"</span>: <span class="s">"Video/VSync"</span>, <span class="k">"group"</span>: <span class="s">"Video"</span>,
+                    <span class="k">"label"</span>: <span class="s">"VSync"</span>, <span class="k">"value"</span>: <span class="n">true</span> } },
+      { <span class="k">"rebind"</span>: { <span class="k">"id"</span>: <span class="s">"Controls/Jump"</span>, <span class="k">"group"</span>: <span class="s">"Controls"</span>,
+                    <span class="k">"label"</span>: <span class="s">"Jump"</span>, <span class="k">"action"</span>: <span class="s">"Gameplay/Jump"</span>,
+                    <span class="k">"bindingIndex"</span>: <span class="n">0</span> } }
+    ] }
+]</code></pre>
+  <p>Useful item fields beyond the basics: <code>tooltip</code> (helper text), <code>persisted: false</code> (the game owns the value — nothing written to the store), <code>wholeNumbers</code> on sliders (integer values), <code>options</code> on dropdowns, and <code>step</code> on steppers. The <code>settings-menu</code> showcase demos all of it.</p>
+
+  <h3>Styling the rows</h3>
+  <p>The row prefabs come from the <code>MenuWidgetLibrary</code> asset, installed by <b>Setup → Create or Repair Menu Widget Library</b> — eight row prefabs plus the category tab and panel used for group navigation. Restyle or replace those prefabs (they're ordinary Neo widgets) and every menu built from the library picks up the change. <code>Validate</code> confirms that control bindings resolve to catalog entries and that rebind rows name a real action.</p>
+</section>
+
+<div class="pagenav"><a href="theming-graphics.html"><span class="dir">Previous</span>Theming &amp; graphics</a><a href="editor.html" style="text-align:right"><span class="dir">Next</span>Editor tooling</a></div>
+</main>
+</div>
+<script>
+  (function () {
+    var links = document.querySelectorAll('nav.toc a[href^="#"]');
+    var map = {};
+    links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
+    var current = null;
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          if (current) current.classList.remove('active');
+          current = map[e.target.id];
+          if (current) current.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-10% 0px -70% 0px' });
+    document.querySelectorAll('main section[id]').forEach(function (s) { observer.observe(s); });
+  })();
+</script>
+</body>
+</html>
