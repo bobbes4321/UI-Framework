@@ -1,7 +1,6 @@
 # Neo UI Package (`com.neo.ui`)
 
-Doozy UI Manager 4 replacement, implementing the
-[feature spec](../docs/neo-ui-package-feature-spec.md). Runtime assembly `Neo.UI`,
+Doozy UI Manager 4 replacement. Runtime assembly `Neo.UI`,
 editor assembly `Neo.UI.Editor`, tests under `Tests/`.
 
 ## Subsystem map

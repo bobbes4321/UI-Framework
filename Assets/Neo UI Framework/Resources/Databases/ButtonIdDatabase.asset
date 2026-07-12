@@ -30,6 +30,10 @@ MonoBehaviour:
   - category: Anim
     names:
     - Hero
+  - category: Audio
+    names:
+    - Tonya_Minus
+    - Tonya_Plus
   - category: B
     names:
     - Go
@@ -39,6 +43,26 @@ MonoBehaviour:
   - category: Bundle
     names:
     - Go
+  - category: Buttons
+    names:
+    - DangerLg
+    - DangerMd
+    - DangerSm
+    - GhostLg
+    - GhostMd
+    - GhostSm
+    - Play
+    - PrimaryLg
+    - PrimaryMd
+    - PrimarySm
+    - SecondaryLg
+    - SecondaryMd
+    - SecondarySm
+    - Settings
+    - Shop
+    - SuccessLg
+    - SuccessMd
+    - SuccessSm
   - category: Cheats
     names:
     - Close
@@ -213,5 +237,6 @@ MonoBehaviour:
   - category: World
     names:
     - FinishRace
+    - Spawn dogs
     - SpawnEnemy
     - Twerk It

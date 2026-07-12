@@ -29,8 +29,6 @@ And added two pillars Doozy never had:
   working UI: views, animations, transitions, navigation graph, and gameplay hooks — by writing text.
 - **Central theming** — one place controls the color scheme, type scale, and shape language of all UIs.
 
-The full feature specification lives in `Assets/docs/neo-ui-package-feature-spec.md`.
-
 ---
 
 ## 2. The three hard constraints
@@ -518,9 +516,7 @@ export.**
 
 | Topic | File |
 |---|---|
-| Full feature specification | `Assets/docs/neo-ui-package-feature-spec.md` |
 | Editor UX rationale + field catalog | `Assets/docs/editor-ux-analysis.md` |
-| Visual-polish roadmap (typography, icons, variants, themes, juice) | `Assets/docs/ui-beautification-plan.md` |
 | Settings/cheats menu design | `Assets/docs/settings-cheats-menu-plan.md` |
 | Spec field reference (generated) | `Assets/docs/spec-reference.md` |
 | Spec JSON schema (generated) | `Assets/docs/neo-spec.schema.json` |

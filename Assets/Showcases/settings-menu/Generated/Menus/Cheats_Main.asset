@@ -105,4 +105,21 @@ MonoBehaviour:
     emitOnRelease: 1
     inputAction: 
     bindingIndex: 0
+  - category: World
+    name: Spawn dogs
+    kind: 1
+    label: Spawn dogs
+    tooltip: 
+    group: World
+    persisted: 1
+    min: 0
+    max: 1
+    step: 1
+    wholeNumbers: 0
+    defaultValue: 
+    options: []
+    emitOnDrag: 1
+    emitOnRelease: 1
+    inputAction: 
+    bindingIndex: 0
   favouritesEnabled: 1

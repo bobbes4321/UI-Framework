@@ -1,7 +1,7 @@
 # Editor UX Analysis & Tooling Suite
 
 Deep analysis of every user-editable surface in the Neo UI Framework, what Doozy did well (and badly),
-and the system built to support it. Companion to `neo-ui-package-feature-spec.md`.
+and the system built to support it.
 
 ## 1. What we learned from Doozy's EditorUI
 

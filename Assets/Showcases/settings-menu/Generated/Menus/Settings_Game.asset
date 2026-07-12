@@ -178,20 +178,3 @@ MonoBehaviour:
     emitOnRelease: 1
     inputAction: 
     bindingIndex: 0
-  - category: Audio
-    name: Tonya
-    kind: 5
-    label: Reset to Defaults
-    tooltip: 
-    group: Controls
-    persisted: 1
-    min: 0
-    max: 10
-    step: 1
-    wholeNumbers: 1
-    defaultValue: 5
-    options: []
-    emitOnDrag: 1
-    emitOnRelease: 1
-    inputAction: 
-    bindingIndex: 0

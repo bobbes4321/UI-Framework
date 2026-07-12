@@ -26,8 +26,6 @@ to the deeper doc or code that owns each one.
   entry point. [editor-ux-analysis.md](./editor-ux-analysis.md) covers the editor-kit
   (`Neo.EditorUI`) conventions for building matching inspectors/windows.
 - **I'm authoring a NeoShape-based shader effect** → [neoshape-channel-layout.md](./neoshape-channel-layout.md).
-- **I want to know what visual-polish work is still open** → [ui-beautification-plan.md](./ui-beautification-plan.md)
-  (P1–P6 are shipped; the doc's own "still open" section is the current backlog).
 
 ## Full documentation map
 
@@ -56,12 +54,6 @@ to the deeper doc or code that owns each one.
 - [editor-ux-analysis.md](./editor-ux-analysis.md) — editor UX rationale and the `Neo.EditorUI`
   field/control catalog, for anyone building a new inspector or window.
 
-**Planning & roadmap**
-- [neo-ui-package-feature-spec.md](./neo-ui-package-feature-spec.md) — the original
-  pre-implementation design brief (2026-06-10). Historical: read it for the "why," not the
-  current feature list — CLAUDE.md and authoring-guide.md are current.
-- [ui-beautification-plan.md](./ui-beautification-plan.md) — visual-polish roadmap; P1–P6 shipped,
-  a handful of items (segmented progress bar, rarity frame, 9-slice art) remain open.
 
 **Glossary**
 - [GLOSSARY.md](./GLOSSARY.md) — one-page definitions of signal, registry, seam, flow graph,

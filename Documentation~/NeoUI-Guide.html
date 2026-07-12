@@ -1,0 +1,989 @@
+<title>Neo UI Framework — Visual Guide</title>
+<style>
+  :root {
+    --bg: #F7F8FB;
+    --panel: #FFFFFF;
+    --ink: #1C2434;
+    --mute: #5A6478;
+    --line: #E3E7F0;
+    --accent: #3D53C6;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #EDF0FC;
+    --seam: #0E7C6E;
+    --seam-bg: #E9F6F3;
+    --warn: #8A6100;
+    --warn-bg: #FBF3E0;
+    --agent: #7A3FB8;
+    --agent-bg: #F4EDFB;
+    --code-bg: #F0F2F8;
+    --code-ink: #2A3350;
+    --syn-key: #3D53C6;
+    --syn-str: #0E7C6E;
+    --syn-num: #B14A8F;
+    --syn-com: #8891A6;
+    --shadow: 0 1px 3px rgba(28,36,52,.07), 0 4px 16px rgba(28,36,52,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151D;
+      --panel: #1A1E29;
+      --ink: #E5E9F2;
+      --mute: #99A2B7;
+      --line: #2A3040;
+      --accent: #92A0F5;
+      --accent-ink: #12151D;
+      --accent-soft: #222A45;
+      --seam: #47C7B4;
+      --seam-bg: #16302C;
+      --warn: #E0B24E;
+      --warn-bg: #322A18;
+      --agent: #C79BF0;
+      --agent-bg: #2A2138;
+      --code-bg: #161A24;
+      --code-ink: #C9D1E4;
+      --syn-key: #92A0F5;
+      --syn-str: #47C7B4;
+      --syn-num: #E08FC8;
+      --syn-com: #6B7590;
+      --shadow: 0 1px 3px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.25);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #F7F8FB; --panel: #FFFFFF; --ink: #1C2434; --mute: #5A6478; --line: #E3E7F0;
+    --accent: #3D53C6; --accent-ink: #FFFFFF; --accent-soft: #EDF0FC;
+    --seam: #0E7C6E; --seam-bg: #E9F6F3; --warn: #8A6100; --warn-bg: #FBF3E0;
+    --agent: #7A3FB8; --agent-bg: #F4EDFB; --code-bg: #F0F2F8; --code-ink: #2A3350;
+    --syn-key: #3D53C6; --syn-str: #0E7C6E; --syn-num: #B14A8F; --syn-com: #8891A6;
+    --shadow: 0 1px 3px rgba(28,36,52,.07), 0 4px 16px rgba(28,36,52,.05);
+  }
+  :root[data-theme="dark"] {
+    --bg: #12151D; --panel: #1A1E29; --ink: #E5E9F2; --mute: #99A2B7; --line: #2A3040;
+    --accent: #92A0F5; --accent-ink: #12151D; --accent-soft: #222A45;
+    --seam: #47C7B4; --seam-bg: #16302C; --warn: #E0B24E; --warn-bg: #322A18;
+    --agent: #C79BF0; --agent-bg: #2A2138; --code-bg: #161A24; --code-ink: #C9D1E4;
+    --syn-key: #92A0F5; --syn-str: #47C7B4; --syn-num: #E08FC8; --syn-com: #6B7590;
+    --shadow: 0 1px 3px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.25);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.65;
+  }
+  .layout { display: grid; grid-template-columns: 264px minmax(0, 1fr); max-width: 1220px; margin: 0 auto; gap: 0 48px; padding: 0 24px; }
+
+  /* ---------- Sidebar ---------- */
+  nav.toc {
+    position: sticky; top: 0; align-self: start;
+    height: 100vh; overflow-y: auto;
+    padding: 32px 8px 32px 0;
+    font-size: 13.5px;
+    border-right: 1px solid var(--line);
+  }
+  nav.toc .brand { font-family: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif; font-weight: 700; font-size: 15px; letter-spacing: .01em; margin-bottom: 4px; }
+  nav.toc .brand-sub { color: var(--mute); font-size: 12px; margin-bottom: 20px; }
+  nav.toc .group { text-transform: uppercase; letter-spacing: .09em; font-size: 10.5px; font-weight: 600; color: var(--mute); margin: 18px 0 6px; }
+  nav.toc a { display: block; color: var(--mute); text-decoration: none; padding: 3px 10px; border-radius: 6px; border-left: 2px solid transparent; }
+  nav.toc a:hover { color: var(--ink); background: var(--accent-soft); }
+  nav.toc a.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+  nav.toc a:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  main { padding: 40px 0 96px; min-width: 0; }
+
+  /* ---------- Typography ---------- */
+  h1, h2, h3, h4 { font-family: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif; text-wrap: balance; line-height: 1.25; }
+  h1 { font-size: 38px; font-weight: 700; margin: 8px 0 10px; letter-spacing: -.015em; }
+  h2 { font-size: 26px; font-weight: 700; margin: 0 0 6px; letter-spacing: -.01em; }
+  h3 { font-size: 18.5px; font-weight: 650; margin: 32px 0 10px; }
+  h4 { font-size: 15.5px; font-weight: 600; margin: 22px 0 8px; }
+  p, li { max-width: 72ch; }
+  p { margin: 0 0 14px; }
+  a { color: var(--accent); }
+  section { padding: 40px 0 8px; border-top: 1px solid var(--line); margin-top: 40px; }
+  section:first-of-type { border-top: none; margin-top: 0; padding-top: 8px; }
+  .lede { font-size: 17.5px; color: var(--mute); max-width: 68ch; }
+  .eyebrow { text-transform: uppercase; letter-spacing: .1em; font-size: 11.5px; font-weight: 650; color: var(--accent); margin-bottom: 6px; }
+
+  /* ---------- Code ---------- */
+  code { font-family: "Cascadia Code", "Cascadia Mono", Consolas, ui-monospace, monospace; font-size: .875em; background: var(--code-bg); color: var(--code-ink); border-radius: 5px; padding: .12em .4em; }
+  pre { background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; overflow-x: auto; line-height: 1.55; margin: 14px 0 20px; }
+  pre code { background: none; padding: 0; font-size: 13.5px; }
+  .k { color: var(--syn-key); } .s { color: var(--syn-str); } .n { color: var(--syn-num); } .c { color: var(--syn-com); font-style: italic; }
+
+  /* ---------- Tables ---------- */
+  .scroll { overflow-x: auto; margin: 14px 0 20px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th { text-align: left; font-weight: 650; font-size: 12.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--mute); border-bottom: 1px solid var(--line); padding: 10px 14px; white-space: nowrap; }
+  td { border-bottom: 1px solid var(--line); padding: 9px 14px; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { min-width: 14ch; }
+
+  /* ---------- Chips ---------- */
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; margin: 10px 0 18px; }
+  .chip { display: inline-flex; align-items: center; font-family: "Cascadia Code", Consolas, ui-monospace, monospace; font-size: 12.5px; background: var(--panel); border: 1px solid var(--line); color: var(--ink); border-radius: 999px; padding: 3px 11px; }
+  .chip.hl { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+  /* ---------- Cards ---------- */
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; margin: 14px 0 20px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow); }
+  .card b { font-size: 14.5px; }
+  .card code { font-size: 12.5px; }
+  .card p { font-size: 13.5px; color: var(--mute); margin: 5px 0 0; }
+
+  /* ---------- Callouts ---------- */
+  .callout { border-radius: 10px; padding: 13px 16px; margin: 16px 0 20px; font-size: 14.5px; border: 1px solid; max-width: 78ch; }
+  .callout .tag { display: inline-block; text-transform: uppercase; letter-spacing: .08em; font-size: 10.5px; font-weight: 700; margin-bottom: 4px; }
+  .callout p { font-size: inherit; margin: 0; max-width: none; }
+  .callout.seam { background: var(--seam-bg); border-color: var(--seam); } .callout.seam .tag { color: var(--seam); }
+  .callout.invariant { background: var(--warn-bg); border-color: var(--warn); } .callout.invariant .tag { color: var(--warn); }
+  .callout.agent { background: var(--agent-bg); border-color: var(--agent); } .callout.agent .tag { color: var(--agent); }
+  .callout.tip { background: var(--accent-soft); border-color: var(--accent); } .callout.tip .tag { color: var(--accent); }
+
+  /* ---------- Hero ---------- */
+  .hero { padding: 24px 0 8px; }
+  .hero .pill { display: inline-flex; gap: 8px; align-items: center; font-size: 12.5px; font-weight: 600; color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 999px; padding: 3px 12px; margin-bottom: 14px; }
+  .pillars { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 24px 0 8px; }
+  .pillar { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow); }
+  .pillar b { display: block; margin-bottom: 4px; font-size: 14.5px; }
+  .pillar span { font-size: 13.5px; color: var(--mute); }
+
+  /* ---------- Flow diagram ---------- */
+  .flowline { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; margin: 16px 0 20px; }
+  .flowline .node { background: var(--panel); border: 1px solid var(--line); border-radius: 9px; padding: 9px 13px; font-size: 13px; box-shadow: var(--shadow); flex: 0 1 auto; }
+  .flowline .node b { display: block; font-size: 13.5px; }
+  .flowline .node span { color: var(--mute); font-size: 12px; }
+  .flowline .arrow { align-self: center; color: var(--mute); font-size: 15px; }
+  .flowline .node.accent { border-color: var(--accent); background: var(--accent-soft); }
+
+  kbd { font-family: "Cascadia Code", Consolas, ui-monospace, monospace; font-size: 12px; background: var(--panel); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: 1px 6px; }
+
+  footer { color: var(--mute); font-size: 13px; border-top: 1px solid var(--line); margin-top: 48px; padding-top: 20px; }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; gap: 0; }
+    nav.toc { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--line); padding: 20px 0 12px; }
+    nav.toc .links { display: flex; flex-wrap: wrap; gap: 4px; }
+    nav.toc .group { width: 100%; }
+    nav.toc a { border-left: none; border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; }
+    h1 { font-size: 30px; }
+  }
+</style>
+
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+  <div class="brand">Neo UI Framework</div>
+  <div class="brand-sub">Visual guide &amp; feature reference</div>
+  <div class="links">
+    <div class="group">Start here</div>
+    <a href="#overview">Overview</a>
+    <a href="#getting-started">Getting started</a>
+    <a href="#concepts">Core concepts</a>
+    <div class="group">Runtime</div>
+    <a href="#containers">Containers &amp; views</a>
+    <a href="#widgets">Interactive widgets</a>
+    <a href="#animation">Animation &amp; tweens</a>
+    <a href="#flow">Flow graphs</a>
+    <a href="#signals">Signals</a>
+    <a href="#back">Back navigation</a>
+    <a href="#theming">Theming</a>
+    <a href="#shapes">NeoShape graphics</a>
+    <a href="#icons">Icons</a>
+    <a href="#menus">Settings &amp; cheat menus</a>
+    <div class="group">Editor</div>
+    <a href="#editor-tools">Editor windows &amp; tools</a>
+    <a href="#validation">Validation</a>
+    <div class="group">Spec workflow</div>
+    <a href="#spec">The spec format</a>
+    <a href="#roundtrip">Round-trip safety</a>
+    <a href="#agent-bridge">Agent Bridge</a>
+    <a href="#showcases">Showcases</a>
+    <div class="group">Going deeper</div>
+    <a href="#extensibility">Extensibility seams</a>
+    <a href="#testing">Testing</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ============================================================ -->
+<section id="overview" class="hero">
+  <div class="pill">Unity 6 &nbsp;·&nbsp; UGUI &nbsp;·&nbsp; New Input System</div>
+  <h1>Neo UI Framework</h1>
+  <p class="lede">A production-grade UI framework for Unity: addressable views, signal-driven wiring, a visual flow graph for navigation, a token-based theme system, and SDF vector graphics that batch on a single material. Everything can be authored two ways — by hand in the editor, or from a JSON spec that generates (and safely re-generates) the whole UI.</p>
+
+  <div class="pillars">
+    <div class="pillar"><b>Extensible by design</b><span>Every fixed set — widget kinds, presets, theme tokens, flow nodes — has a registration seam. You never fork the package to add your own.</span></div>
+    <div class="pillar"><b>Addressed by name</b><span>Views, buttons, signals and streams are identified by <code>Category/Name</code> strings, not object references or GUIDs. Wiring survives refactors and is readable in plain JSON.</span></div>
+    <div class="pillar"><b>Spec ⇄ prefab round-trip</b><span>A JSON spec is the source of truth; prefabs are its materialization. Generate, export, diff, and three-way-merge without losing hand edits.</span></div>
+    <div class="pillar"><b>Loud failures, quiet editor</b><span>Every string-addressed lookup that misses logs a warning. Editor tooling never polls, never scans with reflection, never animates chrome.</span></div>
+  </div>
+
+  <h3>What's in the box</h3>
+  <div class="cards">
+    <div class="card"><b>Containers</b><p>Views, panels, popups, tooltips, overlays, and responsive roots with show/hide transitions.</p></div>
+    <div class="card"><b>Widgets</b><p>Buttons, toggles, sliders, dropdowns, tabs, steppers, counters, badges — all id-addressed and signal-emitting.</p></div>
+    <div class="card"><b>Animation</b><p>Five-channel <code>UIAnimation</code> (move / rotate / scale / fade / color), preset library, pooled tween engine.</p></div>
+    <div class="card"><b>Flow graphs</b><p>A node-based state machine for screen navigation with triggers, history, and named view transitions.</p></div>
+    <div class="card"><b>Signals</b><p>Named event streams (<code>Category/Name</code>) decoupling senders from receivers, with optional typed payloads.</p></div>
+    <div class="card"><b>Theming</b><p>Color tokens × variants (Dark/Light/…), text styles, shape styles — switch a variant and the whole UI re-skins live.</p></div>
+    <div class="card"><b>NeoShape</b><p>SDF vector shapes (rounded rects, pills, rings, glyphs) with gradients, borders, shadows, effects and UI particles — one shared material.</p></div>
+    <div class="card"><b>Editor suite</b><p>Hub, Flow Graph editor, Design System window, Gallery, Palette, Command Palette, ID Database manager, setup wizards.</p></div>
+    <div class="card"><b>Agent Bridge</b><p>A JSON request/response protocol so tools and AI agents can generate, validate, preview, and sync UI with the editor open or headless.</p></div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="getting-started">
+  <div class="eyebrow">Start here</div>
+  <h2>Getting started</h2>
+  <p class="lede">From an empty project to a themed, navigable UI in five steps.</p>
+
+  <h3>1 · Open the Hub</h3>
+  <p><b>Tools → Neo UI → Hub</b> is the central launcher. Every window, wizard, and advanced action is organized there by category (Author / Data / Setup / Advanced), with search. If you only remember one menu item, remember this one — or press <kbd>Ctrl</kbd>+<kbd>K</kbd> for the Command Palette, which finds views, widgets, and windows by typing.</p>
+
+  <h3>2 · Run project setup</h3>
+  <p><b>Tools → Neo UI → Setup → New Project Setup…</b> walks you through choosing a theme and installing the pieces you want. It creates the single settings asset (<code>Resources/NeoUISettings</code>), the starter kit prefabs, widget presets, animation library, fonts, effects, and transition library. Each piece can also be created or repaired individually from the same Setup menu, and <b>Reset To Clean Slate…</b> uninstalls anything setup created, per component.</p>
+
+  <h3>3 · Learn from the showcases</h3>
+  <p>Every user-visible feature has a demo scene under <code>Assets/Showcases/</code> — buttons, toggles, tabs, popups, animations, effects, particles, transitions, a settings menu, and a complete game UI with flow navigation. Open one, press play, then read its spec in <code>Assets/Showcases/Specs/</code> to see exactly how it was described. See <a href="#showcases">Showcases</a>.</p>
+
+  <h3>4 · Build your first screen — pick a path</h3>
+  <p><b>Native authoring:</b> drag widgets from the <b>Palette</b> window (or use starter-kit prefabs), give each an id via the inspector's category/name picker, and wire navigation in the <b>Flow Graph Editor</b>.</p>
+  <p><b>Spec authoring:</b> write a JSON spec (there's a JSON Schema at <code>Assets/docs/neo-spec.schema.json</code> for IDE autocomplete) and run <b>Tools → Neo UI → Advanced → Generate From Spec…</b>. The generator creates prefabs, registers ids, builds flow graphs, and writes a baseline for future safe re-generation. See <a href="#spec">The spec format</a>.</p>
+
+  <h3>5 · Validate</h3>
+  <p><b>Tools → Neo UI → Advanced → Validate</b> runs hard contract checks (theme coverage, flow references, dead ids) plus soft design lints (WCAG contrast, tap targets, spacing scale) and an interactivity lint that flags buttons and tabs that do nothing. Run it after every generate. See <a href="#validation">Validation</a>.</p>
+
+  <div class="callout tip"><span class="tag">Tip</span><p>The framework uses the <b>New Input System</b> exclusively. If pointer events aren't reaching your UI, check that your EventSystem uses the InputSystemUIInputModule, not the legacy StandaloneInputModule.</p></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="concepts">
+  <div class="eyebrow">Start here</div>
+  <h2>Core concepts</h2>
+
+  <h3>Category/Name ids</h3>
+  <p>Almost everything is addressed by a two-part string id: a <b>category</b> and a <b>name</b> — <code>Menu/Main</code>, <code>Shop/BuyButton</code>, <code>Audio/Muted</code>. Typed id classes exist per widget family (<code>ViewId</code>, <code>ButtonId</code>, <code>ToggleId</code>, <code>SliderId</code>, <code>DropdownId</code>, <code>PanelId</code>, <code>TagId</code>, <code>StreamId</code>), each backed by an <b>IdDatabase</b> asset that powers searchable pickers in every inspector, with quick-add and jump-to buttons.</p>
+  <p>Ids also drive naming: a component implementing <code>INeoIdOwner</code> gets a canonical GameObject name derived by <code>NeoIdNaming</code> (<code>Type-Category_Name</code>, e.g. <code>UIButton-Shop_Buy</code>), shared between hand authoring and generation — so hierarchies stay predictable and greppable.</p>
+
+  <h3>Signals as glue</h3>
+  <p>Components rarely hold references to each other. Instead they publish and subscribe to <b>signal streams</b> — named channels like <code>Audio/Muted</code>. A button click, a toggle flip, a flow-graph transition, a particle burst: all can be expressed as "send this signal" / "react to this signal". This keeps prefabs self-contained and makes wiring visible as data.</p>
+
+  <h3>Spec is source of truth; prefab is materialization</h3>
+  <p>When you use the spec workflow, the JSON spec describes the UI and the generator materializes it into prefabs, id registrations, presets, and flow assets. A <b>baseline</b> file (<code>.neo-baseline.json</code>) records the spec the assets were last generated from, so the framework can always tell what you edited by hand versus what the spec says — and merge instead of clobbering. Hand-authoring without specs is fully supported too; the two paths produce identical widgets (verified by round-trip tests).</p>
+
+  <h3>WYSIWYG baking</h3>
+  <p>The state you see in the prefab is the state you get at runtime start: colors are baked, start values are serialized, disabled things start disabled. There is no "wait one frame for the theme to kick in" flash.</p>
+
+  <div class="callout invariant"><span class="tag">Invariant</span><p><b>No silent failures.</b> Any string-addressed lookup that misses — showing an unknown view, starting an unknown flow, sending to a misspelled command — logs a warning naming what was looked up. If something "does nothing", the Console will say why.</p></div>
+
+  <div class="callout invariant"><span class="tag">Invariant</span><p><b>Lifecycle ordering.</b> Registries populate in <code>OnEnable</code>; anything that commands <em>another</em> object defers to <code>Start()</code>, because enable order across objects is arbitrary. Follow the same rule in your own scripts to avoid enable-order races.</p></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="containers">
+  <div class="eyebrow">Runtime</div>
+  <h2>Containers &amp; views</h2>
+  <p class="lede">Containers are the things that show and hide. Everything visible lives inside one.</p>
+
+  <div class="scroll"><table>
+    <tr><th>Component</th><th>What it is</th></tr>
+    <tr><td><code>UIContainer</code></td><td>Base visibility container: show/hide with transitions, animator registration, interruption handling, auto-hide and auto-select behaviors.</td></tr>
+    <tr><td><code>UIView</code></td><td>A screen. Addressed by <code>Category/Name</code>, controllable from anywhere via static API, navigated by flow graphs.</td></tr>
+    <tr><td><code>UIPanel</code></td><td>Tab-content container, kept in sync with a <code>UITab</code>'s selection; optional fade-in on enable.</td></tr>
+    <tr><td><code>UIPopup</code></td><td>Modal/popup looked up by name from <code>PopupDatabase</code>, configured with a fluent API, queued FIFO (one visible per queue).</td></tr>
+    <tr><td><code>UITooltip</code></td><td>Tooltip with follow/anchor positioning and hover triggering; anchors resolve via named <code>UITag</code> targets.</td></tr>
+    <tr><td><code>UIOverlay</code></td><td>Marks children as z-stacked (overlay layout) rather than layout-group stacked.</td></tr>
+    <tr><td><code>UIResponsiveRoot</code></td><td>Responsive layout root managing breakpoint-aware canvas scaling.</td></tr>
+    <tr><td><code>UIResponsiveGridColumns</code></td><td>Grid whose column count adapts to the active screen breakpoint.</td></tr>
+  </table></div>
+
+  <h3>Controlling views from code</h3>
+  <pre><code><span class="c">// Show / hide by address — from anywhere, no references needed</span>
+UIView.<span class="k">Show</span>(<span class="s">"Menu"</span>, <span class="s">"Main"</span>);
+UIView.<span class="k">Hide</span>(<span class="s">"Menu"</span>, <span class="s">"Settings"</span>, instant: <span class="n">true</span>);
+UIView.<span class="k">ShowCategory</span>(<span class="s">"HUD"</span>);      <span class="c">// every view in a category</span>
+UIView.<span class="k">HideAllViews</span>();
+
+<span class="c">// Popups: fetch by name, configure fluently, then show</span>
+UIPopup.<span class="k">Get</span>(<span class="s">"Confirm"</span>)
+       .<span class="k">SetTexts</span>(<span class="s">"Delete save?"</span>, <span class="s">"This cannot be undone."</span>)
+       .<span class="k">SetEvents</span>(OnConfirm, OnCancel)
+       .<span class="k">SetQueue</span>(<span class="s">"dialogs"</span>)
+       .<span class="k">Show</span>();</code></pre>
+
+  <p>Every show/hide accepts an <code>instant</code> flag and an optional <code>UIAnimation</code> override. Containers handle interruption gracefully — hiding mid-show reverses from the current pose rather than snapping.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="widgets">
+  <div class="eyebrow">Runtime</div>
+  <h2>Interactive widgets</h2>
+  <p class="lede">All widgets carry a <code>Category/Name</code> id, emit signals, and animate their selection states through the same animator model.</p>
+
+  <div class="scroll"><table>
+    <tr><th>Widget</th><th>What it does</th></tr>
+    <tr><td><code>UIButton</code></td><td>Button with eleven behavior triggers (below), per-trigger cooldowns, and signal emission per behavior.</td></tr>
+    <tr><td><code>UIToggle</code></td><td>On/off control with group exclusivity, value-changed events, and domain signal publishing (e.g. emit <code>Audio/Muted</code>).</td></tr>
+    <tr><td><code>UISlider</code></td><td>Slider distinguishing <em>continuous</em> (while dragging) from <em>committed</em> (on release) values, with min/max/increment events.</td></tr>
+    <tr><td><code>UIDropdown</code></td><td>Single-choice dropdown (extends TMP_Dropdown) with an id and a selection-changed signal.</td></tr>
+    <tr><td><code>UITab</code></td><td>Toggle bound bidirectionally to a target <code>UIContainer</code> — selecting shows the container, and the container's state mirrors back.</td></tr>
+    <tr><td><code>UIStepper</code></td><td>Plus/minus value control with step size, min/max, and reach-limit events.</td></tr>
+    <tr><td><code>UICounter</code></td><td>Rolling number label that tweens its displayed value toward a target — score counters, coin totals.</td></tr>
+    <tr><td><code>UIBadge</code> / <code>UITag</code></td><td>Badge labels, and named RectTransform position targets (for popup/tooltip anchoring).</td></tr>
+    <tr><td><code>UIScrollbar</code></td><td>Scrollbar with selection-state animator integration.</td></tr>
+    <tr><td><code>UIRebindControl</code></td><td>UI for runtime input rebinding, backed by <code>InputRebindService</code>.</td></tr>
+  </table></div>
+
+  <h3>Button behavior triggers</h3>
+  <p>Each <code>UIButton</code> hosts a list of <code>UIActionBehaviour</code>s — one per trigger — each firing a UnityEvent, an optional signal, and honoring an optional cooldown:</p>
+  <div class="chips">
+    <span class="chip">Click</span><span class="chip">DoubleClick</span><span class="chip">LongClick</span><span class="chip">RightClick</span>
+    <span class="chip">PointerEnter</span><span class="chip">PointerExit</span><span class="chip">PointerDown</span><span class="chip">PointerUp</span>
+    <span class="chip">Selected</span><span class="chip">Deselected</span><span class="chip">Submit</span>
+  </div>
+
+  <h3>Selection states</h3>
+  <p>Widgets built on <code>UISelectable</code> expose five states — <b>Normal · Highlighted · Pressed · Selected · Disabled</b> — consumed by pluggable animators (<code>UISelectableColorAnimator</code>, <code>UISelectableUIAnimator</code>) via <code>SelectionStateRelay</code>. Spec-generated buttons come in variants <span class="chip hl">primary</span> <span class="chip hl">secondary</span> <span class="chip hl">danger</span> <span class="chip hl">light</span> <span class="chip hl">ghost</span> and sizes <span class="chip hl">sm</span> <span class="chip hl">md</span> <span class="chip hl">lg</span>.</p>
+
+  <div class="callout invariant"><span class="tag">Invariant</span><p><b>Dead-interaction lint.</b> A button or tab with no flow trigger, signal, popup, view command, or event is flagged by <code>Validate</code> — a control that looks alive but does nothing never ships silently.</p></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="animation">
+  <div class="eyebrow">Runtime</div>
+  <h2>Animation &amp; tweens</h2>
+  <p class="lede">One composite animation type, a preset library, and a pooled tween engine ticked by a single central service.</p>
+
+  <h3>UIAnimation — five channels</h3>
+  <div class="chips">
+    <span class="chip hl">Move</span><span class="chip hl">Rotate</span><span class="chip hl">Scale</span><span class="chip hl">Fade</span><span class="chip hl">Color</span>
+  </div>
+  <p>Each channel has its own <code>TweenSettings</code>: duration, delay, loops, play mode (<code>Normal · PingPong · Spring · Shake</code>), and easing — either one of ~30 built-in <code>Ease</code> curves (Sine/Quad/Cubic/Quart/Quint/Expo/Circ/Back/Elastic/Bounce in In/Out/InOut flavors, plus Linear and Spring) or a custom <code>AnimationCurve</code>. Move supports directional presets (<code>UIMoveDirection</code>: Left, Top, BottomRight, CustomPosition, …) so "slide in from left" is one dropdown.</p>
+
+  <h3>The preset library</h3>
+  <p><code>UIAnimationPreset</code> assets store named, reusable animations, addressed — as always — by <code>Category/Name</code>. Any preset asset dropped under the library folder is auto-discovered; no registration needed. The setup wizard installs 40 presets across seven categories:</p>
+  <div class="scroll"><table>
+    <tr><th>Category</th><th>Shipped presets</th></tr>
+    <tr><td><b>Show</b></td><td>FadeIn · SlideInLeft · SlideInRight · SlideInUp · SlideInDown · ScalePopIn · ZoomIn · SpinIn · DropInBounce</td></tr>
+    <tr><td><b>Hide</b></td><td>FadeOut · SlideOutLeft · SlideOutRight · SlideOutUp · SlideOutDown · ZoomOut · SpinOut</td></tr>
+    <tr><td><b>Hover</b></td><td>ScaleUp · ScaleUpBig · ScaleDown · LiftUp · TiltLeft · TiltRight · TintPrimary · GlowPulse</td></tr>
+    <tr><td><b>Press</b></td><td>PressDip · PressPop · SquashStretch · FlashTint · PressLift</td></tr>
+    <tr><td><b>Click</b></td><td>Spin360 · Backflip · BarrelRoll · Jello · RubberBand · Wobble · PunchScale · ColorCycle</td></tr>
+    <tr><td><b>Toggle</b></td><td>ToggleOnPop · ToggleOffFade · KnobNudge · TintOn</td></tr>
+    <tr><td><b>Loop</b></td><td>Pulse · Heartbeat · Breathe · Bob · SpinLoop · Shimmer</td></tr>
+  </table></div>
+
+  <h3>Applying presets</h3>
+  <p><b>In the inspector:</b> every animator slot (the "Show" animation on a container animator, the "Hover" animation on a selectable) has a picker grouped by category. Hovering a preset plays a live preview; clicking it <em>copies</em> the animation data into the slot. Presets are copy-on-apply, not linked — editing a preset later never changes widgets that already used it, and you can freely tweak the copy per-widget.</p>
+  <p><b>In a spec:</b> reference presets by full name on the matching field:</p>
+  <pre><code>{ <span class="k">"id"</span>: <span class="s">"Menu/Main"</span>,
+  <span class="k">"showAnimation"</span>: <span class="s">"Show/FadeIn"</span>,
+  <span class="k">"hideAnimation"</span>: <span class="s">"Hide/SlideOutLeft"</span> }</code></pre>
+  <p><b>In the Design System window:</b> the <b>Motion</b> tab is the library's home — a searchable browser on the left, the selected preset's five-channel editor on the right, with play/scrub preview on a preview stage or any scene RectTransform.</p>
+
+  <h3>Animator roles</h3>
+  <p><code>NeoAnimatorRoles</code> names the standard animation slots, and <code>NeoUISettings</code> maps each role to a default preset — so every new widget animates consistently with zero per-widget setup, and re-mapping a role restyles the whole project's motion at once:</p>
+  <div class="chips">
+    <span class="chip">View/Show</span><span class="chip">View/Hide</span>
+    <span class="chip">Button/Hover</span><span class="chip">Button/Press</span>
+    <span class="chip">Selectable/Normal</span><span class="chip">Selectable/Selected</span><span class="chip">Selectable/Disabled</span>
+    <span class="chip">Toggle/On</span><span class="chip">Toggle/Off</span>
+    <span class="chip">Loop</span><span class="chip">OneShot</span>
+  </div>
+  <p>Each role suggests matching preset categories first in the picker (View/Show surfaces the Show category, and so on).</p>
+
+  <h3>Animator components</h3>
+  <div class="scroll"><table>
+    <tr><th>Animator</th><th>Drives</th></tr>
+    <tr><td><code>UIContainerUIAnimator</code></td><td>Container show/hide with full UIAnimation, including transition override animations.</td></tr>
+    <tr><td><code>UIContainerColorAnimator</code></td><td>CanvasGroup alpha during container transitions.</td></tr>
+    <tr><td><code>UISelectableUIAnimator</code></td><td>Per-selection-state UIAnimation on buttons/toggles.</td></tr>
+    <tr><td><code>UISelectableColorAnimator</code></td><td>Per-state color transitions (theme-token aware).</td></tr>
+    <tr><td><code>UIToggleUIAnimator</code></td><td>Toggle on/off animations.</td></tr>
+    <tr><td><code>Progressor</code> → <code>ProgressTarget</code></td><td>Normalized 0..1 progress fan-out (fills, health bars, loading indicators).</td></tr>
+  </table></div>
+
+  <h3>The tween engine</h3>
+  <p>Tweens are pooled (<code>TweenPool</code>) and ticked by <code>UITick</code>, a single central service using unscaled delta time — no per-component <code>Update()</code>. The runtime FPS cap in settings throttles it if needed.</p>
+
+  <div class="callout invariant"><span class="tag">Invariant</span><p><b>Tween lifetime.</b> Bind tweens to their targets with <code>tween.SetTarget(owner, get, set)</code> so a destroyed target self-stops the tween instead of throwing every frame. <code>UITick</code> logs-and-drops any tickable that throws — loudly, once.</p></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="flow">
+  <div class="eyebrow">Runtime</div>
+  <h2>Flow graphs</h2>
+  <p class="lede">Screen navigation as a state machine: nodes show views, edges fire on triggers, history enables Back.</p>
+
+  <div class="flowline">
+    <div class="node accent"><b>StartNode</b><span>entry point</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><b>UINode “MainMenu”</b><span>shows Menu/Main</span></div>
+    <div class="arrow">→ <em>button: Menu/Play</em> →</div>
+    <div class="node"><b>UINode “Game”</b><span>shows HUD/Game</span></div>
+    <div class="arrow">→ <em>signal: Game/Over</em> →</div>
+    <div class="node"><b>UINode “Results”</b><span>shows Menu/Results</span></div>
+  </div>
+
+  <h3>Pieces</h3>
+  <div class="scroll"><table>
+    <tr><th>Type</th><th>Role</th></tr>
+    <tr><td><code>FlowGraph</code></td><td>The asset: a flat, string-addressed list of nodes — readable and diffable as data.</td></tr>
+    <tr><td><code>FlowController</code></td><td>Plays a graph (a runtime clone, so mutations never touch the asset). Global or local scope, history stack with <code>GoBack()</code>, exposes the active node for debugging.</td></tr>
+    <tr><td><code>StartNode</code></td><td>Entry point; advances immediately on start.</td></tr>
+    <tr><td><code>UINode</code></td><td>The workhorse: shows/hides views on enter/exit, listens for its edges' triggers, advances when one fires.</td></tr>
+    <tr><td><code>PortalNode</code></td><td>Global listener, active for the whole flow — jumps the flow from anywhere when its trigger fires (pause menus, error popups), optionally clearing the back history.</td></tr>
+    <tr><td><code>StickyNote</code></td><td>Non-executable annotation in the graph.</td></tr>
+    <tr><td><code>FlowEdge</code></td><td>Connection: target node name, trigger, back-allowed flag, weight, optional named transition.</td></tr>
+  </table></div>
+
+  <h3>Edge triggers</h3>
+  <div class="chips">
+    <span class="chip">button</span><span class="chip">signal</span><span class="chip">toggleOn</span><span class="chip">toggleOff</span>
+    <span class="chip">viewShown</span><span class="chip">viewHidden</span><span class="chip">back</span><span class="chip">timer</span><span class="chip hl">custom…</span>
+  </div>
+  <div class="callout seam"><span class="tag">Extensibility seam</span><p>Register your own trigger kinds via <code>NeoTriggerKinds.Register</code> — implement <code>INeoTriggerKind</code> (<code>Connect</code>, <code>Matches</code>), optionally <code>ITriggerKindIdDatabase</code> to get an id picker in the editor. Flow node kinds themselves are registry-driven too (<code>FlowNodeKinds</code>).</p></div>
+
+  <h3>What a UINode does</h3>
+  <p>On <b>enter</b>, a UINode hides its <code>hideViews</code> list, shows its <code>showViews</code> list (with transition choreography if the edge named one), then listens for its output-edge triggers. On <b>exit</b>, it optionally hides what it showed (<code>hideShownViewsOnExit</code>) — and views shared with the <em>next</em> node carry over untouched, so navigating between two screens that both show the HUD never hide-and-reshow-flashes it.</p>
+
+  <h3>Authoring in the Flow Graph Editor</h3>
+  <p><b>Creating nodes:</b> right-click the canvas for a search-as-you-type node picker, or drag off an output port into empty space — the picker appears and the new node is auto-wired to that port. Double-clicking a <code>FlowGraph</code> asset also opens the window.</p>
+  <p><b>Configuring edges:</b> each edge carries its target node (by name), its trigger, an <b>allowsBack</b> flag (may <code>GoBack()</code> return across it? default yes), an optional port label, a weight (for weighted-random selection), and an optional named transition — empty means the project default.</p>
+  <p><b>Toolbar:</b> Validate, Arrange (auto-layout), and Frame All / Frame Selection. In play mode the window pulses live: the active node highlights in place, traversed edges flash, and a breadcrumb strip tracks the controller's history.</p>
+
+  <h3>Running a flow: FlowController</h3>
+  <p>Add a <code>FlowController</code> to a scene object and assign a graph. It clones the asset at start, so runtime state never touches the asset. Key inspector options:</p>
+  <div class="scroll"><table>
+    <tr><th>Option</th><th>Meaning</th></tr>
+    <tr><td><code>flowType</code></td><td><b>Global</b> (findable from anywhere via <code>FlowController.GetGlobalController()</code>) or <b>Local</b> (a self-contained sub-flow, e.g. inside one widget).</td></tr>
+    <tr><td><code>onEnableBehaviour</code> / <code>onDisableBehaviour</code></td><td>What enabling/disabling the component does: DoNothing · StartFlow · StopFlow · PauseFlow · ResumeFlow. Default: start on enable, stop on disable.</td></tr>
+    <tr><td><code>dontDestroyOnSceneChange</code></td><td>Keep a global flow alive across scene loads.</td></tr>
+    <tr><td><code>goBackOnBackButton</code> / <code>autoCreateBackInput</code></td><td>Navigate back when the back-button signal fires, and auto-add the hardware listener if the scene lacks one.</td></tr>
+  </table></div>
+  <p>At runtime you get <code>StartFlow / StopFlow / PauseFlow / ResumeFlow</code> (pause suspends timers), <code>GoBack()</code> (pops the history stack, only across allows-back edges), <code>SetActiveNodeByName()</code> for direct jumps, and read access to <code>activeNode</code>, <code>previousNode</code>, and <code>history</code>.</p>
+
+  <h3>Flow in a spec</h3>
+  <p>The spec's <code>flow</code> section describes the same graph as data — here's a node from the <code>game-ui</code> showcase:</p>
+  <pre><code><span class="k">"flow"</span>: {
+  <span class="k">"name"</span>: <span class="s">"GameUI"</span>, <span class="k">"start"</span>: <span class="s">"MainMenu"</span>,
+  <span class="k">"nodes"</span>: [
+    { <span class="k">"name"</span>: <span class="s">"Playing"</span>, <span class="k">"view"</span>: <span class="s">"Game/HUD"</span>,
+      <span class="k">"next"</span>: [
+        { <span class="k">"to"</span>: <span class="s">"Inventory"</span>, <span class="k">"on"</span>: { <span class="k">"button"</span>: <span class="s">"HUD/Inventory"</span> } },
+        { <span class="k">"to"</span>: <span class="s">"Victory"</span>,   <span class="k">"on"</span>: { <span class="k">"button"</span>: <span class="s">"HUD/Finish"</span> },
+          <span class="k">"transition"</span>: <span class="s">"Modal/ZoomIn"</span> },
+        { <span class="k">"to"</span>: <span class="s">"MainMenu"</span>,  <span class="k">"on"</span>: { <span class="k">"back"</span>: <span class="n">true</span> } }
+      ] }
+  ] }</code></pre>
+  <p>Trigger forms: <code>{"button": "Cat/Id"}</code> · <code>{"signal": "Cat/Name"}</code> · <code>{"toggleOn"/"toggleOff": "Cat/Id"}</code> · <code>{"viewShown"/"viewHidden": "Cat/Id"}</code> · <code>{"back": true}</code> · <code>{"timer": 3.5}</code> (seconds in the node).</p>
+
+  <h3>View transitions &amp; shared elements</h3>
+  <p><code>ViewTransitionAsset</code> makes a navigation cut a first-class, named thing: it can override the outgoing view's hide and the incoming view's show, offset their timelines, cascade children, and fly <code>NeoSharedElement</code>-marked widgets across the cut (shared-element transitions). Edges reference transitions by name; <code>NeoUISettings</code> holds the project default. Eight ship with the transition library:</p>
+  <div class="chips">
+    <span class="chip">Fade/Cross</span><span class="chip">Fade/ThroughBlack</span>
+    <span class="chip">Push/SlideLeft</span><span class="chip">Push/SlideRight</span><span class="chip">Push/SlideUp</span><span class="chip">Push/SlideDown</span>
+    <span class="chip">Modal/ZoomIn</span><span class="chip">Modal/SheetUp</span>
+  </div>
+  <p>Like animation presets, transition assets are discovered automatically — add your own next to the shipped ones. The <code>transitions</code> showcase demos the library.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="signals">
+  <div class="eyebrow">Runtime</div>
+  <h2>Signals</h2>
+  <p class="lede">Named event streams that decouple senders from receivers — the framework's connective tissue.</p>
+
+  <pre><code><span class="c">// Send — creates the stream on first use</span>
+Signals.<span class="k">Send</span>(<span class="s">"Audio"</span>, <span class="s">"Muted"</span>);
+
+<span class="c">// Subscribe — parameterless or with the full Signal (sender, source, timestamp, message)</span>
+Signals.<span class="k">On</span>(<span class="s">"Audio"</span>, <span class="s">"Muted"</span>, () =&gt; audioSource.mute = <span class="n">true</span>);
+Signals.<span class="k">On</span>(<span class="s">"Game"</span>, <span class="s">"Over"</span>, (Signal s) =&gt; Debug.Log(s.message));</code></pre>
+
+  <div class="scroll"><table>
+    <tr><th>Type</th><th>Role</th></tr>
+    <tr><td><code>SignalStream</code></td><td>A named channel (<code>Category/Name</code>): send, connect/disconnect receivers.</td></tr>
+    <tr><td><code>Signal</code> / <code>MetaSignal&lt;T&gt;</code></td><td>The message — payload-less by default; <code>MetaSignal&lt;T&gt;</code> carries a typed payload.</td></tr>
+    <tr><td><code>Signals</code></td><td>Static service: get-or-create streams, <code>Send</code>, <code>On</code>/<code>Off</code> subscription.</td></tr>
+    <tr><td><code>SignalReceiver</code></td><td>Serializable receiver embeddable in any component — pick a stream in the inspector, hook a UnityEvent or callback.</td></tr>
+    <tr><td><code>SignalSenderComponent</code> / <code>SignalReceiverComponent</code></td><td>Drop-on components: send on enable/disable/destroy, or bind a stream to a UnityEvent — no code.</td></tr>
+    <tr><td><code>SignalLogger</code></td><td>Logs every signal on a stream — first stop when debugging "why didn't X react".</td></tr>
+  </table></div>
+
+  <p>Widgets emit signals natively: a toggle can publish <code>Audio/Muted</code>, a button behavior can send on click, flow edges listen for them, particle emitters can burst on them, and effects can bind signal payloads to parameters (<code>NeoSignalParamBinding</code>). Prefer signals over direct UnityEvent references whenever the sender and receiver live in different prefabs.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="back">
+  <div class="eyebrow">Runtime</div>
+  <h2>Back navigation</h2>
+  <p class="lede">One unified sink for "go back", no matter where the press came from.</p>
+  <p><code>BackButton.Fire()</code> is the single entry point, publishing on the <code>Input/BackButton</code> stream. Three sources feed it:</p>
+  <div class="cards">
+    <div class="card"><b>Hardware</b><p><code>BackButtonInput</code> converts Escape and gamepad Cancel into <code>Fire()</code>.</p></div>
+    <div class="card"><b>Named buttons</b><p>Any <code>UIButton</code> whose name matches the configured back-button name fires it automatically.</p></div>
+    <div class="card"><b>Code</b><p>Call <code>BackButton.Fire()</code> directly; <code>ForceFire()</code> bypasses the cooldown.</p></div>
+  </div>
+  <p>Flow edges with the <b>back</b> trigger consume the press and pop the flow history. <code>Disable()</code>/<code>Enable()</code> stack, so nested "back is temporarily forbidden" scopes compose correctly, and a cooldown (configurable in settings) prevents double-fires.</p>
+  <div class="callout invariant"><span class="tag">Invariant</span><p>Explicit back wiring <b>consumes</b> the press — a screen with a wired back edge never also triggers the global fallback, so you never double-navigate. Covered by <code>BackNavigationTests</code>.</p></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="theming">
+  <div class="eyebrow">Runtime</div>
+  <h2>Theming</h2>
+  <p class="lede">Tokens × variants: name your colors once, restyle the whole app by switching a variant.</p>
+
+  <h3>The model</h3>
+  <p>A <code>Theme</code> asset defines named <b>color tokens</b> (Primary, Background, TextMuted, …) and named <b>variants</b> (Dark, Light, seasonal skins). Each variant supplies a value for every token — the Colors tab of the Design System window edits this matrix and includes a WCAG contrast checker. Switching the active variant via <code>ThemeService.SetVariant()</code> re-applies every bound graphic live.</p>
+
+  <div class="scroll"><table>
+    <tr><th>Piece</th><th>Role</th></tr>
+    <tr><td><code>ThemeColorTarget</code></td><td>Binds a Graphic's color to a token. This is how 99% of UI gets its color.</td></tr>
+    <tr><td><code>ThemeColorRef</code></td><td>A serialized color that is either hardcoded or a token reference — used inside styles and effects.</td></tr>
+    <tr><td><code>SelectableColorSet</code></td><td>Per-selection-state colors (Normal/Highlighted/Pressed/Selected/Disabled), each optionally a token.</td></tr>
+    <tr><td><code>TextStyle</code> + <code>ThemeTextStyleTarget</code></td><td>Named typographic styles (font, size, spacing) applied to TMP texts — edited in the Typography tab.</td></tr>
+    <tr><td><code>ShapeStyle</code> + <code>ThemeShapeStyleTarget</code></td><td>Named surface styles (radius, border, softness) applied to NeoShapes — edited in the Shapes tab.</td></tr>
+    <tr><td><code>ThemeVariantCycler</code></td><td>Component that cycles variants on interaction — instant dark-mode toggle.</td></tr>
+    <tr><td><code>ThemeBundleDefinition</code></td><td>A prebuilt palette you can apply wholesale (Tools → Neo UI → Setup → Apply Theme Bundle…). Drop a new SO to add your own.</td></tr>
+  </table></div>
+
+  <div class="callout tip"><span class="tag">Good to know</span><p>When a component <em>drives</em> a graphic's color at runtime (a selectable animator, a progressor), its inspector shows a <b>ColorDriverNotice</b> warning you that hand-set colors will be overridden. Custom drivers register their detection via <code>NeoColorDrivers.Register</code>.</p></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="shapes">
+  <div class="eyebrow">Runtime</div>
+  <h2>NeoShape graphics</h2>
+  <p class="lede">Resolution-independent vector UI — rounded rects, rings, glyphs — rendered by one SDF shader so <em>everything batches on a single shared material</em>.</p>
+
+  <h3>Shapes</h3>
+  <div class="chips">
+    <span class="chip">RoundedRect</span><span class="chip">Circle</span><span class="chip">Pill</span><span class="chip">Ring</span><span class="chip">Arc</span>
+    <span class="chip">Checkmark</span><span class="chip">Chevron</span><span class="chip">Cross</span>
+  </div>
+  <p>Each <code>NeoShape</code> supports borders, solid or gradient fills (<code>Solid · LinearGradient · RadialGradient</code>, theme-token aware via <code>NeoGradient</code>), soft shadows via <code>ElevationRecipe</code> (depth levels 0–24), radius in pixels or percent, and texture fill with <code>Stretch</code> or <code>Cover</code> fit. Glyph shapes (checkmark/chevron/cross) render as strokes. For icon glyphs, see <a href="#icons">Icons</a>.</p>
+
+  <h3>Effects — two tiers</h3>
+  <p><b>Tier 1</b> effects animate existing graphic properties over a normalized timeline and <b>preserve batching</b>:</p>
+  <div class="chips">
+    <span class="chip">glowPulse</span><span class="chip">sheenSweep</span><span class="chip">gradientCycle</span><span class="chip">arcSpinner</span>
+    <span class="chip">cornerMorph</span><span class="chip">borderPulse</span><span class="chip">hueShift</span><span class="chip">transformJuice</span>
+  </div>
+  <p><b>Tier 2</b> (<code>NeoShapeVariant</code> + <code>ShapeEffectDefinition</code> assets) swaps in material variants for fragment-level effects — more power, but it breaks the batch for that element (the design lint counts these). <code>NeoEffectTrigger</code> plays effects on interaction; <code>NeoSignalParamBinding</code> binds signal payloads to effect parameters.</p>
+
+  <h3>UI particles</h3>
+  <p><code>NeoParticleEmitter</code> spawns pooled, canvas-native particles (each a NeoShape) in batch — coin bursts, confetti, sparkles — with composable modules:</p>
+  <div class="chips">
+    <span class="chip">gravity</span><span class="chip">drag</span><span class="chip">colorOverLife</span><span class="chip">sizeOverLife</span><span class="chip hl">custom via IParticleModule</span>
+  </div>
+  <p>Trigger bursts from signals (<code>NeoParticleBurstOnSignal</code>) or pointer interaction (<code>NeoParticlePointerBurst</code>); save configurations as <code>NeoParticleEmitterPreset</code> assets.</p>
+
+  <div class="callout seam"><span class="tag">Extensibility seam</span><p>Subclass <code>NeoShapeEffect</code> and register with <code>ShapeEffectRegistry</code> for custom effects; implement <code>IParticleModule</code> + a <code>ParticleModuleConfig</code> and register with <code>ParticleEffectRegistry</code> for custom particle behavior. Both become available in specs and inspectors automatically.</p></div>
+
+  <div class="callout tip"><span class="tag">Authoring tip</span><p>When placing effects or particles in a spec, attach them to <em>the element that triggers them</em>. And watch layout: a <code>vstack</code> force-expands child width — use a grid cell size or <code>hstack</code>+<code>spacer</code> when you need intrinsic sizing, and give images a grid cell with <code>fit: cover</code> so they don't stretch.</p></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="icons">
+  <div class="eyebrow">Runtime</div>
+  <h2>Icons</h2>
+  <p class="lede">Icons are addressed by name — <code>"play"</code>, <code>"arrow-right"</code>, <code>"heart"</code>, <code>"bell"</code> — and rendered as font glyphs or sprites, resolved through one lookup chain.</p>
+
+  <p>The <code>NeoIcon</code> component has a single <code>icon</code> string field; call <code>SetIcon("pause")</code> to swap at runtime. Forgiving aliases canonicalize common variants (<code>home</code> → <code>house</code>, <code>close</code> → <code>x</code>, <code>delete</code> → <code>trash-2</code>), and an unknown name warns and keeps the current glyph rather than showing a blank.</p>
+
+  <h3>Where names come from</h3>
+  <p>A name is resolved through four layers, first match wins:</p>
+  <div class="flowline">
+    <div class="node accent"><b>1 · Your sprites</b><span>IconMapOverlay sprite entries</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><b>2 · Your glyphs</b><span>IconMapOverlay codepoints</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><b>3 · Curated set</b><span>~170 pre-baked Lucide glyphs</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><b>4 · Full Lucide</b><span>all 1,962 names</span></div>
+  </div>
+  <p>The curated set is what's pre-baked into the icon font that <b>Setup → Create or Repair Fonts</b> installs (and stores on <code>NeoUISettings.iconFont</code>); the full Lucide table is the fallback for everything else. The <b>Icons</b> tab of the Design System window is the visual home: browse and pick characters from the font, configure the sprite overlay, and set fallbacks.</p>
+
+  <h3>Custom icons: the overlay</h3>
+  <p>The <code>IconMapOverlay</code> asset injects your own art at the front of the chain without touching the framework: <b>sprite entries</b> map a name to a TMP sprite (with a <code>tint</code> flag — tint with the label color, or render full-color as-is), <b>glyph entries</b> map a name to a codepoint in your own font, and <b>aliases</b> add forgiving alternate names for either. Because overlay entries resolve first, you can also override any built-in name with your own art.</p>
+
+  <h3>In specs and widgets</h3>
+  <pre><code><span class="c">// standalone icon element</span>
+{ <span class="k">"icon"</span>: { <span class="k">"name"</span>: <span class="s">"play"</span> } }
+
+<span class="c">// icon on a button</span>
+{ <span class="k">"button"</span>: { <span class="k">"id"</span>: <span class="s">"HUD/Play"</span>, <span class="k">"label"</span>: <span class="s">"Play"</span>, <span class="k">"icon"</span>: <span class="s">"play"</span> } }</code></pre>
+  <p>The featured name list (185 icons) is enumerated in <code>Assets/docs/spec-reference.md</code>; any of the 1,962 Lucide names and your overlay entries resolve at runtime too.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="menus">
+  <div class="eyebrow">Runtime</div>
+  <h2>Settings &amp; cheat menus</h2>
+  <p class="lede">Describe your settings screen as a catalog — groups, items, defaults — and the framework builds the rows, persists the values, and broadcasts every change as a signal.</p>
+
+  <h3>How it fits together</h3>
+  <div class="flowline">
+    <div class="node accent"><b>Catalog</b><span>SettingsCatalog / CheatCatalog asset</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><b>MenuPresenter</b><span>builds rows from the widget library</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><b>Row + binder</b><span>widget wired to the value</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><b>UserSettingsService</b><span>get / set / persist / signal</span></div>
+  </div>
+  <p>A <code>MenuCatalog</code> ScriptableObject declares <b>groups</b> (rendered as tabs) and <b>items</b> — each item is a category/name id, a row kind, a label, and kind-specific fields like min/max or options. At startup, <code>SettingsMenu</code> / <code>CheatMenu</code> (both thin specializations of <code>MenuPresenter</code>) clone one row prefab per item from the <code>MenuWidgetLibrary</code>, and a <code>MenuControlBinder</code> on each row wires the widget to the value. You never hand-build a settings screen row by row.</p>
+
+  <h3>Row kinds</h3>
+  <div class="chips">
+    <span class="chip">label</span><span class="chip">button</span><span class="chip">toggle</span><span class="chip">switch</span>
+    <span class="chip">slider</span><span class="chip">stepper</span><span class="chip">dropdown</span><span class="chip">rebind</span>
+  </div>
+  <div class="callout seam"><span class="tag">Extensibility seam</span><p>Row kinds live in the <code>NeoMenuItemKinds</code> registry — register your own kind (say, a color picker row) and it becomes available to catalogs and specs like the built-ins.</p></div>
+
+  <h3>Values: reading, writing, persisting</h3>
+  <p><code>UserSettingsService</code> is the single door for every menu value. A read resolves in order: a live <b>code binding</b> if the game registered one, then the <b>store</b> (PlayerPrefs by default, keys namespaced <code>NeoUI.Settings.*</code> — or any <code>IUserSettingsStore</code> you inject), then the catalog's <b>default</b>. Hook a setting to real game state like this:</p>
+  <pre><code><span class="c">// route "Audio/Master" through the mixer instead of PlayerPrefs alone</span>
+UserSettingsService.<span class="k">Bind</span>&lt;float&gt;(<span class="s">"Audio"</span>, <span class="s">"Master"</span>,
+    getter: () =&gt; GetMixerVolume(),
+    setter: v  =&gt; SetMixerVolume(v),
+    persist: <span class="n">true</span>);  <span class="c">// also write the store, so the value survives restarts</span>
+
+<span class="c">// or just react to changes anywhere</span>
+Signals.<span class="k">On</span>(<span class="s">"Settings"</span>, <span class="s">"Video/VSync"</span>, ApplyVSync);</code></pre>
+  <p>Every committed change fires a signal on the <code>Settings</code> (or <code>Cheat</code>) category. Sliders can additionally emit <em>preview</em> signals while dragging (<code>emitOnDrag</code>) on a separate <code>Settings.Preview</code> stream, so you can live-preview volume without persisting every intermediate value — the commit happens on release.</p>
+
+  <h3>Cheat menus</h3>
+  <p>A cheat menu is the same machinery pointed at a different signal category (<code>Cheat</code> instead of <code>Settings</code>), so cheats never collide with real settings. On top of that, <code>CheatMenu</code> adds <b>favourites</b>: enable them on the catalog and testers can star their most-used cheats into a quick-access group (persisted per user via the same service). Typical cheat rows are buttons (fire an action), toggles (god mode), and steppers (add coins).</p>
+
+  <h3>Input rebinding</h3>
+  <p>A <b>rebind</b> row binds to a New Input System action by path (e.g. <code>Gameplay/Jump</code>) plus a binding index for composites. The row shows the current binding's display string ("Space", "Left Mouse"); clicking it starts an interactive "press a key…" rebind through <code>InputRebindService</code>, which saves overrides as JSON per action asset and restores them automatically on startup. A reset removes the override and restores the default binding.</p>
+
+  <h3>In a spec</h3>
+  <p>The top-level <code>settings</code> and <code>cheats</code> sections declare whole catalogs; place a <code>settings</code>/<code>cheats</code> element in a view to embed the generated menu:</p>
+  <pre><code><span class="k">"settings"</span>: [
+  { <span class="k">"id"</span>: <span class="s">"Settings/Game"</span>,
+    <span class="k">"groups"</span>: [<span class="s">"Audio"</span>, <span class="s">"Video"</span>, <span class="s">"Controls"</span>], <span class="k">"start"</span>: <span class="s">"Audio"</span>,
+    <span class="k">"items"</span>: [
+      { <span class="k">"slider"</span>: { <span class="k">"id"</span>: <span class="s">"Audio/Master"</span>, <span class="k">"group"</span>: <span class="s">"Audio"</span>,
+                    <span class="k">"label"</span>: <span class="s">"Master Volume"</span>,
+                    <span class="k">"min"</span>: <span class="n">0</span>, <span class="k">"max"</span>: <span class="n">1</span>, <span class="k">"value"</span>: <span class="n">0.8</span> } },
+      { <span class="k">"toggle"</span>: { <span class="k">"id"</span>: <span class="s">"Video/VSync"</span>, <span class="k">"group"</span>: <span class="s">"Video"</span>,
+                    <span class="k">"label"</span>: <span class="s">"VSync"</span>, <span class="k">"value"</span>: <span class="n">true</span> } },
+      { <span class="k">"rebind"</span>: { <span class="k">"id"</span>: <span class="s">"Controls/Jump"</span>, <span class="k">"group"</span>: <span class="s">"Controls"</span>,
+                    <span class="k">"label"</span>: <span class="s">"Jump"</span>, <span class="k">"action"</span>: <span class="s">"Gameplay/Jump"</span>,
+                    <span class="k">"bindingIndex"</span>: <span class="n">0</span> } }
+    ] }
+]</code></pre>
+  <p>Useful item fields beyond the basics: <code>tooltip</code> (helper text), <code>persisted: false</code> (the game owns the value — nothing written to the store), <code>wholeNumbers</code> on sliders (integer values), <code>options</code> on dropdowns, and <code>step</code> on steppers. The <code>settings-menu</code> showcase demos all of it.</p>
+
+  <h3>Styling the rows</h3>
+  <p>The row prefabs come from the <code>MenuWidgetLibrary</code> asset, installed by <b>Setup → Create or Repair Menu Widget Library</b> — eight row prefabs plus the category tab and panel used for group navigation. Restyle or replace those prefabs (they're ordinary Neo widgets) and every menu built from the library picks up the change. <code>Validate</code> confirms that control bindings resolve to catalog entries and that rebind rows name a real action.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="editor-tools">
+  <div class="eyebrow">Editor</div>
+  <h2>Editor windows &amp; tools</h2>
+  <p class="lede">Everything lives under <b>Tools → Neo UI</b>, and everything under there is also findable from the Hub and the Command Palette.</p>
+
+  <div class="scroll"><table>
+    <tr><th>Window</th><th>Menu</th><th>What it does</th></tr>
+    <tr><td><b>Hub</b></td><td>Tools → Neo UI → Hub</td><td>Central launcher: every tool, wizard, and action organized by category, with search. Extensible via <code>HubToolRegistry</code>.</td></tr>
+    <tr><td><b>Command Palette</b></td><td><kbd>Ctrl</kbd>+<kbd>K</kbd></td><td>Search-as-you-type dispatcher: jump to views, widgets, windows, and commands.</td></tr>
+    <tr><td><b>Flow Graph Editor</b></td><td>… → Flow Graph Editor</td><td>Visual node editor for navigation graphs, with blueprint search, Go-To-Node, and live play-mode pulse.</td></tr>
+    <tr><td><b>Design System</b></td><td>… → Design System</td><td>Theme authoring in tabs: Overview · Colors · Typography · Buttons · Shapes · Icons · Presets · Motion · Bundles. Custom tabs via <code>NeoDesignSystemTabs.Register</code>.</td></tr>
+    <tr><td><b>Gallery</b></td><td>… → Gallery</td><td>Rendered thumbnail grid of every generated view and popup, with a built-in screenshotter.</td></tr>
+    <tr><td><b>Palette</b></td><td>… → Palette</td><td>Dockable compose palette — drag widgets, presets, and templates into the scene.</td></tr>
+    <tr><td><b>ID Database Manager</b></td><td>… → ID Database Manager</td><td>Browse and edit every category/name registry (views, buttons, signals, …).</td></tr>
+    <tr><td><b>Setup / Reset wizards</b></td><td>… → Setup → …</td><td>Guided project init and per-component clean-slate uninstall; individual create-or-repair entries for settings, starter kit, presets, fonts, effects, menus, animations, transitions.</td></tr>
+    <tr><td><b>Sync window</b></td><td>… → Advanced → Sync With Spec…</td><td>Three-way merge UI: visualize baseline vs live vs incoming, resolve conflicts, regenerate.</td></tr>
+    <tr><td><b>Drift window</b></td><td>… → Advanced → Check For Drift</td><td>Shows off-spec prefab edits — what a regenerate would lose — with a "Fold Edits" action to absorb them into the baseline.</td></tr>
+  </table></div>
+
+  <h3>The ID Database Manager</h3>
+  <p>Since everything is addressed by <code>Category/Name</code>, the id registries are the project's backbone — and this window is where you keep them healthy. Eight databases ship (Views, Buttons, Toggles, Sliders, Dropdowns, Panels, Tags, signal Streams; add your own via <code>INeoIdDatabaseProvider</code>), browsed in three panes: database → categories → names. Three tabs:</p>
+  <div class="cards">
+    <div class="card"><b>Browse &amp; Edit</b><p>Add, rename, and delete categories and names inline, with a substring filter and a row filter (All / Orphans / Dangling).</p></div>
+    <div class="card"><b>Search</b><p>One global substring search across every database at once — "where is anything called <em>Pause</em>?"</p></div>
+    <div class="card"><b>Usage / Orphans</b><p>Cross-references ids against actual use: <b>orphans</b> are registered but unused (⚠ badges), <b>dangling</b> ids are used but unregistered — with quick-fix add/delete buttons.</p></div>
+  </div>
+  <p>Renames can optionally <b>rewrite references</b>: with the toggle on, renaming an id also updates matching references in your spec files, after a preview dialog showing exactly which files and how many references change. Prefabs and scenes are not rewritten directly — run a sync/regenerate afterward to materialize the rename. Every inspector id picker links back here too: the quick-add button registers new ids without leaving the inspector, and the jump button opens this window focused on the exact id.</p>
+
+  <h3>The Advanced menu (spec &amp; agent actions)</h3>
+  <div class="scroll"><table>
+    <tr><th>Menu item</th><th>Purpose</th></tr>
+    <tr><td>Generate From Spec…</td><td>Spec JSON → prefabs, presets, ids, flow graphs.</td></tr>
+    <tr><td>Export Spec…</td><td>Live project tree → spec JSON (the inverse).</td></tr>
+    <tr><td>Validate</td><td>Run all hard checks + design/interactivity lints.</td></tr>
+    <tr><td>Sync With Spec…</td><td>Safe three-way merge + regenerate.</td></tr>
+    <tr><td>Capture My Edits</td><td>Fold hand edits into the baseline without regenerating.</td></tr>
+    <tr><td>Check For Drift</td><td>Detect off-spec prefab edits vs the baseline.</td></tr>
+    <tr><td>Generate Binding Stub</td><td>Emit a C# partial-class binding stub from a spec.</td></tr>
+    <tr><td>Generate Spec Reference</td><td>Regenerate <code>Assets/docs/spec-reference.md</code> + JSON schema from code.</td></tr>
+    <tr><td>Migrate Spec To Layout Model</td><td>Upgrade old-format specs.</td></tr>
+    <tr><td>Screenshot Selected Prefab</td><td>GPU-render the selected prefab to PNG.</td></tr>
+  </table></div>
+
+  <div class="callout tip"><span class="tag">Editor performance</span><p>By design there is no animated editor chrome, no editor-tick subscriptions, no reflection scans, and exactly one settings asset. Inspectors cache their GUIStyles and SerializedObjects. If you extend the editor, follow suit.</p></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="validation">
+  <div class="eyebrow">Editor</div>
+  <h2>Validation</h2>
+  <p class="lede">Three buckets: hard contracts that can fail CI, design lints that advise, and an interactivity lint that catches dead UI.</p>
+
+  <div class="cards">
+    <div class="card"><b>Hard contracts</b><p>Theme coverage (every variant × every token) · theme bindings resolve · popup database completeness · preset database completeness · generated views registered · flow graph syntax · flow cross-references (views/buttons exist) · menu bindings resolve.</p></div>
+    <div class="card"><b>Design lint (soft)</b><p>WCAG contrast on text/surface pairs · raw font sizes where a TextStyle exists · spacing off the 4/8/12/16/24/32/48/64 scale · missing icon glyphs · tap targets under 44px · extreme sprite stretch · fixed-size elements under force-expanding layouts · Tier-2 effect batching cost · particle emitter cost.</p></div>
+    <div class="card"><b>Interactivity lint (soft)</b><p>Dead buttons (no flow trigger, signal, popup, view command, or event) · dead tabs (no container, no flow trigger).</p></div>
+  </div>
+
+  <div class="callout seam"><span class="tag">Extensibility seam</span><p>Add project-specific rules by implementing <code>INeoValidationRule</code> and calling <code>NeoValidationRules.Register</code>, choosing which bucket (Hard / Design / Interactivity) the rule runs in.</p></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="spec">
+  <div class="eyebrow">Spec workflow</div>
+  <h2>The spec format</h2>
+  <p class="lede">One JSON file describes views, widgets, theme, popups, menus, and navigation. The generator turns it into real assets; the exporter turns assets back into a spec.</p>
+
+  <div class="callout tip"><span class="tag">Reference docs</span><p>The always-current schema lives in the repo: <code>Assets/docs/spec-reference.md</code> (human-readable, generated from code) and <code>Assets/docs/neo-spec.schema.json</code> (JSON Schema draft-07 — point your IDE at it for autocomplete and inline validation).</p></div>
+
+  <h3>Top-level structure</h3>
+  <div class="scroll"><table>
+    <tr><th>Section</th><th>Contents</th></tr>
+    <tr><td><code>theme</code></td><td>Theme bundle, color tokens, variants.</td></tr>
+    <tr><td><code>presets</code></td><td>Animation preset definitions.</td></tr>
+    <tr><td><code>views</code></td><td>The screens: id, background token, show/hide animations, element tree.</td></tr>
+    <tr><td><code>popups</code></td><td>Modal and popup definitions.</td></tr>
+    <tr><td><code>settings</code> / <code>cheats</code></td><td>Settings-menu and cheat-menu catalogs (sliders, toggles, dropdowns, rebind rows).</td></tr>
+    <tr><td><code>breakpoints</code></td><td>Responsive breakpoints.</td></tr>
+    <tr><td><code>flow</code></td><td>The navigation state machine: nodes, edges, triggers, transitions.</td></tr>
+  </table></div>
+
+  <h3>Element kinds</h3>
+  <p>Every element is written as <code>{ "kind": { …fields } }</code> — the kind is the wrapper key:</p>
+  <div class="chips">
+    <span class="chip">vstack</span><span class="chip">hstack</span><span class="chip">grid</span><span class="chip">overlay</span><span class="chip">panel</span><span class="chip">list</span><span class="chip">spacer</span><span class="chip">safearea</span>
+    <span class="chip">text</span><span class="chip">icon</span><span class="chip">image</span><span class="chip">shape</span>
+    <span class="chip">button</span><span class="chip">toggle</span><span class="chip">switch</span><span class="chip">slider</span><span class="chip">stepper</span><span class="chip">dropdown</span><span class="chip">input</span>
+    <span class="chip">tab</span><span class="chip">tabbar</span><span class="chip">progress</span><span class="chip">counter</span>
+    <span class="chip">settings</span><span class="chip">cheats</span>
+  </div>
+  <p>(<code>scroll</code> is accepted as an alias for <code>list</code>.)</p>
+
+  <h3>Layout vocabulary</h3>
+  <div class="scroll"><table>
+    <tr><th>Axis</th><th>Options</th></tr>
+    <tr><td>Horizontal constraint</td><td><code>left · right · center · leftRight · scale</code></td></tr>
+    <tr><td>Vertical constraint</td><td><code>top · bottom · center · topBottom · scale</code></td></tr>
+    <tr><td>Sizing</td><td><code>fixed · hug · fill</code></td></tr>
+  </table></div>
+
+  <h3>A real excerpt</h3>
+  <p>From the <code>toggles-switches</code> showcase — a panel with a caption and two toggles, one of which publishes a signal:</p>
+  <pre><code>{
+  <span class="k">"panel"</span>: {
+    <span class="k">"id"</span>: <span class="s">"TogglesPanel/Toggles"</span>,
+    <span class="k">"style"</span>: <span class="s">"Panel"</span>,
+    <span class="k">"spacing"</span>: <span class="n">16</span>,
+    <span class="k">"children"</span>: [
+      { <span class="k">"text"</span>: { <span class="k">"label"</span>: <span class="s">"TOGGLES"</span>, <span class="k">"color"</span>: <span class="s">"TextMuted"</span>,
+                  <span class="k">"textStyle"</span>: <span class="s">"Caption"</span>, <span class="k">"align"</span>: <span class="s">"left"</span> } },
+      { <span class="k">"toggle"</span>: { <span class="k">"id"</span>: <span class="s">"Toggles/Notifications"</span>,
+                    <span class="k">"label"</span>: <span class="s">"Notifications"</span>, <span class="k">"value"</span>: <span class="n">1</span> } },
+      { <span class="k">"toggle"</span>: { <span class="k">"id"</span>: <span class="s">"Toggles/Muted"</span>,
+                    <span class="k">"label"</span>: <span class="s">"Mute audio"</span>, <span class="k">"value"</span>: <span class="n">0</span>,
+                    <span class="k">"signal"</span>: { <span class="k">"category"</span>: <span class="s">"Audio"</span>, <span class="k">"name"</span>: <span class="s">"Muted"</span> } } }
+    ]
+  }
+}</code></pre>
+
+  <h3>Bindings — connecting spec UI to game code</h3>
+  <p>The <b>bindings</b> action (or Generate Binding Stub in the menu) derives a contract from a spec and emits a partial-class C# stub with typed accessors for its widgets. The stub lands <em>outside</em> the generated root, so it survives regenerates; you implement your game logic in the other half of the partial class.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="roundtrip">
+  <div class="eyebrow">Spec workflow</div>
+  <h2>Round-trip safety</h2>
+  <p class="lede">The reason you can regenerate without fear: the baseline, the diff, and the three-way merge.</p>
+
+  <div class="flowline">
+    <div class="node accent"><b>Spec (JSON)</b><span>source of truth</span></div>
+    <div class="arrow">→ generate →</div>
+    <div class="node"><b>Assets</b><span>prefabs · ids · flow · presets</span></div>
+    <div class="arrow">→ export →</div>
+    <div class="node"><b>Live spec</b><span>what the project looks like now</span></div>
+    <div class="arrow">→ diff vs →</div>
+    <div class="node"><b>.neo-baseline.json</b><span>what was last generated</span></div>
+  </div>
+
+  <h3>The pieces</h3>
+  <div class="scroll"><table>
+    <tr><th>Tool</th><th>Role</th></tr>
+    <tr><td><code>SpecBaseline</code></td><td><code>.neo-baseline.json</code> in the generated root — the spec the assets were last generated from. Rewritten by every successful generate, sync, or Fold Edits.</td></tr>
+    <tr><td><code>SpecDiff</code></td><td>Node-by-node comparison of two specs, with addressable paths like <code>views/Menu/Main/elements[2]/background</code>.</td></tr>
+    <tr><td><code>SpecMerge</code></td><td>The three-way merge: baseline + live project + incoming spec.</td></tr>
+    <tr><td><code>OffSpecLint</code></td><td>Flags hand edits that can't be expressed in a spec and would be dropped by a merge.</td></tr>
+  </table></div>
+
+  <h3>The sync protocol</h3>
+  <p><b>Sync</b> is the standing way to push spec changes into a project someone may have hand-edited. It exports the live project, diffs against the baseline, <b>refuses</b> if off-spec edits exist (unless forced), three-way merges, regenerates, and rewrites the baseline. Human edits a stale spec would have wiped are preserved.</p>
+  <div class="cards">
+    <div class="card"><b>Sync With Spec…</b><p>Merge an incoming spec with your hand edits, then regenerate.</p></div>
+    <div class="card"><b>Check For Drift</b><p>Inspect what you've changed by hand since the last generate.</p></div>
+    <div class="card"><b>Capture My Edits</b><p>Fold your hand edits into the baseline — no regeneration.</p></div>
+  </div>
+  <div class="callout invariant"><span class="tag">Invariant</span><p>The generated root can only be redirected through <code>NeoWorkspace.Scoped(…)</code>, which refuses the default root — so a misbehaving script or tool can never accidentally delete your committed UI. Test runs redirect to a scratch root automatically.</p></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="agent-bridge">
+  <div class="eyebrow">Spec workflow</div>
+  <h2>Agent Bridge</h2>
+  <p class="lede">A file-based JSON protocol that lets external tools — including AI agents — drive the editor: generate, validate, preview, screenshot, sync.</p>
+
+  <h3>How to use it</h3>
+  <p><b>Editor open:</b> toggle <b>Tools → Neo UI → Advanced → Agent Bridge</b>, then write <code>Temp/neo-request.json</code> and read <code>Temp/neo-result.json</code>. The bridge refreshes the AssetDatabase before each request.</p>
+  <p><b>Headless:</b></p>
+  <pre><code>Unity.exe -batchmode -projectPath . ^
+  -executeMethod Neo.UI.Editor.AgentBridge.RunBatch ^
+  -neoRequest req.json -neoResult res.json</code></pre>
+
+  <h3>Actions</h3>
+  <div class="scroll"><table>
+    <tr><th>Action</th><th>Mutates</th><th>Purpose</th></tr>
+    <tr><td><code>generate</code></td><td>yes</td><td>Spec → assets (prefabs, presets, ids, flow graphs).</td></tr>
+    <tr><td><code>export</code></td><td>no</td><td>Live project → spec JSON.</td></tr>
+    <tr><td><code>validate</code></td><td>no</td><td>Hard issues + soft <code>designWarnings</code>, structured. Run after every generate.</td></tr>
+    <tr><td><code>sync</code></td><td>yes</td><td>The safe merge-and-regenerate protocol (add <code>"force": true</code> to override off-spec refusal).</td></tr>
+    <tr><td><code>diff</code> / <code>merge</code></td><td>—</td><td>Compare two specs / three-way merge, as standalone operations.</td></tr>
+    <tr><td><code>preview</code></td><td>no commits</td><td>Render views in-memory to images — the agent render-loop for checking layout without touching assets.</td></tr>
+    <tr><td><code>screenshot</code></td><td>yes</td><td>GPU-render a prefab to PNG.</td></tr>
+    <tr><td><code>buildScene</code></td><td>yes</td><td>Flow-scoped scene build (<code>"flow"</code> + <code>"showcase"</code>), preventing multi-spec leaks.</td></tr>
+    <tr><td><code>regenerateShowcase</code></td><td>yes</td><td>Sync a showcase's spec into its isolated root — the right way to regenerate a showcase.</td></tr>
+    <tr><td><code>bindings</code></td><td>no</td><td>Derive the widget contract + emit a C# partial-class stub.</td></tr>
+    <tr><td><code>specReference</code></td><td>no</td><td>Emit the schema/catalog reference docs.</td></tr>
+    <tr><td><code>importSprites</code></td><td>no</td><td>Sprite-font character-map discovery.</td></tr>
+  </table></div>
+
+  <pre><code><span class="c">// Temp/neo-request.json — push spec changes safely</span>
+{ <span class="k">"action"</span>: <span class="s">"sync"</span>, <span class="k">"incoming"</span>: <span class="s">"spec.json"</span> }
+
+<span class="c">// render without committing anything</span>
+{ <span class="k">"action"</span>: <span class="s">"preview"</span>, <span class="k">"spec"</span>: <span class="s">"spec.json"</span>, <span class="k">"out"</span>: <span class="s">"renders/"</span> }</code></pre>
+
+  <div class="callout seam"><span class="tag">Extensibility seam</span><p>Register custom actions (or override built-ins by id) with <code>AgentBridgeActions.Register</code>. Unknown actions fail loudly with the list of available ones.</p></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="showcases">
+  <div class="eyebrow">Spec workflow</div>
+  <h2>Showcases</h2>
+  <p class="lede">Living documentation: every user-visible feature demos in a showcase scene, generated from a committed spec.</p>
+  <p>Each showcase lives under <code>Assets/Showcases/{id}/</code> with its own <code>Generated/</code> root and scene — isolated roots mean regenerating one never collides with another. <code>ShowcaseDefinition</code> ScriptableObjects are lazily discovered by <code>ShowcaseRegistry</code>; drop a new one to add your own.</p>
+
+  <div class="scroll"><table>
+    <tr><th>Spec</th><th>Demonstrates</th></tr>
+    <tr><td><code>buttons</code></td><td>Button variants, sizes, icons, badges.</td></tr>
+    <tr><td><code>toggles-switches</code></td><td>Boolean controls and signal wiring.</td></tr>
+    <tr><td><code>tabs-panels</code></td><td>Tab controls and panel switching.</td></tr>
+    <tr><td><code>popups</code></td><td>Modal confirms and rich popups.</td></tr>
+    <tr><td><code>settings-menu</code></td><td>Settings/cheats catalogs — sliders, toggles, dropdowns, rebinding.</td></tr>
+    <tr><td><code>animations</code> / <code>presets</code></td><td>The animation preset library in motion.</td></tr>
+    <tr><td><code>transitions</code></td><td>Named view transitions between screens.</td></tr>
+    <tr><td><code>effects</code></td><td>Shape effects (glow, sheen, spinners, morphs).</td></tr>
+    <tr><td><code>particles</code></td><td>UI particle emitters and modules.</td></tr>
+    <tr><td><code>game-ui</code></td><td>A complete game UI — menus, HUD, shop, inventory — with flow navigation.</td></tr>
+    <tr><td><code>color-a-cube</code></td><td>A themed game-shop UI with custom tokens.</td></tr>
+  </table></div>
+  <div class="callout agent"><span class="tag">Workflow rule</span><p>Regenerate a showcase with the <code>regenerateShowcase</code> bridge action (not plain <code>generate</code>, which targets the shared default root). And preview before you commit — render the spec with the <code>preview</code> action and check the images across resolutions instead of trusting the JSON.</p></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="extensibility">
+  <div class="eyebrow">Going deeper</div>
+  <h2>Extensibility seams</h2>
+  <p class="lede">The framework's first principle: seams, not sealed lists. Four patterns cover everything.</p>
+
+  <div class="cards">
+    <div class="card"><b>1 · Keyed registries</b><p><code>NeoKeyedRegistry&lt;T&gt;</code>: built-ins seeded lazily, replace-by-key registration, invalid entries warned and ignored. Register from any <code>[InitializeOnLoad]</code> or runtime bootstrap.</p></div>
+    <div class="card"><b>2 · ScriptableObject discovery</b><p>Drop an asset, it's found — no registration call at all.</p></div>
+    <div class="card"><b>3 · Interfaces &amp; virtuals</b><p>Implement an interface or override a hook on your own component.</p></div>
+    <div class="card"><b>4 · Partials</b><p>Wizard internals (<code>NeoSetupWizard</code>, <code>NeoResetWizard</code>) are partial classes you can extend.</p></div>
+  </div>
+
+  <div class="scroll"><table>
+    <tr><th>Seam</th><th>Pattern</th><th>Lets you add</th></tr>
+    <tr><td><code>FlowNodeKinds</code></td><td>registry</td><td>Custom flow-graph node types.</td></tr>
+    <tr><td><code>NeoTriggerKinds</code></td><td>registry + interface</td><td>Custom flow triggers (<code>INeoTriggerKind</code>).</td></tr>
+    <tr><td><code>AgentBridgeActions</code></td><td>registry</td><td>Custom bridge actions, or overrides of built-ins.</td></tr>
+    <tr><td><code>NeoCommands</code></td><td>registry</td><td>Custom commands for the command system.</td></tr>
+    <tr><td><code>NeoDesignSystemTabs</code></td><td>registry</td><td>Your own tabs in the Design System window.</td></tr>
+    <tr><td><code>HubToolRegistry</code></td><td>registry</td><td>Your own entries in the Hub launcher.</td></tr>
+    <tr><td><code>NeoMenuItemKinds</code></td><td>registry</td><td>Custom settings/cheat menu row kinds.</td></tr>
+    <tr><td><code>NeoValidationRules</code></td><td>registry + interface</td><td>Project-specific validation rules.</td></tr>
+    <tr><td><code>ShapeEffectRegistry</code> / <code>ParticleEffectRegistry</code></td><td>registry + subclass</td><td>Custom shape effects and particle modules.</td></tr>
+    <tr><td><code>ViewTransitionRegistry</code> / <code>AnimationPresetRegistry</code></td><td>asset discovery</td><td>New transitions and animation presets as assets.</td></tr>
+    <tr><td><code>ShowcaseDefinition</code> / <code>ThemeBundleDefinition</code> / <code>NeoWidgetPreset</code> / <code>NeoLayoutTemplateDefinition</code></td><td>asset discovery</td><td>New showcases, theme bundles, widget presets, layout templates.</td></tr>
+    <tr><td><code>INeoIdOwner</code> / <code>NeoColorDrivers</code> / <code>NeoIdDatabaseKinds</code></td><td>interface / registry</td><td>Id-owning components with canonical naming, custom color-driver detection, new id types with databases.</td></tr>
+  </table></div>
+
+  <div class="callout seam"><span class="tag">Promise</span><p>If you ever hit a fixed list you can't extend without editing framework code, that's considered a design bug — every set of kinds, presets, tokens, and nodes is supposed to have a seam. Report it rather than forking.</p></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="testing">
+  <div class="eyebrow">Going deeper</div>
+  <h2>Testing</h2>
+  <p class="lede">Test your own screens with confidence — the framework isolates test runs from your real assets and runs headless in CI.</p>
+
+  <p>The framework's own behavior is guarded by its internal suites — flow playthroughs that click every edge, round-trip merge safety, back-navigation rules, enable-order races. You don't need to re-test any of that; focus your tests on your screens and your game logic.</p>
+
+  <h3>Your assets are safe</h3>
+  <p>Test runs redirect all generation to a scratch root (<code>Assets/NeoUITestScratch</code>) and, in PlayMode, swap <code>NeoUISettings</code> for an in-memory clone — so your committed UI survives every test run untouched. If your own tests generate UI, use the same mechanisms (<code>NeoTestScratchRoot</code> in EditMode, <code>NeoPlayModeScratchSettings</code> in PlayMode) and you get the same guarantee.</p>
+
+  <h3>Running headless</h3>
+  <pre><code>Unity.exe -batchmode -nographics -runTests ^
+  -testPlatform EditMode -projectPath .   <span class="c"># or PlayMode</span></code></pre>
+  <div class="callout tip"><span class="tag">Tip</span><p>PlayMode tests are the right tool for "it renders but does nothing" bugs — EditMode can't catch the enable-order and input problems that only appear in a live scene.</p></div>
+
+  <footer>
+    Neo UI Framework — visual guide. Generated from the live codebase, July 2026.
+    Deeper references in-repo: <code>Assets/docs/spec-reference.md</code> (full spec schema), <code>Assets/docs/neo-spec.schema.json</code> (point your IDE at it for autocomplete).
+  </footer>
+</section>
+
+</main>
+</div>
+
+<script>
+  (function () {
+    var links = document.querySelectorAll('nav.toc a[href^="#"]');
+    var map = {};
+    links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
+    var current = null;
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          if (current) current.classList.remove('active');
+          current = map[e.target.id];
+          if (current) current.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-10% 0px -70% 0px' });
+    document.querySelectorAll('main section[id]').forEach(function (s) { observer.observe(s); });
+  })();
+</script>
