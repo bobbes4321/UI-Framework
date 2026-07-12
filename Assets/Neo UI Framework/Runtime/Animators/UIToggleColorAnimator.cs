@@ -40,6 +40,30 @@ namespace Neo.UI
             _tween = null;
         }
 
+        protected virtual void OnValidate()
+        {
+            // WYSIWYG: the resting color is the baked on/off color for the toggle's current value — at
+            // runtime RegisterToggleAnimator pushes it instantly. Apply it live in edit mode too so
+            // editing on/off colors (or the toggle's baked value) updates the target immediately instead
+            // of only on Play. Read the controller without writing the serialized field (OnValidate must
+            // not mutate serialized state); never disturb a running tween.
+            if (Application.isPlaying) return;
+            ApplyRestingColor();
+        }
+
+        /// <summary>
+        /// Writes the resting on/off color (for the controller's current baked value) onto the color
+        /// target — the WYSIWYG state runtime reproduces the instant this animator registers. Reads the
+        /// controller without writing the serialized field. Idempotent; safe to call from editor tooling.
+        /// </summary>
+        public void ApplyRestingColor()
+        {
+            UIToggle toggle = controller != null ? controller : GetComponentInParent<UIToggle>();
+            bool on = toggle != null && toggle.isOn;
+            IColorTarget target = ColorTargetUtils.FindTarget(gameObject);
+            target?.SetColor((on ? onColor : offColor).Resolve());
+        }
+
         public void BindTarget()
         {
             if (_target == null) _target = ColorTargetUtils.FindTarget(gameObject);

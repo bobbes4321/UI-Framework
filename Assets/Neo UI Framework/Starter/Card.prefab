@@ -114,6 +114,10 @@ MonoBehaviour:
   style: Card
   themeOverride: {fileID: 0}
   applyFillColor: 0
+  applyRadius: 1
+  applyBorder: 1
+  applySoftness: 1
+  applyFill: 1
 --- !u!1 &1379533023265836997
 GameObject:
   m_ObjectHideFlags: 0
@@ -344,3 +348,7 @@ MonoBehaviour:
   style: ShadowSoft
   themeOverride: {fileID: 0}
   applyFillColor: 0
+  applyRadius: 1
+  applyBorder: 1
+  applySoftness: 1
+  applyFill: 1

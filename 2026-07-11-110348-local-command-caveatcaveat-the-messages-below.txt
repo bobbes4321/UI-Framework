@@ -1,0 +1,375 @@
+ ▐▛███▜▌   Claude Code v2.1.206
+▝▜█████▛▘  Haiku 4.5 · Claude Team
+  ▘▘ ▝▝    ~\RiderProjects\UI-Framework
+
+ ⚠ Your login expires in 3 days · run /login to renew
+
+❯ /model                                                                        
+  ⎿  Set model to Haiku 4.5 and saved as your default for new sessions
+
+❯ What's the status of the documentation in this package? is there already a    
+  centralized place that connects all of the docs, or not? how good is the main 
+  readme? What options exist for documentation for packages like these, and in  
+  which ones can you help the most?                                             
+
+● I'll survey the current documentation state for you.
+
+  Searched for 3 patterns, read 4 files, listed 1 directory (ctrl+o to expand)
+
+● Summary
+
+  Current state: Your documentation is quite comprehensive but scattered and not
+  centrally navigable.
+
+  What you have (strong foundation):
+
+  1. Main README (excellent, concise) — entry point and layout
+  2. Assets/Neo UI Framework/README.md (excellent) — subsystem map with section
+  references
+  3. Authoring Guide — one-page mental model, links to deeper docs
+  4. Feature spec, design analysis, beautification roadmap, extensibility seams 
+  plans
+  5. Auto-generated spec reference (from agent bridge)
+  6. CLAUDE.md — 1000+ lines of contributor guidelines (thorough but not
+  user-facing)
+
+  The problem:
+
+  - No centralized TOC. New users land on the main README, which says "see the
+  authoring guide," but that guide cuts off mid-sentence in my read. There's no
+  single "map" showing how authoring-guide → design-system → native authoring →
+  spec flow relate.
+  - Docs scattered across Assets/docs/ with no index — 30+ markdown files, some
+  are design-process docs (human-workflow-plans), some are internal planning
+  (extensibility-seams-*-plan.md), some are reference (authoring-guide,
+  spec-reference).
+  - Hard to orient first-time users on the question "am I building natively, via
+  spec/agent, or both?" and what the mental model is.
+
+  What options exist for package docs:
+
+  Option: Local Markdown + TOC
+  Strengths: Searchable in editor, Ctrl+F, lightweight, versioned with code
+  Weaknesses: No fuzzy search, navigation UX manual
+  Your fit: ✅ Best for now — single entry point doc
+  ────────────────────────────────────────
+  Option: GitHub Pages / Docusaurus
+  Strengths: Hosted, searchable, beautiful
+  Weaknesses: Separate from code, requires build step, one more place to keep in
+
+  sync
+  Your fit: Later, if you publish
+  ────────────────────────────────────────
+  Option: In-editor Help window
+  Strengths: Discoverable from the Hub, contextual
+  Weaknesses: Maintenance burden, Odin-validator-style
+  Your fit: Medium lift, high UX value
+  ────────────────────────────────────────
+  Option: Obsidian vault
+  Strengths: Collaborative, graph view, structured
+  Weaknesses: Not versioned, external to repo
+  Your fit: For team collab, not public docs
+  ────────────────────────────────────────
+  Option: Schema + CLI reference
+  Strengths: Great for agents/API users
+  Weaknesses: Misses human workflows
+  Your fit: Complementary, not primary
+
+  Where I can help most:
+
+  1. Write a centralized docs index/TOC (Assets/docs/INDEX.md or Getting 
+  Started.md) that maps the user's journey: "I want to build a menu" → native
+  authoring guide; "I want to generate from JSON" → spec reference; "I'm
+  extending the package" → extensibility seams, etc.
+  2. Reorganize Assets/docs/ into clear folders (e.g., user/, developer/,
+  planning/) so the 30 docs aren't at the same level.
+  3. Create a brief "decision tree" doc — "How should I author this UI?" — that
+  surfaces the three paths (native scene, spec+agent, hybrid) with trade-offs.
+  4. Add a "Glossary & Quick Reference" — ID databases, signals, flow graphs,
+  themes are big concepts; one page of "what's what" helps.
+  5. Wire the Hub more tightly to docs — the "Guide" button could open a
+  contextual help window per tool instead of a generic guide.
+
+  Which would be most valuable to you right now? The TOC + reorganization would
+  unblock new users fastest; the decision tree + glossary is lighter but very
+  high ROI.
+
+✻ Brewed for 27s
+
+❯ what is toc? and are md files the best/only option?                           
+
+● TOC = Table of Contents — a single document that lists and links to all your
+  other docs, organized hierarchically. Think of it like a book's contents page.
+
+  Example shape:
+  # Neo UI Documentation
+
+  ## Getting Started
+  - [Quick start (5 min)](./quick-start.md)
+  - [Authoring guide (mental model)](./authoring-guide.md)
+
+  ## Building UI
+  - [Native authoring (in the scene)](./native-authoring.md)
+  - [Spec + Agent workflow](./spec-agent-workflow.md)
+
+  ## Reference
+  - [Feature spec](./neo-ui-package-feature-spec.md)
+  - [Spec JSON schema](./spec-reference.md)
+  ...
+
+  ---
+  MD files: best, but not only
+
+  For this package, Markdown is a good fit because:
+  - ✅ Versioned with your code
+  - ✅ Local + no build step (searchable from editor)
+  - ✅ Works with git log / blame
+  - ✅ Free hosting on GitHub (auto-renders)
+
+  BUT — here are alternatives to consider:
+
+  ┌───────────────────┬──────────────────────────┬──────────────────────────┐
+  │      Format       │      When it shines      │         Friction         │
+  ├───────────────────┼──────────────────────────┼──────────────────────────┤
+  │ Markdown + TOC    │ Local, searchable,       │ Manual TOC maintenance   │
+  │ (current)         │ minimalist               │                          │
+  ├───────────────────┼──────────────────────────┼──────────────────────────┤
+  │ Generated from    │ API reference stays in   │ Overkill for user        │
+  │ code (docstrings) │ sync                     │ guides; C# docstrings    │
+  │                   │                          │ are not Unity's strength │
+  ├───────────────────┼──────────────────────────┼──────────────────────────┤
+  │ Hugo / Jekyll     │ Beautiful hosted site,   │ Extra build step; sync   │
+  │ (GitHub Pages)    │ search                   │ discipline               │
+  ├───────────────────┼──────────────────────────┼──────────────────────────┤
+  │ In-editor Help    │ Contextual (Hub →        │ Maintenance burden; need │
+  │ window (custom)   │ "Guide" button opens     │  tight UI integration    │
+  │                   │ relevant section)        │                          │
+  ├───────────────────┼──────────────────────────┼──────────────────────────┤
+  │ Docusaurus /      │ Professional site +      │ External build,          │
+  │ MkDocs            │ versioning               │ different from repo      │
+  ├───────────────────┼──────────────────────────┼──────────────────────────┤
+  │                   │ Collaborative editing,   │ Not versioned; external  │
+  │ Notion / Obsidian │ graph view               │ to repo; harder to keep  │
+  │                   │                          │ in sync                  │
+  └───────────────────┴──────────────────────────┴──────────────────────────┘
+
+  ---
+  Practical recommendation for you:
+
+  Start with a single TOC markdown file (Assets/docs/00-START-HERE.md or
+  INDEX.md). It's:
+  - 1 hour to write
+  - Zero maintenance if you link to existing docs
+  - Searchable (Ctrl+F in the editor)
+  - Surfaces the decision tree ("native vs. spec-driven")
+
+  Then, if you hit a scaling pain (lots of new users, docs falling out of sync,
+  requests for search), level up to an in-editor Help window or a hosted site.
+
+  Should I write that TOC for you now, or would you rather sketch what sections
+  it should have first?
+
+✻ Baked for 9s
+
+❯ give me a prompt i can give to a model with a higher context window so i can  
+  completely bring the docs up to date, fact check them, and make them complete 
+
+  Read 1 file (ctrl+o to expand)
+
+● Here's a comprehensive prompt for a high-context-window model:
+
+  ---
+  Complete Documentation Audit & Update Prompt
+
+  You are auditing and completing the documentation for Neo UI Framework, a
+  Unity 6 production-grade UI package. Your goal is to ensure all docs are:
+  - Factually accurate against the codebase and CLAUDE.md
+  - Complete — no gaps, no orphaned references
+  - Well-organized — a clear entry point with a Table of Contents
+  - User-ready — correct paths, no stale examples, working links
+
+  Source of Truth
+
+  CLAUDE.md in the repo root is the authoritative spec for:
+  - Architecture and layout
+  - Core principles and hard constraints
+  - Editor/runtime conventions
+  - Build & test workflows
+  - Agent bridge actions and seams
+  - Test isolation strategy
+  - Showcase/spec/baseline protocols
+
+  When a doc conflicts with CLAUDE.md or the code, CLAUDE.md wins. Flag
+  conflicts for the user.
+
+  Docs to Audit
+
+  Read and validate these files from Assets/docs/:
+
+  User-facing (primary):
+  - authoring-guide.md — one-page mental model; verify it matches current
+  Hub/Setup/Design System flow
+  - neo-ui-package-feature-spec.md — feature spec; cross-check against CLAUDE.md
+  feature bullets
+  - editor-ux-analysis.md — editor UX rationale and field catalog
+  - ui-beautification-plan.md — visual-polish roadmap; note completeness status
+  - developer-binding-guide.md — binding story for agents/game code
+
+  Reference:
+  - spec-reference.md — JSON schema reference; verify it's auto-generated
+  (specReference action)
+  - neoshape-channel-layout.md — NeoShape vertex channel docs for shader authors
+
+  Planning/internal (for triage):
+  - extensibility-seams-master-plan.md + extensibility-seam-*.md — design docs;
+  are they current?
+  - composer-authoring-overhaul/*.md — 8-part redesign; which phases shipped?
+  which are aspirational?
+  - widget-presets-plan.md, settings-cheats-menu-plan.md,
+  design-system-cohesion-plan.md — planning docs
+  - human-workflow-plans/*.md — round-trip safety, developer binding, agent
+  collaboration
+
+  ---
+  Validation Checklist
+
+  For each user-facing doc:
+
+  1. Accuracy — Does every code path, class name, menu path, action name match
+  the current CLAUDE.md and codebase?
+    - Example: "Tools → Neo UI → Hub" — exists? Correct name?
+    - Example: "UIWidgetFactory.AddHoverAndPressFeel" — does this method exist?
+    - Example: "FlowNodeKinds.Register" — is this the extensibility seam for
+  flow nodes?
+  2. Completeness — Are there gaps?
+    - Are all five animator roles documented? (View/Show, View/Hide,
+  Button/Hover, Button/Press, Loop, OneShot, etc.)
+    - Are all agent bridge actions listed? (generate, export, validate, sync,
+  preview, screenshot, specReference, bindings, buildScene, regenerateShowcase,
+  importSprites)
+    - Do examples work (can a user run them)?
+  3. Links — Do internal doc links work? Are there references to docs that don't
+  exist?
+  4. Stale content — Any references to removed features?
+    - Example: "Composer window" was removed in 2026-07; native authoring is the
+  way now.
+    - Is the Composer seam migration documented?
+  5. Jargon clarity — Do you define: signal stream, registry, seam, flow graph,
+  theme token, shape style, widget preset, animation preset?
+
+  ---
+  Planning Docs (Triage)
+
+  For composer-authoring-overhaul/ and extensibility-seam-*-plan.md:
+
+  - Is it shipped (code exists)? Mark as "Implemented" or "Aspirational"
+  - Is it in CLAUDE.md? If yes, pull the relevant section into a user-facing doc
+  and flag the planning doc as "archived/reference only"
+  - Is it orphaned (no code, no spec mention)? Note for user review — may be
+  dead or genuinely missing
+
+  Example: "responsive-layout-foundation" — does the code support layout,
+  breakpoints, UIResponsiveRoot? If yes, it should be in authoring-guide.md or a
+  dedicated layout-guide.md, not just a planning doc.
+
+  ---
+  Output
+
+  Produce:
+
+  1. Audit Report (20-50 lines):
+    - Factual conflicts found (if any)
+    - Gaps in user docs
+    - Stale content
+    - Planning docs status (shipped vs. aspirational)
+  2. NEW: Assets/docs/00-START-HERE.md — Table of Contents + decision tree
+  # Neo UI Documentation
+
+  **New to Neo UI?** Start here → [Quick Decision Tree](#decision-tree)
+
+  ## Decision Tree: How Should I Author This UI?
+
+  - I want to click together a menu in the scene → [Native
+  Authoring](./native-authoring-guide.md)
+  - I want to generate UI from JSON (agent workflow) → [Spec + Agent
+  Guide](./spec-agent-guide.md)
+  - I'm extending the package (custom widgets, themes, nodes) → [Extensibility
+  Guide](./extensibility-guide.md)
+  ...
+
+  ## Full Documentation Map
+  - Getting Started
+  - Building & Authoring
+  - Reference
+  - Developer/Extending
+  - Planning & Architecture
+  3. UPDATED: Existing user docs — corrected, completed, interlinked
+    - authoring-guide.md — expanded if needed
+    - neo-ui-package-feature-spec.md — fact-checked
+    - developer-binding-guide.md — verify complete
+    - spec-reference.md — auto-generated, but verify it's in sync
+  4. NEW: Glossary & Quick Ref (Assets/docs/GLOSSARY.md) — one-page definitions
+  - **Signal stream** — category/name-addressed pub/sub for UI events
+  - **Registry** — extensibility seam; NeoKeyedRegistry<T> for dynamic lookups
+  - **Seam** — extension point (virtual, SO, registry, or partial)
+  - **Theme token** — named color/size/shape value that flows into UI
+  ...
+  5. Triage List — planning docs status
+  - composer-authoring-overhaul/ — Status: SHIPPED (native authoring replaced
+  it)
+  - extensibility-seam-theme-bundles-plan.md — Status: SHIPPED
+  (ThemeBundleDefinition + lazy discovery)
+  - settings-cheats-menu-plan.md — Status: SHIPPED (MenuItemKinds registry)
+  ...
+
+  ---
+  Success Criteria
+
+  - [ ] Every user-facing doc is accurate against CLAUDE.md and code
+  - [ ] No broken internal links; every reference resolves
+  - [ ] Decision tree answers the question "what's my starting path?"
+  - [ ] Glossary covers 15–20 core concepts
+  - [ ] All agent bridge actions are documented with examples
+  - [ ] All extensibility seams (registries, SOs, virtuals) are listed with
+  their extension paths
+  - [ ] Planning docs are triaged (shipped vs. aspirational)
+  - [ ] Docs are linked from TOC and from each other (cross-references work)
+  - [ ] No stale Composer references (it was removed; native authoring is
+  canonical)
+
+  ---
+  Additional Context
+
+  - Project layout: Runtime/Editor split; Neo.EditorUI is zero-dependency
+  - Agent entry point: Tools → Neo UI → Hub
+  - Three authoring paths: native (scene), spec+agent (JSON), hybrid (both)
+  - Showcase pattern: each self-contained demo lives under
+  Assets/Showcases/{id}/ with own Generated/ root
+  - Spec baseline: .neo-baseline.json is the source of truth for merge/sync;
+  human edits are reconciled, not lost
+  - Test isolation: tests use scratch roots; committed demo survives
+  - Key seams: NeoKeyedRegistry<T>, ScriptableObject discovery,
+  virtual/protected, partial
+
+  ---
+  If You Find Conflicts
+
+  Example: A doc says "use Signals.Send to fire a signal" but CLAUDE.md says
+  "use Signals.On<T> for listening and Signal.Send for firing." Flag it:
+
+  CONFLICT: authoring-guide.md line 42
+  Doc: "Signals.Send(…)"
+  CLAUDE.md: "static Signal.Send(…)" for dispatch
+  → Correct and link to CLAUDE.md section
+
+  ---
+  Ready? Start with CLAUDE.md, then read each doc top-to-bottom, fact-checking
+  as you go. Output the audit report first, then the updated files.
+
+✻ Crunched for 32s
+
+❯ /export                                                                       
+  ⎿  Conversation copied to clipboard
+
+❯ /export                                                                       
+  ⎿  Conversation copied to clipboard

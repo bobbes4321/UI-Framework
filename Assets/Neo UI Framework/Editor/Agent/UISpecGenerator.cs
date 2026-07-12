@@ -1103,8 +1103,7 @@ namespace Neo.UI.Editor
                 styleTarget.style = element.style;
                 styleTarget.applyFillColor = false;
             }
-            if (element.radius.HasValue && element.kind != "shape" && go.TryGetComponent(out NeoShape rootShape))
-                rootShape.cornerRadius = element.radius.Value;
+            ApplyShapeGeometryOverrides(element, go, settings, report);
 
             // data-bound list/grid: build the row template once (kept inactive) and wire a binder;
             // rows are cloned from it at runtime per UIData row. The template is the only "child".
@@ -1524,6 +1523,62 @@ namespace Neo.UI.Editor
         /// </summary>
         private static ThemeColorRef ParseColorRef(string value, GenerateReport report) =>
             EffectParams.ParseColorRef(value, invalid => report.issues.Add($"Invalid gradient color '{invalid}'"));
+
+        /// <summary>
+        /// Applies per-widget shape geometry OVERRIDES (border width/color, softness, uniform + per-corner
+        /// radius, radius unit) onto the element's NeoShape, and for each overridden aspect turns OFF the
+        /// matching <see cref="ThemeShapeStyleTarget"/> apply-flag so the theme style stops owning it — the
+        /// override then survives runtime instead of being re-clobbered on enable (the systemic bug that
+        /// also silently reset preset radii like Primary Button Large's 16px). Symmetric with the
+        /// exporter's <c>ExportShapeGeometry</c>, which reads the same flags back to know what to emit. A
+        /// token border color bakes to a literal at generate time (a per-widget border is bespoke; use a
+        /// shape style for a theme-following border).
+        /// </summary>
+        private static void ApplyShapeGeometryOverrides(ElementSpec element, GameObject go,
+            NeoUISettings settings, GenerateReport report)
+        {
+            if (!go.TryGetComponent(out NeoShape shape)) return;
+            var styleTarget = go.GetComponent<ThemeShapeStyleTarget>();
+
+            if (element.borderWidth.HasValue)
+            {
+                shape.border = element.borderWidth.Value;
+                if (styleTarget != null) styleTarget.applyBorder = false;
+            }
+            if (!string.IsNullOrEmpty(element.borderColor))
+            {
+                shape.outlineColor = ParseColorRef(element.borderColor, report)
+                    .Resolve(settings != null ? settings.theme : null);
+                if (styleTarget != null) styleTarget.applyBorder = false;
+            }
+            if (element.softness.HasValue)
+            {
+                shape.edgeSoftness = element.softness.Value;
+                if (styleTarget != null) styleTarget.applySoftness = false;
+            }
+
+            bool radiusOverridden = false;
+            if (element.cornerRadii != null && element.cornerRadii.Length == 4)
+            {
+                float[] c = element.cornerRadii; // [top-left, top-right, bottom-right, bottom-left]
+                shape.useUniformRadius = false;
+                shape.cornerRadii = new Vector4(c[0], c[1], c[2], c[3]);
+                radiusOverridden = true;
+            }
+            if (element.radius.HasValue)
+            {
+                shape.cornerRadius = element.radius.Value;
+                radiusOverridden = true;
+            }
+            if (!string.IsNullOrEmpty(element.radiusUnit))
+            {
+                shape.cornerRadiusUnit = element.radiusUnit.Equals("percent", StringComparison.OrdinalIgnoreCase)
+                    ? ShapeRadiusUnit.Percent
+                    : ShapeRadiusUnit.Pixels;
+                radiusOverridden = true;
+            }
+            if (radiusOverridden && styleTarget != null) styleTarget.applyRadius = false;
+        }
 
         /// <summary> Unknown icon names become loud report issues (the factory still renders a fallback). </summary>
         private static void ValidateIcon(ElementSpec element, GenerateReport report)

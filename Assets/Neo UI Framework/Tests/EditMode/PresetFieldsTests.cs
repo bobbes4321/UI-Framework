@@ -64,21 +64,23 @@ namespace Neo.UI.Tests
         // ---------------------------------------------------------------- table completeness
 
         [Test]
-        public void All_ContainsExactlyTheElevenGeneratorFieldsPlusMotion()
+        public void All_ContainsExactlyTheExpectedPresetFields()
         {
             var names = PresetFields.All.Select(f => f.name).ToList();
 
-            // The 11 fields hand-listed in UISpecGenerator.ResolvePresetAndOverrides, plus the
-            // motion -> animations.loop custom field.
+            // Every preset-governed field: the design-system references + direct scalars, the shape
+            // geometry overrides (border/softness/radius/per-corner), and the motion -> animations.loop
+            // custom field. Adding a field here is the deliberate tripwire — update this list with it.
             string[] expected =
             {
                 "variant", "sizeVariant", "textStyle", "style", "background", "labelColor",
-                "icon", "radius", "padding", "padding4", "spacing", "motion",
+                "icon", "radius", "radiusUnit", "cornerRadii", "borderWidth", "borderColor",
+                "softness", "padding", "padding4", "spacing", "motion",
             };
             foreach (string name in expected)
                 Assert.Contains(name, names, $"PresetFields.All is missing '{name}'");
             Assert.AreEqual(expected.Length, names.Distinct().Count(),
-                "expected exactly the 11 ResolvePresetAndOverrides fields plus motion — no more, no fewer, no dupes");
+                "expected exactly the listed preset fields — no more, no fewer, no dupes");
         }
 
         // ---------------------------------------------------------------- per-field merge -> delta
@@ -96,6 +98,11 @@ namespace Neo.UI.Tests
                 ["labelColor"] = ("Warning", "OnPrimary"),
                 ["icon"] = ("star", "heart"),
                 ["radius"] = (4f, 12f),
+                ["radiusUnit"] = ("px", "percent"),
+                ["cornerRadii"] = (new float[] { 1f, 2f, 3f, 4f }, new float[] { 5f, 6f, 7f, 8f }),
+                ["borderWidth"] = (2f, 6f),
+                ["borderColor"] = ("#111111", "#222222"),
+                ["softness"] = (1f, 4f),
                 ["padding"] = (4f, 16f),
                 ["padding4"] = (new float[] { 1f, 2f, 3f, 4f }, new float[] { 8f, 8f, 8f, 8f }),
                 ["spacing"] = (2f, 10f),

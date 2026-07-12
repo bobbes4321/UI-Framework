@@ -65,8 +65,23 @@ namespace Neo.UI
         // ---- Direct property defaults (the -1 sentinels keep the asset force-text & Unity-serializable) ----
 
         [Header("Direct defaults (negative = not set)")]
-        [Tooltip("Corner radius in px. Negative = not set by this preset.")]
+        [Tooltip("Corner radius (px, or 0-100 when radiusUnit is 'percent'). Negative = not set by this preset.")]
         public float radius = -1f;
+
+        [Tooltip("Corner radius unit: 'px' or 'percent'. Blank = not set.")]
+        public string radiusUnit;
+
+        [Tooltip("Per-corner radius [top-left, top-right, bottom-right, bottom-left]. Empty = not set; wins over uniform radius.")]
+        public float[] cornerRadii;
+
+        [Tooltip("Shape border width in px (0 = no border). Negative = not set by this preset.")]
+        public float borderWidth = -1f;
+
+        [Tooltip("Shape border color (#hex or theme token). Blank = not set.")]
+        public string borderColor;
+
+        [Tooltip("Shape edge softness in px (0 = crisp, higher = soft shadow/glow). Negative = not set.")]
+        public float softness = -1f;
 
         [Tooltip("Uniform container padding in px. Negative = not set.")]
         public float padding = -1f;
@@ -79,6 +94,15 @@ namespace Neo.UI
 
         /// <summary> Radius as an optional value (null when the <c>-1</c> sentinel means "not set"). </summary>
         public float? RadiusOrNull => radius >= 0f ? (float?)radius : null;
+
+        /// <summary> Per-corner radii, or null when none is authored. </summary>
+        public float[] CornerRadiiOrNull => cornerRadii != null && cornerRadii.Length == 4 ? cornerRadii : null;
+
+        /// <summary> Border width as an optional value (null when the <c>-1</c> sentinel means "not set"). </summary>
+        public float? BorderWidthOrNull => borderWidth >= 0f ? (float?)borderWidth : null;
+
+        /// <summary> Edge softness as an optional value (null when unset). </summary>
+        public float? SoftnessOrNull => softness >= 0f ? (float?)softness : null;
 
         /// <summary> Uniform padding as an optional value (null when unset). </summary>
         public float? PaddingOrNull => padding >= 0f ? (float?)padding : null;

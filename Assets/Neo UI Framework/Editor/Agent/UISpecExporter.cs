@@ -694,6 +694,7 @@ namespace Neo.UI.Editor
                 var popupOnClick = go.GetComponent<ShowPopupOnClick>();
                 if (popupOnClick != null) element.onClickPopup = popupOnClick.popupName;
                 element.onClickClose = go.GetComponent<HideContainerOnClick>() != null;
+                ExportShapeGeometry(go, element);
                 return element;
             }
 
@@ -904,7 +905,8 @@ namespace Neo.UI.Editor
             {
                 // a sprite fill makes this an image element (the shape only rounds its corners)
                 if (aeShape.sprite != null)
-                    return new ElementSpec
+                {
+                    var imageElement = new ElementSpec
                     {
                         kind = "image",
                         src = AssetDatabase.GetAssetPath(aeShape.sprite),
@@ -914,9 +916,12 @@ namespace Neo.UI.Editor
                         background = go.GetComponent<ThemeColorTarget>()?.token,
                         style = go.GetComponent<ThemeShapeStyleTarget>()?.style
                     };
+                    ExportShapeGeometry(go, imageElement);
+                    return imageElement;
+                }
 
                 bool isArc = aeShape.shape == ShapeType.Ring || aeShape.shape == ShapeType.Arc;
-                return new ElementSpec
+                var shapeElement = new ElementSpec
                 {
                     kind = "shape",
                     shape = aeShape.shape.ToString(),
@@ -928,6 +933,8 @@ namespace Neo.UI.Editor
                     background = go.GetComponent<ThemeColorTarget>()?.token,
                     style = go.GetComponent<ThemeShapeStyleTarget>()?.style
                 };
+                ExportShapeGeometry(go, shapeElement);
+                return shapeElement;
             }
 
             var image = go.GetComponent<UnityEngine.UI.Image>();
@@ -958,6 +965,49 @@ namespace Neo.UI.Editor
                 to = ColorRefToString(gradient.colorB),
                 angle = gradient.angle
             };
+        }
+
+        /// <summary>
+        /// Exports a shape's per-widget geometry OVERRIDES — border (width+color), softness and radius
+        /// (uniform, per-corner and unit) — onto <paramref name="element"/>. An aspect is a widget
+        /// override (and thus exported) only when NO <see cref="ThemeShapeStyleTarget"/> owns it: either
+        /// there's no target, or its matching apply-flag is off. When the style still owns the aspect the
+        /// value is implicit from <c>style</c> and stays out of the spec — mirroring how factory defaults
+        /// (variant/size) stay implicit so hand-written specs round-trip unchanged. Uniform-radius values
+        /// a kind already exported inline are left as-is; a per-corner override replaces them.
+        /// </summary>
+        private static void ExportShapeGeometry(GameObject go, ElementSpec element)
+        {
+            var shape = go.GetComponent<NeoShape>();
+            if (shape == null) return;
+            var styleTarget = go.GetComponent<ThemeShapeStyleTarget>();
+            bool ownsBorder = styleTarget == null || !styleTarget.applyBorder;
+            bool ownsSoftness = styleTarget == null || !styleTarget.applySoftness;
+            bool ownsRadius = styleTarget == null || !styleTarget.applyRadius;
+
+            if (ownsBorder && shape.border > 0f)
+            {
+                element.borderWidth = shape.border;
+                element.borderColor = ColorUtils.ToHex(shape.outlineColor);
+            }
+            if (ownsSoftness && shape.edgeSoftness > 0f)
+                element.softness = shape.edgeSoftness;
+            if (ownsRadius && shape.shape == ShapeType.RoundedRect)
+            {
+                if (!shape.useUniformRadius)
+                {
+                    Vector4 c = shape.cornerRadii; // x=top-left, y=top-right, z=bottom-right, w=bottom-left
+                    element.cornerRadii = new[] { c.x, c.y, c.z, c.w };
+                    element.radius = null; // the per-corner override supersedes any uniform value
+                }
+                else if (element.radius == null && shape.cornerRadius > 0f)
+                {
+                    // kinds that don't export radius inline (button/container) capture an owned override here
+                    element.radius = shape.cornerRadius;
+                }
+                if (shape.cornerRadiusUnit == ShapeRadiusUnit.Percent)
+                    element.radiusUnit = "percent";
+            }
         }
 
         /// <summary>
@@ -1086,6 +1136,7 @@ namespace Neo.UI.Editor
             if (element.gradient == null)
                 element.background = go.GetComponent<ThemeColorTarget>()?.token;
             element.radius = shape.cornerRadius;
+            ExportShapeGeometry(go, element);
         }
 
         /// <summary>

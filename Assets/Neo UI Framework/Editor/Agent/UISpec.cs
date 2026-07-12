@@ -984,7 +984,12 @@ namespace Neo.UI.Editor
                                    // hero-capable ViewTransitionAsset instead of cutting/crossfading normally
         public bool cascade;       // vstack/hstack/grid: staggered child entrance on show
         public float? badge;       // button/tab: notification badge count (0 = hidden)
-        public float? radius;      // corner radius override (px)
+        public float? radius;      // corner radius override (px, or 0-100 when radiusUnit is "percent")
+        public string radiusUnit;  // "px" (default) or "percent" — corner radius unit override
+        public float[] cornerRadii; // per-corner radius override [top-left, top-right, bottom-right, bottom-left]
+        public float? borderWidth; // shape border width override (px); 0 = no border
+        public string borderColor; // shape border color override (#hex or theme token)
+        public float? softness;    // shape edge softness override (px); 0 = crisp, higher = soft shadow/glow
         public string anchor;      // anchor preset name (legacy placement)
         public LayoutSpec layout;  // Figma-style constraint+offset placement; when set it WINS over
                                    // anchor/position/size/flex (which stay valid when layout is null)
@@ -1056,6 +1061,11 @@ namespace Neo.UI.Editor
                     anchor = JsonReader.GetString(body, "anchor"),
                     layout = LayoutSpec.Parse(JsonReader.GetObject(body, "layout")),
                     radius = GetNullableFloat(body, "radius"),
+                    radiusUnit = JsonReader.GetString(body, "radiusUnit"),
+                    cornerRadii = GetFloatArray(body, "cornerRadii"),
+                    borderWidth = GetNullableFloat(body, "borderWidth"),
+                    borderColor = JsonReader.GetString(body, "borderColor"),
+                    softness = GetNullableFloat(body, "softness"),
                     size = GetFloatArray(body, "size"),
                     position = GetFloatArray(body, "position"),
                     padding = GetNullableFloat(body, "padding"),
@@ -1181,6 +1191,11 @@ namespace Neo.UI.Editor
             if (!string.IsNullOrEmpty(preset)) body["preset"] = preset;
             if (!string.IsNullOrEmpty(sharedElement)) body["sharedElement"] = sharedElement;
             if (radius.HasValue) body["radius"] = (double)radius.Value;
+            if (!string.IsNullOrEmpty(radiusUnit)) body["radiusUnit"] = radiusUnit;
+            if (cornerRadii != null && cornerRadii.Length > 0) body["cornerRadii"] = ToJsonArray(cornerRadii);
+            if (borderWidth.HasValue) body["borderWidth"] = (double)borderWidth.Value;
+            if (!string.IsNullOrEmpty(borderColor)) body["borderColor"] = borderColor;
+            if (softness.HasValue) body["softness"] = (double)softness.Value;
             if (!string.IsNullOrEmpty(anchor)) body["anchor"] = anchor;
             if (layout != null && !layout.IsEmpty) body["layout"] = layout.ToJsonObject();
             if (overrides != null && overrides.Count > 0)

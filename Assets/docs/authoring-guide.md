@@ -38,7 +38,7 @@ the starting look or top up a library that's fallen behind.
 
 ## Design System window — author the look
 
-`Tools → Neo UI → Design System` is where you keep editing the look after setup. Eight tabs, each its
+`Tools → Neo UI → Design System` is where you keep editing the look after setup. Nine tabs, each its
 own file under `Editor/DesignSystem/`, registered through `NeoDesignSystemTabs` (a project adds its
 own tab via `NeoDesignSystemTabs.Register` without forking the window):
 
@@ -53,6 +53,9 @@ own tab via `NeoDesignSystemTabs.Register` without forking the window):
   per-state color data, plus named sizes, with a real rendered preview.
 - **Shapes** — full `ShapeStyle` fidelity: radius (uniform or per-corner), outline, softness, fill
   mode/gradient, elevation, with a real `NeoShape` render.
+- **Icons** — browse/search the resolvable icon set (185 featured Lucide names, plus every other
+  Lucide 1.17.0 name and any project-defined `IconMapOverlay` entry), add a glyph or texture-backed
+  entry without touching code.
 - **Presets** — the `NeoWidgetPreset` library as a thumbnail grid with an embedded editor; create,
   duplicate, delete, or capture the current scene selection as a new preset.
 - **Motion** — default animation preset per animator role, plus the full preset library as a

@@ -1,6 +1,7 @@
 # Neo UI Package — Feature Specification (Doozy Replacement)
 
-**Status:** Draft 1 — 2026-06-10
+**Status:** Draft 1 — 2026-06-10 (historical — pre-implementation design doc; for current state see
+[CLAUDE.md](../../CLAUDE.md) and [authoring-guide.md](./authoring-guide.md))
 **Working name:** `com.neo.ui`
 **Replaces:** Doozy UI Manager 4 (`Assets/ThirdParty/Doozy` in the CBN repo, ~1,036 C# files)
 
@@ -232,6 +233,7 @@ Cut: sub-graphs (Enter/Exit nodes), multiplayer per-player flows.
 - Graph window: pan/zoom, grid, rectangle select, **node search/create window**, **minimap**, side inspector for the selected node, undo/redo, copy/paste.
 - **Runtime debugging — the killer feature:** in play mode the window highlights the active node and shows the traversal trail live; selecting a FlowController opens its running graph.
 - Implementation note: Doozy builds on `UnityEditor.Experimental.GraphView`, which still works in Unity 6 but is unmaintained. **Evaluate Unity's newer graph-toolkit option on the target LTS before building; GraphView is the fallback.**
+  - **Resolved:** shipped on `GraphView` (`Editor/Flow/FlowGraphWindow.cs`, `FlowNodeKinds.cs`).
 
 ---
 

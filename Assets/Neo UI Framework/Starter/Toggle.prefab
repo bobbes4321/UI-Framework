@@ -758,6 +758,10 @@ MonoBehaviour:
   style: Control
   themeOverride: {fileID: 0}
   applyFillColor: 0
+  applyRadius: 1
+  applyBorder: 1
+  applySoftness: 1
+  applyFill: 1
 --- !u!114 &7259634055853348600
 MonoBehaviour:
   m_ObjectHideFlags: 0

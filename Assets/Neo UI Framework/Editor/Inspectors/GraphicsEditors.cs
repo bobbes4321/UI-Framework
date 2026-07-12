@@ -34,8 +34,15 @@ namespace Neo.UI.Editor
                 || shapeType == ShapeType.Chevron || shapeType == ShapeType.Cross);
             bool isArc = known && (shapeType == ShapeType.Ring || shapeType == ShapeType.Arc);
 
+            // "these geometry fields are theme-driven" hint + edit-to-claim (single selection only —
+            // multi-edit would have to reconcile several style targets)
+            ThemeShapeStyleTarget styleTarget = targets.Length == 1
+                ? ((NeoShape)target).GetComponent<ThemeShapeStyleTarget>()
+                : null;
+            DrawGeometryStyleNotice(styleTarget);
+
             if (known && shapeType == ShapeType.RoundedRect)
-                DrawRadius();
+                DrawRadius(styleTarget);
             if (isArc)
             {
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("thickness"));
@@ -71,30 +78,41 @@ namespace Neo.UI.Editor
             GUILayout.Space(NeoGUI.Spacing);
             if (isGlyph)
             {
+                // glyphs have no border split — the stroke IS the fill; no shape style drives it
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("borderWidth"), StrokeLabel);
             }
             else
             {
+                EditorGUI.BeginChangeCheck();
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("borderWidth"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("borderColor"));
+                if (EditorGUI.EndChangeCheck()) ClaimAspect(styleTarget, ShapeStyleAspects.Border);
             }
+            EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(serializedObject.FindProperty("softness"));
+            if (EditorGUI.EndChangeCheck()) ClaimAspect(styleTarget, ShapeStyleAspects.Softness);
 
             GUILayout.Space(NeoGUI.Spacing);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("m_RaycastTarget"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("m_Maskable"));
         }
 
-        private void DrawRadius()
+        private void DrawRadius(ThemeShapeStyleTarget styleTarget)
         {
+            EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(serializedObject.FindProperty("radiusUnit"));
             SerializedProperty uniformProperty = serializedObject.FindProperty("uniformRadius");
             EditorGUILayout.PropertyField(uniformProperty);
-            if (uniformProperty.hasMultipleDifferentValues) return;
+            if (uniformProperty.hasMultipleDifferentValues)
+            {
+                if (EditorGUI.EndChangeCheck()) ClaimAspect(styleTarget, ShapeStyleAspects.Radius);
+                return;
+            }
 
             if (uniformProperty.boolValue)
             {
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("radius"));
+                if (EditorGUI.EndChangeCheck()) ClaimAspect(styleTarget, ShapeStyleAspects.Radius);
                 return;
             }
 
@@ -110,6 +128,48 @@ namespace Neo.UI.Editor
                 EditorGUI.PropertyField(fieldRect, perCorner.FindPropertyRelative(CornerFields[i]), CornerLabels[i]);
             }
             EditorGUIUtility.labelWidth = previousLabelWidth;
+            if (EditorGUI.EndChangeCheck()) ClaimAspect(styleTarget, ShapeStyleAspects.Radius);
+        }
+
+        /// <summary>
+        /// The "these fields are theme-driven" notice for shape geometry — the border/radius sibling of
+        /// <see cref="ColorDriverNotice"/>. Shown when a <see cref="ThemeShapeStyleTarget"/> still owns at
+        /// least one geometry aspect, so the user knows those values come from the theme style and that
+        /// editing one claims it as a per-widget override (see <see cref="ClaimAspect"/>).
+        /// </summary>
+        private static void DrawGeometryStyleNotice(ThemeShapeStyleTarget styleTarget)
+        {
+            if (styleTarget == null || string.IsNullOrEmpty(styleTarget.style)) return;
+            var owned = new List<string>(3);
+            if (styleTarget.applyRadius) owned.Add("radius");
+            if (styleTarget.applyBorder) owned.Add("border");
+            if (styleTarget.applySoftness) owned.Add("softness");
+            if (owned.Count == 0) return;
+            EditorGUILayout.HelpBox(
+                $"{string.Join(", ", owned)} {(owned.Count == 1 ? "is" : "are")} driven by shape style " +
+                $"'{styleTarget.style}' (Theme Shape Style Target). Editing a field here claims it as a " +
+                "per-widget override the theme style stops driving.",
+                MessageType.Info);
+        }
+
+        /// <summary>
+        /// Hands one geometry aspect from the theme style to this widget: turns off the matching
+        /// <see cref="ThemeShapeStyleTarget"/> apply-flag so the just-edited value survives runtime instead
+        /// of being re-clobbered on enable, and so the exporter captures it into presets. No-op when the
+        /// shape has no style target (a bare shape already owns every field).
+        /// </summary>
+        private static void ClaimAspect(ThemeShapeStyleTarget styleTarget, ShapeStyleAspects aspect)
+        {
+            if (styleTarget == null) return;
+            bool claimsRadius = (aspect & ShapeStyleAspects.Radius) != 0 && styleTarget.applyRadius;
+            bool claimsBorder = (aspect & ShapeStyleAspects.Border) != 0 && styleTarget.applyBorder;
+            bool claimsSoftness = (aspect & ShapeStyleAspects.Softness) != 0 && styleTarget.applySoftness;
+            if (!claimsRadius && !claimsBorder && !claimsSoftness) return;
+            Undo.RecordObject(styleTarget, "Override Shape Style"); // record BEFORE mutating
+            if (claimsRadius) styleTarget.applyRadius = false;
+            if (claimsBorder) styleTarget.applyBorder = false;
+            if (claimsSoftness) styleTarget.applySoftness = false;
+            EditorUtility.SetDirty(styleTarget);
         }
     }
 
@@ -186,6 +246,12 @@ namespace Neo.UI.Editor
 
             EditorGUILayout.PropertyField(serializedObject.FindProperty("themeOverride"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("applyFillColor"));
+            // Per-aspect ownership: unchecking one hands that aspect to the shape as a per-widget override
+            // the style stops driving (so a bespoke border/radius survives runtime). See NeoShape inspector.
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("applyRadius"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("applyBorder"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("applySoftness"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("applyFill"));
         }
 
         private Theme BoundTheme()

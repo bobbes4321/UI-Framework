@@ -22,7 +22,10 @@ namespace Neo.UI.Editor.Authoring
         static NeoPaletteDropHandlers()
         {
             // Once per domain load — the handler lists reset with the domain, so this never stacks.
-            DragAndDrop.AddDropHandler((DragAndDrop.HierarchyDropHandler)OnHierarchyDrop);
+            // Both use the V2 (EntityId) registration path: Unity 6 dispatches EntityId (a UInt64)
+            // to hierarchy drop handlers, so the legacy int-based HierarchyDropHandler throws an
+            // ArgumentException on every hierarchy drag (see DragAndDrop.DropOnHierarchyWindow).
+            DragAndDrop.AddDropHandlerV2((DragAndDrop.HierarchyDropHandlerV2)OnHierarchyDrop);
             DragAndDrop.AddDropHandlerV2((DragAndDrop.SceneDropHandler)OnSceneDrop);
         }
 
@@ -45,7 +48,7 @@ namespace Neo.UI.Editor.Authoring
             DragAndDrop.GetGenericData(NeoWidgetPalette.PresetDragKey) as string,
             DragAndDrop.GetGenericData(NeoWidgetPalette.TemplateDragKey) as string);
 
-        private static DragAndDropVisualMode OnHierarchyDrop(int dropTargetInstanceID,
+        private static DragAndDropVisualMode OnHierarchyDrop(EntityId dropTargetEntityId,
             HierarchyDropFlags dropMode, Transform parentForDraggedObjects, bool perform)
         {
             Payload payload = Read();
@@ -53,7 +56,7 @@ namespace Neo.UI.Editor.Authoring
             if (perform)
             {
                 DragAndDrop.AcceptDrag();
-                var target = EditorUtility.InstanceIDToObject(dropTargetInstanceID) as GameObject;
+                var target = EditorUtility.EntityIdToObject(dropTargetEntityId) as GameObject;
                 NeoPaletteWindow.SpawnPayload(payload.kind, payload.preset, payload.template, target);
             }
             return DragAndDropVisualMode.Copy;

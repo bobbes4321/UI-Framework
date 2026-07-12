@@ -25,6 +25,11 @@ MonoBehaviour:
   labelColor: 
   icon: 
   radius: -1
+  radiusUnit: 
+  cornerRadii: []
+  borderWidth: -1
+  borderColor: 
+  softness: -1
   padding: -1
   padding4:
   - 20

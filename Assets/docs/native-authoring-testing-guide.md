@@ -214,8 +214,11 @@ The unifying idea: **dropping an asset is enough** — no manual registration, n
 
 ## 4. Design System editor — author your look (`Tools → Neo UI → Design System`)
 
-The ongoing home for your design system, editing the live `NeoUISettings` + `Theme`. Five tabs, plus a
+The ongoing home for your design system, editing the live `NeoUISettings` + `Theme`. Nine tabs, plus a
 **Save Assets** button at the bottom. (Edits mark the assets dirty; Save Assets writes them to disk.)
+This guide only carries test steps for the five tabs below (the parity-confirmation pass predates
+**Overview**, **Typography**, **Icons**, and **Bundles** — see [authoring-guide.md](./authoring-guide.md#design-system-window--author-the-look)
+for what those cover; add test steps here if you touch them).
 
 - **Colors:** pick the active variant; edit each token's color; **Add token** / **New variant**;
   **Re-derive hover/pressed states** recomputes Primary/Success/Danger hover+pressed from their base.

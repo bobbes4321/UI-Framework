@@ -24,12 +24,15 @@ Per-element JSON keys (an element is `{ "<kind>": { ...fields } }`). Fields appl
 | `background` | string |
 | `badge` | number |
 | `bind` | string |
+| `borderColor` | string |
+| `borderWidth` | number |
 | `cascade` | bool |
 | `catalog` | string |
 | `cellSize` | number[] |
 | `children` | element[] |
 | `columns` | int |
 | `controls` | string |
+| `cornerRadii` | number[] |
 | `effect` | { id, params } |
 | `fit` | string |
 | `flex` | number |
@@ -60,12 +63,14 @@ Per-element JSON keys (an element is `{ "<kind>": { ...fields } }`). Fields appl
 | `position` | number[] |
 | `preset` | string |
 | `radius` | number |
+| `radiusUnit` | string |
 | `rotation` | number |
 | `shape` | string |
 | `sharedElement` | string |
 | `signal` | { category, name } |
 | `size` | number[] |
 | `sizeVariant` | string |
+| `softness` | number |
 | `spacing` | number |
 | `src` | string |
 | `step` | number |
@@ -148,9 +153,12 @@ An element's `sharedElement` field (a plain string key) marks it for hero/shared
 | Back button | `{ "back": true }` |
 | Timer | `{ "timer": seconds }` |
 
-## Icons (185 Lucide names)
+## Icons (185 featured Lucide names)
 
 Use on `icon` elements (`"name"`) or button/tab `"icon"` slots.
+
+Beyond this featured list, EVERY Lucide 1.17.0 name (~1960) resolves — use any name from lucide.dev —
+plus project-defined `IconMapOverlay` entries (custom glyphs and sprite-backed PNG icons).
 
 `anchor`, `arrow-down`, `arrow-left`, `arrow-right`, `arrow-up`, `arrow-up-right`, `award`, `axe`, `backpack`, `banknote`, `battery`, `battery-charging`, `battery-low`, `bell`, `bell-off`, `bike`, `bluetooth`, `book`, `book-open`, `bookmark`, `bot`, `brush`, `calendar`, `camera`, `car`, `castle`, `check`, `check-check`, `chevron-down`, `chevron-left`, `chevron-right`, `chevron-up`, `chevrons-down`, `chevrons-left`, `chevrons-right`, `chevrons-up`, `circle-alert`, `circle-check`, `circle-help`, `circle-minus`, `circle-plus`, `circle-user`, `circle-x`, `clipboard`, `clock`, `cloud`, `coins`, `compass`, `copy`, `credit-card`, `crosshair`, `crown`, `diamond`, `dice-5`, `download`, `droplet`, `ellipsis`, `ellipsis-vertical`, `external-link`, `eye`, `eye-off`, `fast-forward`, `file`, `file-text`, `film`, `filter`, `flag`, `flame`, `folder`, `footprints`, `frown`, `gamepad-2`, `gem`, `ghost`, `gift`, `hammer`, `hand`, `heart`, `heart-crack`, `hourglass`, `house`, `image`, `info`, `key`, `layout-grid`, `leaf`, `lightbulb`, `link`, `list`, `lock`, `lock-open`, `log-in`, `log-out`, `mail`, `map`, `map-pin`, `maximize`, `medal`, `menu`, `message-circle`, `message-square`, `mic`, `mic-off`, `minimize`, `minus`, `moon`, `mountain`, `move`, `music`, `octagon-alert`, `package`, `palette`, `paperclip`, `pause`, `pencil`, `phone`, `pin`, `pipette`, `plane`, `play`, `plus`, `pointer`, `power`, `puzzle`, `redo-2`, `refresh-ccw`, `refresh-cw`, `rewind`, `rocket`, `rotate-ccw`, `rotate-cw`, `save`, `scale`, `search`, `send`, `settings`, `settings-2`, `share-2`, `shield`, `shield-alert`, `shield-check`, `shopping-bag`, `shopping-cart`, `skip-back`, `skip-forward`, `skull`, `sliders-horizontal`, `smile`, `snowflake`, `sparkles`, `square`, `star`, `star-half`, `sun`, `sword`, `swords`, `tag`, `target`, `thumbs-down`, `thumbs-up`, `timer`, `trash`, `trash-2`, `triangle-alert`, `trophy`, `undo-2`, `upload`, `user`, `user-plus`, `users`, `video`, `volume`, `volume-1`, `volume-2`, `volume-off`, `volume-x`, `wallet`, `wand-sparkles`, `wifi`, `wifi-off`, `wrench`, `x`, `zap`, `zoom-in`, `zoom-out`
 

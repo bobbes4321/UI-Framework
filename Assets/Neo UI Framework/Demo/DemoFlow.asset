@@ -20,6 +20,7 @@ MonoBehaviour:
   - rid: 3594297271374315585
   - rid: 3594297271374315586
   - rid: 3594297271374315587
+  groups: []
   editorPan: {x: 0, y: 0}
   editorZoom: 1
   references:
@@ -41,6 +42,7 @@ MonoBehaviour:
             timerDuration: 1
             customKind: 
           weight: 100
+          transition: 
     - rid: 3594297271374315586
       type: {class: UINode, ns: Neo.UI, asm: Neo.UI}
       data:
@@ -52,11 +54,23 @@ MonoBehaviour:
           allowsBack: 1
           trigger:
             type: 1
-            category: Action
-            name: Settings
+            category: DecoTabs
+            name: Home
             timerDuration: 1
             customKind: 
           weight: 100
+          transition: 
+        - portName: Out
+          toNode: 
+          allowsBack: 1
+          trigger:
+            type: 0
+            category: 
+            name: 
+            timerDuration: 1
+            customKind: 
+          weight: 100
+          transition: 
         showViews:
         - category: Menu
           viewName: Main
@@ -78,6 +92,7 @@ MonoBehaviour:
             timerDuration: 1
             customKind: 
           weight: 100
+          transition: 
         showViews:
         - category: Menu
           viewName: Settings

@@ -4,6 +4,27 @@ using UnityEngine;
 namespace Neo.UI
 {
     /// <summary>
+    /// The independently-ownable styling aspects of a <see cref="ShapeStyle"/>. A
+    /// <see cref="ThemeShapeStyleTarget"/> applies only the aspects it owns, so a widget that overrides
+    /// one aspect per-instance (e.g. a custom border) still live-follows the theme for the rest. Mirrors
+    /// the color seam's <c>applyFillColor</c> opt-out, one flag per shape aspect.
+    /// </summary>
+    [Flags]
+    public enum ShapeStyleAspects
+    {
+        None = 0,
+        /// <summary> Radius unit, uniform flag, radius and per-corner radii. </summary>
+        Radius = 1 << 0,
+        /// <summary> Border width + color. </summary>
+        Border = 1 << 1,
+        /// <summary> Edge softness. </summary>
+        Softness = 1 << 2,
+        /// <summary> Fill mode + gradient second color/angle (not the primary fill color — that's applyFillColor). </summary>
+        Fill = 1 << 3,
+        All = Radius | Border | Softness | Fill
+    }
+
+    /// <summary>
     /// A named surface treatment for <see cref="NeoShape"/>s: corner radius, border and colors
     /// (as theme token refs) plus edge softness. Styles live on the <see cref="Theme"/> and are
     /// addressed by name via <see cref="ThemeShapeStyleTarget"/>, so restyling every card/button
@@ -50,21 +71,39 @@ namespace Neo.UI
         /// Copies every styling field of this style onto a shape (not the fill color, not elevation —
         /// elevation is a bake-time widget-construction concern, see <see cref="elevation"/>).
         /// </summary>
-        public void ApplyTo(NeoShape shape, Theme theme = null)
+        public void ApplyTo(NeoShape shape, Theme theme = null) => ApplyTo(shape, theme, ShapeStyleAspects.All);
+
+        /// <summary>
+        /// Copies only the selected <paramref name="aspects"/> of this style onto a shape (never the fill
+        /// color — that's <c>applyFillColor</c> on the target — and never elevation). Aspects a widget
+        /// overrides per-instance are excluded by <see cref="ThemeShapeStyleTarget"/> so the style's live
+        /// theme-follow never clobbers them.
+        /// </summary>
+        public void ApplyTo(NeoShape shape, Theme theme, ShapeStyleAspects aspects)
         {
             if (shape == null) return;
-            shape.cornerRadiusUnit = radiusUnit;
-            shape.useUniformRadius = uniformRadius;
-            shape.cornerRadius = radius;
-            shape.cornerRadii = radiusPerCorner;
-            shape.border = borderWidth;
-            shape.outlineColor = borderColor.Resolve(theme);
-            shape.edgeSoftness = softness;
-            shape.fill = fillMode;
-            if (fillMode != ShapeFillMode.Solid)
+            if ((aspects & ShapeStyleAspects.Radius) != 0)
             {
-                shape.colorB = fillColorB.Resolve(theme);
-                shape.gradientAngleDegrees = gradientAngle;
+                shape.cornerRadiusUnit = radiusUnit;
+                shape.useUniformRadius = uniformRadius;
+                shape.cornerRadius = radius;
+                shape.cornerRadii = radiusPerCorner;
+            }
+            if ((aspects & ShapeStyleAspects.Border) != 0)
+            {
+                shape.border = borderWidth;
+                shape.outlineColor = borderColor.Resolve(theme);
+            }
+            if ((aspects & ShapeStyleAspects.Softness) != 0)
+                shape.edgeSoftness = softness;
+            if ((aspects & ShapeStyleAspects.Fill) != 0)
+            {
+                shape.fill = fillMode;
+                if (fillMode != ShapeFillMode.Solid)
+                {
+                    shape.colorB = fillColorB.Resolve(theme);
+                    shape.gradientAngleDegrees = gradientAngle;
+                }
             }
         }
     }

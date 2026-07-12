@@ -540,6 +540,14 @@
           "type": "string",
           "description": "list/grid: UIData source id feeding rows at runtime"
         },
+        "borderColor": {
+          "type": "string",
+          "description": "shape border color override (#hex or theme token)"
+        },
+        "borderWidth": {
+          "type": "number",
+          "description": "shape border width override in px (0 = no border)"
+        },
         "cascade": {
           "type": "boolean"
         },
@@ -559,6 +567,13 @@
         "controls": {
           "type": "string",
           "description": "tab: id of the sibling panel it shows/hides"
+        },
+        "cornerRadii": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "per-corner radius override [top-left, top-right, bottom-right, bottom-left]"
         },
         "effect": {
           "$ref": "#/definitions/effect"
@@ -666,6 +681,13 @@
         "radius": {
           "type": "number"
         },
+        "radiusUnit": {
+          "enum": [
+            "px",
+            "percent"
+          ],
+          "description": "corner radius unit override (default px; percent = 0-100 of half the smaller side)"
+        },
         "rotation": {
           "type": "number",
           "description": "z rotation in degrees"
@@ -709,6 +731,10 @@
               }
             }
           ]
+        },
+        "softness": {
+          "type": "number",
+          "description": "shape edge softness override in px (0 = crisp, higher = soft shadow/glow)"
         },
         "spacing": {
           "type": "number"

@@ -461,6 +461,18 @@ namespace Neo.UI.Editor
                     ["description"] = "shape style name for most kinds; \"radial\" is progress-only (arc dial)"
                 },
                 ["shape"] = EnumOf(Enum.GetNames(typeof(ShapeType))),
+                // Per-widget shape geometry OVERRIDES. When the element also sets "style", these win over
+                // the theme shape style for that aspect (the widget stops following the style there); a
+                // bare shape owns every aspect. All optional.
+                ["radiusUnit"] = new Dictionary<string, object>
+                {
+                    ["enum"] = new List<object> { "px", "percent" },
+                    ["description"] = "corner radius unit override (default px; percent = 0-100 of half the smaller side)"
+                },
+                ["cornerRadii"] = NumberArray("per-corner radius override [top-left, top-right, bottom-right, bottom-left]"),
+                ["borderWidth"] = Typed("number", "shape border width override in px (0 = no border)"),
+                ["borderColor"] = Typed("string", "shape border color override (#hex or theme token)"),
+                ["softness"] = Typed("number", "shape edge softness override in px (0 = crisp, higher = soft shadow/glow)"),
                 ["gradient"] = Ref("gradient"),
                 ["effect"] = Ref("effect"),
                 ["particles"] = Ref("particles"),

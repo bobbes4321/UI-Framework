@@ -24,7 +24,12 @@ MonoBehaviour:
   background: Surface
   labelColor: 
   icon: 
-  radius: 18
+  radius: 8
+  radiusUnit: 
+  cornerRadii: []
+  borderWidth: -1
+  borderColor: 
+  softness: -1
   padding: 12
   padding4: []
   spacing: 8
