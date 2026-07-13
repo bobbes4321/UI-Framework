@@ -239,6 +239,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Neo.UI::Neo.UI.ThemeColorTarget
   token: TextOnPrimary
+  outlineToken: 
   themeOverride: {fileID: 0}
   tint: {r: 1, g: 1, b: 1, a: 1}
 --- !u!225 &828943641788947818
@@ -478,6 +479,61 @@ MonoBehaviour:
       toCustomValue: 1
       fromOffset: 0
       toOffset: 0
+    color:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 5
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.2
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      from:
+        reference: 1
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+      to:
+        reference: 2
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+    sourcePreset: 
   offAnimation:
     purpose: 4
     move:
@@ -690,6 +746,61 @@ MonoBehaviour:
       toCustomValue: 0
       fromOffset: 0
       toOffset: 0
+    color:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 5
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.2
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      from:
+        reference: 1
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+      to:
+        reference: 2
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+    sourcePreset: 
 --- !u!1 &2685069908178144782
 GameObject:
   m_ObjectHideFlags: 0
@@ -789,6 +900,10 @@ MonoBehaviour:
   style: Control
   themeOverride: {fileID: 0}
   applyFillColor: 0
+  applyRadius: 1
+  applyBorder: 1
+  applySoftness: 1
+  applyFill: 1
 --- !u!114 &1230882236928082352
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1007,6 +1122,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Neo.UI::Neo.UI.ThemeColorTarget
   token: TextDefault
+  outlineToken: 
   themeOverride: {fileID: 0}
   tint: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &4287207017531754919
@@ -1044,7 +1160,7 @@ MonoBehaviour:
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
---- !u!1 &6273599525266475701
+--- !u!1 &5473417174781026070
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1052,11 +1168,11 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 826373929431312453}
-  - component: {fileID: 3912710925689064773}
-  - component: {fileID: 8632118221994121461}
-  - component: {fileID: 7661476667359213253}
-  - component: {fileID: 6956605298568092221}
+  - component: {fileID: 8152259918560965418}
+  - component: {fileID: 8264449111078037762}
+  - component: {fileID: 2195074292253715191}
+  - component: {fileID: 3337383520173615376}
+  - component: {fileID: 3650351660142361486}
   m_Layer: 0
   m_Name: Label
   m_TagString: Untagged
@@ -1064,13 +1180,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &826373929431312453
+--- !u!224 &8152259918560965418
 RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6273599525266475701}
+  m_GameObject: {fileID: 5473417174781026070}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -1083,21 +1199,21 @@ RectTransform:
   m_AnchoredPosition: {x: 26, y: 0}
   m_SizeDelta: {x: -52, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &3912710925689064773
+--- !u!222 &8264449111078037762
 CanvasRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6273599525266475701}
+  m_GameObject: {fileID: 5473417174781026070}
   m_CullTransparentMesh: 1
---- !u!114 &8632118221994121461
+--- !u!114 &2195074292253715191
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6273599525266475701}
+  m_GameObject: {fileID: 5473417174781026070}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
@@ -1183,28 +1299,29 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &7661476667359213253
+--- !u!114 &3337383520173615376
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6273599525266475701}
+  m_GameObject: {fileID: 5473417174781026070}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 694856ef5d85d304f86b08412f8c495e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Neo.UI::Neo.UI.ThemeColorTarget
   token: TextDefault
+  outlineToken: 
   themeOverride: {fileID: 0}
   tint: {r: 1, g: 1, b: 1, a: 1}
---- !u!114 &6956605298568092221
+--- !u!114 &3650351660142361486
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6273599525266475701}
+  m_GameObject: {fileID: 5473417174781026070}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 64f2314303b057d4488f46f606e1fb36, type: 3}
@@ -1244,7 +1361,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2644347733628335418}
-  - {fileID: 826373929431312453}
+  - {fileID: 8152259918560965418}
   m_Father: {fileID: 3407063827551793618}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
@@ -1293,6 +1410,7 @@ MonoBehaviour:
     m_DisabledTrigger: Disabled
   m_Interactable: 1
   m_TargetGraphic: {fileID: 0}
+  deselectAfterClick: 1
   id:
     category: Row
     name: Toggle

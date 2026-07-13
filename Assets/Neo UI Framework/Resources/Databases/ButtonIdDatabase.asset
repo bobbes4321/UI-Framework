@@ -227,6 +227,18 @@ MonoBehaviour:
   - category: Sync
     names:
     - Play
+  - category: Transitions
+    names:
+    - DetailBack
+    - GalleryBack
+    - GoFadeBlack
+    - GoFadeCross
+    - GoSheetUp
+    - GoSlideDown
+    - GoSlideLeft
+    - GoSlideRight
+    - GoSlideUp
+    - GoZoomIn
   - category: Typo
     names:
     - Apply

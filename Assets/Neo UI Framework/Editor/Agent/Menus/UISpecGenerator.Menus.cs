@@ -145,6 +145,18 @@ namespace Neo.UI.Editor
             bindingIndex = item.bindingIndex
         };
 
+        /// <summary>
+        /// Registers a catalog SO into the build-time lookup so a subsequent <see cref="BuildMenuElement"/>
+        /// (via <see cref="BuildElementLive"/>) can resolve a <c>settings</c>/<c>cheats</c> element's
+        /// <c>catalog</c> by id — the seam the native drop uses to build a baked menu from a catalog that
+        /// lives OUTSIDE <see cref="GeneratedRoot"/> (developer-owned, never generated). Without this, only
+        /// catalogs generated this run or sitting under <c>GeneratedRoot/Menus</c> resolve.
+        /// </summary>
+        public static void RegisterCatalogForBuild(MenuCatalog catalog)
+        {
+            if (catalog != null) s_catalogs[catalog.Id] = catalog;
+        }
+
         private static MenuCatalog LookupCatalog(string id)
         {
             if (string.IsNullOrEmpty(id)) return null;

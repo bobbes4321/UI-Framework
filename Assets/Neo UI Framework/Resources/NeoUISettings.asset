@@ -46,7 +46,7 @@ MonoBehaviour:
   streamIds: {fileID: 11400000, guid: 8ea990a424e56a14aa67dd067061bb1b, type: 2}
   panelIds: {fileID: 11400000, guid: 8bc78860e6e74d747b379ac8aa66375f, type: 2}
   dropdownIds: {fileID: 0}
-  menuWidgets: {fileID: 0}
+  menuWidgets: {fileID: 11400000, guid: d72f57cb1ab5b8d4dbdbac0bf88d9c8e, type: 2}
   buttonVariants:
   - name: primary
     colors:

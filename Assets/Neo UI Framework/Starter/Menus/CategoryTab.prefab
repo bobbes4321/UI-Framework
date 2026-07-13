@@ -130,6 +130,7 @@ MonoBehaviour:
     m_DisabledTrigger: Disabled
   m_Interactable: 1
   m_TargetGraphic: {fileID: 6172309378639110231}
+  deselectAfterClick: 1
   id:
     category: Row
     name: Tab
@@ -460,8 +461,63 @@ MonoBehaviour:
       toCustomValue: 1
       fromOffset: 0
       toOffset: 0
+    color:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 5
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.2
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      from:
+        reference: 1
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+      to:
+        reference: 2
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+    sourcePreset: 
   highlightedAnimation:
-    purpose: 4
+    purpose: 5
     move:
       enabled: 0
       settings:
@@ -517,6 +573,58 @@ MonoBehaviour:
       fromOffset: {x: 0, y: 0, z: 0}
       toOffset: {x: 0, y: 0, z: 0}
     rotate:
+      enabled: 1
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 5
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.14
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      fromReference: 0
+      toReference: 2
+      fromCustomValue: {x: 0, y: 0, z: 0}
+      toCustomValue: {x: 0, y: 0, z: -4}
+      fromOffset: {x: 0, y: 0, z: 0}
+      toOffset: {x: 0, y: 0, z: 0}
+    scale:
       enabled: 0
       settings:
         playMode: 0
@@ -564,60 +672,8 @@ MonoBehaviour:
         fadeOutShake: 0
       fromReference: 0
       toReference: 0
-      fromCustomValue: {x: 0, y: 0, z: 0}
-      toCustomValue: {x: 0, y: 0, z: 0}
-      fromOffset: {x: 0, y: 0, z: 0}
-      toOffset: {x: 0, y: 0, z: 0}
-    scale:
-      enabled: 1
-      settings:
-        playMode: 0
-        easeMode: 0
-        ease: 5
-        curve:
-          serializedVersion: 2
-          m_Curve:
-          - serializedVersion: 3
-            time: 0
-            value: 0
-            inSlope: 0
-            outSlope: 0
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0
-          - serializedVersion: 3
-            time: 1
-            value: 1
-            inSlope: 0
-            outSlope: 0
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0
-          m_PreInfinity: 2
-          m_PostInfinity: 2
-          m_RotationOrder: 4
-        duration: 0.12
-        useRandomDuration: 0
-        randomDuration: {x: 0.2, y: 0.5}
-        startDelay: 0
-        useRandomStartDelay: 0
-        randomStartDelay: {x: 0, y: 0.2}
-        loops: 0
-        useRandomLoops: 0
-        randomLoops: {x: 0, y: 2}
-        loopDelay: 0
-        useRandomLoopDelay: 0
-        randomLoopDelay: {x: 0, y: 0.2}
-        strength: 1
-        vibration: 8
-        elasticity: 1
-        fadeOutShake: 0
-      fromReference: 0
-      toReference: 2
       fromCustomValue: {x: 1, y: 1, z: 1}
-      toCustomValue: {x: 1.05, y: 1.05, z: 1}
+      toCustomValue: {x: 1, y: 1, z: 1}
       fromOffset: {x: 0, y: 0, z: 0}
       toOffset: {x: 0, y: 0, z: 0}
     fade:
@@ -672,8 +728,63 @@ MonoBehaviour:
       toCustomValue: 1
       fromOffset: 0
       toOffset: 0
+    color:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 5
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.2
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      from:
+        reference: 1
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+      to:
+        reference: 2
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+    sourcePreset: Hover/TiltRight
   pressedAnimation:
-    purpose: 4
+    purpose: 5
     move:
       enabled: 0
       settings:
@@ -810,7 +921,7 @@ MonoBehaviour:
           m_PreInfinity: 2
           m_PostInfinity: 2
           m_RotationOrder: 4
-        duration: 0.08
+        duration: 0.1
         useRandomDuration: 0
         randomDuration: {x: 0.2, y: 0.5}
         startDelay: 0
@@ -829,7 +940,7 @@ MonoBehaviour:
       fromReference: 0
       toReference: 2
       fromCustomValue: {x: 1, y: 1, z: 1}
-      toCustomValue: {x: 0.96, y: 0.96, z: 1}
+      toCustomValue: {x: 1.1, y: 0.9, z: 1}
       fromOffset: {x: 0, y: 0, z: 0}
       toOffset: {x: 0, y: 0, z: 0}
     fade:
@@ -884,6 +995,61 @@ MonoBehaviour:
       toCustomValue: 1
       fromOffset: 0
       toOffset: 0
+    color:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 5
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.2
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      from:
+        reference: 1
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+      to:
+        reference: 2
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+    sourcePreset: Press/SquashStretch
   selectedAnimation:
     purpose: 4
     move:
@@ -1096,6 +1262,61 @@ MonoBehaviour:
       toCustomValue: 1
       fromOffset: 0
       toOffset: 0
+    color:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 5
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.2
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      from:
+        reference: 1
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+      to:
+        reference: 2
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+    sourcePreset: 
   disabledAnimation:
     purpose: 4
     move:
@@ -1308,6 +1529,61 @@ MonoBehaviour:
       toCustomValue: 1
       fromOffset: 0
       toOffset: 0
+    color:
+      enabled: 0
+      settings:
+        playMode: 0
+        easeMode: 0
+        ease: 5
+        curve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        duration: 0.2
+        useRandomDuration: 0
+        randomDuration: {x: 0.2, y: 0.5}
+        startDelay: 0
+        useRandomStartDelay: 0
+        randomStartDelay: {x: 0, y: 0.2}
+        loops: 0
+        useRandomLoops: 0
+        randomLoops: {x: 0, y: 2}
+        loopDelay: 0
+        useRandomLoopDelay: 0
+        randomLoopDelay: {x: 0, y: 0.2}
+        strength: 1
+        vibration: 8
+        elasticity: 1
+        fadeOutShake: 0
+      from:
+        reference: 1
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+      to:
+        reference: 2
+        customColor: {r: 1, g: 1, b: 1, a: 1}
+        themeToken: 
+    sourcePreset: 
 --- !u!114 &3702498471446342429
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1520,6 +1796,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Neo.UI::Neo.UI.ThemeColorTarget
   token: Primary
+  outlineToken: 
   themeOverride: {fileID: 0}
   tint: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &6902306088802971242

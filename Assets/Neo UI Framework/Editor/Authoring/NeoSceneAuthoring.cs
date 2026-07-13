@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Neo.UI.Menus;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -46,6 +47,12 @@ namespace Neo.UI.Editor.Authoring
             // INTO) — route it to the real view factory so every CreateWidget entry point (palette tile,
             // drag-drop, More Widgets…, Ctrl-K) can start a new screen. Presets never target views.
             if (kind == NeoWidgetPalette.ViewKind) return CreateView(parentSelection);
+            // "settings"/"cheats" are catalog-backed menus, not one-shot spec elements — a spec `settings`
+            // element only resolves against a catalog generated in the SAME pass, so dropping one natively
+            // used to build an empty menu pointed at a phantom catalog. Route them to the native path: a
+            // real, non-generated catalog SO + a live presenter the developer edits and rebuilds directly.
+            if (kind == MenuCatalogSpec.SettingsKind || kind == MenuCatalogSpec.CheatKind)
+                return CreateMenu(kind, parentSelection);
             ElementSpec element = SpecFactory.NewElement(kind);
             if (!string.IsNullOrEmpty(presetName))
             {
@@ -73,6 +80,9 @@ namespace Neo.UI.Editor.Authoring
         public static GameObject CreateWidgetDetached(string kind, string presetName, GameObject parentSelection)
         {
             if (string.IsNullOrEmpty(kind)) return null;
+            // Menus carry no preset styling — always take the native catalog-backed path.
+            if (kind == MenuCatalogSpec.SettingsKind || kind == MenuCatalogSpec.CheatKind)
+                return CreateMenu(kind, parentSelection);
             if (string.IsNullOrEmpty(presetName) || !NeoWidgetPresets.TryGet(presetName, out NeoWidgetPreset preset))
             {
                 if (!string.IsNullOrEmpty(presetName))
@@ -665,6 +675,117 @@ namespace Neo.UI.Editor.Authoring
             EditorGUIUtility.PingObject(go);
             if (report != null && report.issues.Count > 0)
                 Debug.LogWarning($"Neo UI: '{undoLabel}' reported — {string.Join("; ", report.issues)}");
+        }
+
+        // ---------------------------------------------------------------- catalog-backed menus (native)
+        //
+        // The human-first counterpart to the spec pipeline's baked `settings`/`cheats` view elements: a
+        // dropped menu owns a real, non-generated catalog SO the developer edits in the inspector, and its
+        // rows/tabs are BAKED through the SAME generator element-build every other native widget uses
+        // (BuildElementLive → BuildMenuElement). That path builds real UITab/UIPanel tabs whose wiring is
+        // serialized and self-establishes on enable — so grouped menus switch at runtime with no rebuild,
+        // exactly like a generated menu. (The dynamic MenuPresenter.Build path wires nav via runtime-only
+        // listeners, which vanish when buildOnStart=false — hence routing through the generator instead.)
+        // No spec, no baseline, no drift: edit the SO, hit "Rebuild From Catalog", press play.
+
+        /// <summary> Folder new native menu catalogs land in (developer-owned; never a GeneratedRoot). </summary>
+        public const string MenuCatalogFolder = "Assets/NeoUI/Menus";
+
+        private static GameObject CreateMenu(string kind, GameObject parentSelection)
+        {
+            bool cheat = kind == MenuCatalogSpec.CheatKind;
+            MenuCatalog catalog = CreateCatalogAsset(cheat);
+            // Make the fresh, non-generated catalog resolvable by the element build, then build it through
+            // the standard native widget path (Place → BuildElementLive → tab wiring via ResolveTabPanels).
+            UISpecGenerator.RegisterCatalogForBuild(catalog);
+            var element = new ElementSpec { kind = kind, catalog = catalog.Id };
+            GameObject root = Place(element, kind, parentSelection,
+                cheat ? "Create Neo Cheats Menu" : "Create Neo Settings Menu");
+            if (root != null) EditorGUIUtility.PingObject(catalog);
+            return root;
+        }
+
+        /// <summary>
+        /// Re-materialises a menu from its catalog in place — the inspector's "Rebuild From Catalog" action.
+        /// Rebuilds through the generator (so grouped menus get freshly-wired UITab/UIPanel tabs), preserving
+        /// the menu's parent, sibling index and placement in one undo step. Returns the new menu root.
+        /// </summary>
+        public static GameObject RebuildMenu(MenuPresenter presenter)
+        {
+            if (presenter == null) return null;
+            MenuCatalog catalog = presenter.catalog;
+            if (catalog == null)
+            {
+                Debug.LogWarning($"Neo UI: '{presenter.name}' has no catalog assigned — nothing to build.", presenter);
+                return null;
+            }
+            if (!(presenter.transform.parent is RectTransform))
+            {
+                Debug.LogWarning($"Neo UI: '{presenter.name}' is a root object — a menu must live under a view/container to rebuild.", presenter);
+                return null;
+            }
+            UISpecGenerator.RegisterCatalogForBuild(catalog);
+            var spec = new ElementSpec
+            {
+                kind = catalog is CheatCatalog ? MenuCatalogSpec.CheatKind : MenuCatalogSpec.SettingsKind,
+                catalog = catalog.Id
+            };
+            return RebuildInPlace(presenter.gameObject, spec, "Rebuild Neo Menu", $"rebuilding menu '{presenter.name}'");
+        }
+
+        private static MenuCatalog CreateCatalogAsset(bool cheat)
+        {
+            EnsureAssetFolder(MenuCatalogFolder);
+            // Set every field BEFORE CreateAsset (serialization-order safety), then commit.
+            MenuCatalog catalog = cheat
+                ? (MenuCatalog)ScriptableObject.CreateInstance<CheatCatalog>()
+                : ScriptableObject.CreateInstance<SettingsCatalog>();
+            catalog.category = cheat ? "Cheats" : "Settings";
+            catalog.menuName = "Main";
+            SeedCatalog(catalog, cheat);
+
+            string path = AssetDatabase.GenerateUniqueAssetPath(
+                $"{MenuCatalogFolder}/{(cheat ? "CheatCatalog" : "SettingsCatalog")}.asset");
+            AssetDatabase.CreateAsset(catalog, path);
+            AssetDatabase.SaveAssets();
+            return catalog;
+        }
+
+        // A tasteful starter set so a freshly dropped menu renders real controls (teaches the shape) rather
+        // than an empty box — flat (no groups) to stay obvious; the developer edits/extends the SO from here.
+        private static void SeedCatalog(MenuCatalog catalog, bool cheat)
+        {
+            if (cheat)
+            {
+                catalog.items.Add(new MenuItemDefinition
+                {
+                    category = "Player", name = "GiveGold", kind = MenuControlKind.Button, label = "Give 100 Gold"
+                });
+                catalog.items.Add(new MenuItemDefinition
+                {
+                    category = "Player", name = "God", kind = MenuControlKind.Switch, label = "God Mode", defaultValue = "False"
+                });
+                return;
+            }
+            catalog.items.Add(new MenuItemDefinition
+            {
+                category = "Audio", name = "Master", kind = MenuControlKind.Slider, label = "Master Volume",
+                min = 0f, max = 1f, defaultValue = "0.8"
+            });
+            catalog.items.Add(new MenuItemDefinition
+            {
+                category = "Video", name = "Fullscreen", kind = MenuControlKind.Toggle, label = "Fullscreen", defaultValue = "True"
+            });
+        }
+
+        private static void EnsureAssetFolder(string folder)
+        {
+            if (string.IsNullOrEmpty(folder) || AssetDatabase.IsValidFolder(folder)) return;
+            string parent = System.IO.Path.GetDirectoryName(folder)?.Replace('\\', '/');
+            string leaf = System.IO.Path.GetFileName(folder);
+            if (string.IsNullOrEmpty(parent)) return;
+            EnsureAssetFolder(parent);
+            AssetDatabase.CreateFolder(parent, leaf);
         }
 
         private static NeoUISettings PrepareSettings()

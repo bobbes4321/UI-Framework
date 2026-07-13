@@ -1,0 +1,110 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fda86a7559c16a246aae48c7f8c8f6e9, type: 3}
+  m_Name: SettingsCatalog
+  m_EditorClassIdentifier: Neo.UI::Neo.UI.Menus.SettingsCatalog
+  category: Settings
+  menuName: Main
+  groups:
+  - Audio
+  - Video
+  - Controls
+  startGroup: 
+  inputActionAssetPath: 
+  items:
+  - category: Audio
+    name: Master
+    kind: 4
+    label: Master Volume
+    tooltip: 
+    group: Audio
+    persisted: 1
+    min: 0
+    max: 1
+    step: 1
+    wholeNumbers: 0
+    defaultValue: 0.8
+    options: []
+    emitOnDrag: 1
+    emitOnRelease: 1
+    inputAction: 
+    bindingIndex: 0
+  - category: Video
+    name: Fullscreen
+    kind: 2
+    label: Fullscreen
+    tooltip: 
+    group: Video
+    persisted: 1
+    min: 0
+    max: 1
+    step: 1
+    wholeNumbers: 0
+    defaultValue: True
+    options: []
+    emitOnDrag: 1
+    emitOnRelease: 1
+    inputAction: 
+    bindingIndex: 0
+  - category: Video
+    name: Resolution
+    kind: 5
+    label: Resolution
+    tooltip: 
+    group: Video
+    persisted: 1
+    min: 0
+    max: 1
+    step: 1
+    wholeNumbers: 0
+    defaultValue: True
+    options: []
+    emitOnDrag: 1
+    emitOnRelease: 1
+    inputAction: 
+    bindingIndex: 0
+  - category: Controls
+    name: Jump
+    kind: 7
+    label: Jump
+    tooltip: 
+    group: Controls
+    persisted: 1
+    min: 0
+    max: 1
+    step: 1
+    wholeNumbers: 0
+    defaultValue: True
+    options: []
+    emitOnDrag: 1
+    emitOnRelease: 1
+    inputAction: 
+    bindingIndex: 0
+  - category: Controls
+    name: Input Method
+    kind: 6
+    label: Input Method
+    tooltip: 
+    group: Controls
+    persisted: 1
+    min: 0
+    max: 1
+    step: 1
+    wholeNumbers: 0
+    defaultValue: True
+    options:
+    - Keyboard
+    - Controller
+    emitOnDrag: 1
+    emitOnRelease: 1
+    inputAction: 
+    bindingIndex: 0

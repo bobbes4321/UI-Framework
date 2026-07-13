@@ -9,6 +9,7 @@
       "properties": {
         "bundle": {
           "enum": [
+            "TestingTheme",
             "CleanSlate",
             "NeonArcade",
             "SoftFantasy"

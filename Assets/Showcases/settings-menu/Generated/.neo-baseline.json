@@ -460,13 +460,6 @@
             "group": "World",
             "label": "Spawn Enemy"
           }
-        },
-        {
-          "button": {
-            "id": "World/Spawn dogs",
-            "group": "World",
-            "label": "Spawn dogs"
-          }
         }
       ]
     }
